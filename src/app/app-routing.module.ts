@@ -3,7 +3,18 @@ import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [
 
-  { path: '', redirectTo: 'portal/landing', pathMatch: 'full' },
+  { path: '', redirectTo: 'auth', pathMatch: 'full' },
+  {
+    path: 'auth',
+    // canActivate: [NativeLoginGuard],
+    loadChildren: async () => {
+      try {
+        return await import('./pages/auth/auth.module').then((m) => m.AuthModule);
+      } catch (error) {
+        throw new Error('Failed to load LoginModule');
+      }
+    }
+  },
 
   // {
   //   path: 'portal',
