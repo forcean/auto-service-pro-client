@@ -1,0 +1,23 @@
+<div class="main-container d-flex">
+    <!-- <div class="sidebar" id="side_nav" tabindex="-1" [ngClass]="{ 'mini-bar': isMinibar }" aria-labelledby="side_navLabel">
+    <div class="header-box px-2 pt-3 pb-4 d-flex justify-content-center">
+      <img class="img-logo full-logo" src="assets/img/logo/logo.new.svg" alt="" [ngClass]="{'d-none': isMinibar}">
+      <img class="img-logo mini-logo" src="assets/img/logo/logo40x37-mini.svg" alt="" [ngClass]="{'d-none': !isMinibar}">
+    </div>
+    <div class="menu">
+      <app-sidebar [isMinibar]="isMinibar" (miniBarToggled)="onSidebarToggled($event)"></app-sidebar>
+    </div>
+  </div> -->
+
+    <div class="content flex-grow-1 d-flex flex-column">
+        <!-- <app-header class="container-header" (miniBarToggled)="onSidebarToggled($event)"
+      [isMinimal]="isMinibar"></app-header> -->
+        <div #mainContent class="main-content d-flex flex-column">
+            <router-outlet></router-outlet>
+            <!-- <app-footer class="app-footer flex-grow-1"></app-footer> -->
+        </div>
+    </div>
+</div>
+
+<!-- <div *ngIf="!isMinibar" class="backdrop"></div>
+<app-modal-verify-mail></app-modal-verify-mail> -->

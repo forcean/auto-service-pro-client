@@ -7,5 +7,5 @@ import { Component } from '@angular/core';
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = 'autoservice-pro-client';
+  title = 'autoservice-pro';
 }

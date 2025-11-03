@@ -1,0 +1,193 @@
+<main class="min-h-screen bg-[#f8fafc] text-[#374870]">
+
+  <!-- Hero -->
+  <section
+    class="relative overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 text-white ">
+    <!-- subtle pattern -->
+    <div class="pointer-events-none absolute inset-0 opacity-10"
+      style="background-image: radial-gradient(circle at 1px 1px,#fff 1px,transparent 1.5px);
+                background-size: 18px 18px;"></div>
+
+    <div
+      class="relative z-10 max-w-7xl mx-auto px-6 py-20 md:py-24 text-center">
+      <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mb-6">
+        Welcome to <span
+          class="text-[#88C273] drop-shadow">AutoServicePro</span>
+      </h1>
+      <p class="max-w-2xl mx-auto text-base md:text-lg text-gray-300/90 mb-8">
+        Manage your auto workshop smarter — bookings, service history,
+        customers,
+        and billing in one platform.
+      </p>
+
+      <!-- <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a routerLink="/portal/jobs/create"
+          class="inline-flex items-center justify-center gap-2 bg-[#88C273] text-white px-8 py-3 rounded-xl font-semibold
+                  hover:bg-[#76ac64] active:scale-[0.99] transition focus:outline-none focus:ring-4 focus:ring-[#88C273]/30"
+          aria-label="Create new job">
+          <span>Get Started</span>
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+            xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </a>
+
+        <a routerLink="/portal/guide"
+          class="inline-flex items-center justify-center gap-2 border border-white/30 px-8 py-3 rounded-xl font-semibold
+                  hover:bg-white hover:text-slate-900 transition focus:outline-none focus:ring-4 focus:ring-white/30"
+          aria-label="Learn more">
+          Learn More
+        </a>
+      </div> -->
+    </div>
+  </section>
+
+  <!-- Overview Cards -->
+  <section class="max-w-7xl mx-auto px-6 -mt-10 md:-mt-12">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- card -->
+      <div
+        class="bg-white/90 backdrop-blur-sm rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition">
+        <div class="flex items-start justify-between">
+          <p class="text-[#6e7287]">จำนวนงานในวันนี้</p>
+          <span
+            class="text-xs px-2 py-1 rounded-full bg-[#88C273]/15 text-[#374870]">Live</span>
+        </div>
+        <h2 class="text-4xl font-extrabold tracking-tight mt-2">48</h2>
+        <p class="text-xs text-[#6e7287] mt-1">อัปเดตล่าสุด 5 นาทีที่แล้ว</p>
+      </div>
+
+      <div
+        class="bg-white/90 backdrop-blur-sm rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition">
+        <p class="text-[#6e7287]">ช่างที่กำลังทำงาน</p>
+        <h2
+          class="text-4xl font-extrabold tracking-tight mt-2 text-[#88C273]">12</h2>
+        <p class="text-xs text-[#6e7287] mt-1">บนชิฟต์ปัจจุบัน</p>
+      </div>
+
+      <div
+        class="bg-white/90 backdrop-blur-sm rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition">
+        <p class="text-[#6e7287]">งานรออนุมัติ</p>
+        <h2 class="text-4xl font-extrabold tracking-tight mt-2">7</h2>
+        <p class="text-xs text-[#6e7287] mt-1">ต้องการการตรวจสอบ</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Chart / Activity -->
+  <section class="max-w-7xl mx-auto px-6 mt-10">
+    <div
+      class="bg-white rounded-2xl p-6 md:p-7 shadow-sm border border-gray-100">
+      <div class="flex items-center justify-between mb-4">
+        <h3
+          class="text-xl md:text-2xl font-bold">ภาพรวมการให้บริการรายเดือน</h3>
+        <div class="flex gap-2">
+          <button
+            class="text-sm px-3 py-1.5 rounded-lg border hover:bg-gray-50">เดือนนี้</button>
+          <button
+            class="text-sm px-3 py-1.5 rounded-lg border hover:bg-gray-50">ไตรมาส</button>
+        </div>
+      </div>
+      <div class="h-64 grid place-content-center text-[#6e7287]">
+        <!-- วางกราฟจริงภายหลัง -->
+        <span class="text-sm">[Chart.js / Recharts placeholder]</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Actions -->
+  <section class="max-w-7xl mx-auto px-6 mt-10">
+    <div
+      class="bg-white rounded-2xl p-6 md:p-7 shadow-sm border border-gray-100">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl md:text-2xl font-bold">เมนูทางลัด</h3>
+        <p
+          class="text-xs md:text-sm text-[#6e7287]">เข้าถึงฟีเจอร์ที่ใช้บ่อยได้รวดเร็ว</p>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <a routerLink="/portal/jobs/create"
+          class="group p-4 rounded-xl bg-[#88C273]/10 hover:bg-[#88C273]/20 transition
+                  ring-1 ring-transparent hover:ring-[#88C273]/30">
+          <div class="flex items-center gap-3">
+            <div class="text-lg">📋</div>
+            <div class="font-medium text-[#374870]">สร้างใบงานใหม่</div>
+          </div>
+          <p
+            class="text-xs text-[#6e7287] mt-1 opacity-90">เริ่มงานซ่อม/บำรุง</p>
+        </a>
+
+        <a routerLink="/portal/technicians"
+          class="group p-4 rounded-xl bg-[#374870]/10 hover:bg-[#374870]/20 transition
+                  ring-1 ring-transparent hover:ring-[#374870]/30">
+          <div class="flex items-center gap-3">
+            <div class="text-lg">👨‍🔧</div>
+            <div class="font-medium text-[#374870]">รายชื่อช่าง</div>
+          </div>
+          <p
+            class="text-xs text-[#6e7287] mt-1 opacity-90">จัดตาราง/ความชำนาญ</p>
+        </a>
+
+        <a routerLink="/portal/bookings"
+          class="group p-4 rounded-xl bg-[#88C273]/10 hover:bg-[#88C273]/20 transition
+                  ring-1 ring-transparent hover:ring-[#88C273]/30">
+          <div class="flex items-center gap-3">
+            <div class="text-lg">🧾</div>
+            <div class="font-medium text-[#374870]">ตรวจสอบสถานะงาน</div>
+          </div>
+          <p
+            class="text-xs text-[#6e7287] mt-1 opacity-90">ติดตามงานแบบเรียลไทม์</p>
+        </a>
+
+        <a routerLink="/portal/settings"
+          class="group p-4 rounded-xl bg-[#374870]/10 hover:bg-[#374870]/20 transition
+                  ring-1 ring-transparent hover:ring-[#374870]/30">
+          <div class="flex items-center gap-3">
+            <div class="text-lg">⚙️</div>
+            <div class="font-medium text-[#374870]">ตั้งค่าระบบ</div>
+          </div>
+          <p
+            class="text-xs text-[#6e7287] mt-1 opacity-90">สิทธิ์/ฟอร์ม/แจ้งเตือน</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Announcements -->
+  <section class="max-w-7xl mx-auto px-6 my-10 pb-4">
+    <div
+      class="bg-white rounded-2xl p-6 md:p-7 shadow-sm border border-gray-100">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl md:text-2xl font-bold">ข่าวสารและประกาศ</h3>
+        <a routerLink="/portal/announcements"
+          class="text-sm text-[#374870] hover:underline">ดูทั้งหมด</a>
+      </div>
+
+      <ul class="divide-y divide-gray-100">
+        <li class="py-3">
+          <p class="font-semibold">🔧 ปรับปรุงระบบฐานข้อมูลวันที่ 30 ต.ค.
+            2568</p>
+          <p
+            class="text-sm text-[#6e7287] mt-1">ระบบอาจไม่สามารถใช้งานได้ชั่วคราว
+            22:00–23:00 น.</p>
+        </li>
+        <li class="py-3">
+          <p class="font-semibold">🚗 เปิดฟีเจอร์ใหม่: บันทึกประวัติการซ่อม</p>
+          <p
+            class="text-sm text-[#6e7287] mt-1">ดูรายละเอียดการซ่อมของรถแต่ละคันได้ที่หน้า
+            “ประวัติรถ”</p>
+        </li>
+        <li class="py-3">
+          <p class="font-semibold">🛡️ แจ้งเตือนความปลอดภัย</p>
+          <p class="text-sm text-[#6e7287] mt-1">เปิดใช้ 2FA สำหรับผู้ใช้ภายใน
+            เริ่มใช้งานเดือนหน้า</p>
+        </li>
+      </ul>
+
+      <p class="text-xs text-[#6e7287] mt-4">Updated: {{ (today | date:
+        'mediumDate') || '—' }}</p>
+    </div>
+  </section>
+</main>
