@@ -2,8 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RESPONSE } from '../../../shared/enum/response.enum';
-
-declare const google: any;
+import { LoginService } from '../../../shared/services/login.service';
 
 @Component({
   selector: 'app-login',
@@ -19,7 +18,8 @@ export class LoginComponent {
 
   constructor(
     private fb: FormBuilder,
-    private router: Router) {
+    private router: Router,
+    private loginService: LoginService) {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
@@ -45,14 +45,15 @@ export class LoginComponent {
     }
     this.isLoading = true;
     try {
-      // const result = await this.authService.login(this.form.value);
-      // console.log("Response login:", result);
+      const result = await this.loginService.login(this.form.value);
+      console.log("Response login:", result);
 
-      // if (result.resultCode == RESPONSE.SUCCESS) {
-
-      // } else if (result.resultCode == RESPONSE.INVALID_CREDENTIALS) {
-      //   // this.alert.warning('อีเมลหรือรหัสผ่านไม่ถูกต้อง')
-      // }
+      if (result.resultCode == RESPONSE.SUCCESS) {
+        // const decoded = this.authService.decodeToken(result.data.accessToken);
+        // this.authService.saveData(decoded.username, decoded.role);
+      } else if (result.resultCode == RESPONSE.INVALID_CREDENTIALS) {
+      }
+      this.router.navigate(['/portal/landing']);
     } catch (error: any) {
       const errorObject = error as { message: string };
       if (errorObject.message !== '504') {

@@ -8,4 +8,9 @@ import { Component } from '@angular/core';
 })
 export class CommonLayoutPagesComponent {
 
+  isMinibar = false;
+
+  onSidebarToggled(isMinibar: boolean) {
+    this.isMinibar = isMinibar;
+  }
 }
