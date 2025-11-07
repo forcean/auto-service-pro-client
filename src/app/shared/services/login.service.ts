@@ -5,23 +5,25 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ILoginResponse, ILoginUser, IReqRefreshToken, IResponseToken } from '../interface/auth.interface';
 import { IBaseResponse } from '../interface/base-http.interface';
 import { ApiPrefix } from '../enum/api-prefix.enum';
-@Injectable({ providedIn: 'root' })
+import { HttpService } from '../../core/services/http-service/http.service';
+
+@Injectable({
+  providedIn: 'root'
+})
 
 export class LoginService {
 
   constructor(
-    private http: HttpClient,
+    private httpService: HttpService,
   ) { }
 
   private PREFIX_AUTH = ApiPrefix.ServiceManagement;
 
-  async login(data: ILoginUser): Promise<IBaseResponse<ILoginResponse>> {
-    const url = this.PREFIX_AUTH + `/login`;
-
+  async login(data: ILoginUser) {
+    const uri = this.PREFIX_AUTH + `/auth/login`;
     try {
-      const response = await firstValueFrom(
-        this.http.post<IBaseResponse<ILoginResponse>>(url, data, { withCredentials: true })
-      );
+      const response = await
+        this.httpService.post<ILoginResponse>(uri, data, true);
       return response;
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
@@ -33,8 +35,8 @@ export class LoginService {
 
   async logout() {
     try {
-      const uri = this.PREFIX_AUTH + `/token/revoke`;
-      const response = await this.http.post<any>(uri, {});
+      const uri = this.PREFIX_AUTH + `/auth/revoke`;
+      const response = await this.httpService.post<any>(uri, {});
       return response;
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
@@ -47,8 +49,8 @@ export class LoginService {
 
   async getRefreshToken(req: IReqRefreshToken) {
     try {
-      const uri = this.PREFIX_AUTH + '/token/refresh';
-      const response = await this.http.post<IResponseToken>(uri, req, { withCredentials: true });
+      const uri = this.PREFIX_AUTH + '/auth/refresh';
+      const response = await this.httpService.post<IResponseToken>(uri, req, true);
       return response;
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {

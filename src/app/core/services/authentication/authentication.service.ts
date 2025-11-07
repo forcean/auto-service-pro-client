@@ -30,8 +30,8 @@ export class AuthenticationService {
   // }
 
   public login(accessToken: string, refreshToken: string): void {
-    // localStorage.setItem(this.ACCESS_TOKEN_NAME, accessToken);
-    // localStorage.setItem(this.REFRESH_TOKEN_NAME, refreshToken);
+    localStorage.setItem(this.ACCESS_TOKEN_NAME, accessToken);
+    localStorage.setItem(this.REFRESH_TOKEN_NAME, refreshToken);
     this.isAuthenticatedSubject.next(true);
   }
 
@@ -51,20 +51,20 @@ export class AuthenticationService {
       return null;
     }
   }
-  // getAccessToken(): string | null {
-  //   return localStorage.getItem(this.ACCESS_TOKEN_NAME);
-  // }
-
-  // getRefreshToken(): string | null {
-  //   return localStorage.getItem(this.REFRESH_TOKEN_NAME);
-  // }
   getAccessToken(): string | null {
-    return this.cookieService.get(this.ACCESS_TOKEN_NAME);
+    return localStorage.getItem(this.ACCESS_TOKEN_NAME);
   }
 
   getRefreshToken(): string | null {
-    return this.cookieService.get(this.REFRESH_TOKEN_NAME);
+    return localStorage.getItem(this.REFRESH_TOKEN_NAME);
   }
+  // getAccessToken(): string | null {
+  //   return this.cookieService.get(this.ACCESS_TOKEN_NAME);
+  // }
+
+  // getRefreshToken(): string | null {
+  //   return this.cookieService.get(this.REFRESH_TOKEN_NAME);
+  // }
 
   checkAuthenticationState(): boolean {
     const token = this.getAccessToken();
