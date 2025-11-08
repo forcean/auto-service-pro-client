@@ -13,7 +13,7 @@ export class AuthenticationService {
 
   private readonly ACCESS_TOKEN_NAME = 'access-token';
   private readonly REFRESH_TOKEN_NAME = 'refresh-token';
-  private readonly isAuthenticatedSubject = new BehaviorSubject<boolean>(this.checkAuthenticationState());
+  private readonly isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
 
   public refreshTokenSubject = new BehaviorSubject<string | null>(null);
 
@@ -51,20 +51,20 @@ export class AuthenticationService {
       return null;
     }
   }
-  getAccessToken(): string | null {
-    return localStorage.getItem(this.ACCESS_TOKEN_NAME);
-  }
-
-  getRefreshToken(): string | null {
-    return localStorage.getItem(this.REFRESH_TOKEN_NAME);
-  }
   // getAccessToken(): string | null {
-  //   return this.cookieService.get(this.ACCESS_TOKEN_NAME);
+  //   return localStorage.getItem(this.ACCESS_TOKEN_NAME);
   // }
 
   // getRefreshToken(): string | null {
-  //   return this.cookieService.get(this.REFRESH_TOKEN_NAME);
+  //   return localStorage.getItem(this.REFRESH_TOKEN_NAME);
   // }
+  getAccessToken(): string | null {
+    return this.cookieService.get(this.ACCESS_TOKEN_NAME);
+  }
+
+  getRefreshToken(): string | null {
+    return this.cookieService.get(this.REFRESH_TOKEN_NAME);
+  }
 
   checkAuthenticationState(): boolean {
     const token = this.getAccessToken();

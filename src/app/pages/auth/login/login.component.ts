@@ -21,13 +21,13 @@ export class LoginComponent {
     private router: Router,
     private loginService: LoginService) {
     this.form = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      username: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
   }
 
-  get email() {
-    return this.form.get('email');
+  get username() {
+    return this.form.get('username');
   }
 
   get password() {

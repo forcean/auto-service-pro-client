@@ -20,7 +20,7 @@ export class LoginService {
   private PREFIX_AUTH = ApiPrefix.ServiceManagement;
 
   async login(data: ILoginUser) {
-    const uri = this.PREFIX_AUTH + `/auth/login`;
+    const uri = this.PREFIX_AUTH + `/login`;
     try {
       const response = await
         this.httpService.post<ILoginResponse>(uri, data, true);

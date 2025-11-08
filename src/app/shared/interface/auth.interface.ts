@@ -4,9 +4,8 @@ export interface ILoginResponse {
   isNewUser?: boolean;
 }
 export interface ILoginUser {
-  email: string;
+  username: string;
   password: string;
-  role: string;
 }
 
 export interface IReqRefreshToken {
