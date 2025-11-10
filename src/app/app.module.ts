@@ -17,7 +17,7 @@ import { SharedModule } from './shared/shared.module';
     AppRoutingModule,
     HttpClientModule,
     LoadingBarModule,
-    SharedModule
+    SharedModule,
   ],
   providers: [CookieService],
   bootstrap: [AppComponent]

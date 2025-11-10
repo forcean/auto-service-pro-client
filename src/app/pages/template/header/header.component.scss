@@ -1,0 +1,32 @@
+.navbar {
+    height: 2.5rem;
+    padding: 0;
+    z-index: 2;
+    background-color: #FFFFFF !important;
+    box-shadow: 0px 0px 35px 0px rgba(154, 161, 171, 0.15);
+}
+
+.full-screen-icon {
+    cursor: pointer;
+}
+
+.navbar-toggler-icon {
+    font-size: .8rem;
+}
+
+.container-fluid {
+    height: 100%;
+    box-shadow: 0px 0px 35px 0px #9AA1AB26;
+}
+
+img.img-logo-header {
+    height: 1.75rem;
+}
+
+@media (max-width: 800px) {
+    nav.navbar {
+        div>div.btn-mini {
+            padding-left: 2rem;
+        }
+    }
+}

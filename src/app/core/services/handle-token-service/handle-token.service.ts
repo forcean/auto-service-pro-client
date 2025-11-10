@@ -29,15 +29,15 @@ export class HandleTokenService {
     return this.decodeToken(token);
   }
 
-  // getRole(): string {
-  //   const decodedToken = this.getDecodedAccessToken();
-  //   return decodedToken && decodedToken.role;
-  // }
+  getRole(): string {
+    const decodedToken = this.getDecodedAccessToken();
+    return decodedToken && decodedToken.role;
+  }
 
-  // getUsername(): string {
-  //   const decodedToken = this.getDecodedAccessToken();
-  //   return decodedToken && decodedToken.publicId;
-  // }
+  getUsername(): string {
+    const decodedToken = this.getDecodedAccessToken();
+    return decodedToken && decodedToken.publicId;
+  }
 
   // getSysMail(): string {
   //   const decodedToken = this.getDecodedAccessToken();

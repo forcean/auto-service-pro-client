@@ -3,9 +3,11 @@ import { CommonModule } from '@angular/common';
 
 import { SharedRoutingModule } from './shared-routing.module';
 import { ModalCommonComponent } from './components/modal-common/modal-common.component';
+import { ProfileComponent } from './components/profile/profile.component';
 
 const components = [
-  ModalCommonComponent
+  ModalCommonComponent,
+  ProfileComponent
 ];
 
 @NgModule({
@@ -18,6 +20,7 @@ const components = [
   ],
   exports: [
     ...components,
+    ProfileComponent
   ]
 })
 export class SharedModule { }

@@ -19,6 +19,7 @@
     "@angular/router": "^19.2.0",
     "@ngx-loading-bar/core": "^7.0.0",
     "jwt-decode": "^4.0.0",
+    "lucide-angular": "^0.553.0",
     "ngx-cookie-service": "^17.0.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
