@@ -1,10 +1,9 @@
-<div class="relative text-[#253300] text-[0.96rem]">
-  <!-- Profile Trigger -->
+<div class="relative text-[#111] text-[0.96rem]">
   <button
     id="dropdownProfile"
     (click)="toggleDropdown()"
     class="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-gray-100 transition">
-    <!-- Profile Icon -->
+
     <div class="relative">
       <img class="w-6 mr-1" src="assets/img/icon.user.svg" alt="user" />
       <img
@@ -14,10 +13,8 @@
         alt="warning" />
     </div>
 
-    <!-- Username -->
     <span class="hidden sm:inline font-medium">{{ username }}</span>
 
-    <!-- Arrows -->
     <img
       #arrowDown
       id="profile-arrow-down"
@@ -32,16 +29,14 @@
       alt="up" />
   </button>
 
-  <!-- Dropdown Menu -->
   <div
     #dropdownMenu
     id="dropdownMenu"
     class="hidden absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 z-[999]">
-    <!-- Profile -->
     <button
       (click)="onProfileDetail()"
       class="w-full flex items-center gap-3 px-4 py-2 text-left hover:bg-gray-50 rounded-t-xl transition">
-      <img src="assets/img/icons/Vector.svg" alt="profile" />
+      <img class="icon" src="assets/img/icons/icon.profile.svg" alt="profile" />
       <span class="text-[1rem]">โปรไฟล์</span>
       <!-- <span
         *ngIf="isNotEmailVerified"
@@ -53,21 +48,19 @@
 
     <hr class="border-gray-200" />
 
-    <!-- Contact Us -->
     <button
       (click)="onContactUs()"
       class="w-full flex items-center gap-3 px-4 py-2 text-left hover:bg-gray-50 transition">
-      <img src="assets/img/icons/icon.call.svg" alt="contact" />
+      <img class="icon" src="assets/img/icons/icon.call.svg" alt="contact" />
       <span class="text-[1rem]">ติดต่อเรา</span>
     </button>
 
     <hr class="border-gray-200" />
 
-    <!-- Logout -->
     <button
       (click)="onLogout()"
-      class="w-full flex items-center gap-3 px-4 py-2 text-left hover:bg-gray-50 rounded-b-xl transition">
-      <img src="assets/img/icons/icon.logout.svg" alt="logout" />
+      class="w-full flex items-center gap-3 px-4 py-2 text-left hover:bg-red-50 rounded-b-xl transition">
+      <img class="icon" src="assets/img/icons/icon.logout.svg" alt="logout" />
       <span class="text-[1rem]">ออกจากระบบ</span>
     </button>
   </div>

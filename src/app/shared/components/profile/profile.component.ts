@@ -143,29 +143,29 @@ export class ProfileComponent implements OnInit, AfterViewInit {
   private handleCommonExpired() {
     this.modalCommonService.open({
       type: 'expire',
-      title: 'EXPIRE_MODAL.TITLE',
-      subtitle: 'EXPIRE_MODAL.SUBTITLE',
-      buttonText: 'EXPIRE_MODAL.TEXT_BUTTON',
-      routePage: '/login',
+      title: 'เซสชั่นหมดอายุ',
+      subtitle: 'เซสชั่นของคุณหมดอายุเนื่องจากไม่มีการใช้งาน <br/>กรุณาเข้าสู่ระบบอีกครั้งเพื่อดำเนินการต่อ',
+      buttonText: 'เข้าสู่ระบบ',
+      routePage: '/auth/login',
     });
   }
 
   private handleCommonError() {
     this.modalCommonService.open({
       type: 'alert',
-      title: 'ERROR_MODAL.TITLE',
-      subtitle: 'ERROR_MODAL.SUBTITLE',
-      buttonText: 'ERROR_MODAL.TEXT_BUTTON',
-      routePage: '/login',
+      title: 'ขออภัย ระบบขัดข้องในขณะนี้',
+      subtitle: 'กรุณาทำรายการใหม่อีกครั้ง หรือ ติดต่อผู้ดูแลระบบในองค์กรของคุณ',
+      buttonText: 'เข้าใจแล้ว',
+      routePage: '/auth/login',
     });
   }
 
   private handleContactUs() {
     this.modalCommonService.open({
       type: undefined,
-      title: 'CONTACT_US_MODAL.TITLE',
-      subtitle: 'CONTACT_US_MODAL.SUBTITLE',
-      buttonText: 'CONTACT_US_MODAL.TEXT_BUTTON',
+      title: 'ติดต่อเรา',
+      subtitle: 'ติดต่อโดยตรงที่ฝ่าย Admin<br/>หรือ E-Mail: example@ac.co.th',
+      buttonText: 'ปิด',
       height: '12rem',
     });
   }
