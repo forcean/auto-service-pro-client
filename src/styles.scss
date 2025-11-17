@@ -2,3 +2,240 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+// @import "./assets/styles/mixins";
+@import "./assets/styles/fonts";
+@import "./assets/styles/color";
+@import "./assets/styles/variables";
+
+html,
+body {
+    height: 100%;
+    overflow-y: hidden;
+}
+
+// body {
+//     font-family: "KanitRegular";
+//     font-size: 24px;
+//     margin: 0 auto;
+//     color: $color-text !important;
+// }
+
+// button {
+//     height: 1.666667rem !important;
+//     line-height: 1 !important;
+//     padding-top: 0px;
+//     padding-bottom: 0px;
+// }
+
+// .form-check-input {
+//     height: 0.833333rem !important;
+// }
+
+// button:disabled {
+//     color: #c6c7c5 !important;
+//     background-color: #f6f6f6 !important;
+// }
+
+// button:focus {
+//     outline: none;
+//     box-shadow: none;
+// }
+
+// .navbar-toggler:focus {
+//     box-shadow: unset;
+// }
+
+// :focus {
+//     outline: none !important;
+//     box-shadow: none !important;
+// }
+
+// .no-focus:focus {
+//     border-color: #dee2e6 !important;
+//     outline: none;
+//     box-shadow: none;
+// }
+
+// input {
+//     height: 1.666667rem;
+//     line-height: 1;
+// }
+
+// input,
+// .form-input {
+//     height: 1.666667rem;
+// }
+
+// /* Hide the default eye icon */
+// ::-ms-reveal {
+//     display: none;
+// }
+
+// /* Hide the default eye icon */
+// ::-ms-reveal {
+//     display: none;
+// }
+
+// /* Hide the default dropdown icon */
+// .dropdown-toggle::after {
+//     display: none;
+// }
+
+// input:disabled {
+//     background-color: #f6f6f6 !important;
+// }
+
+// .no-eye {
+
+//     &::-ms-reveal,
+//     &::-ms-clear {
+//         display: none;
+//     }
+
+//     &::-webkit-input-placeholder {
+//         color: #abaca8;
+//     }
+
+//     &::-webkit-textfield-decoration-container {
+//         display: none !important;
+//     }
+// }
+
+// .container-table {
+//     min-width: 100%;
+//     width: calc(100vw - #{$sidebar-width} - 4.208rem);
+//     overflow-x: auto;
+//     overflow-y: hidden;
+//     transition: transform .3s ease-out;
+
+//     &.mini-bar {
+//         min-width: 100%;
+//         width: calc(100vw - #{$mini-bar-width} - 4.208rem);
+//         transition: transform .3s ease-in-out;
+//     }
+// }
+
+// .table-wrapper {
+//     border: 1px solid #c6c7c5;
+//     border-radius: 10px;
+//     overflow: hidden;
+// }
+
+// table {
+//     width: 100%;
+//     border-collapse: collapse;
+//     border-spacing: 0;
+
+//     thead {
+//         background-color: #5d989b;
+
+//         tr {
+//             background-color: #5d989b;
+//             border-bottom: 1px solid #c6c7c5;
+
+//             th {
+//                 font-size: 0.833333rem !important;
+//                 font-weight: 500 !important;
+//                 align-content: center;
+//                 background-color: #5d989b !important;
+//                 color: #ffffff !important;
+//                 padding: 0.25rem 0.5rem !important;
+//                 height: 1.875rem !important;
+//             }
+//         }
+//     }
+
+//     tbody {
+//         background-color: #ffffff;
+
+//         tr {
+//             background-color: #ffffff;
+
+//             td {
+//                 font-size: 0.833333rem !important;
+//                 font-weight: 500 !important;
+//                 padding: 0.25rem 0.5rem !important;
+//                 background-color: #ffffff !important;
+//                 color: #253300 !important;
+//                 align-content: center;
+//                 border-bottom: 1px solid #c6c7c5;
+//             }
+
+//             &.last-row {
+//                 td {
+//                     border-bottom: none !important;
+//                 }
+//             }
+
+//             &:last-child td:first-child {
+//                 border-bottom-left-radius: 10px;
+//             }
+
+//             &:last-child td:last-child {
+//                 border-bottom-right-radius: 10px;
+//             }
+//         }
+//     }
+// }
+
+// .custom-tooltip {
+//     position: relative;
+//     display: inline-block;
+// }
+
+// .custom-tooltip:hover::before {
+//     background: #202027;
+//     border-radius: 5px;
+//     color: #fff;
+//     content: attr(data-tooltip);
+//     padding: 5px 15px;
+//     position: absolute;
+//     z-index: 98;
+//     width: auto;
+//     bottom: 110%;
+//     left: 50%;
+//     transform: translateX(-50%);
+//     white-space: nowrap;
+//     opacity: 1;
+//     visibility: visible;
+//     transition: opacity 0.3s ease, visibility 0.3s ease;
+// }
+
+// .custom-tooltip:hover::after {
+//     content: "";
+//     position: absolute;
+//     bottom: 100%;
+//     left: 50%;
+//     transform: translateX(-50%);
+//     margin-bottom: -5px;
+//     border-left: 5px solid transparent;
+//     border-right: 5px solid transparent;
+//     border-top: 10px solid #202027;
+//     z-index: 99;
+//     opacity: 1;
+//     visibility: visible;
+// }
+
+// .custom-tooltip::before,
+// .custom-tooltip::after {
+//     visibility: hidden;
+//     opacity: 0;
+//     transition: opacity 0.3s ease, visibility 0.3s ease;
+// }
+
+// .custom-tooltip:hover::before,
+// .custom-tooltip:hover::after {
+//     visibility: visible;
+//     opacity: 1;
+// }
+
+// @media (max-width: 800px) {
+//     .container-table {
+//         overflow-y: auto;
+//     }
+// }
+
+// .spinner-border-sm {
+//     --bs-spinner-border-width: 0.1em;
+// }
