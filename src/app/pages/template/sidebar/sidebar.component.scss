@@ -1,3 +1,17 @@
 .sidebar-menu.mini-bar .text-menu {
     @apply hidden;
 }
+
+@media (max-width: 800px) {
+    .sidebar {
+        @apply fixed bottom-0 z-[1045] flex flex-col w-[10.8rem] transition-transform duration-300;
+    }
+}
+
+.icon-expand img {
+    @apply transition-transform duration-200;
+}
+
+.sidebar-menu.mini-bar .submenu {
+    @apply hidden;
+}

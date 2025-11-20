@@ -1,25 +1,38 @@
 <div
   class="flex h-screen overflow-hidden bg-gradient-to-r from-cyan-50/50 to-lime-50/50">
-  <!-- Sidebar -->
+  <div
+    *ngIf="isSidebarOverlayOpen"
+    class="sidebar-backdrop fixed inset-0 bg-black/40 z-30"></div>
+
   <aside
-    [class.w-48]="!isMinibar"
+    class="
+    fixed top-0 left-0 h-full
+    w-52 bg-white border-r border-gray-200 shadow-lg
+    transition-all duration-300 z-40
+    flex flex-col
+  "
     [class.w-14]="isMinibar"
-    class="flex flex-col bg-white shadow-lg transition-all duration-300 ease-in-out z-20">
-    <div class="flex items-center justify-center p-3 border-b">
-      <img
-        src="assets/img/logo/logo.new.svg"
+    [class.-translate-x-full]="isMinibar"
+    [class.translate-x-0]="!isMinibar">
+
+    <!-- LOGO -->
+    <div class="p-3 border-b border-gray-200">
+      <img src="assets/img/logo/logo.new.svg"
         class="w-40 h-7"
         [class.hidden]="isMinibar" />
-      <img
-        src="assets/img/logo/logo40x37-mini.svg"
+      <img src="assets/img/logo/logo40x37-mini.svg"
         class="w-9"
         [class.hidden]="!isMinibar" />
     </div>
 
-    <app-sidebar
-      [isMinibar]="isMinibar"
-      (miniBarToggled)="onSidebarToggled($event)"
-      class="flex-1 overflow-y-auto"></app-sidebar>
+    <!-- SCROLL AREA -->
+    <div class="flex-1 overflow-y-auto scrollable-items">
+      <app-sidebar
+        [isMinibar]="isMinibar"
+        (miniBarToggled)="onSidebarToggled($event)">
+      </app-sidebar>
+    </div>
+
   </aside>
 
   <!-- Content -->
@@ -27,9 +40,10 @@
     <app-header
       class="sticky top-0 z-10 bg-white shadow-md"
       [isMinimal]="isMinibar"
-      (miniBarToggled)="onSidebarToggled($event)"></app-header>
+      (miniBarToggled)="onSidebarToggled($event)">
+    </app-header>
 
-    <main class="flex-1 overflow-y-auto">
+    <main class="flex-1 overflow-y-auto scrollable-items">
       <router-outlet></router-outlet>
     </main>
 

@@ -1,13 +1,12 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { IAvailableMenu, IMenu, IResponseMenu } from '../../../shared/interface/sidebar.interface';
+import { LoadingBarService } from '@ngx-loading-bar/core';
+import { RESPONSE } from '../../../shared/enum/response.enum';
+import { ModalCommonService } from '../../../shared/components/modal-common/modal-common.service';
+import { UserService } from '../../../shared/services/user.service';
+import { MaskValueService } from '../../../shared/components/mask-value/mask-value.service';
 
-interface SidebarMenu {
-  key: string;
-  displayName: string;
-  endpoint?: string;
-  icon: string;
-  children?: SidebarMenu[];
-}
 @Component({
   selector: 'app-sidebar',
   standalone: false,
@@ -17,74 +16,132 @@ interface SidebarMenu {
 export class SidebarComponent {
   @Input() isMinibar = false;
   @Output() miniBarToggled = new EventEmitter<boolean>();
+  @ViewChild('menuList') menuList!: ElementRef
 
+  availableMenus!: IAvailableMenu
   expands: Record<string, boolean> = {};
+  menus: IResponseMenu = {
+    role: '',
+    menus: []
+  }
 
-  menus: SidebarMenu[] = [
-    {
-      key: 'home',
-      displayName: 'Home',
-      endpoint: '/home',
-      icon: 'assets/img/menu/home.svg',
-    },
-    {
-      key: 'corp',
-      displayName: 'Corporate Management',
-      icon: 'assets/img/menu/corp.svg',
-      children: [
-        { key: 'corp-1', displayName: 'List', endpoint: '/corp/list', icon: '' },
-        { key: 'corp-2', displayName: 'Add Corporate', endpoint: '/corp/add', icon: '' },
-      ],
-    },
-    {
-      key: 'sender',
-      displayName: 'Sender Name Management',
-      icon: 'assets/img/menu/sender.svg',
-      children: [
-        { key: 'sender-1', displayName: 'Registered', endpoint: '/sender/registered', icon: '' },
-        { key: 'sender-2', displayName: 'Requests', endpoint: '/sender/request', icon: '' },
-      ],
-    },
-    {
-      key: 'faq',
-      displayName: 'FAQ',
-      endpoint: '/faq',
-      icon: 'assets/img/menu/faq.svg',
-    },
-    {
-      key: 'guide',
-      displayName: 'Guidebook',
-      endpoint: '/guidebook',
-      icon: 'assets/img/menu/guide.svg',
-    },
-  ];
+  private callBackUrl: string = '';
 
-  constructor(private router: Router) { }
+  constructor(
+    private router: Router,
+    private userService: UserService,
+    private route: ActivatedRoute,
+    private loadingBarService: LoadingBarService,
+    private modalCommonService: ModalCommonService,
+    private maskValueService: MaskValueService,
 
-  navigate(url?: string) {
-    if (!url) return;
-    this.router.navigateByUrl(url);
+  ) { }
+
+  async ngOnInit() {
+    this.route.queryParams.subscribe((params) => {
+      this.callBackUrl = params['callBackUrl'] || '';
+    })
+    await this.getMenus()
+    this.handleDefaultExpand()
+  }
+
+  private async getMenus() {
+    const loader = this.loadingBarService.useRef();
+    loader.start();
+
+    try {
+      const respMenus = await this.userService.getMenu()
+      if (respMenus.resultCode === RESPONSE.SUCCESS) {
+        this.menus = respMenus.data;
+        const allEndpoints = this.getAllEndpoint(respMenus.data.menus);
+        this.maskValueService.setAllEndpoints(allEndpoints);
+        if (this.callBackUrl !== '' && allEndpoints.some(s => this.callBackUrl.includes(s.endpoint))) {
+          this.router.navigateByUrl(this.callBackUrl);
+        } else if (this.callBackUrl !== '' && !allEndpoints.some(s => this.callBackUrl.includes(s.endpoint)) && !this.callBackUrl.includes('report-download')) {
+          this.router.navigate(['portal', 'landing']);
+        } else if (this.callBackUrl.includes('report-download')) {
+          this.router.navigateByUrl(this.callBackUrl);
+        }
+        this.callBackUrl = '';
+      } else {
+        this.handleCommonError();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    finally {
+      loader.complete();
+    }
+  }
+
+  private handleDefaultExpand() {
+    for (const menu of this.menus.menus) {
+      if (menu.endpoint && this.router.url.includes(menu.endpoint)) {
+        this.expands[menu.key] = true
+      }
+      for (const child of menu.children) {
+        if (this.router.url.includes(child.endpoint)) {
+          this.expands[menu.key] = true
+          break
+        }
+      }
+    }
+  }
+
+  navigate(url: string) {
+    // this.sessionIdService.newTransactionId()
+    this.router.navigate(['portal' + url]);
     if (window.innerWidth <= 800) {
       this.isMinibar = true;
-      this.miniBarToggled.emit(this.isMinibar);
+    }
+    this.isMinibar = true;
+    this.miniBarToggled.emit(this.isMinibar);
+  }
+
+  isActiveParentMenu(menu: any): boolean {
+    if (menu.endpoint && this.isActiveMenu(menu.endpoint)) {
+      return true
+    }
+    for (const child of menu.children) {
+      if (this.isActiveMenu(child.endpoint)) {
+        return true
+      }
+    }
+    return false
+  }
+
+  isActiveMenu(endpoint: string) {
+    return this.router.url.includes(endpoint)
+  }
+
+  isShowExpand(key: string) {
+    if (this.isMinibar) {
+      return
+    }
+    this.expands[key] = !this.expands[key]
+  }
+
+  handleMiniBarToggle() {
+    if (this.isMinibar) {
+      this.isMinibar = false
+      this.miniBarToggled.emit(this.isMinibar)
     }
   }
 
-  toggleExpand(key: string) {
-    if (this.isMinibar) return;
-    this.expands[key] = !this.expands[key];
+  private getAllEndpoint(menuItems: IMenu[]) {
+    const allEndpoints = menuItems.flatMap(item => {
+      const childrenEndpoints = item.children.map(child => child);
+      return [item, ...childrenEndpoints];
+    });
+    return allEndpoints.filter(f => f.endpoint !== null);
   }
 
-  isActiveMenu(endpoint?: string): boolean {
-    if (!endpoint) return false;
-    return this.router.url.includes(endpoint);
-  }
-
-  isActiveParentMenu(menu: SidebarMenu): boolean {
-    if (menu.endpoint && this.isActiveMenu(menu.endpoint)) return true;
-    if (menu.children) {
-      return menu.children.some((c) => this.isActiveMenu(c.endpoint));
-    }
-    return false;
+  private handleCommonError() {
+    this.modalCommonService.open({
+      type: 'alert',
+      title: 'ขออภัย ระบบขัดข้องในขณะนี้',
+      subtitle: 'กรุณาทำรายการใหม่อีกครั้ง หรือ ติดต่อผู้ดูแลระบบในองค์กรของคุณ',
+      buttonText: 'เข้าใจแล้ว',
+    });
   }
 }

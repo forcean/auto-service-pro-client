@@ -1,5 +1,4 @@
 <header class="flex items-center justify-between px-4 h-12 bg-white shadow">
-  <!-- Left -->
   <div class="flex items-center gap-3">
     <button
       class="p-2 rounded-md hover:bg-gray-100 transition"
@@ -8,14 +7,10 @@
         class="w-5 h-5 text-gray-700"></lucide-icon>
     </button>
 
-    <img
-      *ngIf="isCleanMenu"
-      src="assets/img/logo_copy/logo.new.svg"
-      alt="logo"
-      class="h-7" />
+    <img src="assets/img/logo/logo40x37-mini.svg"
+      class="w-9 rounded-md" />
   </div>
 
-  <!-- Right -->
   <div class="flex items-center gap-4">
     <!-- Language -->
     <!-- <button class="text-sm flex items-center gap-1 hover:text-green-700">
@@ -30,7 +25,6 @@
         class="w-5 h-5 object-contain" />
     </button>
 
-    <!-- Profile -->
     <app-profile></app-profile>
   </div>
 </header>

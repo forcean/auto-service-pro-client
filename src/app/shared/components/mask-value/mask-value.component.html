@@ -1,0 +1,25 @@
+<div class="container-mask">
+  <div class="d-flex">
+    <button class="button-mask" (click)="toggleShowMask()">
+      <img style="margin-top: -2px;" alt="settingIcon"
+        src="assets/img/icons/icon.setting.svg">
+      <span class="ps-1">{{ 'MASK.VIEW'}}</span>
+    </button>
+  </div>
+  <div *ngIf="showMask" class="container-mask-popup d-flex flex-column">
+    <span class="text-title">
+      {{ 'MASK.TITLE'}}
+    </span>
+    <span class="text-subtitle mb-1">
+      {{ 'MASK.SUBTITLE'}}
+    </span>
+    <div class="container-mask-toggle d-flex justify-content-between">
+      <span class="text-title">
+        {{ 'MASK.MASKED'}}
+      </span>
+      <div class="align-items-center">
+        <!-- <toggle-switch class="toggle-switch" [checked]="maskStage === 'mask'" (toggleChange)="onMaskChange()"></toggle-switch> -->
+      </div>
+    </div>
+  </div>
+</div>

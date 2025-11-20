@@ -1,9 +1,7 @@
-/* You can add global styles to this file, and also import other style files */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-// @import "./assets/styles/mixins";
 @import "./assets/styles/fonts";
 @import "./assets/styles/color";
 @import "./assets/styles/variables";
@@ -14,12 +12,40 @@ body {
     overflow-y: hidden;
 }
 
-// body {
-//     font-family: "KanitRegular";
-//     font-size: 24px;
-//     margin: 0 auto;
-//     color: $color-text !important;
-// }
+body {
+    font-family: "KanitRegular";
+    margin: 0 auto;
+    color: $color-text !important;
+}
+
+html {
+    font-size: clamp(14px, 1.1vw + 10px, 20px);
+}
+
+
+.scrollable-items {
+    min-height: 12rem;
+    width: 100%;
+    overflow-y: auto;
+    // scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.scrollable-items::-webkit-scrollbar {
+    width: 14px;
+}
+
+.scrollable-items::-webkit-scrollbar-thumb {
+    background-color: #DEDEDE;
+    // background-color: #ECECEC;
+    border-radius: 10px;
+    border: 4px solid #FFF;
+
+    &:hover {
+        background-color: $color-dark-gray;
+    }
+}
+
 
 // button {
 //     height: 1.666667rem !important;
