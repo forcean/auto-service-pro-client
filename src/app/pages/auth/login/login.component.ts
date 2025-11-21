@@ -117,7 +117,5 @@ export class LoginComponent {
       routePage: path,
     });
   }
-
-
 }
 

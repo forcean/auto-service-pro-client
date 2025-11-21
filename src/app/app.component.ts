@@ -16,11 +16,11 @@ export class AppComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    // const loader = this.loadingBar.useRef();
-    // loader.start();
+    const loader = this.loadingBar.useRef();
+    loader.start();
 
-    // this.idleSessionService.start();
+    this.idleSessionService.start();
 
-    // setTimeout(() => loader.complete(), 1000);
+    setTimeout(() => loader.complete(), 1000);
   }
 }
