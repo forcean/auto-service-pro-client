@@ -6,6 +6,22 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'KanitLight';
+  src: url('../fonts/Kanit-Light.ttf') format("truetype");
+  // font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'KanitMedium';
+  src: url('../fonts/Kanit-Medium.ttf') format("truetype");
+  // font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
 // @font-face {
 //   font-family: 'DBHeavent';
 //   src: url('../fonts/db_heavent_v3.2-webfont.eot');

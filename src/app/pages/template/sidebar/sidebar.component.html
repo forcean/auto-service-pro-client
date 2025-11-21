@@ -4,13 +4,13 @@
   [ngClass]="{ 'mini-bar': isMinibar }">
   <li *ngFor="let menu of menus.menus" class="mb-1">
 
+    <!-- MAIN MENU -->
     <div
       class="menu-list flex items-center px-3 py-2 rounded-lg cursor-pointer transition-all duration-150
              hover:bg-gray-50 rounded-t-xl "
       (click)="menu.children.length ? isShowExpand(menu.key) : navigate(menu.endpoint); handleMiniBarToggle()"
       [attr.data-bs-toggle]="!isMinibar && menu.children.length ? 'collapse' : null"
       [attr.href]="menu.children.length ? '#' + menu.key + 'Menu' : null">
-
       <span
         class="icon-menu relative flex items-center justify-center w-6 h-6"
         [ngClass]="{
@@ -20,7 +20,8 @@
         <img class="w-5 h-5" [src]="'assets/img/menu' + menu.icon" alt />
       </span>
 
-      <span class="text-menu ml-3 text-base font-medium" *ngIf="!isMinibar">
+      <span class="text-menu ml-3 font-normal"
+        *ngIf="!isMinibar">
         {{ menu.displayName }}
       </span>
 

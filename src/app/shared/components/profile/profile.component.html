@@ -1,4 +1,4 @@
-<div class="relative text-[#111] text-[0.96rem]">
+<div class="relative text-[0.96rem]">
   <button
     id="dropdownProfile"
     (click)="toggleDropdown()"
@@ -32,12 +32,12 @@
   <div
     #dropdownMenu
     id="dropdownMenu"
-    class="hidden absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 z-[999]">
+    class="hidden absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-lg border border-gray-100 z-[999]">
     <button
       (click)="onProfileDetail()"
       class="w-full flex items-center gap-3 px-4 py-2 text-left hover:bg-gray-50 rounded-t-xl transition">
       <img class="icon" src="assets/img/icons/icon.profile.svg" alt="profile" />
-      <span class="text-[1rem]">โปรไฟล์</span>
+      <span class="text-[0.833333rem]">โปรไฟล์</span>
       <!-- <span
         *ngIf="isNotEmailVerified"
         class="ml-auto bg-yellow-100 border border-yellow-400 rounded-full px-2 text-xs font-medium text-yellow-700"
@@ -52,7 +52,7 @@
       (click)="onContactUs()"
       class="w-full flex items-center gap-3 px-4 py-2 text-left hover:bg-gray-50 transition">
       <img class="icon" src="assets/img/icons/icon.call.svg" alt="contact" />
-      <span class="text-[1rem]">ติดต่อเรา</span>
+      <span class="text-[0.833333rem]">ติดต่อเรา</span>
     </button>
 
     <hr class="border-gray-200" />
@@ -61,7 +61,7 @@
       (click)="onLogout()"
       class="w-full flex items-center gap-3 px-4 py-2 text-left hover:bg-red-50 rounded-b-xl transition">
       <img class="icon" src="assets/img/icons/icon.logout.svg" alt="logout" />
-      <span class="text-[1rem]">ออกจากระบบ</span>
+      <span class="text-[0.833333rem]">ออกจากระบบ</span>
     </button>
   </div>
 </div>

@@ -108,5 +108,16 @@ export class LoginComponent {
     });
   }
 
+  handleForgetPassword(path?: string) {
+    this.modalCommonService.open({
+      type: 'alert',
+      title: 'รีเซ็ตรหัสผ่าน',
+      subtitle: 'โปรดติดต่อผู้ดูแลระบบเพื่อทำการรีเซ็ตรหัสผ่านของคุณ',
+      buttonText: 'ปิด',
+      routePage: path,
+    });
+  }
+
+
 }
 
