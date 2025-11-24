@@ -123,7 +123,7 @@ export class ProfileComponent implements OnInit, AfterViewInit {
       if (response.resultCode === RESPONSE.SUCCESS) {
         this.authenticationService.logout();
         this.router.navigate(['/']);
-      } else if (response.resultCode === RESPONSE.INVALID_CREDENTIALS) {
+      } else if (response.resultCode === RESPONSE.INVALID_ACCESS_TOKEN) {
         this.handleCommonExpired();
         this.authenticationService.logout();
       } else {

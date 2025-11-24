@@ -1,5 +1,7 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { AuthGuard } from './core/guards/auth.guard';
+import { NotFoundComponent } from './pages/not-found/not-found.component';
 
 const routes: Routes = [
 
@@ -15,17 +17,9 @@ const routes: Routes = [
       }
     }
   },
-
-  // {
-  //   path: 'portal',
-  //   loadChildren: () =>
-  //     import('./pages/common-layout-pages.module').then(
-  //       m => m.CommonLayoutPagesModule
-  //     ),
-  // }
   {
     path: 'portal',
-    // canActivate: [AuthGuard],
+    canActivate: [AuthGuard],
     loadChildren: async () => {
       try {
         return await import('./pages/common-layout-pages.module').then((m) => m.CommonLayoutPagesModule);
@@ -34,6 +28,12 @@ const routes: Routes = [
       }
     }
   },
+  {
+    path: 'not-found',
+    component: NotFoundComponent,
+    children: [{ path: '', component: NotFoundComponent }]
+  },
+  { path: '**', redirectTo: '/not-found' },
 ];
 
 @NgModule({
