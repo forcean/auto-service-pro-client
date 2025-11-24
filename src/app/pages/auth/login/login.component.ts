@@ -62,9 +62,9 @@ export class LoginComponent {
       console.log("Response login:", result);
 
       if (result.resultCode == RESPONSE.SUCCESS) {
-        this.authenticationService.login(result.data.accessToken, result.data.refreshToken);
+        this.authenticationService.login(result.resultData.accessToken, result.resultData.refreshToken);
         this.router.navigate(['/portal/landing']);
-      } else if (result.resultCode == RESPONSE.INVALID_CREDENTIALS) {
+      } else if (result.resultCode == RESPONSE.INVALID_ACCESS_TOKEN) {
         this.handleFailResponse();
       }
       else {

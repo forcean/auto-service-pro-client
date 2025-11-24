@@ -98,7 +98,7 @@ export class IdleSessionService implements OnDestroy {
       next: (res) => {
         // console.log('[IdleSession] Token refresh success');
         /* เส้น refreshToken ตั้ง cookie → authService.read() */
-        this.authService.login(res.data.accessToken, res.data.refreshToken);
+        this.authService.login(res.resultData.accessToken, res.resultData.refreshToken);
         this.hasActivity = false;
         this.isRefreshing = false;
       },

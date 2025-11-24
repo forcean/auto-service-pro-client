@@ -10,7 +10,7 @@ import { RESPONSE } from "../enum/response.enum";
 export interface IBaseResponse<T> {
   message: string;
   resultCode: string;
-  data: T;
+  resultData: T;
   status?: 'success' | 'error';
   error?: IDataError;
   hasMore?: boolean;
