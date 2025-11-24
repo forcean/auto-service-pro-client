@@ -8,7 +8,7 @@ import { RESPONSE } from "../enum/response.enum";
 // }
 
 export interface IBaseResponse<T> {
-  message: string;
+  developerMessage: string;
   resultCode: string;
   resultData: T;
   status?: 'success' | 'error';

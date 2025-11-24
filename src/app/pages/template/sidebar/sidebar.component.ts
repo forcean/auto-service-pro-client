@@ -52,8 +52,8 @@ export class SidebarComponent {
     try {
       const respMenus = await this.userService.getMenu()
       if (respMenus.resultCode === RESPONSE.SUCCESS) {
-        this.menus = respMenus.data;
-        const allEndpoints = this.getAllEndpoint(respMenus.data.menus);
+        this.menus = respMenus.resultData;
+        const allEndpoints = this.getAllEndpoint(respMenus.resultData.menus);
         this.maskValueService.setAllEndpoints(allEndpoints);
         if (this.callBackUrl !== '' && allEndpoints.some(s => this.callBackUrl.includes(s.endpoint))) {
           this.router.navigateByUrl(this.callBackUrl);
