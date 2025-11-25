@@ -19,7 +19,7 @@ const routes: Routes = [
   },
   {
     path: 'portal',
-    canActivate: [AuthGuard],
+    // canActivate: [AuthGuard],
     loadChildren: async () => {
       try {
         return await import('./pages/common-layout-pages.module').then((m) => m.CommonLayoutPagesModule);
