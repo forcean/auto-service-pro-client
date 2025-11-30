@@ -1,92 +1,185 @@
 <div
   class="min-h-screen bg-[#0f172a] flex justify-center items-start py-10 px-4">
+  <div class="bg-white w-full max-w-2xl rounded-xl p-8 shadow-lg">
 
-  <div class="bg-white w-full max-w-3xl rounded-xl p-8 shadow-lg">
-
-    <h2 class="font-bold text-gray-800 mb-6">
-      เพิ่มบุคลากรในองค์กร
-    </h2>
+    <h2 class="font-bold text-gray-800 mb-6 text-2xl">เพิ่มบุคลากรในองค์กร</h2>
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
 
-      <!-- Basic Information -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="block mb-1 text-gray-700">Firstname</label>
-          <input type="text" formControlName="firstname"
-            class="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400">
-        </div>
-
-        <div>
-          <label class="block mb-1 text-gray-700">Lastname</label>
-          <input type="text" formControlName="lastname"
-            class="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400">
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="block mb-1 text-gray-700">Username</label>
-          <input type="text" formControlName="username"
-            class="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400">
-        </div>
-
-        <div>
-          <label class="block mb-1 text-gray-700">Password</label>
-          <input type="password" formControlName="password"
-            class="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400">
+      <div>
+        <label class="block mb-1 text-gray-700">Name</label>
+        <input
+          type="text"
+          formControlName="name"
+          class="form-input-custom"
+          placeholder="กรุณากรอกชื่อ"
+          [class.border-error]="form.controls['name'].invalid && form.controls['name'].touched" />
+        <div
+          *ngIf="form.controls['name'].invalid && form.controls['name'].touched"
+          class="flex items-center gap-1 text-red-600 text-sm mt-1">
+          <img src="assets/img/alert-icon.svg" class="alert-icon-create">
+          <span>กรุณากรอกชื่อ</span>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="block mb-1 text-gray-700">Phone Number</label>
-          <input type="text"
-            formControlName="phone"
-            appNumeric
-            class="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400">
-        </div>
-
-        <div>
-          <label class="block mb-1 text-gray-700">Email</label>
-          <input type="email" formControlName="email"
-            class="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400">
+      <div>
+        <label class="block mb-1 text-gray-700">Surname</label>
+        <input
+          type="text"
+          formControlName="surname"
+          class="form-input-custom"
+          placeholder="กรุณากรอกนามสกุล"
+          [class.border-error]="form.controls['surname'].invalid && form.controls['name'].touched" />
+        <div
+          *ngIf="form.controls['surname'].invalid && form.controls['surname'].touched"
+          class="flex items-center gap-1 text-red-600 text-sm mt-1">
+          <img src="assets/img/alert-icon.svg" class="alert-icon-create">
+          <span>กรุณากรอกนามสกุล</span>
         </div>
       </div>
 
-      <!-- Role Selection -->
       <div>
         <label class="block mb-1 text-gray-700">Role</label>
-        <select formControlName="role"
+        <custom-select
+          formControlName="role"
+          placeholder="-- เลือก Role --"
           (change)="onRoleChange()"
-          class="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400">
-          <option value>-- เลือก Role --</option>
-          <option value="ADM">Admin (ADM)</option>
-          <option value="MNG">Manager (MNG)</option>
-          <option value="ACC">Accountant (ACC)</option>
-          <option value="SAL">Sale (SAL)</option>
-          <option value="STC">Stock Controller (STC)</option>
-          <option value="MEC">Mechanic (MEC)</option>
-        </select>
+          [isError]="form.controls['role'].invalid && form.controls['role'].touched">
+          <custom-option value="ADM">Admin (ADM)</custom-option>
+          <custom-option value="MNG">Manager (MNG)</custom-option>
+          <custom-option value="ACC">Accountant (ACC)</custom-option>
+          <custom-option value="SAL">Sale (SAL)</custom-option>
+          <custom-option value="STC">Stock Controller (STC)</custom-option>
+          <custom-option value="MEC">Mechanic (MEC)</custom-option>
+        </custom-select>
+        <div
+          *ngIf="form.controls['role'].invalid && form.controls['role'].touched"
+          class="flex items-center gap-1 text-red-600 text-sm mt-1">
+          <img src="assets/img/alert-icon.svg" class="alert-icon-create">
+          <span>กรุณาเลือก Role</span></div>
       </div>
 
-      <!-- Manager Selection (show only when needed) -->
       <div *ngIf="mustSelectManager">
         <label class="block mb-1 text-gray-700">สังกัด Manager</label>
-        <select
-          formControlName="managerId"
-          class="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400">
-          <option value>-- เลือก Manager --</option>
-          <option *ngFor="let m of managerList" [value]="m.id">
-            {{ m.firstname }} {{ m.lastname }}
-          </option>
-        </select>
+        <custom-select formControlName="managerId"
+          placeholder="-- เลือก Manager --"
+          [isError]="form.controls['managerId'].invalid && form.controls['managerId'].touched">
+          <custom-option *ngFor="let m of managerList" [value]="m.id">{{
+            m.firstname }} {{ m.lastname }}</custom-option>
+        </custom-select>
+        <div
+          *ngIf="form.controls['managerId'].invalid && form.controls['managerId'].touched"
+          class="flex items-center gap-1 text-red-600 text-sm mt-1">
+          <img src="assets/img/alert-icon.svg" class="alert-icon-create">
+          <span>กรุณาเลือก Manager</span></div>
       </div>
 
-      <!-- Submit Button -->
+      <div>
+        <label class="block mb-1 text-gray-700">Username</label>
+        <input
+          type="text"
+          formControlName="username"
+          class="form-input-custom"
+          placeholder="กรุณากรอกชื่อผู้ใช้งาน (4-30 ตัวอักษร)"
+          [class.border-error]="form.controls['username'].invalid && form.controls['username'].touched" />
+        <div
+          *ngIf="form.controls['username'].invalid && form.controls['username'].touched"
+          class="flex items-center gap-1 text-red-600 text-sm mt-1">
+          <img src="assets/img/alert-icon.svg" class="alert-icon-create">
+          <span>ชื่อผู้ใช้งานไม่ถูกต้อง (ต้องขึ้นต้นด้วยตัวอักษรและไม่ต่ำกว่า 4
+            ตัว)</span>
+        </div>
+      </div>
+
+      <div>
+        <label class="block mb-1 text-gray-700">Password</label>
+        <app-strong-password-input #StrongPasswordInputComponent
+          [isError]="isPasswordInvalid || isPasswordFormat || (form.controls['password'].touched && form.controls['password'].invalid)"
+          (onCompletePassword)="onPasswordComplete($event)">
+        </app-strong-password-input>
+        <div
+          *ngIf="isPasswordInvalid "
+          class="flex items-center gap-1 text-red-600 text-sm mt-1">
+          <img src="assets/img/alert-icon.svg" class="alert-icon-create">
+          <span>รหัสผ่านไม่ตรงกัน</span>
+        </div>
+
+        <div
+          *ngIf=" form.controls['password'].touched && form.controls['password'].invalid"
+          class="flex items-center gap-1 text-red-600 text-sm mt-1">
+          <img src="assets/img/alert-icon.svg" class="alert-icon-create">
+          <span>กรุณากรอกรหัสผ่าน</span>
+        </div>
+      </div>
+
+      <div>
+        <label class="block mb-1 text-gray-700">Confirm Password</label>
+
+        <div class="relative">
+          <input
+            [type]="isPasswordVisible ? 'text' : 'password'"
+            formControlName="confirmPassword"
+            class="form-input-custom pr-10"
+            placeholder="กรุณายืนยันรหัสผ่าน"
+            [class.border-error]="form.controls['confirmPassword'].invalid && form.controls['confirmPassword'].touched || isPasswordInvalid" />
+
+          <div
+            class="password-toggle z-20"
+            (click)="togglePasswordVisibility()"
+            [class.show]="isPasswordVisible">
+          </div>
+        </div>
+
+        <!-- error: field invalid -->
+        <div
+          *ngIf="form.controls['confirmPassword'].invalid && form.controls['confirmPassword'].touched"
+          class="flex items-center gap-1 text-red-600 text-sm mt-1">
+          <img src="assets/img/alert-icon.svg" class="alert-icon-create">
+          <span>กรุณายืนยันรหัสผ่าน</span>
+        </div>
+
+        <!-- error: password mismatch -->
+        <div *ngIf="isPasswordInvalid"
+          class="flex items-center gap-1 text-red-600 text-sm mt-1">
+          <img src="assets/img/alert-icon.svg" class="alert-icon-create">
+          <span>รหัสผ่านไม่ตรงกัน</span>
+        </div>
+      </div>
+
+      <div>
+        <label class="block mb-1 text-gray-700">Phone Number</label>
+        <input type="text" id="mobileNo" formControlName="phoneNumber"
+          appNumeric
+          class="form-input-custom" [maxlength]="checkMobileLength()"
+          placeholder="กรุณากรอกหมายเลขโทรศัพท์"
+          (input)="checkMobileNoInvalid()"
+          [class.border-error]="isMobileNoInvalid" />
+        <div *ngIf="isMobileNoInvalid"
+          class="flex items-center gap-1 text-red-600 text-sm mt-1">
+          <img src="assets/img/alert-icon.svg" class="alert-icon-create">
+          <span>หมายเลขโทรศัพท์ไม่ถูกต้อง</span>
+        </div>
+      </div>
+
+      <div>
+        <label class="block mb-1 text-gray-700">Email</label>
+        <input
+          type="email"
+          formControlName="email"
+          appPreventSpace
+          class="form-input-custom"
+          placeholder="กรุณากรอกอีเมล"
+          (input)="validateEmail($event)"
+          [class.border-error]="isMatchEmail" />
+        <div *ngIf="isMatchEmail"
+          class="flex items-center gap-1 text-red-600 text-sm mt-1">
+          <img src="assets/img/alert-icon.svg" class="alert-icon-create">
+          <span>อีเมลไม่ถูกต้อง</span>
+        </div>
+      </div>
+
       <div class="pt-4">
-        <button
-          type="submit"
+        <button type="submit"
           class="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-3 rounded-lg shadow-md transition">
           เพิ่มผู้ใช้งาน
         </button>

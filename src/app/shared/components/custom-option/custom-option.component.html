@@ -1,0 +1,11 @@
+<div
+  class="cursor-pointer transition-colors text-[0.92rem] font-medium custom-option"
+  (click)="select()"
+  [class.pointer-events-none]="disabled"
+  [class.cursor-default]="disabled"
+  [class.opacity-50]="disabled">
+  <span
+    class="block px-2 py-1 my-1  hover:bg-[#F6F7F8] hover:rounded-md">
+    <ng-content></ng-content>
+  </span>
+</div>

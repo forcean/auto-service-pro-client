@@ -1,0 +1,31 @@
+@tailwind components;
+@import '../../../../assets/styles/variables';
+
+
+.form-input-custom {
+  @apply w-full border border-gray-300 font-medium text-[#000d19] px-3 py-2 rounded-md focus:outline-none focus:border-[#88c273];
+  font-size: $font-size-24;
+
+
+  &::placeholder {
+    color: #abaca8;
+    font-size: $font-size-24;
+  }
+}
+
+.error {
+  @apply text-red-500 text-sm mt-1;
+}
+
+.border-error {
+  @apply border-red-500;
+}
+
+.password-toggle {
+  @apply absolute cursor-pointer bottom-[32%] right-[3%] flex items-center w-[0.7rem] h-[0.7rem] bg-contain bg-center bg-no-repeat;
+  background-image: url('../../../../assets/img/icons/icon.eye-off.svg');
+}
+
+.password-toggle.show {
+  background-image: url('../../../../assets/img/icons/icon.eye.svg');
+}

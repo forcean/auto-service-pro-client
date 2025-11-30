@@ -1,0 +1,31 @@
+.custom-option {
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: .916666rem;
+  font-weight: 500;
+}
+
+.text-option {
+  color: #00162b;
+  display: block;
+
+  &:hover {
+    border-radius: .3rem;
+    background-color: #F6F7F8;
+  }
+}
+
+.text-disabled {
+  color: #abaca8 !important;
+}
+
+// .custom-option.selected {
+//   background-color: #e0e0e0;
+//   font-weight: bold;
+// }
+
+.custom-option.disabled {
+  background-color: transparent;
+  cursor: default;
+  pointer-events: none;
+}

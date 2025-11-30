@@ -5,6 +5,7 @@ import { FormCreateAdminComponent } from './form-create-admin/form-create-admin.
 import { CorporateAdminRoutingModule } from './corporate-admin-routing.module';
 import { SharedModule } from '../../shared/shared.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { SortableDirective } from "../../shared/directive/sortable.directive";
 
 
 
@@ -19,6 +20,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     SharedModule,
     FormsModule,
     ReactiveFormsModule,
+    SortableDirective
   ]
 })
 export class CorporateAdminModule { }
