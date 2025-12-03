@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { CorporateAdminListComponent } from './corporate-admin-list/corporate-admin-list.component';
-import { FormCreateAdminComponent } from './form-create-admin/form-create-admin.component';
+import { FormCreateUserComponent } from './form-create-user/form-create-user.component';
 
 const routes: Routes = [
   {
@@ -10,7 +10,7 @@ const routes: Routes = [
   },
   {
     path: 'account/create',
-    component: FormCreateAdminComponent,
+    component: FormCreateUserComponent,
   },
   // {
   //   path: 'account/detail/:id',

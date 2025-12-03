@@ -12,12 +12,12 @@ import { UserManagementService } from '../../../shared/services/user-management.
 import { IReqCreateUser } from '../../../shared/interface/user-management.interface';
 
 @Component({
-  selector: 'app-form-create-admin',
+  selector: 'app-form-create-user',
   standalone: false,
-  templateUrl: './form-create-admin.component.html',
-  styleUrl: './form-create-admin.component.scss'
+  templateUrl: './form-create-user.component.html',
+  styleUrl: './form-create-user.component.scss'
 })
-export class FormCreateAdminComponent implements OnInit {
+export class FormCreateUserComponent implements OnInit {
   private modalSubscription: Subscription | null = null;
   form!: FormGroup;
   managerList: any[] = [];
