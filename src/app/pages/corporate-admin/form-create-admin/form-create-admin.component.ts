@@ -6,6 +6,10 @@ import { ModalCommonService } from '../../../shared/components/modal-common/moda
 import { getInvalidControl, publicIdValidator } from '../../../shared/util';
 import { IStrongPassword } from '../../../shared/interface/strong-password.interface';
 import { StrongPasswordInputComponent } from '../../../shared/components/strong-password-input/strong-password-input.component';
+import { LoadingBarService } from '@ngx-loading-bar/core';
+import { RESPONSE } from '../../../shared/enum/response.enum';
+import { UserManagementService } from '../../../shared/services/user-management.service';
+import { IReqCreateUser } from '../../../shared/interface/user-management.interface';
 
 @Component({
   selector: 'app-form-create-admin',
@@ -24,6 +28,7 @@ export class FormCreateAdminComponent implements OnInit {
   isStrong: boolean = false;
   isMobileNoInvalid: boolean = false;
   isPasswordVisible: boolean = false;
+  isLoading = false;
 
   getInvalidControl = getInvalidControl;
 
@@ -34,6 +39,8 @@ export class FormCreateAdminComponent implements OnInit {
     private fb: FormBuilder,
     private modalCommonService: ModalCommonService,
     private router: Router,
+    private loadingBarService: LoadingBarService,
+    private userManagementService: UserManagementService,
   ) { }
 
 
@@ -122,7 +129,7 @@ export class FormCreateAdminComponent implements OnInit {
     this.isPasswordVisible = !this.isPasswordVisible;
   }
 
-  onSubmit() {
+  async onSubmit() {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       const pw = this.form.value.password;
@@ -134,7 +141,39 @@ export class FormCreateAdminComponent implements OnInit {
       return;
     }
 
-    console.log('Submit:', this.form.value);
+    this.isLoading = true;
+    const loader = this.loadingBarService.useRef();
+    loader.start();
+    try {
+      const payload: IReqCreateUser = {
+        publicId: this.form.value.username,
+        painTextPassword: this.form.value.password,
+        firstname: this.form.value.name,
+        lastname: this.form.value.surname,
+        phoneNumber: this.form.value.phoneNumber,
+        email: this.form.value.email,
+        role: this.form.value.role,
+        managerId: this.form.value.managerId || undefined,
+      };
+      const res = await this.userManagementService.CreateUser(payload);
+      if (res.resultCode == RESPONSE.SUCCESS) {
+        this.handleCommonSuccess();
+      } else if (res.resultCode == RESPONSE.INVALID_ACCESS_TOKEN) {
+        this.handleFailResponse();
+      }
+      else {
+        this.handleCommonSuccess();
+      }
+    } catch (error: any) {
+      const errorObject = error as { message: string };
+      if (errorObject.message !== '504') {
+        this.handleCommonError();
+      }
+    }
+    finally {
+      this.isLoading = false;
+      loader.complete();
+    }
   }
 
   private handleNotFoundProfile() {
@@ -154,9 +193,9 @@ export class FormCreateAdminComponent implements OnInit {
   private handleCommonSuccess() {
     this.modalCommonService.open({
       type: 'success',
-      title: 'ADMIN_MANAGEMENT.MODAL_TITLE',
-      subtitle: 'ADMIN_MANAGEMENT.MODAL_SUB_TITLE',
-      buttonText: 'GLOBAL.CONFIRM'
+      title: 'สร้างผู้ใช้งานสำเร็จ',
+      subtitle: 'คุณได้สร้างผู้ใช้งานในองค์กรเรียบร้อยแล้ว',
+      buttonText: 'ยืนยัน'
     });
     this.modalSubscription = this.modalCommonService.isOpen.subscribe((obj) => {
       if (!obj?.isOpen) {
@@ -185,9 +224,9 @@ export class FormCreateAdminComponent implements OnInit {
   private handleFailResponse() {
     this.modalCommonService.open({
       type: 'alert',
-      title: 'ERROR_MODAL.TITLE',
-      subtitle: 'ERROR_MODAL.SUBTITLE',
-      buttonText: 'ERROR_MODAL.TEXT_BUTTON',
+      title: 'ขออภัย ระบบขัดข้องในขณะนี้',
+      subtitle: 'กรุณาทำรายการใหม่อีกครั้ง หรือ ติดต่อผู้ดูแลระบบในองค์กรของคุณ',
+      buttonText: 'เข้าใจแล้ว',
     });
   }
 }

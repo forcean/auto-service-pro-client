@@ -16,7 +16,7 @@
           [class.border-error]="form.controls['name'].invalid && form.controls['name'].touched" />
         <div
           *ngIf="form.controls['name'].invalid && form.controls['name'].touched"
-          class="flex items-center gap-1 text-red-600 text-sm mt-1">
+          class="flex items-center gap-1 error">
           <img src="assets/img/alert-icon.svg" class="alert-icon-create">
           <span>กรุณากรอกชื่อ</span>
         </div>
@@ -32,7 +32,7 @@
           [class.border-error]="form.controls['surname'].invalid && form.controls['name'].touched" />
         <div
           *ngIf="form.controls['surname'].invalid && form.controls['surname'].touched"
-          class="flex items-center gap-1 text-red-600 text-sm mt-1">
+          class="flex items-center gap-1 error">
           <img src="assets/img/alert-icon.svg" class="alert-icon-create">
           <span>กรุณากรอกนามสกุล</span>
         </div>
@@ -54,7 +54,7 @@
         </custom-select>
         <div
           *ngIf="form.controls['role'].invalid && form.controls['role'].touched"
-          class="flex items-center gap-1 text-red-600 text-sm mt-1">
+          class="flex items-center gap-1 error">
           <img src="assets/img/alert-icon.svg" class="alert-icon-create">
           <span>กรุณาเลือก Role</span></div>
       </div>
@@ -69,7 +69,7 @@
         </custom-select>
         <div
           *ngIf="form.controls['managerId'].invalid && form.controls['managerId'].touched"
-          class="flex items-center gap-1 text-red-600 text-sm mt-1">
+          class="flex items-center gap-1 error">
           <img src="assets/img/alert-icon.svg" class="alert-icon-create">
           <span>กรุณาเลือก Manager</span></div>
       </div>
@@ -84,7 +84,7 @@
           [class.border-error]="form.controls['username'].invalid && form.controls['username'].touched" />
         <div
           *ngIf="form.controls['username'].invalid && form.controls['username'].touched"
-          class="flex items-center gap-1 text-red-600 text-sm mt-1">
+          class="flex items-center gap-1 error">
           <img src="assets/img/alert-icon.svg" class="alert-icon-create">
           <span>ชื่อผู้ใช้งานไม่ถูกต้อง (ต้องขึ้นต้นด้วยตัวอักษรและไม่ต่ำกว่า 4
             ตัว)</span>
@@ -99,14 +99,14 @@
         </app-strong-password-input>
         <div
           *ngIf="isPasswordInvalid "
-          class="flex items-center gap-1 text-red-600 text-sm mt-1">
+          class="flex items-center gap-1 error">
           <img src="assets/img/alert-icon.svg" class="alert-icon-create">
           <span>รหัสผ่านไม่ตรงกัน</span>
         </div>
 
         <div
           *ngIf=" form.controls['password'].touched && form.controls['password'].invalid"
-          class="flex items-center gap-1 text-red-600 text-sm mt-1">
+          class="flex items-center gap-1 error">
           <img src="assets/img/alert-icon.svg" class="alert-icon-create">
           <span>กรุณากรอกรหัสผ่าน</span>
         </div>
@@ -130,17 +130,15 @@
           </div>
         </div>
 
-        <!-- error: field invalid -->
         <div
           *ngIf="form.controls['confirmPassword'].invalid && form.controls['confirmPassword'].touched"
-          class="flex items-center gap-1 text-red-600 text-sm mt-1">
+          class="flex items-center gap-1 error">
           <img src="assets/img/alert-icon.svg" class="alert-icon-create">
           <span>กรุณายืนยันรหัสผ่าน</span>
         </div>
 
-        <!-- error: password mismatch -->
         <div *ngIf="isPasswordInvalid"
-          class="flex items-center gap-1 text-red-600 text-sm mt-1">
+          class="flex items-center gap-1 error">
           <img src="assets/img/alert-icon.svg" class="alert-icon-create">
           <span>รหัสผ่านไม่ตรงกัน</span>
         </div>
@@ -155,7 +153,7 @@
           (input)="checkMobileNoInvalid()"
           [class.border-error]="isMobileNoInvalid" />
         <div *ngIf="isMobileNoInvalid"
-          class="flex items-center gap-1 text-red-600 text-sm mt-1">
+          class="flex items-center gap-1 error">
           <img src="assets/img/alert-icon.svg" class="alert-icon-create">
           <span>หมายเลขโทรศัพท์ไม่ถูกต้อง</span>
         </div>
@@ -172,7 +170,7 @@
           (input)="validateEmail($event)"
           [class.border-error]="isMatchEmail" />
         <div *ngIf="isMatchEmail"
-          class="flex items-center gap-1 text-red-600 text-sm mt-1">
+          class="flex items-center gap-1 error">
           <img src="assets/img/alert-icon.svg" class="alert-icon-create">
           <span>อีเมลไม่ถูกต้อง</span>
         </div>

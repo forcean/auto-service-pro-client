@@ -9,7 +9,7 @@ import { LoadingBarModule } from '@ngx-loading-bar/core';
 import { SharedModule } from './shared/shared.module';
 import { ModalCommonService } from './shared/components/modal-common/modal-common.service';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
-import { ResponseInterceptor } from './core/interceptors/request.interceptor';
+import { ResponseInterceptor } from './core/interceptors/response.interceptor';
 import { NotFoundComponent } from './pages/not-found/not-found.component';
 
 @NgModule({
