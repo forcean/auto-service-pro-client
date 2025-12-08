@@ -1,0 +1,13 @@
+@tailwind components;
+@import '../../../../assets/styles/variables';
+@import '../../../../assets/styles/color';
+
+.form-input-custom {
+  @apply w-full border border-gray-300 font-medium text-[#000d19] px-3 py-2 rounded-lg focus:outline-none focus:border-[#$color-primary];
+  font-size: $font-size-24;
+
+  &::placeholder {
+    color: gray-400;
+    font-size: $font-size-22;
+  }
+}

@@ -14,14 +14,13 @@ export interface IReqCreateUser {
 
 export interface IReqUpdateUser {
     publicId: string;
-    credentialId?: string;
+    painTextPassword?: string;
     firstName?: string;
     lastName?: string;
-    mobile: string;
     sysEmail: string;
     role: string;
+    phoneNumber?: string;
     managerId?: string;
-    isActive?: boolean;
 }
 
 export interface IQueryListUser extends ISearchCriteria {

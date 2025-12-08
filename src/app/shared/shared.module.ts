@@ -9,6 +9,8 @@ import { StrongPasswordInputComponent } from './components/strong-password-input
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CustomOptionComponent } from './components/custom-option/custom-option.component';
 import { CustomSelectComponent } from './components/custom-select/custom-select.component';
+import { ResetPasswordModuleComponent } from './components/reset-password-modal/reset-password-modal.component';
+import { ModalConditionComponent } from './components/modal-condition/modal-condition.component';
 
 const components = [
   ModalCommonComponent,
@@ -16,7 +18,9 @@ const components = [
   MaskValueComponent,
   StrongPasswordInputComponent,
   CustomOptionComponent,
-  CustomSelectComponent
+  CustomSelectComponent,
+  ResetPasswordModuleComponent,
+  ModalConditionComponent
 ];
 
 @NgModule({

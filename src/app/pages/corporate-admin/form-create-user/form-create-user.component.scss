@@ -4,7 +4,7 @@
 
 
 .form-input-custom {
-  @apply w-full border border-gray-300 font-medium text-[#000d19] px-3 py-2 rounded-md focus:outline-none focus:border-[#$color-primary];
+  @apply w-full border border-gray-300 font-medium text-[#000d19] px-3 py-2 rounded-lg focus:outline-none focus:border-[#$color-primary];
   font-size: $font-size-24;
 
 

@@ -15,6 +15,7 @@ export class StrongPasswordInputComponent implements OnInit, OnDestroy, AfterVie
 
   @Input() position: 'left' | 'right' | 'auto' = 'auto';
   @Input() isError = false;
+  @Input() isPasswordExist = false;
 
   @Output() onCompletePassword = new EventEmitter<IStrongPassword>();
 
@@ -111,6 +112,11 @@ export class StrongPasswordInputComponent implements OnInit, OnDestroy, AfterVie
 
   enableForm() {
     this.passwordForm?.enable();
+  }
+
+  updatePassword(password: string): void {
+    this.passwordForm.controls['password'].setValue(password);
+    this.updatePasswordStrength();
   }
 
   togglePasswordVisibility(): void {

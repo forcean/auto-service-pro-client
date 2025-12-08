@@ -6,13 +6,15 @@ import { SharedModule } from '../../shared/shared.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SortableDirective } from "../../shared/directive/sortable.directive";
 import { FormCreateUserComponent } from './form-create-user/form-create-user.component';
+import { FormDetailUserComponent } from './form-detail-user/form-detail-user.component';
 
 
 
 @NgModule({
   declarations: [
     CorporateAdminListComponent,
-    FormCreateUserComponent
+    FormCreateUserComponent,
+    FormDetailUserComponent
   ],
   imports: [
     CommonModule,
