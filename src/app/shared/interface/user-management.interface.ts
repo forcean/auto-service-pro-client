@@ -3,8 +3,8 @@ export type DataType = 'string' | 'number' | 'percent' | 'date';
 export interface IReqCreateUser {
     publicId: string;
     painTextPassword: string;
-    firstname?: string;
-    lastname?: string;
+    firstName?: string;
+    lastName?: string;
     phoneNumber: string;
     email: string;
     // sysEmail: string;
@@ -40,18 +40,16 @@ export interface IUserResultData {
     page: number;
     total: number;
     totalPage: number;
-    users: IListUser[];
+    users: IUser[];
 }
 
-export interface IListUser {
+export interface IUser {
     id: string;
-    chargeNumber: string;
-    senderName: string;
-    defaultSender: boolean;
-    senderType: number;
-    createDt: string;
-    status: 'Waiting for Approve' | 'Rejected' | 'Reject' | 'reject' | 'rejected' | 'Approved';
-    approvedDt: string;
-    approvedBy: string;
-    remark: string;
+    publicId: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: 'MNG' | 'ADM' | 'ACC' | 'MEC' | 'rejected' | 'Approved';
+    phoneNumber: string;
+    managerId: string;
 }

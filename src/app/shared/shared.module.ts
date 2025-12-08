@@ -11,6 +11,8 @@ import { CustomOptionComponent } from './components/custom-option/custom-option.
 import { CustomSelectComponent } from './components/custom-select/custom-select.component';
 import { ResetPasswordModuleComponent } from './components/reset-password-modal/reset-password-modal.component';
 import { ModalConditionComponent } from './components/modal-condition/modal-condition.component';
+import { NumericDirective } from './directive/numeric.directive';
+import { PreventSpaceDirective } from './directive/preventspace.directive';
 
 const components = [
   ModalCommonComponent,
@@ -20,7 +22,9 @@ const components = [
   CustomOptionComponent,
   CustomSelectComponent,
   ResetPasswordModuleComponent,
-  ModalConditionComponent
+  ModalConditionComponent,
+  NumericDirective,
+  PreventSpaceDirective
 ];
 
 @NgModule({

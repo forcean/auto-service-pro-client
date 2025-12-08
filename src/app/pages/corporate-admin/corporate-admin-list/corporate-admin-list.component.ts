@@ -19,13 +19,13 @@ export class CorporateAdminListComponent {
     this.router.navigate(['/portal/corporate-admin/account/detail', this.id], {
       state: {
         user: {
-          username: 'john_doe',
-          firstname: 'John',
-          lastname: 'Doe',
+          publicId: 'john_doe',
+          firstName: 'John',
+          lastName: 'Doe',
           email: 'test@gmail.com',
           phoneNumber: '0987654321',
           role: 'ACC',
-          managerId: null,
+          managerId: '2',
           createdDate: '2023-10-01T12:00:00Z'
         }
       }

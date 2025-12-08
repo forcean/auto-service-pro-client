@@ -6,7 +6,7 @@ import { UserManagementService } from '../../../shared/services/user-management.
 import { RESPONSE } from '../../../shared/enum/response.enum';
 import { ModalConditionComponent } from '../../../shared/components/modal-condition/modal-condition.component';
 import { ModalConditionService } from '../../../shared/components/modal-condition/modal-condition.service';
-import { IReqUpdateUser } from '../../../shared/interface/user-management.interface';
+import { IReqUpdateUser, IUser } from '../../../shared/interface/user-management.interface';
 import { Subscription } from 'rxjs';
 
 
@@ -20,11 +20,11 @@ export class FormDetailUserComponent implements OnInit {
 
   private modalSubscription: Subscription | null = null;
   form!: FormGroup;
-  userData: any = null;
-  isEditMode = false;
-  managerList: any[] = [];
-  mustSelectManager = false;
+  userData!: IUser;
+  managerList: IUser[] = [];
 
+  mustSelectManager = false;
+  isEditMode = false;
   isLoadingDelete: boolean = false;
   isPasswordInvalid: boolean = false;
   isLoadingEdit: boolean = false;
@@ -55,9 +55,9 @@ export class FormDetailUserComponent implements OnInit {
 
   createForm() {
     this.form = this.fb.group({
-      username: [{ value: this.userData.username, disabled: true }],
-      name: [{ value: this.userData.firstname, disabled: true }, Validators.required],
-      surname: [{ value: this.userData.lastname, disabled: true }, Validators.required],
+      username: [{ value: this.userData.publicId, disabled: true }],
+      name: [{ value: this.userData.firstName, disabled: true }, Validators.required],
+      surname: [{ value: this.userData.lastName, disabled: true }, Validators.required],
       email: [{ value: this.userData.email, disabled: true }, [Validators.required, Validators.email]],
       phoneNumber: [{ value: this.userData.phoneNumber, disabled: true }, Validators.required],
       role: [{ value: this.userData.role, disabled: true }, Validators.required],
@@ -83,8 +83,9 @@ export class FormDetailUserComponent implements OnInit {
 
   loadManagerList() {
     this.managerList = [
-      { id: 1, firstname: 'John', lastname: 'Doe' },
-      { id: 2, firstname: 'Jane', lastname: 'Smith' }
+      { id: '1', publicId: 'mgr001', firstName: 'John', lastName: 'Doe', email: '', role: 'MNG', phoneNumber: '', managerId: '' },
+      { id: '2', publicId: 'mgr002', firstName: 'Jane', lastName: 'Smith', email: '', role: 'MNG', phoneNumber: '', managerId: '' },
+      { id: '3', publicId: 'mgr003', firstName: 'Bob', lastName: 'Johnson', email: '', role: 'MNG', phoneNumber: '', managerId: '' }
     ];
   }
 
@@ -103,9 +104,9 @@ export class FormDetailUserComponent implements OnInit {
   onCancelEdit() {
     this.isEditMode = false;
     this.form.reset({
-      username: this.userData.username,
-      name: this.userData.firstname,
-      surname: this.userData.lastname,
+      username: this.userData.publicId,
+      name: this.userData.firstName,
+      surname: this.userData.lastName,
       email: this.userData.email,
       phoneNumber: this.userData.phoneNumber,
       role: this.userData.role,
@@ -136,7 +137,14 @@ export class FormDetailUserComponent implements OnInit {
       const res = await this.userManagementService.updateUserDetail(payload, this.userData.id);
 
       if (res.resultCode === RESPONSE.SUCCESS) {
-        this.userData = { ...this.userData, ...payload };
+        // this.userData = { ...this.userData,
+        //   firstName: this.form.value.name,
+        //   lastName: this.form.value.surname,
+        //   email: this.form.value.email,
+        //   phoneNumber: this.form.value.phoneNumber,
+        //   role: this.form.value.role,
+        //   managerId: this.form.value.managerId || ''
+        // };
         this.onCancelEdit();
         this.handleSuccessEdit();
       } else if (res.resultCode === RESPONSE.INVALID_ACCESS_TOKEN) {

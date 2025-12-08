@@ -43,12 +43,13 @@
         <label class="block mb-1 text-gray-700">Role</label>
         <custom-select formControlName="role" (change)="onRoleChange()"
           [isDisabled]="!isEditMode">
-          <custom-option value="ADM">Admin</custom-option>
-          <custom-option value="MNG">Manager</custom-option>
-          <custom-option value="ACC">Accountant</custom-option>
-          <custom-option value="SAL">Sale</custom-option>
-          <custom-option value="STC">Stock Controller</custom-option>
-          <custom-option value="MEC">Mechanic</custom-option>
+          <custom-option value="ADM">Admin (ADM)</custom-option>
+          <custom-option value="MNG">Manager (MNG)</custom-option>
+          <custom-option value="ACC">Accountant (ACC)</custom-option>
+          <custom-option value="SAL">Sale (SAL)</custom-option>
+          <custom-option value="STC">Stock Controller
+            (STC)</custom-option>
+          <custom-option value="MEC">Mechanic (MEC)</custom-option>
         </custom-select>
       </div>
 
@@ -56,20 +57,22 @@
         <label class="block mb-1 text-gray-700">สังกัด Manager</label>
         <custom-select formControlName="managerId" [isDisabled]="!isEditMode">
           <custom-option *ngFor="let m of managerList" [value]="m.id">
-            {{ m.firstname }} {{ m.lastname }}
+            {{ m.firstName }} {{ m.lastName }}
           </custom-option>
         </custom-select>
       </div>
 
       <div>
-        <label class="block mb-1 text-gray-700">Email</label>
-        <input type="email" formControlName="email" class="form-input-custom" />
+        <label class="block mb-1 text-gray-700">อีเมล</label>
+        <input type="email" formControlName="email" class="form-input-custom"
+          appPreventSpace />
       </div>
 
       <div>
-        <label class="block mb-1 text-gray-700">Phone Number</label>
+        <label class="block mb-1 text-gray-700">หมายเลขโทรศัพท์</label>
         <input type="text" formControlName="phoneNumber"
-          class="form-input-custom" />
+          class="form-input-custom"
+          appNumeric />
       </div>
 
       <div *ngIf="isEditMode" class="pt-4 flex gap-3">
@@ -91,4 +94,5 @@
 
 <app-modal-condition
   (onConfirm)="handleOnModalConfirm($event)"
-  [isLoading]="isLoadingDelete"></app-modal-condition>
+  [isLoading]="isLoadingDelete">
+</app-modal-condition>

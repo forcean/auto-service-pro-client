@@ -3,7 +3,8 @@ import { Directive, ElementRef, Renderer2 } from '@angular/core';
 // ห้าม paste ข้อความที่มี space — จะลบ space ออกอัตโนมัติ
 
 @Directive({
-  selector: '[appPreventSpace]'
+  selector: '[appPreventSpace]',
+  standalone: false
 })
 export class PreventSpaceDirective {
 

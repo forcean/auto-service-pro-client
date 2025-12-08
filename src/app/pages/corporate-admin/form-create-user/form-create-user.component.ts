@@ -9,7 +9,7 @@ import { StrongPasswordInputComponent } from '../../../shared/components/strong-
 import { LoadingBarService } from '@ngx-loading-bar/core';
 import { RESPONSE } from '../../../shared/enum/response.enum';
 import { UserManagementService } from '../../../shared/services/user-management.service';
-import { IReqCreateUser } from '../../../shared/interface/user-management.interface';
+import { IReqCreateUser, IUser } from '../../../shared/interface/user-management.interface';
 
 @Component({
   selector: 'app-form-create-user',
@@ -20,7 +20,8 @@ import { IReqCreateUser } from '../../../shared/interface/user-management.interf
 export class FormCreateUserComponent implements OnInit {
   private modalSubscription: Subscription | null = null;
   form!: FormGroup;
-  managerList: any[] = [];
+  managerList: IUser[] = [];
+
   mustSelectManager = false;
   isMatchEmail: boolean = false;
   isPasswordInvalid: boolean = false;
@@ -45,6 +46,7 @@ export class FormCreateUserComponent implements OnInit {
 
 
   ngOnInit() {
+    // this.initializePermissions();
     this.createForm();
     this.loadManagerList();
   }
@@ -54,6 +56,23 @@ export class FormCreateUserComponent implements OnInit {
     if (this.modalSubscription) this.modalSubscription.unsubscribe();
   }
 
+  //  private async initializePermissions() {
+  //   try {
+  //     this.permissions = await this.permissionService.permissions();
+  //     this.isViewAdminSender = this.permissionService.isViewAdminSender;
+  //     this.isDeleteAdminSender = this.permissionService.isDeleteAdminSender;
+
+  //     if (!this.isViewAdminSender) {
+  //       this.router.navigate(['/not-found']);
+  //     }
+
+  //   } catch (error) {
+  //     const errorObject = error as { message: string };
+  //     if (errorObject.message !== '504') {
+  //       this.handleCommonError();
+  //     }
+  //   }
+  // }
 
   createForm() {
     this.form = this.fb.group({
@@ -75,8 +94,9 @@ export class FormCreateUserComponent implements OnInit {
       // const result = await this.userService.getManagers();
       // this.managerList = result.data;
       this.managerList = [
-        { id: 1, firstname: 'John', lastname: 'Doe' },
-        { id: 2, firstname: 'Jane', lastname: 'Smith' }
+        { id: '1', publicId: 'manager1', firstName: 'สมชาย', lastName: 'ใจดี', email: '', role: 'MNG', phoneNumber: '', managerId: '' },
+        { id: '2', publicId: 'manager2', firstName: 'สมหญิง', lastName: 'แสนสวย', email: '', role: 'MNG', phoneNumber: '', managerId: '' },
+        { id: '3', publicId: 'manager3', firstName: 'สมปอง', lastName: 'รวยรวย', email: '', role: 'MNG', phoneNumber: '', managerId: '' },
       ];
     } catch (err) {
       console.error('Error loading manager list', err);
@@ -148,8 +168,8 @@ export class FormCreateUserComponent implements OnInit {
       const payload: IReqCreateUser = {
         publicId: this.form.value.username,
         painTextPassword: this.form.value.password,
-        firstname: this.form.value.name,
-        lastname: this.form.value.surname,
+        firstName: this.form.value.name,
+        lastName: this.form.value.surname,
         phoneNumber: this.form.value.phoneNumber,
         email: this.form.value.email,
         role: this.form.value.role,

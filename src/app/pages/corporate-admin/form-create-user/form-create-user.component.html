@@ -6,9 +6,84 @@
       class="font-bold text-gray-800 mb-6 text-2xl">เพิ่มบุคลากรในองค์กร</h2>
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+      <div>
+        <label class="block mb-1 text-gray-700">Username</label>
+        <input
+          appPreventSpace
+          type="text"
+          formControlName="username"
+          class="form-input-custom"
+          placeholder="กรุณากรอกชื่อผู้ใช้งาน (4-30 ตัวอักษร)"
+          [class.border-error]="form.controls['username'].invalid && form.controls['username'].touched" />
+        <div
+          *ngIf="form.controls['username'].invalid && form.controls['username'].touched"
+          class="flex items-center gap-1 error">
+          <img src="assets/img/alert-icon.svg"
+            class="alert-icon-create">
+          <span>ชื่อผู้ใช้งานไม่ถูกต้อง
+            (ต้องขึ้นต้นด้วยตัวอักษรและไม่ต่ำกว่า 4
+            ตัว)</span>
+        </div>
+      </div>
 
       <div>
-        <label class="block mb-1 text-gray-700">Name</label>
+        <label class="block mb-1 text-gray-700">รหัสผ่าน</label>
+        <app-strong-password-input #StrongPasswordInputComponent
+          [isError]="isPasswordInvalid || isPasswordFormat || (form.controls['password'].touched && form.controls['password'].invalid)"
+          (onCompletePassword)="onPasswordComplete($event)">
+        </app-strong-password-input>
+        <div
+          *ngIf="isPasswordInvalid "
+          class="flex items-center gap-1 error">
+          <img src="assets/img/alert-icon.svg"
+            class="alert-icon-create">
+          <span>รหัสผ่านไม่ตรงกัน</span>
+        </div>
+
+        <div
+          *ngIf=" form.controls['password'].touched && form.controls['password'].invalid"
+          class="flex items-center gap-1 error">
+          <img src="assets/img/alert-icon.svg"
+            class="alert-icon-create">
+          <span>กรุณากรอกรหัสผ่าน</span>
+        </div>
+      </div>
+
+      <div>
+        <label class="block mb-1 text-gray-700">ยืนยันรหัสผ่านอีกครั้ง</label>
+
+        <div class="relative">
+          <input
+            [type]="isPasswordVisible ? 'text' : 'password'"
+            formControlName="confirmPassword"
+            class="form-input-custom pr-10"
+            placeholder="กรุณายืนยันรหัสผ่าน"
+            [class.border-error]="form.controls['confirmPassword'].invalid && form.controls['confirmPassword'].touched || isPasswordInvalid" />
+
+          <div
+            class="password-toggle z-20"
+            (click)="togglePasswordVisibility()"
+            [class.show]="isPasswordVisible">
+          </div>
+        </div>
+
+        <div
+          *ngIf="form.controls['confirmPassword'].invalid && form.controls['confirmPassword'].touched"
+          class="flex items-center gap-1 error">
+          <img src="assets/img/alert-icon.svg"
+            class="alert-icon-create">
+          <span>กรุณายืนยันรหัสผ่าน</span>
+        </div>
+
+        <div *ngIf="isPasswordInvalid"
+          class="flex items-center gap-1 error">
+          <img src="assets/img/alert-icon.svg"
+            class="alert-icon-create">
+          <span>รหัสผ่านไม่ตรงกัน</span>
+        </div>
+      </div>
+      <div>
+        <label class="block mb-1 text-gray-700">ชื่อ</label>
         <input
           type="text"
           formControlName="name"
@@ -25,7 +100,7 @@
       </div>
 
       <div>
-        <label class="block mb-1 text-gray-700">Surname</label>
+        <label class="block mb-1 text-gray-700">นามสกุล</label>
         <input
           type="text"
           formControlName="surname"
@@ -71,7 +146,7 @@
           [isError]="form.controls['managerId'].invalid && form.controls['managerId'].touched">
           <custom-option *ngFor="let m of managerList"
             [value]="m.id">{{
-            m.firstname }} {{ m.lastname }}</custom-option>
+            m.firstName }} {{ m.lastName }}</custom-option>
         </custom-select>
         <div
           *ngIf="form.controls['managerId'].invalid && form.controls['managerId'].touched"
@@ -80,101 +155,8 @@
             class="alert-icon-create">
           <span>กรุณาเลือก Manager</span></div>
       </div>
-
       <div>
-        <label class="block mb-1 text-gray-700">Username</label>
-        <input
-          type="text"
-          formControlName="username"
-          class="form-input-custom"
-          placeholder="กรุณากรอกชื่อผู้ใช้งาน (4-30 ตัวอักษร)"
-          [class.border-error]="form.controls['username'].invalid && form.controls['username'].touched" />
-        <div
-          *ngIf="form.controls['username'].invalid && form.controls['username'].touched"
-          class="flex items-center gap-1 error">
-          <img src="assets/img/alert-icon.svg"
-            class="alert-icon-create">
-          <span>ชื่อผู้ใช้งานไม่ถูกต้อง
-            (ต้องขึ้นต้นด้วยตัวอักษรและไม่ต่ำกว่า 4
-            ตัว)</span>
-        </div>
-      </div>
-
-      <div>
-        <label class="block mb-1 text-gray-700">Password</label>
-        <app-strong-password-input #StrongPasswordInputComponent
-          [isError]="isPasswordInvalid || isPasswordFormat || (form.controls['password'].touched && form.controls['password'].invalid)"
-          (onCompletePassword)="onPasswordComplete($event)">
-        </app-strong-password-input>
-        <div
-          *ngIf="isPasswordInvalid "
-          class="flex items-center gap-1 error">
-          <img src="assets/img/alert-icon.svg"
-            class="alert-icon-create">
-          <span>รหัสผ่านไม่ตรงกัน</span>
-        </div>
-
-        <div
-          *ngIf=" form.controls['password'].touched && form.controls['password'].invalid"
-          class="flex items-center gap-1 error">
-          <img src="assets/img/alert-icon.svg"
-            class="alert-icon-create">
-          <span>กรุณากรอกรหัสผ่าน</span>
-        </div>
-      </div>
-
-      <div>
-        <label class="block mb-1 text-gray-700">Confirm Password</label>
-
-        <div class="relative">
-          <input
-            [type]="isPasswordVisible ? 'text' : 'password'"
-            formControlName="confirmPassword"
-            class="form-input-custom pr-10"
-            placeholder="กรุณายืนยันรหัสผ่าน"
-            [class.border-error]="form.controls['confirmPassword'].invalid && form.controls['confirmPassword'].touched || isPasswordInvalid" />
-
-          <div
-            class="password-toggle z-20"
-            (click)="togglePasswordVisibility()"
-            [class.show]="isPasswordVisible">
-          </div>
-        </div>
-
-        <div
-          *ngIf="form.controls['confirmPassword'].invalid && form.controls['confirmPassword'].touched"
-          class="flex items-center gap-1 error">
-          <img src="assets/img/alert-icon.svg"
-            class="alert-icon-create">
-          <span>กรุณายืนยันรหัสผ่าน</span>
-        </div>
-
-        <div *ngIf="isPasswordInvalid"
-          class="flex items-center gap-1 error">
-          <img src="assets/img/alert-icon.svg"
-            class="alert-icon-create">
-          <span>รหัสผ่านไม่ตรงกัน</span>
-        </div>
-      </div>
-
-      <div>
-        <label class="block mb-1 text-gray-700">Phone Number</label>
-        <input type="text" id="mobileNo" formControlName="phoneNumber"
-          appNumeric
-          class="form-input-custom" [maxlength]="checkMobileLength()"
-          placeholder="กรุณากรอกหมายเลขโทรศัพท์"
-          (input)="checkMobileNoInvalid()"
-          [class.border-error]="isMobileNoInvalid" />
-        <div *ngIf="isMobileNoInvalid"
-          class="flex items-center gap-1 error">
-          <img src="assets/img/alert-icon.svg"
-            class="alert-icon-create">
-          <span>หมายเลขโทรศัพท์ไม่ถูกต้อง</span>
-        </div>
-      </div>
-
-      <div>
-        <label class="block mb-1 text-gray-700">Email</label>
+        <label class="block mb-1 text-gray-700">อีเมล</label>
         <input
           type="email"
           formControlName="email"
@@ -188,6 +170,22 @@
           <img src="assets/img/alert-icon.svg"
             class="alert-icon-create">
           <span>อีเมลไม่ถูกต้อง</span>
+        </div>
+      </div>
+
+      <div>
+        <label class="block mb-1 text-gray-700">หมายเลขโทรศัพท์</label>
+        <input type="text" id="mobileNo" formControlName="phoneNumber"
+          appNumeric
+          class="form-input-custom" [maxlength]="checkMobileLength()"
+          placeholder="กรุณากรอกหมายเลขโทรศัพท์"
+          (input)="checkMobileNoInvalid()"
+          [class.border-error]="isMobileNoInvalid" />
+        <div *ngIf="isMobileNoInvalid"
+          class="flex items-center gap-1 error">
+          <img src="assets/img/alert-icon.svg"
+            class="alert-icon-create">
+          <span>หมายเลขโทรศัพท์ไม่ถูกต้อง</span>
         </div>
       </div>
 

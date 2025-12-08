@@ -1,7 +1,8 @@
 import { Directive, ElementRef, Renderer2 } from '@angular/core';
 
 @Directive({
-  selector: '[appNumeric]'
+  selector: '[appNumeric]',
+  standalone: false
 })
 export class NumericDirective {
 
@@ -39,5 +40,5 @@ export class NumericDirective {
     if (!regEx.test(key) && !this.allowedKeys.includes(key)) {
       event.preventDefault();
     }
-  } 
+  }
 }
