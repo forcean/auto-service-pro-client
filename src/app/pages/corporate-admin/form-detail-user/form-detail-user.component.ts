@@ -28,6 +28,8 @@ export class FormDetailUserComponent implements OnInit {
   isLoadingDelete: boolean = false;
   isPasswordInvalid: boolean = false;
   isLoadingEdit: boolean = false;
+  isMobileNoInvalid: boolean = false;
+  isMatchEmail: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -37,7 +39,6 @@ export class FormDetailUserComponent implements OnInit {
     private modalConditionService: ModalConditionService
   ) { }
 
-  // @ViewChild(ResetPasswordModuleComponent) resetPasswordModuleComponent!: ResetPasswordModuleComponent;
   @ViewChild(ModalConditionComponent) modalConditionComponent!: ModalConditionComponent;
 
   ngOnInit(): void {
@@ -53,6 +54,24 @@ export class FormDetailUserComponent implements OnInit {
     this.loadManagerList();
   }
 
+  //  private async initializePermissions() {
+  //   try {
+  //     this.permissions = await this.permissionService.permissions();
+  //     this.isViewAdminSender = this.permissionService.isViewAdminSender;
+  //     this.isDeleteAdminSender = this.permissionService.isDeleteAdminSender;
+
+  //     if (!this.isViewAdminSender) {
+  //       this.router.navigate(['/not-found']);
+  //     }
+
+  //   } catch (error) {
+  //     const errorObject = error as { message: string };
+  //     if (errorObject.message !== '504') {
+  //       this.handleCommonError();
+  //     }
+  //   }
+  // }
+
   createForm() {
     this.form = this.fb.group({
       username: [{ value: this.userData.publicId, disabled: true }],
@@ -67,6 +86,22 @@ export class FormDetailUserComponent implements OnInit {
     this.onRoleChange();
   }
 
+  checkMobileLength() {
+    const value = this.form.controls['phoneNumber'].value || '';
+    if (value.startsWith('0')) return 10;
+    if (value.startsWith('66')) return 11;
+    return 10;
+  }
+
+  checkMobileNoInvalid() {
+    this.isMobileNoInvalid = this.form.controls['phoneNumber'].invalid && this.form.controls['phoneNumber'].touched;
+  }
+
+  validateEmail(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const pattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    this.isMatchEmail = !pattern.test(input.value);
+  }
 
   onRoleChange() {
     const role = this.form.get('role')?.value;
@@ -77,16 +112,27 @@ export class FormDetailUserComponent implements OnInit {
       this.mustSelectManager = false;
       this.form.get('managerId')?.clearValidators();
       this.form.get('managerId')?.setValue('');
+      this.form.get('managerId')?.markAsUntouched();
     }
     this.form.get('managerId')?.updateValueAndValidity();
   }
 
-  loadManagerList() {
-    this.managerList = [
-      { id: '1', publicId: 'mgr001', firstName: 'John', lastName: 'Doe', email: '', role: 'MNG', phoneNumber: '', managerId: '' },
-      { id: '2', publicId: 'mgr002', firstName: 'Jane', lastName: 'Smith', email: '', role: 'MNG', phoneNumber: '', managerId: '' },
-      { id: '3', publicId: 'mgr003', firstName: 'Bob', lastName: 'Johnson', email: '', role: 'MNG', phoneNumber: '', managerId: '' }
-    ];
+  async loadManagerList() {
+    try {
+      // const res = await this.userManagementService.getListUser({ page: 1, limit: 100, role: 'MNG' });
+      // if (res.resultCode == RESPONSE.SUCCESS) {
+      //   this.managerList = res.resultData?.users || [];
+      // } else {
+      //   this.handleCommonError();
+      // }
+      this.managerList = [
+        { id: '1', publicId: 'manager1', firstName: 'สมชาย', lastName: 'ใจดี', email: '', role: 'MNG', phoneNumber: '', managerId: '', createdDt: '' },
+        { id: '2', publicId: 'manager2', firstName: 'สมหญิง', lastName: 'แสนสวย', email: '', role: 'MNG', phoneNumber: '', managerId: '', createdDt: '' },
+        { id: '3', publicId: 'manager3', firstName: 'สมปอง', lastName: 'รวยรวย', email: '', role: 'MNG', phoneNumber: '', managerId: '', createdDt: '' },
+      ];
+    } catch (err) {
+      console.error('Error loading manager list', err);
+    }
   }
 
   toggleEdit() {
@@ -98,11 +144,14 @@ export class FormDetailUserComponent implements OnInit {
     } else {
       this.form.disable();
       this.form.get('username')?.disable();
+      this.form.markAsUntouched();
     }
   }
 
   onCancelEdit() {
     this.isEditMode = false;
+    this.isMobileNoInvalid = false;
+    this.isMatchEmail = false;
     this.form.reset({
       username: this.userData.publicId,
       name: this.userData.firstName,
@@ -125,10 +174,10 @@ export class FormDetailUserComponent implements OnInit {
     this.isLoadingEdit = true;
     try {
       const payload: IReqUpdateUser = {
-        publicId: this.userData.id,
+        publicId: this.userData.publicId,
         firstName: this.form.value.name,
         lastName: this.form.value.surname,
-        sysEmail: this.form.value.email,
+        email: this.form.value.email,
         phoneNumber: this.form.value.phoneNumber,
         role: this.form.value.role,
         managerId: this.form.value.managerId || null
@@ -167,32 +216,15 @@ export class FormDetailUserComponent implements OnInit {
 
       if (res.resultCode === RESPONSE.SUCCESS) {
         this.handleSuccessDelete();
+        this.modalConditionComponent.onClose();
       } else {
         this.handleFailDelete();
       }
-      //  else if (res.resultCode === RESPONSE.INVALID_ACCESS_TOKEN) {
-      //   // if (res.error?.code === ERR_CODE.EXISTING_PASSWORD) {
-      //   //   this.resetPasswordModuleComponent.isPasswordDuplicate = true;
-      //   // } else if (res.error?.code === ERR_CODE.INVALID_PASSWORD) {
-      //   //   this.resetPasswordModuleComponent.isPasswordInvalid = true;
-      //   // } else if (res.error?.code === ERR_CODE.ACCOUNT_INACTIVE) {
-      //   //   this.closeModal();
-      //   //   // this.handleFailAccountUnavailable();
-      //   // }
-      // } else if (res.resultCode === RESPONSE.INVALID_ACCESS_TOKEN) {
-      //   this.closeModal();
-      //   this.router.navigate(['/not-found']);
-      // } else {
-      //   this.closeModal();
-      //   this.handleFailResetPassword();
-      // }
-
     } catch (error) {
       console.error('Response error', error);
       this.handleCommonError();
     } finally {
       this.isLoadingDelete = false;
-      this.modalConditionComponent.onClose();
     }
   }
 

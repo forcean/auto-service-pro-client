@@ -7,7 +7,6 @@ export interface IReqCreateUser {
     lastName?: string;
     phoneNumber: string;
     email: string;
-    // sysEmail: string;
     role: string;
     managerId?: string;
 }
@@ -17,7 +16,7 @@ export interface IReqUpdateUser {
     painTextPassword?: string;
     firstName?: string;
     lastName?: string;
-    sysEmail: string;
+    email: string;
     role: string;
     phoneNumber?: string;
     managerId?: string;
@@ -49,7 +48,8 @@ export interface IUser {
     firstName: string;
     lastName: string;
     email: string;
-    role: 'MNG' | 'ADM' | 'ACC' | 'MEC' | 'rejected' | 'Approved';
+    role: 'MNG' | 'ADM' | 'ACC' | 'MEC' | 'SO' | 'SAL' | 'STC';
     phoneNumber: string;
     managerId: string;
+    createdDt: string;
 }

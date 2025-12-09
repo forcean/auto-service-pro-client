@@ -19,7 +19,7 @@ export class UserManagementService {
 
   async getListUser(params: IQueryListUser): Promise<IBaseResponse<IUserResultData>> {
     try {
-      const uri = this.PREFIX_USER + `/admin/senderNames`;
+      const uri = this.PREFIX_USER + `/user-management/admin/users`;
       const response = await this.httpService.get<IUserResultData>(uri, params);
       return response;
     } catch (error) {
@@ -47,8 +47,7 @@ export class UserManagementService {
 
   async CreateUser(body: IReqCreateUser) {
     try {
-      const uri = this.PREFIX_USER + '/auth/register';
-      // const uri = this.PREFIX_USER + '/corps/users/createUser';
+      const uri = this.PREFIX_USER + '/corps/users/createUser';
       const response = await this.httpService.post<any>(uri, body);
       return response;
     } catch (error) {
@@ -65,7 +64,7 @@ export class UserManagementService {
       const body = {
         credentialId: pwd
       }
-      const url = this.PREFIX_USER + `/corps/users/${userId}/resetPassword`;
+      const url = this.PREFIX_USER + `/users/${userId}/resetPassword`;
       const response = await this.httpService.post<any>(url, body);
       return response
     } catch (error) {
@@ -79,7 +78,7 @@ export class UserManagementService {
 
   async updateUserDetail(body: IReqUpdateUser, userId: string) {
     try {
-      const url = this.PREFIX_USER + `/corps/users/${userId}/update`;
+      const url = this.PREFIX_USER + `/users/${userId}/update`;
       const response = await this.httpService.post<any>(url, body);
       return response
     } catch (error) {

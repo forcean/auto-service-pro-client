@@ -3,11 +3,26 @@
 @import '../../../../assets/styles/color';
 
 .form-input-custom {
-  @apply w-full border border-gray-300 font-medium text-[#000d19] px-3 py-2 rounded-lg focus:outline-none focus:border-[#$color-primary];
-  font-size: $font-size-24;
+  @apply w-full border border-gray-300 font-medium text-[#000d19] px-3 py-2 rounded-lg transition-all;
+
+  &:focus {
+    border-color: $color-primary;
+    outline: none;
+  }
+
+  font-size: $font-size-22;
 
   &::placeholder {
     color: gray-400;
-    font-size: $font-size-22;
+    font-size: $font-size-20;
   }
+}
+
+.error {
+  color: $color-error;
+  @apply text-sm mt-1;
+}
+
+.border-error {
+  border-color: $color-error !important;
 }

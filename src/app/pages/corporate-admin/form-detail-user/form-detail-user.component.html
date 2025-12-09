@@ -1,94 +1,158 @@
 <div class="min-h-screen bg-[#0f172a] py-10 px-4">
-  <div class="max-w-3xl mx-auto flex justify-end gap-3 mb-6">
-    <button
-      class="px-5 py-2 rounded-lg bg-yellow-400 hover:bg-yellow-500"
-      *ngIf="!isEditMode"
-      (click)="toggleEdit()">
-      แก้ไข
-    </button>
-
-    <button
-      class="px-5 py-2 rounded-lg bg-gray-200 hover:bg-gray-300"
-      (click)="onDelete()">
-      ลบผู้ใช้งาน
-    </button>
-  </div>
-
-  <div class="bg-white w-full max-w-3xl mx-auto rounded-xl p-8 shadow-lg">
-
-    <h2 class="font-bold text-gray-800 text-2xl mb-6">
+  <div class="max-w-4xl mx-auto mb-6 flex items-center justify-between">
+    <h2 class="text-2xl font-bold text-white tracking-wide">
       รายละเอียดผู้ใช้งาน
     </h2>
 
-    <form [formGroup]="form" class="space-y-6">
+    <div class="flex gap-3">
+      <button
+        *ngIf="!isEditMode"
+        (click)="toggleEdit()"
+        class="px-5 py-2 rounded-lg bg-yellow-400 hover:bg-yellow-500 font-semibold shadow-sm">
+        แก้ไขข้อมูล
+      </button>
 
-      <div>
-        <label class="block text-gray-700 mb-1">Username</label>
-        <input type="text" formControlName="username"
+      <button
+        (click)="onDelete()"
+        class="px-5 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white shadow-sm">
+        ลบผู้ใช้งาน
+      </button>
+    </div>
+  </div>
+  <div class="bg-white w-full max-w-4xl mx-auto rounded-2xl p-8 shadow-xl">
+
+    <h3 class="text-xl font-semibold text-gray-800 mb-6">ข้อมูลผู้ใช้งาน</h3>
+
+    <form [formGroup]="form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <div class="md:col-span-2">
+        <label class="block text-gray-700 font-medium mb-1">Username</label>
+        <input
+          type="text"
+          formControlName="username"
           class="form-input-custom bg-gray-100" />
       </div>
 
       <div>
-        <label class="block mb-1 text-gray-700">ชื่อ</label>
-        <input type="text" formControlName="name" class="form-input-custom" />
+        <label class="block text-gray-700 mb-1">ชื่อ</label>
+        <input
+          type="text"
+          formControlName="name"
+          class="form-input-custom"
+          placeholder="กรุณากรอกชื่อ"
+          [class.border-error]="form.controls['name'].invalid && form.controls['name'].touched" />
+
+        <div
+          *ngIf="form.controls['name'].invalid && form.controls['name'].touched"
+          class="flex items-center gap-1 error">
+          <img src="assets/img/alert-icon.svg" class="alert-icon-create">
+          <span>กรุณากรอกชื่อ</span>
+        </div>
       </div>
 
       <div>
-        <label class="block mb-1 text-gray-700">นามสกุล</label>
-        <input type="text" formControlName="surname"
-          class="form-input-custom" />
+        <label class="block text-gray-700 mb-1">นามสกุล</label>
+        <input
+          type="text"
+          formControlName="surname"
+          class="form-input-custom"
+          placeholder="กรุณากรอกนามสกุล"
+          [class.border-error]="form.controls['surname'].invalid && form.controls['surname'].touched" />
+
+        <div
+          *ngIf="form.controls['surname'].invalid && form.controls['surname'].touched"
+          class="flex items-center gap-1 error">
+          <img src="assets/img/alert-icon.svg" class="alert-icon-create">
+          <span>กรุณากรอกนามสกุล</span>
+        </div>
       </div>
 
       <div>
-        <label class="block mb-1 text-gray-700">Role</label>
-        <custom-select formControlName="role" (change)="onRoleChange()"
+        <label class="block text-gray-700 mb-1">Role</label>
+        <custom-select
+          formControlName="role"
+          (change)="onRoleChange()"
           [isDisabled]="!isEditMode">
           <custom-option value="ADM">Admin (ADM)</custom-option>
           <custom-option value="MNG">Manager (MNG)</custom-option>
           <custom-option value="ACC">Accountant (ACC)</custom-option>
           <custom-option value="SAL">Sale (SAL)</custom-option>
-          <custom-option value="STC">Stock Controller
-            (STC)</custom-option>
+          <custom-option value="STC">Stock Controller (STC)</custom-option>
           <custom-option value="MEC">Mechanic (MEC)</custom-option>
         </custom-select>
       </div>
 
       <div *ngIf="mustSelectManager">
-        <label class="block mb-1 text-gray-700">สังกัด Manager</label>
-        <custom-select formControlName="managerId" [isDisabled]="!isEditMode">
+        <label class="block text-gray-700 mb-1">สังกัด Manager</label>
+        <custom-select
+          formControlName="managerId"
+          placeholder="-- เลือก Manager --"
+          [isDisabled]="!isEditMode"
+          [isError]="form.controls['managerId'].invalid && form.controls['managerId'].touched">
           <custom-option *ngFor="let m of managerList" [value]="m.id">
             {{ m.firstName }} {{ m.lastName }}
           </custom-option>
         </custom-select>
+
+        <div
+          *ngIf="form.controls['managerId'].invalid && form.controls['managerId'].touched"
+          class="flex items-center gap-1 error">
+          <img src="assets/img/alert-icon.svg" class="alert-icon-create">
+          <span>กรุณาเลือก Manager</span>
+        </div>
       </div>
 
       <div>
-        <label class="block mb-1 text-gray-700">อีเมล</label>
-        <input type="email" formControlName="email" class="form-input-custom"
-          appPreventSpace />
-      </div>
-
-      <div>
-        <label class="block mb-1 text-gray-700">หมายเลขโทรศัพท์</label>
-        <input type="text" formControlName="phoneNumber"
+        <label class="block text-gray-700 mb-1">อีเมล</label>
+        <input
+          type="email"
+          formControlName="email"
           class="form-input-custom"
-          appNumeric />
+          placeholder="กรุณากรอกอีเมล"
+          (input)="validateEmail($event)"
+          [class.border-error]="isMatchEmail" />
+
+        <div *ngIf="isMatchEmail" class="flex items-center gap-1 error">
+          <img src="assets/img/alert-icon.svg" class="alert-icon-create">
+          <span>อีเมลไม่ถูกต้อง</span>
+        </div>
       </div>
 
-      <div *ngIf="isEditMode" class="pt-4 flex gap-3">
-        <button type="button"
-          class="w-full bg-gray-200 hover:bg-gray-300 py-3 rounded-lg font-semibold"
-          (click)="onCancelEdit()">
-          ยกเลิก
-        </button>
-        <button type="button"
-          class="w-full bg-yellow-400 hover:bg-yellow-500 py-3 rounded-lg font-semibold"
-          (click)="onSubmit()">
-          บันทึกข้อมูล
-        </button>
-      </div>
+      <div>
+        <label class="block text-gray-700 mb-1">หมายเลขโทรศัพท์</label>
+        <input
+          type="text"
+          formControlName="phoneNumber"
+          class="form-input-custom"
+          appNumeric
+          placeholder="กรุณากรอกหมายเลขโทรศัพท์"
+          [maxlength]="checkMobileLength()"
+          (input)="checkMobileNoInvalid()"
+          [class.border-error]="isMobileNoInvalid" />
 
+        <div *ngIf="isMobileNoInvalid" class="flex items-center gap-1 error">
+          <img src="assets/img/alert-icon.svg" class="alert-icon-create">
+          <span>หมายเลขโทรศัพท์ไม่ถูกต้อง</span>
+        </div>
+      </div>
     </form>
+
+    <div *ngIf="isEditMode" class="pt-8 flex gap-3">
+      <button
+        type="button"
+        class="w-full bg-gray-200 hover:bg-gray-300 py-3 rounded-lg font-medium"
+        (click)="onCancelEdit()">
+        ยกเลิก
+      </button>
+
+      <button
+        type="button"
+        class="w-full bg-yellow-400 hover:bg-yellow-500 py-3 rounded-lg font-semibold"
+        (click)="onSubmit()">
+        บันทึกข้อมูล
+      </button>
+    </div>
+
   </div>
 </div>
 

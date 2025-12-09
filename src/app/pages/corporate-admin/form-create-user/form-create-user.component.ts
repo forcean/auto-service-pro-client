@@ -91,12 +91,16 @@ export class FormCreateUserComponent implements OnInit {
 
   async loadManagerList() {
     try {
-      // const result = await this.userService.getManagers();
-      // this.managerList = result.data;
+      // const res = await this.userManagementService.getListUser({ page: 1, limit: 100, role: 'MNG' });
+      // if (res.resultCode == RESPONSE.SUCCESS) {
+      //   this.managerList = res.resultData?.users || [];
+      // } else {
+      //   this.handleCommonError();
+      // }
       this.managerList = [
-        { id: '1', publicId: 'manager1', firstName: 'สมชาย', lastName: 'ใจดี', email: '', role: 'MNG', phoneNumber: '', managerId: '' },
-        { id: '2', publicId: 'manager2', firstName: 'สมหญิง', lastName: 'แสนสวย', email: '', role: 'MNG', phoneNumber: '', managerId: '' },
-        { id: '3', publicId: 'manager3', firstName: 'สมปอง', lastName: 'รวยรวย', email: '', role: 'MNG', phoneNumber: '', managerId: '' },
+        { id: '1', publicId: 'manager1', firstName: 'สมชาย', lastName: 'ใจดี', email: '', role: 'MNG', phoneNumber: '', managerId: '', createdDt: '' },
+        { id: '2', publicId: 'manager2', firstName: 'สมหญิง', lastName: 'แสนสวย', email: '', role: 'MNG', phoneNumber: '', managerId: '', createdDt: '' },
+        { id: '3', publicId: 'manager3', firstName: 'สมปอง', lastName: 'รวยรวย', email: '', role: 'MNG', phoneNumber: '', managerId: '', createdDt: '' },
       ];
     } catch (err) {
       console.error('Error loading manager list', err);
@@ -111,7 +115,6 @@ export class FormCreateUserComponent implements OnInit {
     this.isPasswordInvalid = confirm && confirm !== event.password;
   }
 
-
   onRoleChange() {
     const role = this.form.get('role')?.value;
     if (['ACC', 'SAL', 'STC', 'MEC'].includes(role)) {
@@ -124,7 +127,6 @@ export class FormCreateUserComponent implements OnInit {
     }
     this.form.get('managerId')?.updateValueAndValidity();
   }
-
 
   validateEmail(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -139,7 +141,6 @@ export class FormCreateUserComponent implements OnInit {
     if (value.startsWith('66')) return 11;
     return 10;
   }
-
 
   checkMobileNoInvalid() {
     this.isMobileNoInvalid = this.form.controls['phoneNumber'].invalid && this.form.controls['phoneNumber'].touched;
@@ -194,20 +195,6 @@ export class FormCreateUserComponent implements OnInit {
       this.isLoading = false;
       loader.complete();
     }
-  }
-
-  private handleNotFoundProfile() {
-    this.modalCommonService.open({
-      type: 'alert',
-      title: 'ADMIN_MANAGEMENT.TITLE_NOT_FOUND_PROFILE',
-      subtitle: 'ADMIN_MANAGEMENT.SUBTITLE_NOT_FOUND_PROFILE',
-      buttonText: 'GLOBAL.UNDERSTAND'
-    });
-    this.modalSubscription = this.modalCommonService.isOpen.subscribe((obj) => {
-      if (!obj?.isOpen) {
-        this.unsubscribeModal();
-      }
-    });
   }
 
   private handleCommonSuccess() {

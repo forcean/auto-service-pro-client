@@ -155,6 +155,7 @@
             class="alert-icon-create">
           <span>กรุณาเลือก Manager</span></div>
       </div>
+
       <div>
         <label class="block mb-1 text-gray-700">อีเมล</label>
         <input
@@ -164,8 +165,9 @@
           class="form-input-custom"
           placeholder="กรุณากรอกอีเมล"
           (input)="validateEmail($event)"
-          [class.border-error]="isMatchEmail" />
-        <div *ngIf="isMatchEmail"
+          [class.border-error]="isMatchEmail || form.controls['email'].invalid && form.controls['email'].touched" />
+        <div
+          *ngIf="isMatchEmail || form.controls['email'].invalid && form.controls['email'].touched"
           class="flex items-center gap-1 error">
           <img src="assets/img/alert-icon.svg"
             class="alert-icon-create">
@@ -180,8 +182,9 @@
           class="form-input-custom" [maxlength]="checkMobileLength()"
           placeholder="กรุณากรอกหมายเลขโทรศัพท์"
           (input)="checkMobileNoInvalid()"
-          [class.border-error]="isMobileNoInvalid" />
-        <div *ngIf="isMobileNoInvalid"
+          [class.border-error]="isMobileNoInvalid || form.controls['phoneNumber'].invalid && form.controls['phoneNumber'].touched" />
+        <div
+          *ngIf="isMobileNoInvalid || form.controls['phoneNumber'].invalid && form.controls['phoneNumber'].touched"
           class="flex items-center gap-1 error">
           <img src="assets/img/alert-icon.svg"
             class="alert-icon-create">
