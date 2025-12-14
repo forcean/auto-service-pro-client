@@ -13,6 +13,8 @@ import { ResetPasswordModuleComponent } from './components/reset-password-modal/
 import { ModalConditionComponent } from './components/modal-condition/modal-condition.component';
 import { NumericDirective } from './directive/numeric.directive';
 import { PreventSpaceDirective } from './directive/preventspace.directive';
+import { TableUserManagementComponent } from './components/table-user-management/table-user-management.component';
+import { PaginationComponent } from './components/pagination/pagination.component';
 
 const components = [
   ModalCommonComponent,
@@ -24,12 +26,15 @@ const components = [
   ResetPasswordModuleComponent,
   ModalConditionComponent,
   NumericDirective,
-  PreventSpaceDirective
+  PreventSpaceDirective,
+  TableUserManagementComponent,
+  PaginationComponent
 ];
 
 @NgModule({
   declarations: [
     ...components,
+
   ],
   imports: [
     CommonModule,

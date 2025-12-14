@@ -6,8 +6,9 @@ import { UserManagementService } from '../../../shared/services/user-management.
 import { RESPONSE } from '../../../shared/enum/response.enum';
 import { ModalConditionComponent } from '../../../shared/components/modal-condition/modal-condition.component';
 import { ModalConditionService } from '../../../shared/components/modal-condition/modal-condition.service';
-import { IReqUpdateUser, IUser } from '../../../shared/interface/user-management.interface';
+import { IReqUpdateUser } from '../../../shared/interface/user-management.interface';
 import { Subscription } from 'rxjs';
+import { UserList } from '../../../shared/interface/table-user-management.interface';
 
 
 @Component({
@@ -20,8 +21,8 @@ export class FormDetailUserComponent implements OnInit {
 
   private modalSubscription: Subscription | null = null;
   form!: FormGroup;
-  userData!: IUser;
-  managerList: IUser[] = [];
+  userData!: any;
+  managerList: UserList[] = [];
 
   mustSelectManager = false;
   isEditMode = false;
@@ -126,9 +127,9 @@ export class FormDetailUserComponent implements OnInit {
       //   this.handleCommonError();
       // }
       this.managerList = [
-        { id: '1', publicId: 'manager1', firstName: 'สมชาย', lastName: 'ใจดี', email: '', role: 'MNG', phoneNumber: '', managerId: '', createdDt: '' },
-        { id: '2', publicId: 'manager2', firstName: 'สมหญิง', lastName: 'แสนสวย', email: '', role: 'MNG', phoneNumber: '', managerId: '', createdDt: '' },
-        { id: '3', publicId: 'manager3', firstName: 'สมปอง', lastName: 'รวยรวย', email: '', role: 'MNG', phoneNumber: '', managerId: '', createdDt: '' },
+        { id: '1', publicId: 'manager1', firstName: 'สมชาย', lastName: 'ใจดี', role: 'MNG', managerName: null, phoneNumber: '0812345678', activeFlag: true, lastAccess: null },
+        { id: '2', publicId: 'manager2', firstName: 'สมหญิง', lastName: 'แสนสวย', role: 'MNG', managerName: null, phoneNumber: '0898765432', activeFlag: true, lastAccess: null },
+        { id: '3', publicId: 'manager3', firstName: 'สมปอง', lastName: 'หัวไว', role: 'MNG', managerName: null, phoneNumber: '0823456789', activeFlag: false, lastAccess: null }
       ];
     } catch (err) {
       console.error('Error loading manager list', err);

@@ -1,0 +1,101 @@
+ <div class="flex flex-wrap justify-between items-center gap-3 w-full mt-4"
+  *ngIf="totalRecord">
+
+  <nav aria-label="Page navigation">
+    <ul class="flex items-center gap-1 select-none">
+
+      <li>
+        <button
+          class="page-btn"
+          [class.disabled]="isFirst()"
+          (click)="onFirst()">
+          <img class="w-4 opacity-70" [style.opacity]="isFirst() ? '0.3' : ''"
+            src="assets/img/icons/double-left.svg">
+        </button>
+      </li>
+
+      <li>
+        <button
+          class="page-btn"
+          [class.disabled]="isFirst()"
+          (click)="onPrevious()">
+          <img class="w-4 opacity-70" [style.opacity]="isFirst() ? '0.3' : ''"
+            src="assets/img/icons/icon.arrownext.left.svg">
+        </button>
+      </li>
+
+      <li *ngIf="totalPages > 4 && currentPage > 2">
+        <button class="page-number-btn" [class.active]="currentPage === 1"
+          (click)="onPaginate(1)">
+          1
+        </button>
+      </li>
+
+      <li *ngIf="totalPages > 4 && currentPage > 3">
+        <span class="ellipsis">...</span>
+      </li>
+
+      <li *ngFor="let page of getVisiblePages()">
+        <button class="page-number-btn" [class.active]="currentPage === page"
+          (click)="onPaginate(page)">
+          {{ page }}
+        </button>
+      </li>
+
+      <li *ngIf="totalPages > 4 && currentPage < totalPages - 2">
+        <span class="ellipsis">...</span>
+      </li>
+
+      <li *ngIf="totalPages > 4 && currentPage < totalPages - 1">
+        <button class="page-number-btn" [class.active]="isLast()"
+          (click)="onPaginate(totalPages)">
+          {{ totalPages }}
+        </button>
+      </li>
+
+      <li>
+        <button
+          class="page-btn"
+          [class.disabled]="isLast()"
+          (click)="onNext()">
+          <img class="w-4 opacity-70" [style.opacity]="isLast() ? '0.3' : ''"
+            src="assets/img/icons/icon.arrownext.right.svg">
+        </button>
+      </li>
+
+      <li>
+        <button
+          class="page-btn"
+          [class.disabled]="isLast()"
+          (click)="onLast()">
+          <img class="w-4 opacity-70 last-arrow"
+            [style.opacity]="isLast() ? '0.3' : ''"
+            src="assets/img/icons/double-right.svg">
+        </button>
+      </li>
+
+    </ul>
+  </nav>
+
+  <div class="flex items-center gap-2">
+    <span class="text-sm text-white">แสดงต่อหน้า</span>
+
+    <custom-select
+      class="pagination-select w-20 sm:w-24"
+      [(ngModel)]="selectedItemsPerPage"
+      (change)="onClickChangePerPage($event)"
+      (toggle)="toggleDropdown('pagination')"
+      [isDropdownOpen]="isDropdownOpen('pagination')"
+      [dropdownName]="'pagination'"
+      (clickOutside)="handleDropdownClickOutside('pagination')">
+
+      <custom-option
+        *ngFor="let itemPerPage of configListPerPage"
+        [value]="itemPerPage">
+        {{ itemPerPage === -1 ? 'All' : itemPerPage }} แถว
+      </custom-option>
+
+    </custom-select>
+  </div>
+
+</div>

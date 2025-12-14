@@ -1,0 +1,57 @@
+.page-btn {
+  @apply w-7 h-7 flex items-center justify-center rounded-md border border-gray-300 bg-white hover:bg-[#FFEA00] hover:text-[#00162b] transition cursor-pointer;
+
+  &.disabled {
+    @apply opacity-40 cursor-not-allowed pointer-events-none;
+  }
+}
+
+.page-number-btn {
+  @apply min-w-7 h-7 px-2 flex items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 font-medium transition cursor-pointer;
+
+  &:hover:not(.active) {
+    @apply bg-gray-100;
+  }
+
+  &.active {
+    @apply bg-[#FFEA00] text-[#00162b] border-[#FFEA00] cursor-default;
+  }
+}
+
+.ellipsis {
+  @apply w-7 h-7 flex items-center justify-center text-gray-500 cursor-default;
+}
+
+.pagination-select {
+  width: 5rem;
+}
+
+:host ::ng-deep .custom-select-container>button {
+  @apply border border-gray-300 rounded-md px-3 py-1 text-sm;
+}
+
+:host ::ng-deep .custom-select-container i {
+  @apply pr-1;
+}
+
+@media (max-width: 480px) {
+  .page-btn {
+    @apply w-6 h-6;
+  }
+
+  .page-number-btn {
+    @apply min-w-6 h-6 text-xs px-1;
+  }
+
+  .ellipsis {
+    @apply w-6 h-6 text-xs;
+  }
+
+  .pagination-select {
+    width: 4rem !important;
+  }
+
+  .pagination-select ::ng-deep button {
+    @apply text-xs px-2 py-1;
+  }
+}

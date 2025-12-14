@@ -1,0 +1,84 @@
+<div class="table-container">
+  <div class="table-wrapper">
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th>No</th>
+
+          <ng-container *ngFor="let h of headers; let i = index">
+            <th
+              [ngClass]="{ 'sortable': h.isSort }"
+              (click)="h.isSort ? onSort(h.headerName) : null">
+
+              {{ h.i18nKey || h.headerName}}
+
+              <span *ngIf="h.isSort" class="inline-block ml-1">
+                <img *ngIf="sortField !== h.headerName"
+                  src="assets/img/icons/icon.sort.svg"
+                  class="sort-icon" />
+
+                <img
+                  *ngIf="sortField === h.headerName && sortDirection === 'asc'"
+                  src="assets/img/icons/icon.sort.up.svg"
+                  class="sort-icon" />
+
+                <img
+                  *ngIf="sortField === h.headerName && sortDirection === 'desc'"
+                  src="assets/img/icons/icon.sort.down.svg"
+                  class="sort-icon" />
+              </span>
+            </th>
+          </ng-container>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <tr *ngFor="let row of config?.users; let i = index">
+          <td>{{ i + 1 + (pageIndex - 1) * pageSize }}</td>
+          <td>{{ row.publicId }}</td>
+          <td>{{ row.role }}</td>
+          <td>{{ row.managerName || '-' }}</td>
+          <td>{{ row.phoneNumber }}</td>
+          <td>
+            <span class="badge" [ngClass]="getStatusClass(row.activeFlag)">
+              {{ row.activeFlag ? 'Active' : 'Inactive' }}
+            </span>
+          </td>
+
+          <td>{{ formatDate(row.lastAccess) }}</td>
+
+          <td>
+            <div class="action-group">
+              <img src="assets/img/icons/icon.view.svg"
+                class="action-icon"
+                (click)="onView.emit(row.id)" />
+
+              <img src="assets/img/icons/icon.resetPwd.svg"
+                class="action-icon"
+                (click)="onReset.emit(row.id)" />
+            </div>
+          </td>
+        </tr>
+
+        <tr *ngIf="config?.users?.length === 0">
+          <td class="text-center py-5" [attr.colspan]="headers.length + 2">
+            - No User Found -
+          </td>
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+</div>
+
+<app-pagination *ngIf="config" aligns="end"
+  [paginationOption]="paginationOption"
+  [currentPage]="pageIndex"
+  [recordPerPage]="pageSize"
+  (changePage)="onPageChange($event)"
+  [totalRecord]="config.total">
+</app-pagination>
