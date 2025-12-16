@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IQueryListUser, ISearchCriteria, ITableHeader, IUserResultData } from '../../../shared/interface/table-user-management.interface';
 import { Subscription } from 'rxjs';
@@ -6,6 +6,12 @@ import { ModalConditionService } from '../../../shared/components/modal-conditio
 import { ModalCommonService } from '../../../shared/components/modal-common/modal-common.service';
 import { UserManagementService } from '../../../shared/services/user-management.service';
 import { RESPONSE } from '../../../shared/enum/response.enum';
+import { ROLE } from '../../../shared/enum/role.enum';
+import { HandleTokenService } from '../../../core/services/handle-token-service/handle-token.service';
+import { ModalConditionComponent } from '../../../shared/components/modal-condition/modal-condition.component';
+import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
+import { ResetPasswordModuleComponent } from '../../../shared/components/reset-password-modal/reset-password-modal.component';
+import { ResetPasswordModuleService } from '../../../shared/components/reset-password-modal/reset-password-modal.service';
 @Component({
   selector: 'app-corporate-admin-list',
   standalone: false,
@@ -13,6 +19,10 @@ import { RESPONSE } from '../../../shared/enum/response.enum';
   styleUrl: './corporate-admin-list.component.scss'
 })
 export class CorporateAdminListComponent implements OnInit {
+  @ViewChild(ModalConditionComponent) modalConditionComponent!: ModalConditionComponent;
+  @ViewChild(PaginationComponent) paginationComponent!: PaginationComponent;
+  @ViewChild(ResetPasswordModuleComponent) resetPasswordModuleComponent!: ResetPasswordModuleComponent;
+
   keyword: string = '';
   page: number = 1
   limit: number = 10;
@@ -24,6 +34,9 @@ export class CorporateAdminListComponent implements OnInit {
 
   isLoadingReset: boolean = false;
   isLoading: boolean = false;
+  isRoleSO: boolean = true;
+  isRoleAMD: boolean = true;
+  isPasswordInvalid: boolean = false;
 
   private modalSubscription: Subscription | null = null;
 
@@ -43,10 +56,17 @@ export class CorporateAdminListComponent implements OnInit {
     private route: ActivatedRoute,
     private modalConditionService: ModalConditionService,
     private modalCommonService: ModalCommonService,
-    private userManagementService: UserManagementService
-  ) { }
+    private userManagementService: UserManagementService,
+    private handleTokenService: HandleTokenService,
+    private resetFormService: ResetPasswordModuleService,
+  ) {
+    this.role = this.handleTokenService.getRole();
+    // this.isRoleSO = this.role === ROLE.SO;
+    // this.isRoleAMD = this.role === ROLE.ADM;
+    // console.log(this.isRoleAMD);
+    // console.log(this.isRoleSO);
 
-
+  }
 
   userList: IUserResultData = {
     keyword: '',
@@ -103,6 +123,7 @@ export class CorporateAdminListComponent implements OnInit {
     // try {
     //   this.permissions = await this.permissionService.permissions();
     //   this.isViewDetailReport = this.permissionService.isViewDetailReport;
+    // this.isDeleteUser=this.permissionService.isDeleteUser;
     //   if (!this.isViewDetailReport) {
     //     this.router.navigate(['/not-found']);
     //   } else {
@@ -160,7 +181,6 @@ export class CorporateAdminListComponent implements OnInit {
     this.limit = Number(params['limit'] || this.limit);
     this.sortList = params['sort'] || '';
     this.username = params['username'] || '';
-    // this.phoneNumber = params['phoneNumber'] || '';
     this.role = params['role'] || '';
     this.getListUser();
   }
@@ -172,7 +192,6 @@ export class CorporateAdminListComponent implements OnInit {
       limit: this.limit.toString(),
       sort: this.sortList || undefined,
       username: this.username || undefined,
-      // phoneNumber: this.phoneNumber || undefined,
       role: this.role || undefined,
     };
 
@@ -200,8 +219,11 @@ export class CorporateAdminListComponent implements OnInit {
     this.updateUrlParams();
   }
 
+  closeModalResetPassword(): void {
+    this.resetPasswordModuleComponent.closeModal();
+  }
+
   private async getListUser() {
-    console.log('Get list user');
     this.isLoading = true;
     try {
       const params: IQueryListUser = {
@@ -230,21 +252,51 @@ export class CorporateAdminListComponent implements OnInit {
       this.isLoading = false;
     }
   }
-  private resetPassword() {
-    console.log("UserID: ", this.userId);
+
+  async resetPasswordEvent(pwd: string) {
+    this.isLoadingReset = true;
+    try {
+      const res = await this.userManagementService.resetPassword(pwd, this.userId);
+      if (res.resultCode === RESPONSE.SUCCESS) {
+        this.closeModalResetPassword();
+        this.handleSuccessResetPassword();
+      } else if (res.resultCode === RESPONSE.INVALID_ACCESS_TOKEN) {
+        // if (res.error?.code === ERR_CODE.PASSWORD_DUPLICATE) {
+        //   this.resetPasswordModuleComponent.isPasswordDuplicate = true;
+        // } else if (res.error?.code === ERR_CODE.PASSWORD_NOT_MATCH) {
+        //   this.resetPasswordModuleComponent.isPasswordInvalid = true;
+        // } else if (res.error?.code === ERR_CODE.ACCOUNT_INACTIVE) {
+        //   this.closeModal();
+        //   this.handleFailAccountUnavailable();
+        // }
+      } else if (res.resultCode === RESPONSE.INVALID_PERMISSION) {
+        this.router.navigate(['/not-found']);
+      } else {
+        this.closeModalResetPassword();
+        this.handleFailResponse();
+      }
+    } catch (error) {
+      console.error('Response error', error);
+    }
+    this.isLoadingReset = false;
+  }
+
+  private openResetPasswordForm() {
+    this.modalConditionComponent.onClose();
+    this.resetFormService.open({});
   }
 
   async handleOnModalConfirm(flag: string) {
     if (flag === 'change') {
-      this.resetPassword();
+      this.openResetPasswordForm();
     }
   }
 
   private handleModalReset() {
     this.modalConditionService.open({
       type: 'change',
-      title: 'REPORT_HISTORY.RESEND_REPORT_TITLE',
-      subtitle: 'REPORT_HISTORY.RESEND_REPORT_SUBTITLE',
+      title: 'คุณต้องการรีเซ็ตรหัสผ่านหรือไม่?',
+      subtitle: 'คุณต้องการยืนยันการเปลี่ยนรหัสผ่านหรือไม่? การคลิก ยืนยัน <br>จะพาคุณไปยังหน้าการเปลี่ยนรหัสผ่าน คลิก ยกเลิก เพื่อออก',
     });
   }
 
@@ -263,6 +315,15 @@ export class CorporateAdminListComponent implements OnInit {
       title: 'ขออภัย ระบบขัดข้องในขณะนี้',
       subtitle: 'กรุณาทำรายการใหม่อีกครั้ง หรือ ติดต่อผู้ดูแลระบบในองค์กรของคุณ',
       buttonText: 'เข้าใจแล้ว',
+    });
+  }
+
+  private handleSuccessResetPassword() {
+    this.modalCommonService.open({
+      type: 'success',
+      title: 'การรีเซ็ตรหัสผ่านเสร็จสมบูรณ์',
+      subtitle: 'การรีเซ็ตรหัสผ่านเสร็จสมบูรณ์แล้ว กรุณาใช้รหัสผ่านใหม่ของคุณในการเข้าสู่ระบบ',
+      buttonText: 'ยืนยัน',
     });
   }
 

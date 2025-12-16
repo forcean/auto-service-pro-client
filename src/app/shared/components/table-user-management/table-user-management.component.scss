@@ -25,14 +25,10 @@
 }
 
 .action-icon {
-  width: 1rem;
-  height: 1rem;
-  opacity: .75;
   cursor: pointer;
   transition: .2s;
 }
 
 .action-icon:hover {
-  opacity: 1;
   transform: scale(1.2);
 }

@@ -4,10 +4,9 @@
       <app-content-title title="การจัดการผู้ใช้"></app-content-title>
 
       <button
-        class="bg-yellow-400 hover:bg-yellow-500
-           text-black font-semibold
-           px-6 py-3 rounded-lg shadow transition"
-        (click)="onCreate()">
+        class="create-user-btn"
+        (click)="onCreate()"
+        [disabled]="isRoleAMD||isRoleSO">
         + สร้างผู้ใช้งาน
       </button>
     </div>
@@ -37,3 +36,6 @@
   (onConfirm)="handleOnModalConfirm($event)"
   [isLoading]="isLoadingReset">
 </app-modal-condition>
+
+<app-reset-password-modal (newPassword)="resetPasswordEvent($event)"
+  [isPasswordInvalid]="isPasswordInvalid"></app-reset-password-modal>
