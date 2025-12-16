@@ -1,0 +1,26 @@
+@tailwind components;
+@import '../../../../assets/styles/variables';
+@import '../../../../assets/styles/color';
+
+label {
+  font-size: $font-size-22;
+  font-weight: 500;
+  color: #64748b; // slate-500
+  margin-bottom: 0.25rem;
+}
+
+.form-input-custom {
+  @apply w-full border border-gray-300 font-medium text-[#000d19] px-3 py-2 rounded-lg;
+  font-size: $font-size-24;
+
+  &:focus {
+    border-color: $color-primary;
+    outline: none;
+  }
+
+
+  &::placeholder {
+    color: gray-400;
+    font-size: $font-size-22;
+  }
+}

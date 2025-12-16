@@ -1,0 +1,53 @@
+ <div class="bg-white rounded-xl shadow-md p-5 mb-6">
+  <div
+    class="grid grid-cols-1 md:grid-cols-[2fr_1.5fr_auto_auto] gap-4 items-end">
+    <div>
+      <label class="text-sm font-medium text-gray-600 mb-1 block">
+        Username
+      </label>
+      <input
+        type="text"
+        [(ngModel)]="username"
+        (keyup.enter)="onSearch()"
+        placeholder="กรุณากรอก Username"
+        class="form-input-custom" />
+    </div>
+    <div>
+      <label class="text-sm font-medium text-gray-600 mb-1 block">
+        บทบาท
+      </label>
+
+      <custom-select
+        [(ngModel)]="role"
+        placeholder="-- เลือก Role --">
+        <custom-option value>All</custom-option>
+        <custom-option value="ADM">Admin (ADM)</custom-option>
+        <custom-option value="MNG">Manager (MNG)</custom-option>
+        <custom-option value="ACC">Accountant (ACC)</custom-option>
+        <custom-option value="SAL">Sale (SAL)</custom-option>
+        <custom-option value="STC">Stock Controller
+          (STC)</custom-option>
+        <custom-option value="MEC">Mechanic (MEC)</custom-option>
+      </custom-select>
+    </div>
+    <div class="flex gap-3 md:col-span-2">
+      <button
+        class="flex-1 md:flex-none md:w-[100px]
+           bg-gray-200 hover:bg-gray-300
+           text-gray-800 font-semibold
+           py-3 rounded-lg transition"
+        (click)="onReset()">
+        รีเซ็ต
+      </button>
+
+      <button
+        class="flex-1 md:flex-none md:w-[120px]
+           bg-yellow-400 hover:bg-yellow-500
+           text-black font-semibold
+           py-3 rounded-lg transition"
+        (click)="onSearch()">
+        ค้นหา
+      </button>
+    </div>
+  </div>
+</div>

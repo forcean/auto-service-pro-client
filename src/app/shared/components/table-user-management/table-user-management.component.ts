@@ -32,6 +32,17 @@ export class TableUserManagementComponent implements OnChanges {
   sortDirection: 'asc' | 'desc' = 'asc';
   paginationOption: number[] = [10, 15, 20, 30, 40, 50];
 
+  readonly ROLE_LABEL_MAP: Record<string, string> = {
+    SO: 'System Owner',
+    ADM: 'Admin',
+    MNG: 'Manager',
+    ACC: 'Accountant',
+    SAL: 'Sale',
+    STC: 'Stock Controller',
+    MEC: 'Mechanic'
+  };
+
+
   ngOnChanges(): void {
     this.sorted = {};
     this.sortList = [];
@@ -73,4 +84,12 @@ export class TableUserManagementComponent implements OnChanges {
   onPageChange(e: PaginationModel) {
     this.changePage.emit(e);
   }
+
+  mapRole(role: string | null | undefined): string {
+    if (!role) {
+      return '-';
+    }
+    return this.ROLE_LABEL_MAP[role] || role;
+  }
+
 }

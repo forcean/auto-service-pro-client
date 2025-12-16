@@ -1,16 +1,23 @@
 <div class="w-full px-4">
   <div class="layout-content">
-    <button
-      class="w-40 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-3 rounded-lg shadow-md transition m-4"
-      (click)="onCreate()">
-      Create User
-    </button>
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+      <app-content-title title="การจัดการผู้ใช้"></app-content-title>
 
-    <!-- <button
-      class="w-full bg-red-400 hover:bg-yellow-500 text-black font-semibold py-3 rounded-lg shadow-md transition"
-      (click)="onDetail()">
-      Detail User
-    </button> -->
+      <button
+        class="bg-yellow-400 hover:bg-yellow-500
+           text-black font-semibold
+           px-6 py-3 rounded-lg shadow transition"
+        (click)="onCreate()">
+        + สร้างผู้ใช้งาน
+      </button>
+    </div>
+
+    <app-search-user-management
+      [username]="username"
+      [role]="role"
+      (search)="onSearchSubmit($event)"
+      (reset)="onResetCriteria()">
+    </app-search-user-management>
 
     <app-table-user-management
       [headers]="headers"
@@ -22,8 +29,11 @@
       (sortEmit)="onSort($event)"
       (changePage)="onChangePage($event)">
     </app-table-user-management>
+
   </div>
 </div>
 
-<app-modal-condition (onConfirm)="handleOnModalConfirm($event)"
-  [isLoading]="isLoadingReset"></app-modal-condition>
+<app-modal-condition
+  (onConfirm)="handleOnModalConfirm($event)"
+  [isLoading]="isLoadingReset">
+</app-modal-condition>
