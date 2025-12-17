@@ -68,7 +68,7 @@
       </div>
 
       <div>
-        <label class="block text-gray-700 mb-1">Role</label>
+        <label class="block text-gray-700 mb-1">บทบาท</label>
         <custom-select
           formControlName="role"
           (change)="onRoleChange()"
@@ -136,6 +136,52 @@
         </div>
       </div>
     </form>
+    <div class="mt-10 border-t pt-6">
+      <h3 class="text-xl font-semibold text-gray-800 mb-6">ข้อมูลระบบ</h3>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <div>
+          <label class="block text-gray-700 mb-1">สร้างเมื่อ</label>
+          <input class="form-input-custom bg-gray-100"
+            [value]="form.value.createdDt | date:'dd/MM/yyyy HH:mm'"
+            disabled />
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-1">สร้างโดย</label>
+          <input class="form-input-custom bg-gray-100"
+            [value]="form.value.createdBy"
+            disabled />
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-1">แก้ไขล่าสุด</label>
+          <input class="form-input-custom bg-gray-100"
+            [value]="form.value.updatedDt | date:'dd/MM/yyyy HH:mm'"
+            disabled />
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-1">แก้ไขโดย</label>
+          <input class="form-input-custom bg-gray-100"
+            [value]="form.value.updatedBy"
+            disabled />
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-1">สถานะผู้ใช้งาน </label>
+          <span
+            class="inline-flex px-3 py-1 rounded-full text-sm font-medium"
+            [ngClass]="{
+          'bg-green-100 text-green-700': form.value.activeFlag,
+          'bg-red-100 text-red-700': !form.value.activeFlag
+        }">
+            {{ form.value.activeFlag ? 'ใช้งานอยู่' : 'ปิดการใช้งาน' }}
+          </span>
+        </div>
+      </div>
+    </div>
 
     <div *ngIf="isEditMode" class="pt-8 flex gap-3">
       <button

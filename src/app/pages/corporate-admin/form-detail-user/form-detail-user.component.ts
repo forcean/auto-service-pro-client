@@ -6,7 +6,7 @@ import { UserManagementService } from '../../../shared/services/user-management.
 import { RESPONSE } from '../../../shared/enum/response.enum';
 import { ModalConditionComponent } from '../../../shared/components/modal-condition/modal-condition.component';
 import { ModalConditionService } from '../../../shared/components/modal-condition/modal-condition.service';
-import { IReqUpdateUser } from '../../../shared/interface/user-management.interface';
+import { IReqUpdateUser, IResponseUserDetail } from '../../../shared/interface/user-management.interface';
 import { Subscription } from 'rxjs';
 import { UserList } from '../../../shared/interface/table-user-management.interface';
 
@@ -21,8 +21,12 @@ export class FormDetailUserComponent implements OnInit {
 
   private modalSubscription: Subscription | null = null;
   form!: FormGroup;
-  userData!: any;
+  userData!: IResponseUserDetail;
   managerList: UserList[] = [];
+  managerName: string | null = null;
+  page = 1;
+  limit = 10;
+  readonly role = 'MNG'
 
   mustSelectManager = false;
   isEditMode = false;
@@ -43,9 +47,10 @@ export class FormDetailUserComponent implements OnInit {
 
   @ViewChild(ModalConditionComponent) modalConditionComponent!: ModalConditionComponent;
 
-  ngOnInit(): void {
-    this.getUserData();
-    this.loadManagerList();
+  async ngOnInit() {
+    await this.getUserData();
+    await this.loadManagerList();
+    this.mapManagerName();
   }
 
   //  private async initializePermissions() {
@@ -72,19 +77,35 @@ export class FormDetailUserComponent implements OnInit {
       this.router.navigate(['/portal/corporate-admin/account']);
       return;
     }
-    try {
-      const res = await this.userManagementService.getUserDetail(userId);
-      if (res.resultCode == RESPONSE.SUCCESS) {
-        this.userData = res.resultData;
-        this.createForm();
-      } else {
-        this.createForm();
-        this.handleCommonError();
-      }
-    } catch (error) {
-      console.error('Error fetching user data', error);
+    this.userData = {
+      id: userId,
+      publicId: 'user123',
+      firstName: 'สมชาย',
+      lastName: 'ใจดี',
+      email: 'example@example.com',
+      role: 'MEC',
+      phoneNumber: '0812345678',
+      managerId: '2',
+      createdDt: '2023-01-01T12:00:00Z',
+      createdBy: 'admin',
+      updatedDt: '2023-06-01T12:00:00Z',
+      updatedBy: 'admin2',
+      activeFlag: true
+    };
+    this.createForm();
+    // try {
+    //   const res = await this.userManagementService.getUserDetail(userId);
+    //   if (res.resultCode == RESPONSE.SUCCESS) {
+    //     this.userData = res.resultData;
+    //     this.createForm();
+    //   } else {
+    //     this.createForm();
+    //     this.handleCommonError();
+    //   }
+    // } catch (error) {
+    //   console.error('Error fetching user data', error);
 
-    }
+    // }
   }
 
   createForm() {
@@ -95,7 +116,13 @@ export class FormDetailUserComponent implements OnInit {
       email: [{ value: this.userData.email, disabled: true }, [Validators.required, Validators.email]],
       phoneNumber: [{ value: this.userData.phoneNumber, disabled: true }, Validators.required],
       role: [{ value: this.userData.role, disabled: true }, Validators.required],
-      managerId: [{ value: this.userData.managerId || '', disabled: true }]
+      managerId: [{ value: this.userData.managerId || '', disabled: true }],
+
+      createdDt: [{ value: this.userData.createdDt, disabled: true }],
+      createdBy: [{ value: this.userData.createdBy, disabled: true }],
+      updatedDt: [{ value: this.userData.updatedDt, disabled: true }],
+      updatedBy: [{ value: this.userData.updatedBy, disabled: true }],
+      activeFlag: [{ value: this.userData.activeFlag, disabled: true }]
     });
     this.onRoleChange();
   }
@@ -131,22 +158,43 @@ export class FormDetailUserComponent implements OnInit {
     this.form.get('managerId')?.updateValueAndValidity();
   }
 
-  async loadManagerList() {
+  private async loadManagerList() {
     try {
-      // const res = await this.userManagementService.getListUser({ page: 1, limit: 100, role: 'MNG' });
-      // if (res.resultCode == RESPONSE.SUCCESS) {
-      //   this.managerList = res.resultData?.users || [];
-      // } else {
-      //   this.handleCommonError();
-      // }
-      this.managerList = [
-        { id: '1', publicId: 'manager1', firstName: 'สมชาย', lastName: 'ใจดี', role: 'MNG', managerName: null, phoneNumber: '0812345678', activeFlag: true, lastAccess: null },
-        { id: '2', publicId: 'manager2', firstName: 'สมหญิง', lastName: 'แสนสวย', role: 'MNG', managerName: null, phoneNumber: '0898765432', activeFlag: true, lastAccess: null },
-        { id: '3', publicId: 'manager3', firstName: 'สมปอง', lastName: 'หัวไว', role: 'MNG', managerName: null, phoneNumber: '0823456789', activeFlag: false, lastAccess: null }
-      ];
+      const payload = {
+        page: this.page,
+        limit: this.limit,
+        role: this.role
+      };
+      const res = await this.userManagementService.getListUser(payload);
+      if (res.resultCode == RESPONSE.SUCCESS) {
+        this.managerList = res.resultData?.users || [];
+      } else {
+        this.handleCommonError();
+      }
+      // this.managerList = [
+      //   { id: '1', publicId: 'manager1', firstName: 'สมชาย', lastName: 'ใจดี', role: 'MNG', managerName: null, phoneNumber: '0812345678', activeFlag: true, lastAccess: null },
+      //   { id: '2', publicId: 'manager2', firstName: 'สมหญิง', lastName: 'แสนสวย', role: 'MNG', managerName: null, phoneNumber: '0898765432', activeFlag: true, lastAccess: null },
+      //   { id: '3', publicId: 'manager3', firstName: 'สมปอง', lastName: 'หัวไว', role: 'MNG', managerName: null, phoneNumber: '0823456789', activeFlag: false, lastAccess: null }
+      // ];
     } catch (err) {
       console.error('Error loading manager list', err);
+      this.handleCommonError();
     }
+  }
+
+  private mapManagerName() {
+    if (!this.userData?.managerId) {
+      this.managerName = '-';
+      return;
+    }
+
+    const manager = this.managerList.find(
+      m => m.id === this.userData.managerId
+    );
+
+    this.managerName = manager
+      ? `${manager.firstName} ${manager.lastName}`
+      : '-';
   }
 
   toggleEdit() {
@@ -173,7 +221,12 @@ export class FormDetailUserComponent implements OnInit {
       email: this.userData.email,
       phoneNumber: this.userData.phoneNumber,
       role: this.userData.role,
-      managerId: this.userData.managerId || ''
+      managerId: this.userData.managerId || '',
+      createdDt: this.userData.createdDt,
+      createdBy: this.userData.createdBy,
+      updatedDt: this.userData.updatedDt,
+      updatedBy: this.userData.updatedBy,
+      activeFlag: this.userData.activeFlag
     });
     this.form.disable();
     this.form.get('username')?.disable();
@@ -200,14 +253,7 @@ export class FormDetailUserComponent implements OnInit {
       const res = await this.userManagementService.updateUserDetail(payload, this.userData.id);
 
       if (res.resultCode === RESPONSE.SUCCESS) {
-        // this.userData = { ...this.userData,
-        //   firstName: this.form.value.name,
-        //   lastName: this.form.value.surname,
-        //   email: this.form.value.email,
-        //   phoneNumber: this.form.value.phoneNumber,
-        //   role: this.form.value.role,
-        //   managerId: this.form.value.managerId || ''
-        // };
+        this.getUserData();
         this.onCancelEdit();
         this.handleSuccessEdit();
       } else if (res.resultCode === RESPONSE.INVALID_ACCESS_TOKEN) {
@@ -277,6 +323,7 @@ export class FormDetailUserComponent implements OnInit {
       buttonText: 'เข้าใจแล้ว',
     });
   }
+
   private handleSuccessEdit() {
     this.modalCommonService.open({
       type: 'success',

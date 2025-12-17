@@ -23,12 +23,17 @@ export interface IReqUpdateUser {
 }
 
 export interface IResponseUserDetail {
+    id: string;
     publicId: string;
-    firstName?: string;
-    lastName?: string;
+    firstName: string;
+    lastName: string;
     email: string;
     role: string;
     phoneNumber?: string;
     managerId?: string;
-    createDt?: string;
+    createdDt: string;
+    createdBy: string;
+    updatedDt: string;
+    updatedBy: string;
+    activeFlag: boolean;
 }

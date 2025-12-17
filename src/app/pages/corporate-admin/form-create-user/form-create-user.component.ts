@@ -22,6 +22,9 @@ export class FormCreateUserComponent implements OnInit {
   private modalSubscription: Subscription | null = null;
   form!: FormGroup;
   managerList: UserList[] = [];
+  page = 1;
+  limit = 10;
+  readonly role = 'MNG'
 
   mustSelectManager = false;
   isMatchEmail: boolean = false;
@@ -89,25 +92,29 @@ export class FormCreateUserComponent implements OnInit {
     });
   }
 
-
-  async loadManagerList() {
+  private async loadManagerList() {
     try {
-      // const res = await this.userManagementService.getListUser({ page: 1, limit: 100, role: 'MNG' });
-      // if (res.resultCode == RESPONSE.SUCCESS) {
-      //   this.managerList = res.resultData?.users || [];
-      // } else {
-      //   this.handleCommonError();
-      // }
-      this.managerList = [
-        { id: '1', publicId: 'manager1', firstName: 'สมชาย', lastName: 'ใจดี', role: 'MNG', managerName: null, phoneNumber: '0812345678', activeFlag: true, lastAccess: null },
-        { id: '2', publicId: 'manager2', firstName: 'สมหญิง', lastName: 'แสนสวย', role: 'MNG', managerName: null, phoneNumber: '0898765432', activeFlag: true, lastAccess: null },
-        { id: '3', publicId: 'manager3', firstName: 'สมปอง', lastName: 'หัวไว', role: 'MNG', managerName: null, phoneNumber: '0823456789', activeFlag: false, lastAccess: null }
-      ];
+      const payload = {
+        page: this.page,
+        limit: this.limit,
+        role: this.role
+      };
+      const res = await this.userManagementService.getListUser(payload);
+      if (res.resultCode == RESPONSE.SUCCESS) {
+        this.managerList = res.resultData?.users || [];
+      } else {
+        this.handleCommonError();
+      }
+      // this.managerList = [
+      //   { id: '1', publicId: 'manager1', firstName: 'สมชาย', lastName: 'ใจดี', role: 'MNG', managerName: null, phoneNumber: '0812345678', activeFlag: true, lastAccess: null },
+      //   { id: '2', publicId: 'manager2', firstName: 'สมหญิง', lastName: 'แสนสวย', role: 'MNG', managerName: null, phoneNumber: '0898765432', activeFlag: true, lastAccess: null },
+      //   { id: '3', publicId: 'manager3', firstName: 'สมปอง', lastName: 'หัวไว', role: 'MNG', managerName: null, phoneNumber: '0823456789', activeFlag: false, lastAccess: null }
+      // ];
     } catch (err) {
       console.error('Error loading manager list', err);
+      this.handleCommonError();
     }
   }
-
 
   onPasswordComplete(event: IStrongPassword) {
     this.isStrong = event.isStrong;
@@ -237,6 +244,4 @@ export class FormCreateUserComponent implements OnInit {
       buttonText: 'เข้าใจแล้ว',
     });
   }
-
-  ///test push
 }
