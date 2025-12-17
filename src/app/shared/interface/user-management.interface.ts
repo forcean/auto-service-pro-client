@@ -21,3 +21,14 @@ export interface IReqUpdateUser {
     phoneNumber?: string;
     managerId?: string;
 }
+
+export interface IResponseUserDetail {
+    publicId: string;
+    firstName?: string;
+    lastName?: string;
+    email: string;
+    role: string;
+    phoneNumber?: string;
+    managerId?: string;
+    createDt?: string;
+}

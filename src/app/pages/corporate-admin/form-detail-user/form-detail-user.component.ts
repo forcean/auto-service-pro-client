@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ModalCommonService } from '../../../shared/components/modal-common/modal-common.service';
 import { UserManagementService } from '../../../shared/services/user-management.service';
 import { RESPONSE } from '../../../shared/enum/response.enum';
@@ -36,6 +36,7 @@ export class FormDetailUserComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private modalCommonService: ModalCommonService,
+    private route: ActivatedRoute,
     private userManagementService: UserManagementService,
     private modalConditionService: ModalConditionService
   ) { }
@@ -43,15 +44,7 @@ export class FormDetailUserComponent implements OnInit {
   @ViewChild(ModalConditionComponent) modalConditionComponent!: ModalConditionComponent;
 
   ngOnInit(): void {
-    const nav = history.state;
-    this.userData = nav.user;
-
-    // if (!this.userData) {
-    //   this.router.navigate(['/portal/corporate-admin/account']);
-    //   return;
-    // }
-
-    this.createForm();
+    this.getUserData();
     this.loadManagerList();
   }
 
@@ -73,6 +66,27 @@ export class FormDetailUserComponent implements OnInit {
   //   }
   // }
 
+  private async getUserData() {
+    const userId = this.route.snapshot.paramMap.get('id');
+    if (!userId) {
+      this.router.navigate(['/portal/corporate-admin/account']);
+      return;
+    }
+    try {
+      const res = await this.userManagementService.getUserDetail(userId);
+      if (res.resultCode == RESPONSE.SUCCESS) {
+        this.userData = res.resultData;
+        this.createForm();
+      } else {
+        this.createForm();
+        this.handleCommonError();
+      }
+    } catch (error) {
+      console.error('Error fetching user data', error);
+
+    }
+  }
+
   createForm() {
     this.form = this.fb.group({
       username: [{ value: this.userData.publicId, disabled: true }],
@@ -83,7 +97,6 @@ export class FormDetailUserComponent implements OnInit {
       role: [{ value: this.userData.role, disabled: true }, Validators.required],
       managerId: [{ value: this.userData.managerId || '', disabled: true }]
     });
-
     this.onRoleChange();
   }
 
@@ -230,7 +243,6 @@ export class FormDetailUserComponent implements OnInit {
   }
 
   onDelete() {
-    // this.userId = event;
     this.handleModalDelete();
   }
 

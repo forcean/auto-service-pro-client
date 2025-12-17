@@ -185,7 +185,6 @@ export class CorporateAdminListComponent implements OnInit {
     this.getListUser();
   }
 
-
   private updateUrlParams() {
     const queryParams = {
       page: this.page.toString(),

@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 import { ApiPrefix } from '../enum/api-prefix.enum';
 import { IResponseMenu } from '../interface/sidebar.interface';
 import { IBaseResponse } from '../interface/base-http.interface';
-import { IReqCreateUser, IReqUpdateUser } from '../interface/user-management.interface';
+import { IReqCreateUser, IReqUpdateUser, IResponseUserDetail } from '../interface/user-management.interface';
 import { IQueryListUser, IUserResultData } from '../interface/table-user-management.interface';
 
 @Injectable({
@@ -32,14 +32,14 @@ export class UserManagementService {
     }
   }
 
-  async getUserDetail(params: IQueryListUser): Promise<IBaseResponse<IUserResultData>> {
+  async getUserDetail(userId: string | null): Promise<IBaseResponse<IResponseUserDetail>> {
     try {
-      const uri = this.PREFIX_USER + `/admin/senderNames`;
-      const response = await this.httpService.get<IUserResultData>(uri, params);
+      const uri = this.PREFIX_USER + `/users/${userId}`;
+      const response = await this.httpService.get<IResponseUserDetail>(uri);
       return response;
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
-        return error.error as IBaseResponse<IUserResultData>;
+        return error.error as IBaseResponse<IResponseUserDetail>;
       } else {
         throw error;
       }
