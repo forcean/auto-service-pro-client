@@ -77,35 +77,34 @@ export class FormDetailUserComponent implements OnInit {
       this.router.navigate(['/portal/corporate-admin/account']);
       return;
     }
-    this.userData = {
-      id: userId,
-      publicId: 'user123',
-      firstName: 'สมชาย',
-      lastName: 'ใจดี',
-      email: 'example@example.com',
-      role: 'MEC',
-      phoneNumber: '0812345678',
-      managerId: '2',
-      createdDt: '2023-01-01T12:00:00Z',
-      createdBy: 'admin',
-      updatedDt: '2023-06-01T12:00:00Z',
-      updatedBy: 'admin2',
-      activeFlag: true
-    };
-    this.createForm();
-    // try {
-    //   const res = await this.userManagementService.getUserDetail(userId);
-    //   if (res.resultCode == RESPONSE.SUCCESS) {
-    //     this.userData = res.resultData;
-    //     this.createForm();
-    //   } else {
-    //     this.createForm();
-    //     this.handleCommonError();
-    //   }
-    // } catch (error) {
-    //   console.error('Error fetching user data', error);
-
-    // }
+    // this.userData = {
+    //   id: userId,
+    //   publicId: 'user123',
+    //   firstName: 'สมชาย',
+    //   lastName: 'ใจดี',
+    //   email: 'example@example.com',
+    //   role: 'MEC',
+    //   phoneNumber: '0812345678',
+    //   managerId: '2',
+    //   createdDt: '2023-01-01T12:00:00Z',
+    //   createdBy: 'admin',
+    //   updatedDt: '2023-06-01T12:00:00Z',
+    //   updatedBy: 'admin2',
+    //   activeFlag: true
+    // };
+    // this.createForm();
+    try {
+      const res = await this.userManagementService.getUserDetail(userId);
+      if (res.resultCode == RESPONSE.SUCCESS) {
+        this.userData = res.resultData;
+        this.createForm();
+      } else {
+        this.createForm();
+        this.handleCommonError();
+      }
+    } catch (error) {
+      console.error('Error fetching user data', error);
+    }
   }
 
   createForm() {
