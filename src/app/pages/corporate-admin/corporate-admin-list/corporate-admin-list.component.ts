@@ -68,51 +68,7 @@ export class CorporateAdminListComponent implements OnInit {
 
   }
 
-  userList: IUserResultData = {
-    keyword: '',
-    page: 1,
-    limit: 10,
-    total: 3,
-    totalPage: 1,
-    users: [
-      {
-        id: 'U001',
-        publicId: 'USR-001',
-        role: 'ADM',
-        managerName: null,
-        phoneNumber: '0812345678',
-        activeFlag: true,
-        lastAccess: '2025-01-10T10:23:00'
-      },
-      {
-        id: 'U002',
-        publicId: 'USR-002',
-        role: 'MNG',
-        managerName: 'John Manager',
-        phoneNumber: '0853332222',
-        activeFlag: false,
-        lastAccess: null
-      },
-      {
-        id: 'U003',
-        publicId: 'USR-003',
-        role: 'SAL',
-        managerName: null,
-        phoneNumber: '0891112222',
-        activeFlag: true,
-        lastAccess: '2025-01-12T08:51:00'
-      },
-      {
-        id: 'U004',
-        publicId: 'USR-004',
-        role: 'ACC',
-        managerName: 'Alice Manager',
-        phoneNumber: '0825556666',
-        activeFlag: true,
-        lastAccess: '2025-01-11T14:30:00'
-      }
-    ]
-  };
+  userList!: IUserResultData;
 
   ngOnInit(): void {
     this.initializePermissions();
@@ -230,7 +186,7 @@ export class CorporateAdminListComponent implements OnInit {
         role: this.role || undefined,
         page: this.page,
         limit: this.limit,
-        sort: this.sortList ? this.sortList : 'createDt.desc'
+        // sort: this.sortList ? this.sortList : 'createDt.desc'
       };
       const res = await this.userManagementService.getListUser(params);
       if (res.resultCode === RESPONSE.SUCCESS) {

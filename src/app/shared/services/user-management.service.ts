@@ -20,7 +20,7 @@ export class UserManagementService {
 
   async getListUser(params: IQueryListUser): Promise<IBaseResponse<IUserResultData>> {
     try {
-      const uri = this.PREFIX_USER + `/users`;
+      const uri = this.PREFIX_USER + `/users/getListUsers`;
       const response = await this.httpService.get<IUserResultData>(uri, params);
       return response;
     } catch (error) {
@@ -34,7 +34,7 @@ export class UserManagementService {
 
   async getUserDetail(userId: string | null): Promise<IBaseResponse<IResponseUserDetail>> {
     try {
-      const uri = this.PREFIX_USER + `/users/${userId}`;
+      const uri = this.PREFIX_USER + `/users/${userId}/detail`;
       const response = await this.httpService.get<IResponseUserDetail>(uri);
       return response;
     } catch (error) {
@@ -48,7 +48,7 @@ export class UserManagementService {
 
   async CreateUser(body: IReqCreateUser) {
     try {
-      const uri = this.PREFIX_USER + '/corps/users/createUser';
+      const uri = this.PREFIX_USER + '/users/corps/register';
       const response = await this.httpService.post<any>(uri, body);
       return response;
     } catch (error) {
@@ -63,9 +63,10 @@ export class UserManagementService {
   async resetPassword(pwd: string, userId: string) {
     try {
       const body = {
-        credentialId: pwd
+        painTextPassword: pwd
       }
-      const url = this.PREFIX_USER + `/users/${userId}/resetPassword`;
+      const url = this.PREFIX_USER + `/users/corps/${userId}/resetPassword`;
+      // const url = this.PREFIX_USER + `/users/${userId}/resetPassword`;
       const response = await this.httpService.post<any>(url, body);
       return response
     } catch (error) {
@@ -93,7 +94,8 @@ export class UserManagementService {
 
   async deleteUser(userId: string) {
     try {
-      const uri = this.PREFIX_USER + `/corps/users/${userId}/delete`;
+      const uri = this.PREFIX_USER + `/users/corps/${userId}/delete`;
+      // const uri = this.PREFIX_USER + `/corps/users/${userId}/delete`;
       const response = await this.httpService.post<unknown>(uri, {});
       return response;
     } catch (error) {

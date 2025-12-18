@@ -272,11 +272,10 @@ export class FormDetailUserComponent implements OnInit {
   async deleteUser(id: string) {
     this.isLoadingDelete = true;
     try {
+      this.modalConditionComponent.onClose();
       const res = await this.userManagementService.deleteUser(id);
-
       if (res.resultCode === RESPONSE.SUCCESS) {
         this.handleSuccessDelete();
-        this.modalConditionComponent.onClose();
       } else {
         this.handleFailDelete();
       }
