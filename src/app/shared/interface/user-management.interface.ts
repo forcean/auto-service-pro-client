@@ -3,8 +3,8 @@ export type DataType = 'string' | 'number' | 'percent' | 'date';
 export interface IReqCreateUser {
     publicId: string;
     painTextPassword: string;
-    firstName?: string;
-    lastName?: string;
+    firstname?: string;
+    lastname?: string;
     phoneNumber: string;
     email: string;
     role: string;
@@ -14,8 +14,8 @@ export interface IReqCreateUser {
 export interface IReqUpdateUser {
     publicId: string;
     painTextPassword?: string;
-    firstName?: string;
-    lastName?: string;
+    firstname?: string;
+    lastname?: string;
     email: string;
     role: string;
     phoneNumber?: string;

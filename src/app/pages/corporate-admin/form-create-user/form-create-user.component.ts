@@ -177,8 +177,8 @@ export class FormCreateUserComponent implements OnInit {
       const payload: IReqCreateUser = {
         publicId: this.form.value.username,
         painTextPassword: this.form.value.password,
-        firstName: this.form.value.name,
-        lastName: this.form.value.surname,
+        firstname: this.form.value.name,
+        lastname: this.form.value.surname,
         phoneNumber: this.form.value.phoneNumber,
         email: this.form.value.email,
         role: this.form.value.role,

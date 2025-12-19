@@ -48,6 +48,7 @@ export class FormDetailUserComponent implements OnInit {
   @ViewChild(ModalConditionComponent) modalConditionComponent!: ModalConditionComponent;
 
   async ngOnInit() {
+    await this.initForm();
     await this.getUserData();
     await this.loadManagerList();
     this.mapManagerName();
@@ -77,29 +78,12 @@ export class FormDetailUserComponent implements OnInit {
       this.router.navigate(['/portal/corporate-admin/account']);
       return;
     }
-    // this.userData = {
-    //   id: userId,
-    //   publicId: 'user123',
-    //   firstName: 'สมชาย',
-    //   lastName: 'ใจดี',
-    //   email: 'example@example.com',
-    //   role: 'MEC',
-    //   phoneNumber: '0812345678',
-    //   managerId: '2',
-    //   createdDt: '2023-01-01T12:00:00Z',
-    //   createdBy: 'admin',
-    //   updatedDt: '2023-06-01T12:00:00Z',
-    //   updatedBy: 'admin2',
-    //   activeFlag: true
-    // };
-    // this.createForm();
     try {
       const res = await this.userManagementService.getUserDetail(userId);
       if (res.resultCode == RESPONSE.SUCCESS) {
         this.userData = res.resultData;
-        this.createForm();
+        this.patchForm();
       } else {
-        this.createForm();
         this.handleCommonError();
       }
     } catch (error) {
@@ -107,23 +91,41 @@ export class FormDetailUserComponent implements OnInit {
     }
   }
 
-  createForm() {
-    this.form = this.fb.group({
-      username: [{ value: this.userData.publicId, disabled: true }],
-      name: [{ value: this.userData.firstName, disabled: true }, Validators.required],
-      surname: [{ value: this.userData.lastName, disabled: true }, Validators.required],
-      email: [{ value: this.userData.email, disabled: true }, [Validators.required, Validators.email]],
-      phoneNumber: [{ value: this.userData.phoneNumber, disabled: true }, Validators.required],
-      role: [{ value: this.userData.role, disabled: true }, Validators.required],
-      managerId: [{ value: this.userData.managerId || '', disabled: true }],
-
-      createdDt: [{ value: this.userData.createdDt, disabled: true }],
-      createdBy: [{ value: this.userData.createdBy, disabled: true }],
-      updatedDt: [{ value: this.userData.updatedDt, disabled: true }],
-      updatedBy: [{ value: this.userData.updatedBy, disabled: true }],
-      activeFlag: [{ value: this.userData.activeFlag, disabled: true }]
+  private patchForm() {
+    this.form.patchValue({
+      username: this.userData.publicId,
+      name: this.userData.firstName,
+      surname: this.userData.lastName,
+      email: this.userData.email,
+      phoneNumber: this.userData.phoneNumber,
+      role: this.userData.role,
+      managerId: this.userData.managerId || '',
+      createdDt: this.userData.createdDt,
+      createdBy: this.userData.createdBy,
+      updatedDt: this.userData.updatedDt,
+      updatedBy: this.userData.updatedBy,
+      activeFlag: this.userData.activeFlag
     });
+
     this.onRoleChange();
+  }
+
+  private async initForm() {
+    this.form = this.fb.group({
+      username: [{ value: '', disabled: true }],
+      name: [{ value: '', disabled: true }, Validators.required],
+      surname: [{ value: '', disabled: true }, Validators.required],
+      email: [{ value: '', disabled: true }, [Validators.required, Validators.email]],
+      phoneNumber: [{ value: '', disabled: true }, Validators.required],
+      role: [{ value: '', disabled: true }, Validators.required],
+      managerId: [{ value: '', disabled: true }],
+
+      createdDt: [{ value: '', disabled: true }],
+      createdBy: [{ value: '', disabled: true }],
+      updatedDt: [{ value: '', disabled: true }],
+      updatedBy: [{ value: '', disabled: true }],
+      activeFlag: [{ value: false, disabled: true }]
+    });
   }
 
   checkMobileLength() {
@@ -241,8 +243,8 @@ export class FormDetailUserComponent implements OnInit {
     try {
       const payload: IReqUpdateUser = {
         publicId: this.userData.publicId,
-        firstName: this.form.value.name,
-        lastName: this.form.value.surname,
+        firstname: this.form.value.name,
+        lastname: this.form.value.surname,
         email: this.form.value.email,
         phoneNumber: this.form.value.phoneNumber,
         role: this.form.value.role,
@@ -275,6 +277,7 @@ export class FormDetailUserComponent implements OnInit {
       const res = await this.userManagementService.deleteUser(id);
       if (res.resultCode === RESPONSE.SUCCESS) {
         this.handleSuccessDelete();
+        this.router.navigate(['/portal/corporate-admin/account']);
       } else {
         this.handleFailDelete();
       }

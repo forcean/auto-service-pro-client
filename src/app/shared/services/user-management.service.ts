@@ -67,7 +67,7 @@ export class UserManagementService {
       }
       const url = this.PREFIX_USER + `/users/corps/${userId}/resetPassword`;
       // const url = this.PREFIX_USER + `/users/${userId}/resetPassword`;
-      const response = await this.httpService.post<any>(url, body);
+      const response = await this.httpService.patch<any>(url, body);
       return response
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
@@ -81,7 +81,7 @@ export class UserManagementService {
   async updateUserDetail(body: IReqUpdateUser, userId: string) {
     try {
       const url = this.PREFIX_USER + `/users/${userId}/update`;
-      const response = await this.httpService.post<any>(url, body);
+      const response = await this.httpService.patch<any>(url, body);
       return response
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {

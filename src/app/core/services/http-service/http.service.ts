@@ -32,6 +32,10 @@ export class HttpService {
     return lastValueFrom(this.httpClient.put<IBaseResponse<T>>(url, body, { withCredentials }));
   }
 
+  patch<T>(url: string, body: any, withCredentials = false) {
+    return lastValueFrom(this.httpClient.patch<IBaseResponse<T>>(url, body, { withCredentials }));
+  }
+
   delete<T>(url: string, queryParams?: any, withCredentials = false) {
     let params = new HttpParams();
 
