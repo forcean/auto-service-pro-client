@@ -90,7 +90,7 @@
           [isDisabled]="!isEditMode"
           [isError]="form.controls['managerId'].invalid && form.controls['managerId'].touched">
           <custom-option *ngFor="let m of managerList" [value]="m.id">
-            {{ m.firstName }} {{ m.lastName }}
+            {{ m.firstname }} {{ m.lastname }}
           </custom-option>
         </custom-select>
 

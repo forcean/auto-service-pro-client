@@ -11,8 +11,8 @@ export interface UserList {
   id: string;
   publicId: string;
   role: 'MNG' | 'ADM' | 'ACC' | 'MEC' | 'SO' | 'SAL' | 'STC';
-  firstName?: string;
-  lastName?: string;
+  firstname?: string;
+  lastname?: string;
   managerName: string | null;
   phoneNumber: string;
   activeFlag: boolean;

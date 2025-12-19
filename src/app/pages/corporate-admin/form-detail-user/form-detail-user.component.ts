@@ -94,8 +94,8 @@ export class FormDetailUserComponent implements OnInit {
   private patchForm() {
     this.form.patchValue({
       username: this.userData.publicId,
-      name: this.userData.firstName,
-      surname: this.userData.lastName,
+      name: this.userData.firstname,
+      surname: this.userData.lastname,
       email: this.userData.email,
       phoneNumber: this.userData.phoneNumber,
       role: this.userData.role,
@@ -194,7 +194,7 @@ export class FormDetailUserComponent implements OnInit {
     );
 
     this.managerName = manager
-      ? `${manager.firstName} ${manager.lastName}`
+      ? `${manager.firstname} ${manager.lastname}`
       : '-';
   }
 
@@ -217,8 +217,8 @@ export class FormDetailUserComponent implements OnInit {
     this.isMatchEmail = false;
     this.form.reset({
       username: this.userData.publicId,
-      name: this.userData.firstName,
-      surname: this.userData.lastName,
+      name: this.userData.firstname,
+      surname: this.userData.lastname,
       email: this.userData.email,
       phoneNumber: this.userData.phoneNumber,
       role: this.userData.role,
