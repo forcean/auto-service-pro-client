@@ -7,6 +7,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SortableDirective } from "../../shared/directive/sortable.directive";
 import { FormCreateUserComponent } from './form-create-user/form-create-user.component';
 import { FormDetailUserComponent } from './form-detail-user/form-detail-user.component';
+import { LucideAngularModule, Pencil, Trash2 } from 'lucide-angular';
 
 
 
@@ -22,7 +23,8 @@ import { FormDetailUserComponent } from './form-detail-user/form-detail-user.com
     SharedModule,
     FormsModule,
     ReactiveFormsModule,
-    SortableDirective
+    SortableDirective,
+    LucideAngularModule.pick({ Pencil, Trash2 }),
   ]
 })
 export class CorporateAdminModule { }

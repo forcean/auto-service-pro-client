@@ -32,3 +32,8 @@
 .action-icon:hover {
   transform: scale(1.2);
 }
+
+.action-icon.disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}

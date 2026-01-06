@@ -17,6 +17,7 @@ import { TableUserManagementComponent } from './components/table-user-management
 import { PaginationComponent } from './components/pagination/pagination.component';
 import { SearchUserManagementComponent } from './components/search-user-management/search-user-management.component';
 import { ContentTitleComponent } from './components/content-title/content-title.component';
+import { LazyLoadTableComponent } from './lazy-load/lazy-load-table/lazy-load-table.component';
 
 const components = [
   ModalCommonComponent,
@@ -32,7 +33,8 @@ const components = [
   TableUserManagementComponent,
   PaginationComponent,
   SearchUserManagementComponent,
-  ContentTitleComponent
+  ContentTitleComponent,
+  LazyLoadTableComponent
 ];
 
 @NgModule({

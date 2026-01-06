@@ -1,25 +1,56 @@
 .layout-content {
-    padding: 1rem;
+  padding: 1rem;
 }
 
 .custom-card {
-    @apply bg-white rounded-xl shadow-md;
+  @apply bg-white rounded-xl shadow-md;
 }
 
 label {
-    font-size: 0.85rem;
+  font-size: 0.85rem;
 }
 
 app-table-user-management {
-    display: block;
-    margin-top: 3rem;
+  display: block;
+  margin-top: 3rem;
 }
 
 .create-user-btn {
-    @apply bg-yellow-400 text-black font-semibold px-6 py-3 rounded-lg shadow transition-all duration-200 hover:bg-yellow-500;
+  @apply relative px-6 py-3 rounded-2xl font-semibold text-slate-900 bg-white/85 border border-slate-200 backdrop-blur-xl transition-all duration-300;
 
-    &:disabled {
-        @apply bg-gray-300 text-gray-500 cursor-not-allowed shadow-none;
-        opacity: 0.7;
-    }
+  /* elevation */
+  box-shadow:
+    0 4px 10px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
+  /* highlight */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(to bottom,
+        rgba(255, 255, 255, 0.85),
+        rgba(255, 255, 255, 0.35));
+    pointer-events: none;
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      0 8px 20px rgba(0, 0, 0, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow:
+      0 3px 8px rgba(0, 0, 0, 0.15),
+      inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  &:disabled {
+    @apply bg-white/60 text-slate-400 border-slate-100 cursor-not-allowed;
+    box-shadow: none;
+  }
 }

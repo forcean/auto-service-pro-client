@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ModalCommonService } from '../../../shared/components/modal-common/modal-common.service';
@@ -9,6 +9,7 @@ import { ModalConditionService } from '../../../shared/components/modal-conditio
 import { IReqUpdateUser, IResponseUserDetail } from '../../../shared/interface/user-management.interface';
 import { Subscription } from 'rxjs';
 import { UserList } from '../../../shared/interface/table-user-management.interface';
+import { LoadingBarService } from '@ngx-loading-bar/core';
 
 
 @Component({
@@ -18,6 +19,8 @@ import { UserList } from '../../../shared/interface/table-user-management.interf
   styleUrl: './form-detail-user.component.scss'
 })
 export class FormDetailUserComponent implements OnInit {
+  @Input() isDelete: boolean = false;
+  @Input() isUpdate: boolean = false;
 
   private modalSubscription: Subscription | null = null;
   form!: FormGroup;
@@ -42,7 +45,8 @@ export class FormDetailUserComponent implements OnInit {
     private modalCommonService: ModalCommonService,
     private route: ActivatedRoute,
     private userManagementService: UserManagementService,
-    private modalConditionService: ModalConditionService
+    private modalConditionService: ModalConditionService,
+    private loadingBarService: LoadingBarService,
   ) { }
 
   @ViewChild(ModalConditionComponent) modalConditionComponent!: ModalConditionComponent;
@@ -78,6 +82,8 @@ export class FormDetailUserComponent implements OnInit {
       this.router.navigate(['/portal/corporate-admin/account']);
       return;
     }
+    const loader = this.loadingBarService.useRef();
+    loader.start();
     try {
       const res = await this.userManagementService.getUserDetail(userId);
       if (res.resultCode == RESPONSE.SUCCESS) {
@@ -88,6 +94,8 @@ export class FormDetailUserComponent implements OnInit {
       }
     } catch (error) {
       console.error('Error fetching user data', error);
+    } finally {
+      loader.complete();
     }
   }
 
@@ -240,6 +248,8 @@ export class FormDetailUserComponent implements OnInit {
       return;
     }
     this.isLoadingEdit = true;
+    const loader = this.loadingBarService.useRef();
+    loader.start();
     try {
       const payload: IReqUpdateUser = {
         publicId: this.userData.publicId,
@@ -267,11 +277,14 @@ export class FormDetailUserComponent implements OnInit {
       this.handleCommonError();
     } finally {
       this.isLoadingEdit = false;
+      loader.complete();
     }
   }
 
   async deleteUser(id: string) {
     this.isLoadingDelete = true;
+    const loader = this.loadingBarService.useRef();
+    loader.start();
     try {
       this.modalConditionComponent.onClose();
       const res = await this.userManagementService.deleteUser(id);
@@ -286,6 +299,7 @@ export class FormDetailUserComponent implements OnInit {
       this.handleCommonError();
     } finally {
       this.isLoadingDelete = false;
+      loader.complete();
     }
   }
 

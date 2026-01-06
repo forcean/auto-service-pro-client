@@ -12,6 +12,7 @@ import { ModalConditionComponent } from '../../../shared/components/modal-condit
 import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
 import { ResetPasswordModuleComponent } from '../../../shared/components/reset-password-modal/reset-password-modal.component';
 import { ResetPasswordModuleService } from '../../../shared/components/reset-password-modal/reset-password-modal.service';
+import { LoadingBarService } from '@ngx-loading-bar/core';
 @Component({
   selector: 'app-corporate-admin-list',
   standalone: false,
@@ -31,6 +32,7 @@ export class CorporateAdminListComponent implements OnInit {
   phoneNumber: string = '';
   userId: string = '';
   role: string = '';
+  userList!: IUserResultData;
 
   isLoadingReset: boolean = false;
   isLoading: boolean = false;
@@ -40,12 +42,11 @@ export class CorporateAdminListComponent implements OnInit {
 
   private modalSubscription: Subscription | null = null;
 
-
   headers: ITableHeader[] = [
     { headerName: 'username', valueType: 'string', isSort: true, i18nKey: 'Username' },
     { headerName: 'role', valueType: 'string', isSort: true, i18nKey: 'บทบาท' },
     { headerName: 'manager', valueType: 'date', isSort: true, i18nKey: 'ผู้จัดการ' },
-    { headerName: 'phoneNumber', valueType: 'string', isSort: true, i18nKey: 'หมายเลขโทรศัพท์' },
+    { headerName: 'phoneNumber', valueType: 'string', isSort: false, i18nKey: 'หมายเลขโทรศัพท์' },
     { headerName: 'activeFlag', valueType: 'date', isSort: false, i18nKey: 'สถานะ' },
     { headerName: 'createDt', valueType: 'string', isSort: false, i18nKey: 'เข้าสู่ระบบล่าสุด' },
     { headerName: 'action', valueType: 'string', isSort: false, i18nKey: 'จัดการ' },
@@ -59,16 +60,14 @@ export class CorporateAdminListComponent implements OnInit {
     private userManagementService: UserManagementService,
     private handleTokenService: HandleTokenService,
     private resetFormService: ResetPasswordModuleService,
+    private loadingBarService: LoadingBarService,
   ) {
     this.role = this.handleTokenService.getRole();
-    // this.isRoleSO = this.role === ROLE.SO;
-    // this.isRoleAMD = this.role === ROLE.ADM;
+    this.isRoleSO = this.role === ROLE.SO;
+    this.isRoleAMD = this.role === ROLE.ADM;
     // console.log(this.isRoleAMD);
     // console.log(this.isRoleSO);
-
   }
-
-  userList!: IUserResultData;
 
   ngOnInit(): void {
     this.initializePermissions();
@@ -80,6 +79,8 @@ export class CorporateAdminListComponent implements OnInit {
     //   this.permissions = await this.permissionService.permissions();
     //   this.isViewDetailReport = this.permissionService.isViewDetailReport;
     // this.isDeleteUser=this.permissionService.isDeleteUser;
+    // this.isUpdateUser=this.permissionService.isUpdateUser;
+    // this.isResetPasswordUser=this.permissionService.isResetPasswordUser;
     //   if (!this.isViewDetailReport) {
     //     this.router.navigate(['/not-found']);
     //   } else {
@@ -180,6 +181,8 @@ export class CorporateAdminListComponent implements OnInit {
 
   private async getListUser() {
     this.isLoading = true;
+    const loader = this.loadingBarService.useRef();
+    loader.start();
     try {
       const params: IQueryListUser = {
         publicId: this.username || undefined,
@@ -205,11 +208,14 @@ export class CorporateAdminListComponent implements OnInit {
       // }
     } finally {
       this.isLoading = false;
+      loader.complete();
     }
   }
 
   async resetPasswordEvent(pwd: string) {
     this.isLoadingReset = true;
+    const loader = this.loadingBarService.useRef();
+    loader.start();
     try {
       const res = await this.userManagementService.resetPassword(pwd, this.userId);
       if (res.resultCode === RESPONSE.SUCCESS) {
@@ -234,6 +240,7 @@ export class CorporateAdminListComponent implements OnInit {
       console.error('Response error', error);
     }
     this.isLoadingReset = false;
+    loader.complete();
   }
 
   private openResetPasswordForm() {

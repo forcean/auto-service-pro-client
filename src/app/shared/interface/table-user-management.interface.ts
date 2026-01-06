@@ -1,5 +1,5 @@
 export interface IUserResultData {
-  keyword: string;
+  keyword?: string;
   page: number;
   limit: number;
   total: number;
@@ -16,7 +16,7 @@ export interface UserList {
   managerName: string | null;
   phoneNumber: string;
   activeFlag: boolean;
-  lastAccess: string | null;
+  lastAccessDt: string | null;
 }
 
 export interface ITableHeader {

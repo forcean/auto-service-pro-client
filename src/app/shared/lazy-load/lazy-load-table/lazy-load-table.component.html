@@ -1,0 +1,31 @@
+<div class="mb-3 table-wrapper">
+  <table class="table w-full">
+    <thead>
+      <tr>
+        <th
+          *ngFor="let _ of listTd"
+          class="text-center">
+          <div class="flex justify-center">
+            <div
+              class="h-4 w-24 rounded-md bg-white/60 animate-pulse">
+            </div>
+          </div>
+        </th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let _ of listTr; let last = last">
+        <td
+          *ngFor="let _ of listTd"
+          class="text-center">
+          <div class="flex justify-center">
+            <div
+              class="h-4 w-20 skeleton">
+            </div>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

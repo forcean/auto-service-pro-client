@@ -19,6 +19,7 @@ export class TableUserManagementComponent implements OnChanges {
   @Input() pageIndex: number = 1;
   @Input() sort: string = '';
   @Input() isLoading: boolean = false;
+  @Input() isDisableAction: boolean = false;
 
   @Output() sortEmit = new EventEmitter<string[]>();
   @Output() changePage = new EventEmitter<PaginationModel>();
