@@ -3,7 +3,7 @@
 @import '../../../../assets/styles/color';
 
 .form-input-custom {
-  @apply w-full border border-gray-300 font-medium text-[#000d19] px-3 py-2 rounded-lg transition-all;
+  @apply w-full border border-gray-300 font-medium text-[#000d19] px-3 py-2 rounded-xl transition-all;
 
   &:focus {
     border-color: $color-primary;
@@ -101,5 +101,23 @@
 
   &:hover {
     background: #dc2626;
+  }
+}
+
+.action-btn.is-disabled,
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+  filter: grayscale(40%);
+}
+
+.action-btn.is-disabled:hover {
+  padding-right: 0.9rem;
+
+  .label {
+    max-width: 0;
+    opacity: 0;
+    margin-left: 0;
   }
 }

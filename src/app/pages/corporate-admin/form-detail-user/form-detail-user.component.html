@@ -5,16 +5,22 @@
     </h2>
 
     <div class="action-buttons">
-      <button *ngIf="!isEditMode" class="action-btn edit-btn"
+      <button
+        *ngIf="!isEditMode"
+        class="action-btn edit-btn"
         (click)="toggleEdit()"
-        [disabled]="!isUpdate">
+        [disabled]="!isUpdate"
+        [class.is-disabled]="!isUpdate">
+
         <lucide-icon name="pencil" class="icon"></lucide-icon>
         <span class="label">แก้ไขข้อมูล</span>
       </button>
 
-      <button class="action-btn delete-btn"
+      <button
+        class="action-btn delete-btn"
         (click)="onDelete()"
-        [disabled]="!isDelete">
+        [disabled]="!isDelete"
+        [class.is-disabled]="!isDelete">
         <lucide-icon name="trash-2" class="icon"></lucide-icon>
         <span class="label">ลบผู้ใช้งาน</span>
       </button>
@@ -192,14 +198,14 @@
     <div *ngIf="isEditMode" class="pt-8 flex gap-3">
       <button
         type="button"
-        class="w-full bg-gray-200 hover:bg-gray-300 py-3 rounded-lg font-medium"
+        class="w-full bg-gray-200 hover:bg-gray-300 py-3 rounded-2xl font-medium"
         (click)="onCancelEdit()">
         ยกเลิก
       </button>
 
       <button
         type="button"
-        class="w-full bg-yellow-400 hover:bg-yellow-500 py-3 rounded-lg font-semibold"
+        class="w-full bg-yellow-400 hover:bg-yellow-500 py-3 rounded-2xl font-semibold"
         (click)="onSubmit()">
         บันทึกข้อมูล
       </button>

@@ -10,9 +10,8 @@ label {
 }
 
 .form-input-custom {
-  @apply w-full border border-gray-300 font-medium text-[#000d19] px-3 py-2;
+  @apply w-full border border-gray-300 font-medium text-[#000d19] px-3 py-2 rounded-xl transition-all;
   font-size: $font-size-24;
-  border-radius: 0.5rem;
 
   &:focus {
     border-color: $color-primary;
@@ -27,8 +26,8 @@ label {
 }
 
 .custom-btn {
-  @apply flex-1 md:flex-none md:w-[100px] font-semibold py-3 transition;
-  border-radius: 0.5rem;
+  @apply flex-1 md:flex-none md:w-[100px] font-semibold py-2 transition;
+  border-radius: 1rem;
 }
 
 custom-select {

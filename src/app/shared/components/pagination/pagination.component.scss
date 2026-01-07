@@ -1,5 +1,5 @@
 .page-btn {
-  @apply w-7 h-7 flex items-center justify-center rounded-md border border-gray-300 bg-white hover:bg-[#FFEA00] hover:text-[#00162b] transition cursor-pointer;
+  @apply w-7 h-7 flex items-center justify-center rounded-md border border-gray-300 bg-white hover:bg-[#FEF08A] hover:text-[#00162b] transition cursor-pointer;
 
   &.disabled {
     @apply opacity-40 cursor-not-allowed pointer-events-none;
@@ -14,7 +14,7 @@
   }
 
   &.active {
-    @apply bg-[#FFEA00] text-[#00162b] border-[#FFEA00] cursor-default;
+    @apply bg-[#FACC15] text-[#00162b] border-[#FACC15] cursor-default;
   }
 }
 

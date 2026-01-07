@@ -58,24 +58,6 @@ export class FormDetailUserComponent implements OnInit {
     this.mapManagerName();
   }
 
-  //  private async initializePermissions() {
-  //   try {
-  //     this.permissions = await this.permissionService.permissions();
-  //     this.isViewAdminSender = this.permissionService.isViewAdminSender;
-  //     this.isDeleteAdminSender = this.permissionService.isDeleteAdminSender;
-
-  //     if (!this.isViewAdminSender) {
-  //       this.router.navigate(['/not-found']);
-  //     }
-
-  //   } catch (error) {
-  //     const errorObject = error as { message: string };
-  //     if (errorObject.message !== '504') {
-  //       this.handleCommonError();
-  //     }
-  //   }
-  // }
-
   private async getUserData() {
     const userId = this.route.snapshot.paramMap.get('id');
     if (!userId) {

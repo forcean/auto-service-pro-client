@@ -3,7 +3,7 @@
     type="button"
     #dropdown
     [disabled]="isDisabled"
-    class="flex justify-between items-center w-full pl-4 pr-3 py-2 bg-white border border-gray-300 rounded-lg cursor-pointer whitespace-nowrap text-[0.92rem] overflow-hidden disabled:cursor-default focus:border-[#88c273] focus:outline-none"
+    class="flex justify-between items-center w-full pl-4 pr-3 py-2 bg-white border border-gray-300 rounded-xl cursor-pointer whitespace-nowrap text-[0.92rem] overflow-hidden disabled:cursor-default focus:border-[#88c273] focus:outline-none"
     (click)="toggleDropdown()"
     [class.border-error]="isError">
     <span
@@ -29,7 +29,7 @@
     #customOptions
     *ngIf="isDropdownOpen"
     [ngClass]="{ 'py-0': optionsValue === 'noData' }"
-    class="absolute left-0 top-full mt-1 min-w-full max-h-[50vh] w-auto bg-white border border-gray-300 shadow-md rounded-md z-[1000] p-2 overflow-y-auto whitespace-nowrap">
+    class="absolute left-0 top-full mt-1 min-w-full max-h-[50vh] w-auto bg-white border border-gray-300 shadow-md rounded-xl z-[1000] p-2 overflow-y-auto whitespace-nowrap">
     <ng-content></ng-content>
   </div>
 </div>
