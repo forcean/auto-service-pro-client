@@ -1,0 +1,7 @@
+@tailwind components;
+@import '../../../../assets/styles/variables';
+@import '../../../../assets/styles/color';
+
+.form-input {
+  @apply w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[$color-primary];
+}

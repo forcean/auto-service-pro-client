@@ -1,0 +1,67 @@
+<div
+  class="relative flex flex-col bg-white rounded-2xl shadow-md hover:shadow-xl transition cursor-pointer overflow-hidden"
+  [class.opacity-60]="isOutOfStock"
+  (click)="onClick()">
+
+  <!-- Image -->
+  <div class="relative w-full h-44 bg-gray-100">
+    <img
+      *ngIf="product.image; else noImage"
+      [src]="product.image"
+      class="w-full h-full object-cover" />
+
+    <ng-template #noImage>
+      <div
+        class="flex items-center justify-center h-full text-gray-400 text-sm">
+        No Image
+      </div>
+    </ng-template>
+
+    <!-- Status Badge -->
+    <span
+      *ngIf="isOutOfStock"
+      class="absolute top-2 left-2 bg-gray-700 text-white text-xs px-2 py-0.5 rounded-full">
+      Out of stock
+    </span>
+  </div>
+
+  <!-- Content -->
+  <div class="flex flex-col gap-1 p-3 flex-1">
+
+    <!-- Product Name -->
+    <h3 class="text-sm font-semibold truncate">
+      {{ product.name }}
+    </h3>
+
+    <!-- SKU -->
+    <p class="text-xs text-gray-400">
+      SKU: {{ product.sku }}
+    </p>
+
+    <!-- Brand / Category -->
+    <p class="text-xs text-gray-600">
+      {{ product.brandName }} • {{ product.categoryName }}
+    </p>
+
+    <!-- Vehicles -->
+    <p
+      *ngIf="product.vehicles?.length"
+      class="text-xs text-gray-500 line-clamp-2">
+      ใช้กับ: {{ product.vehicles!.join(', ') }}
+    </p>
+
+    <!-- Price -->
+    <div class="mt-auto flex items-end justify-between">
+      <span class="text-primary font-bold text-base">
+        ฿{{ product.price.retail | number }}
+      </span>
+
+      <span
+        *ngIf="product.price.wholesale"
+        class="text-xs text-gray-400">
+        ช่าง ฿{{ product.price.wholesale | number }}
+      </span>
+    </div>
+
+  </div>
+</div>

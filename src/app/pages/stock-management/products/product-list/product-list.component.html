@@ -1,0 +1,61 @@
+<!-- <section class="w-full bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 py-6">
+
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold">สินค้าทั้งหมด</h2>
+            <span class="text-sm text-gray-500">
+                {{ products.length }} รายการ
+            </span>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <app-product-card
+                *ngFor="let product of products"
+                [product]="product"
+                (clicked)="goToDetail($event)" />
+        </div>
+
+    </div>
+</section> -->
+
+<section class="w-full bg-gray-50">
+  <div class="max-w-7xl mx-auto px-4 py-6">
+
+    <div class="grid grid-cols-12 gap-6">
+
+      <!-- Filter -->
+      <aside class="col-span-12 lg:col-span-3">
+        <app-product-filter
+          (filterChange)="onFilterChange($event)" />
+      </aside>
+
+      <!-- Product Grid -->
+      <main class="col-span-12 lg:col-span-9">
+
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-semibold">
+            รายการอะไหล่
+          </h2>
+          <span class="text-sm text-gray-500">
+            {{ products.length }} รายการ
+          </span>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <app-product-card
+            *ngFor="let product of products"
+            [product]="product"></app-product-card>
+
+        </div>
+        <app-pagination *ngIf="true" aligns="end"
+          [paginationOption]="paginationOption"
+          [currentPage]="pageIndex"
+          [recordPerPage]="pageSize"
+          (changePage)="onPageChange($event)"
+          [totalRecord]="10">
+        </app-pagination>
+      </main>
+
+    </div>
+  </div>
+</section>

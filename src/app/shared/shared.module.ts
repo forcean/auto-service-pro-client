@@ -18,6 +18,8 @@ import { PaginationComponent } from './components/pagination/pagination.componen
 import { SearchUserManagementComponent } from './components/search-user-management/search-user-management.component';
 import { ContentTitleComponent } from './components/content-title/content-title.component';
 import { LazyLoadTableComponent } from './lazy-load/lazy-load-table/lazy-load-table.component';
+import { ProductCardComponent } from './components/product-card/product-card.component';
+import { ProductFilterComponent } from './components/product-filter/product-filter.component';
 
 const components = [
   ModalCommonComponent,
@@ -34,12 +36,15 @@ const components = [
   PaginationComponent,
   SearchUserManagementComponent,
   ContentTitleComponent,
-  LazyLoadTableComponent
+  LazyLoadTableComponent,
+  ProductCardComponent,
+  ProductFilterComponent
 ];
 
 @NgModule({
   declarations: [
     ...components,
+
   ],
   imports: [
     CommonModule,
