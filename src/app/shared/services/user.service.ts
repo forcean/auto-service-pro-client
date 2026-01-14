@@ -33,7 +33,7 @@ export class UserService {
 
   async getUserPermission() {
     try {
-      const uri = this.PREFIX_USER + `/users/permission`;
+      const uri = this.PREFIX_USER + `/users/permissions`;
       const response = await this.httpService.get<IUserPermission>(uri);
       return response;
     } catch (error) {
