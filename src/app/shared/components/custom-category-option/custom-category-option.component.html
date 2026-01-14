@@ -1,0 +1,38 @@
+<div class="category-option">
+
+  <div
+    class="indent"
+    [style.paddingLeft.px]="level * 24">
+
+    <div
+      class="row"
+      (click)="select()">
+
+      <button
+        *ngIf="node.children?.length"
+        type="button"
+        class="caret"
+        (click)="toggle($event)">
+        {{ expanded ? '▾' : '▸' }}
+      </button>
+
+      <span
+        class="label"
+        [class.parent]="node.children?.length"
+        [class.leaf]="!node.children?.length">
+        {{ node.name }}
+      </span>
+
+    </div>
+  </div>
+
+  <div *ngIf="expanded">
+    <custom-category-option
+      *ngFor="let child of node.children"
+      [node]="child"
+      [level]="level + 1.25"
+      (selectCategory)="selectCategory.emit($event)">
+    </custom-category-option>
+  </div>
+
+</div>

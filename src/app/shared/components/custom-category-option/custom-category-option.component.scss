@@ -1,0 +1,51 @@
+// .category-option {
+//     font-size: 0.875rem;
+// }
+
+// .row {
+//     display: flex;
+//     align-items: center;
+//     gap: 6px;
+//     padding: 6px 8px;
+//     border-radius: 8px;
+//     cursor: pointer;
+
+//     &:hover {
+//         background: #f6f7f8;
+//     }
+// }
+
+.caret {
+  width: 16px;
+  font-size: 18px;
+  color: #64748b;
+}
+
+.label {
+  color: #00162b;
+}
+
+.parent {
+  font-weight: 600;
+}
+
+.leaf {
+  font-weight: 500;
+}
+
+.indent {
+  display: block;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+
+  &:hover {
+    background: #f6f7f8;
+  }
+}

@@ -2,7 +2,10 @@ import { Component, ContentChildren, QueryList, forwardRef, Input, HostListener,
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { CustomOptionComponent } from '../custom-option/custom-option.component';
 import { createPopper } from '@popperjs/core';
+import { CustomCategoryOptionComponent } from '../custom-category-option/custom-category-option.component';
 // import { TranslateService } from '@ngx-translate/core';
+
+
 
 @Component({
   selector: 'custom-select',
@@ -20,6 +23,8 @@ import { createPopper } from '@popperjs/core';
 export class CustomSelectComponent implements ControlValueAccessor, AfterContentInit {
 
   @ContentChildren(CustomOptionComponent) options!: QueryList<CustomOptionComponent>;
+  @ContentChildren(CustomCategoryOptionComponent, { descendants: true })
+  categoryOptions!: QueryList<CustomCategoryOptionComponent>;
 
   @Input() placeholder: string = '';
   @Input() isDisabled = false;
@@ -57,6 +62,12 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   ngAfterContentInit() {
     this.setupOptionSubscriptions();
 
+    this.categoryOptions?.forEach(option => {
+      option.selectCategory.subscribe(event => {
+        this.selectOption(event.value, event.label);
+      });
+    });
+
     this.options.changes.subscribe(() => {
       this.setupOptionSubscriptions();
     });
@@ -67,7 +78,6 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
       }
     }, 0);
   }
-
 
   setupOptionSubscriptions() {
     this.options.forEach(option => {
@@ -172,4 +182,9 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
       this.clickOutside.emit(this.dropdownName);
     }
   }
+
+  onExternalSelect(event: { value: unknown; label: string }) {
+    this.selectOption(event.value, event.label);
+  }
+
 }

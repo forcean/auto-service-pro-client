@@ -20,6 +20,8 @@ import { ContentTitleComponent } from './components/content-title/content-title.
 import { LazyLoadTableComponent } from './lazy-load/lazy-load-table/lazy-load-table.component';
 import { ProductCardComponent } from './components/product-card/product-card.component';
 import { ProductFilterComponent } from './components/product-filter/product-filter.component';
+import { FileUploadComponent } from './components/file-upload/file-upload.component';
+import { CustomCategoryOptionComponent } from './components/custom-category-option/custom-category-option.component';
 
 const components = [
   ModalCommonComponent,
@@ -38,7 +40,9 @@ const components = [
   ContentTitleComponent,
   LazyLoadTableComponent,
   ProductCardComponent,
-  ProductFilterComponent
+  ProductFilterComponent,
+  FileUploadComponent,
+  CustomCategoryOptionComponent,
 ];
 
 @NgModule({
@@ -54,7 +58,6 @@ const components = [
   ],
   exports: [
     ...components,
-    ProfileComponent
   ]
 })
 export class SharedModule { }
