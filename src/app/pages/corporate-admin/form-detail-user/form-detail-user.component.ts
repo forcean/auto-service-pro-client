@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ModalCommonService } from '../../../shared/components/modal-common/modal-common.service';
@@ -10,8 +10,7 @@ import { IReqUpdateUser, IResponseUserDetail } from '../../../shared/interface/u
 import { Subscription } from 'rxjs';
 import { UserList } from '../../../shared/interface/table-user-management.interface';
 import { LoadingBarService } from '@ngx-loading-bar/core';
-
-
+import { PermissionService } from '../../../shared/services/permission.service';
 @Component({
   selector: 'app-form-detail-user',
   standalone: false,
@@ -19,11 +18,10 @@ import { LoadingBarService } from '@ngx-loading-bar/core';
   styleUrl: './form-detail-user.component.scss'
 })
 export class FormDetailUserComponent implements OnInit {
-  @Input() isDelete: boolean = false;
-  @Input() isUpdate: boolean = false;
 
   private modalSubscription: Subscription | null = null;
   form!: FormGroup;
+  permissions!: PermissionService;
   userData!: IResponseUserDetail;
   managerList: UserList[] = [];
   managerName: string | null = null;
@@ -38,6 +36,9 @@ export class FormDetailUserComponent implements OnInit {
   isLoadingEdit: boolean = false;
   isMobileNoInvalid: boolean = false;
   isMatchEmail: boolean = false;
+  isDeleteUser: boolean = false;
+  isUpdateUser: boolean = false;
+  isViewUserDetail: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -47,15 +48,36 @@ export class FormDetailUserComponent implements OnInit {
     private userManagementService: UserManagementService,
     private modalConditionService: ModalConditionService,
     private loadingBarService: LoadingBarService,
+    private permissionService: PermissionService,
   ) { }
 
   @ViewChild(ModalConditionComponent) modalConditionComponent!: ModalConditionComponent;
 
   async ngOnInit() {
+    this.initializePermissions();
     await this.initForm();
     await this.getUserData();
     await this.loadManagerList();
     this.mapManagerName();
+
+  }
+
+  private async initializePermissions() {
+    try {
+      this.permissions = await this.permissionService.permissions();
+      this.isUpdateUser = this.permissionService.isUpdateUser;
+      this.isDeleteUser = this.permissionService.isDeleteUser;
+      this.isViewUserDetail = this.permissionService.isViewUserDetail;
+      if (!this.isViewUserDetail) {
+        this.router.navigate(['/not-found']);
+      }
+
+    } catch (error) {
+      const errorObject = error as { message: string };
+      if (errorObject.message !== '504') {
+        this.handleCommonError();
+      }
+    }
   }
 
   private async getUserData() {
@@ -162,11 +184,6 @@ export class FormDetailUserComponent implements OnInit {
       } else {
         this.handleCommonError();
       }
-      // this.managerList = [
-      //   { id: '1', publicId: 'manager1', firstName: 'สมชาย', lastName: 'ใจดี', role: 'MNG', managerName: null, phoneNumber: '0812345678', activeFlag: true, lastAccess: null },
-      //   { id: '2', publicId: 'manager2', firstName: 'สมหญิง', lastName: 'แสนสวย', role: 'MNG', managerName: null, phoneNumber: '0898765432', activeFlag: true, lastAccess: null },
-      //   { id: '3', publicId: 'manager3', firstName: 'สมปอง', lastName: 'หัวไว', role: 'MNG', managerName: null, phoneNumber: '0823456789', activeFlag: false, lastAccess: null }
-      // ];
     } catch (err) {
       console.error('Error loading manager list', err);
       this.handleCommonError();

@@ -38,13 +38,13 @@ export class CorporateAdminListComponent implements OnInit {
 
   isLoadingReset: boolean = false;
   isLoading: boolean = false;
-  isRoleSO: boolean = true;
-  isRoleAMD: boolean = true;
+  isRoleSO: boolean = false;
+  isRoleAMD: boolean = false;
+  isRoleMNG: boolean = false;
   isPasswordInvalid: boolean = false;
   isResetPassword: boolean = false;
   isViewUserList: boolean = false;
-  isDeleteUser: boolean = false;
-  isCreateUser: boolean = false;
+
 
   private modalSubscription: Subscription | null = null;
 
@@ -72,6 +72,7 @@ export class CorporateAdminListComponent implements OnInit {
     this.role = this.handleTokenService.getRole();
     this.isRoleSO = this.role === ROLE.SO;
     this.isRoleAMD = this.role === ROLE.ADM;
+    this.isRoleMNG = this.role === ROLE.MNG;
   }
 
   ngOnInit(): void {
@@ -83,8 +84,6 @@ export class CorporateAdminListComponent implements OnInit {
       this.permissions = await this.permissionService.permissions();
       this.isViewUserList = this.permissionService.isViewUserList;
       this.isResetPassword = this.permissionService.isResetPassword;
-      this.isDeleteUser = this.permissionService.isDeleteUser;
-      this.isCreateUser = this.permissionService.isCreateUser;
       if (!this.isViewUserList) {
         this.router.navigate(['/not-found']);
       } else {
