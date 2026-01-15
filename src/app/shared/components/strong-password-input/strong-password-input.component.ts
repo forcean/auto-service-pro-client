@@ -2,7 +2,6 @@ import { Component, ElementRef, EventEmitter, Input, OnInit, Output, SimpleChang
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IStrongPassword } from '../../interface/strong-password.interface';
 
-declare const bootstrap: any;
 
 @Component({
   selector: 'app-strong-password-input',
@@ -30,7 +29,6 @@ export class StrongPasswordInputComponent implements OnInit, OnDestroy, AfterVie
   passwordStrengthLevelText: string = 'ความปลอดภัยของรหัสผ่าน';
 
   barColors = ['', '', '', ''];
-  popoverInstance: any;
   popoverContent = '';
 
   private readonly colors = ['#F5222D', '#FFC107', '#7BA800', '#A88D00'];
@@ -51,20 +49,7 @@ export class StrongPasswordInputComponent implements OnInit, OnDestroy, AfterVie
   }
 
   ngAfterViewInit(): void {
-    const inputEl = this.passwordInput.nativeElement;
 
-    this.popoverInstance = new bootstrap.Popover(inputEl, {
-      html: true,
-      sanitize: false,
-      content: () => this.passwordPopover.nativeElement.innerHTML,
-      customClass: 'custom-popover',
-      trigger: 'manual',
-      container: 'body',     // <<< FIX ใหญ่ที่สุด
-      placement: 'right-start'
-    });
-
-    inputEl.addEventListener('focus', () => this.showPopover());
-    inputEl.addEventListener('blur', () => this.hidePopover());
   }
 
   isPopoverVisible = false;
@@ -74,7 +59,6 @@ export class StrongPasswordInputComponent implements OnInit, OnDestroy, AfterVie
   }
 
   hideTailwindPopover() {
-    // delay เพื่อกัน blur ตอนกด toggle eye
     setTimeout(() => {
       if (!this.isPasswordVisible) {
         this.isPopoverVisible = false;
@@ -89,13 +73,6 @@ export class StrongPasswordInputComponent implements OnInit, OnDestroy, AfterVie
     this.updatePasswordStrength();
   }
 
-  private showPopover(): void {
-    this.popoverInstance.show();
-  }
-
-  private hidePopover(): void {
-    this.popoverInstance.hide();
-  }
 
   resetForm() {
     this.passwordForm?.reset();
@@ -140,7 +117,6 @@ export class StrongPasswordInputComponent implements OnInit, OnDestroy, AfterVie
     if (this.passwordInput && this.passwordInput.nativeElement.contains(event.target)) {
       return;
     }
-    this.hidePopover();
   }
 
   private updatePasswordStrength(): void {
