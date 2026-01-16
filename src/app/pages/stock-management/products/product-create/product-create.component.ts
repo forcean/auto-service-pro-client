@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ICategory } from '../../../../shared/interface/category.interface';
+import { ProductBrand } from '../../../../shared/interface/brand.interface';
 
 @Component({
   selector: 'app-product-create',
@@ -11,14 +12,12 @@ import { ICategory } from '../../../../shared/interface/category.interface';
 })
 export class ProductCreateComponent implements OnInit {
   form!: FormGroup;
-
-  /** mock options (ควรโหลดจาก API จริง) */
   categories: ICategory[] = [];
-  brands: Array<{ id: string; name: string }> = [];
+  brands: ProductBrand[] = [];
+  isVehicleBinding: boolean = false;
 
   constructor(
     private fb: FormBuilder,
-    // private productService: ProductService,
     private router: Router
   ) { }
 
@@ -37,7 +36,7 @@ export class ProductCreateComponent implements OnInit {
 
       status: ['active', Validators.required],
 
-      vehicles: this.fb.array([]),
+      vehicles: this.fb.control([], Validators.required),
 
       prices: this.fb.array([
         this.createPrice('RETAIL'),
@@ -55,13 +54,6 @@ export class ProductCreateComponent implements OnInit {
 
       images: this.fb.array([], Validators.required),
     });
-
-    // default 1 vehicle
-    this.addVehicle();
-  }
-
-  get vehicles(): FormArray {
-    return this.form.get('vehicles') as FormArray;
   }
 
   get prices(): FormArray {
@@ -72,36 +64,11 @@ export class ProductCreateComponent implements OnInit {
     return this.form.get('images') as FormArray;
   }
 
-  private createVehicle(): FormGroup {
-    return this.fb.group({
-      vehicleId: ['', Validators.required],
-      from: [null],
-      to: [null],
-      engines: [''], // comma separated
-      remark: [''],
-    });
-  }
-
   private createPrice(type: 'RETAIL' | 'WHOLESALE' | 'COST'): FormGroup {
     return this.fb.group({
       type: [type],
       amount: [null],
     });
-  }
-
-  private createImage(fileId: string, isPrimary = false): FormGroup {
-    return this.fb.group({
-      fileId: [fileId, Validators.required],
-      isPrimary: [isPrimary],
-    });
-  }
-
-  addVehicle(): void {
-    this.vehicles.push(this.createVehicle());
-  }
-
-  removeVehicle(index: number): void {
-    this.vehicles.removeAt(index);
   }
 
   tempImages: {
@@ -128,10 +95,7 @@ export class ProductCreateComponent implements OnInit {
 
     const payload = this.mapToPayload(this.form.value);
     console.log('Create Product Payload:', payload);
-    // this.productService.create(payload).subscribe({
-    //   next: () => this.router.navigate(['/products']),
-    //   error: err => console.error('Create product failed', err),
-    // });
+
   }
 
   private mapToPayload(raw: any): any {
@@ -147,16 +111,15 @@ export class ProductCreateComponent implements OnInit {
       vehicles: raw.vehicles?.length
         ? raw.vehicles.map((v: any) => ({
           vehicleId: v.vehicleId,
-          yearRange:
-            v.from || v.to
-              ? { from: v.from, to: v.to }
-              : undefined,
-          engines: v.engines
-            ? v.engines.split(',').map((e: string) => e.trim())
-            : undefined,
-          remark: v.remark || undefined,
+          yearRange: {
+            from: v.yearFrom,
+            to: v.yearTo,
+          },
+          engines: v.engines,
+          remark: v.remark,
         }))
         : undefined,
+
 
       prices: raw.prices
         ?.filter((p: any) => p.amount)
@@ -252,7 +215,7 @@ export class ProductCreateComponent implements OnInit {
                 level: 3,
                 path: ['ENG', 'OILF', 'OILF1'],
                 isSelectable: true,
-                allowVehicleBinding: false,
+                allowVehicleBinding: true,
                 allowStock: true,
                 children: []
               }
@@ -261,11 +224,47 @@ export class ProductCreateComponent implements OnInit {
         ]
       }
     ];
+  }
 
-    this.brands = [
-      { id: 'brand-bosch', name: 'Bosch' },
-      { id: 'brand-oem', name: 'OEM Toyota' }
-    ];
+  async onSelectedCategory(): Promise<void> {
+    this.form.get('brandId')?.reset();
+    this.brands = [];
+    const catId = this.form.get('categoryId')?.value;
+    if (!catId) {
+      return;
+    }
+
+    const selectedCategory = this.findCategoryById(this.categories, catId);
+    this.isVehicleBinding = selectedCategory?.allowVehicleBinding || false;
+    try {
+      if (catId === 'cat-brake-pad') {
+        this.brands = [{ id: 'brand-abc', name: 'Brand ABC', code: 'ABC' }];
+      } else if (catId === 'cat-oil-filter-1') {
+        this.brands = [{ id: 'brand-xyz', name: 'Brand XYZ', code: 'XYZ' }];
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+
+  private findCategoryById(
+    categories: ICategory[],
+    id: string
+  ): ICategory | null {
+    for (const cat of categories) {
+      if (cat.id === id) {
+        return cat;
+      }
+
+      if (cat.children?.length) {
+        const found = this.findCategoryById(cat.children, id);
+        if (found) {
+          return found;
+        }
+      }
+    }
+    return null;
   }
 
 

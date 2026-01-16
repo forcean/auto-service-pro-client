@@ -3,6 +3,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { CustomOptionComponent } from '../custom-option/custom-option.component';
 import { createPopper } from '@popperjs/core';
 import { CustomCategoryOptionComponent } from '../custom-category-option/custom-category-option.component';
+import { CustomBrandOptionComponent } from '../custom-brand-option/custom-brand-option.component';
 // import { TranslateService } from '@ngx-translate/core';
 
 
@@ -23,6 +24,7 @@ import { CustomCategoryOptionComponent } from '../custom-category-option/custom-
 export class CustomSelectComponent implements ControlValueAccessor, AfterContentInit {
 
   @ContentChildren(CustomOptionComponent) options!: QueryList<CustomOptionComponent>;
+  @ContentChildren(CustomBrandOptionComponent) brandOptions!: QueryList<CustomBrandOptionComponent>;
   @ContentChildren(CustomCategoryOptionComponent, { descendants: true })
   categoryOptions!: QueryList<CustomCategoryOptionComponent>;
 
@@ -61,6 +63,15 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
 
   ngAfterContentInit() {
     this.setupOptionSubscriptions();
+    this.setupBrandOptionSubscriptions();
+
+    this.options.changes.subscribe(() => {
+      this.setupOptionSubscriptions();
+    });
+
+    this.brandOptions.changes.subscribe(() => {
+      this.setupBrandOptionSubscriptions();
+    });
 
     this.categoryOptions?.forEach(option => {
       option.selectCategory.subscribe(event => {
@@ -68,16 +79,13 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
       });
     });
 
-    this.options.changes.subscribe(() => {
-      this.setupOptionSubscriptions();
-    });
-
     setTimeout(() => {
       if (this.selectedValue) {
         this.writeValue(this.selectedValue);
       }
-    }, 0);
+    });
   }
+
 
   setupOptionSubscriptions() {
     this.options.forEach(option => {
@@ -92,6 +100,17 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
     });
     this.writeValue(this.selectedValue);
   }
+
+  setupBrandOptionSubscriptions() {
+    this.brandOptions.forEach(option => {
+      option.selectEvent.subscribe(({ value, label }) => {
+        this.selectOption(value, label);
+      });
+
+      option.isSelected = option.value === this.selectedValue;
+    });
+  }
+
 
   toggleDropdown() {
     if (!this.isDisabled) {
@@ -134,11 +153,15 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
       this.onChange(value);
       this.onTouched();
       this.isDropdownOpen = false;
+
       this.change.emit(value);
       this.toggle.emit(this.dropdownName);
-      this.options.forEach(option => option.isSelected = option.value === value);
+
+      this.options.forEach(o => o.isSelected = o.value === value);
+      this.brandOptions.forEach(o => o.isSelected = o.value === value);
     }
   }
+
 
   getSelectedLabel(): string {
     return this.selectedLabel || this.placeholder;

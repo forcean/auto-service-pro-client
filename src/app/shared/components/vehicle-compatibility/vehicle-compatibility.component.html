@@ -1,0 +1,25 @@
+<section class="card">
+  <h2 class="section-title">ความเข้ากันได้ของยานยนต์
+    <span class="text-red-600">*</span>
+  </h2>
+
+  <app-vehicle-card
+    *ngFor="let v of vehicles; let i = index; trackBy: trackByVehicleId"
+    [vehicle]="v"
+    [readonly]="false"
+    (remarkChange)="onRemarkChange(i, $event)"
+    (remove)="remove(i)">
+  </app-vehicle-card>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <label class="label">เพิ่มยานยนต์
+        <span class="text-red-600">*</span>
+      </label>
+
+      <app-vehicle-step-selector
+        (selected)="addVehicle($event)">
+      </app-vehicle-step-selector>
+    </div>
+  </div>
+
+</section>

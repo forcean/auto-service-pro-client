@@ -1,0 +1,17 @@
+<div class="card">
+  <div class="row">
+    <input class="form-input" disabled [value]="vehicle.model"
+      placeholder="Vehicle ID" />
+    <input class="form-input" disabled [value]="vehicle.yearFrom" />
+    <input class="form-input" disabled [value]="vehicle.yearTo" />
+    <input class="form-input" disabled [value]="vehicle.engines" />
+  </div>
+
+  <input
+    class="form-input remark"
+    [value]="vehicle.remark"
+    placeholder="Remark"
+    (input)="onRemarkChange($any($event.target).value)" />
+
+  <button class="remove" (click)="remove.emit()">Remove</button>
+</div>

@@ -22,6 +22,10 @@ import { ProductCardComponent } from './components/product-card/product-card.com
 import { ProductFilterComponent } from './components/product-filter/product-filter.component';
 import { FileUploadComponent } from './components/file-upload/file-upload.component';
 import { CustomCategoryOptionComponent } from './components/custom-category-option/custom-category-option.component';
+import { CustomBrandOptionComponent } from './components/custom-brand-option/custom-brand-option.component';
+import { VehicleCardComponent } from './components/vehicle-card/vehicle-card.component';
+import { VehicleStepSelectorComponent } from './components/vehicle-step-selector/vehicle-step-selector.component';
+import { VehicleCompatibilityComponent } from './components/vehicle-compatibility/vehicle-compatibility.component';
 
 const components = [
   ModalCommonComponent,
@@ -43,12 +47,15 @@ const components = [
   ProductFilterComponent,
   FileUploadComponent,
   CustomCategoryOptionComponent,
+  CustomBrandOptionComponent,
+  VehicleCardComponent,
+  VehicleStepSelectorComponent,
+  VehicleCompatibilityComponent,
 ];
 
 @NgModule({
   declarations: [
     ...components,
-
   ],
   imports: [
     CommonModule,

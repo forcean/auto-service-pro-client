@@ -1,0 +1,35 @@
+<div class="step-box">
+    <custom-select
+        *ngIf="step === 1"
+        placeholder="Select Brand"
+        (change)="selectBrand($event)">
+        <custom-option
+            *ngFor="let b of brands"
+            [value]="b.id">
+            {{ b.name }}
+        </custom-option>
+    </custom-select>
+
+    <custom-select
+        *ngIf="step === 2"
+        placeholder="Select Model"
+        (change)="selectModel($event)">
+        <custom-option
+            *ngFor="let m of models"
+            [value]="m.id">
+            {{ m.name }}
+        </custom-option>
+    </custom-select>
+
+    <custom-select
+        *ngIf="step === 3"
+        placeholder="Select Vehicle"
+        (change)="selectVehicle($event)">
+        <custom-option
+            *ngFor="let v of vehicles"
+            [value]="v">
+            {{ v.model }}
+        </custom-option>
+    </custom-select>
+
+</div>
