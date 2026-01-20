@@ -1,14 +1,27 @@
 import { Directive, ElementRef, Renderer2, Input } from '@angular/core';
+/**
+ * Directive สำหรับป้องกันอักขระพิเศษที่ไม่ต้องการใน input
+ * - อนุญาตเฉพาะตัวอักษรภาษาอังกฤษ (a–z, A–Z)
+ * - อนุญาตตัวอักษรภาษาไทย (ก–ฮ รวมสระและวรรณยุกต์)
+ * - อนุญาตตัวเลข 0–9 และเครื่องหมายขีด (-)
+ * - สามารถกำหนดให้อนุญาตช่องว่าง (space) ได้ผ่าน @Input() allowSpace
+ *
+ * ทำงานทั้งตอนพิมพ์ (keydown) และตอนแก้ไขค่า (input)
+ * เพื่อป้องกันการพิมพ์และการ paste อักขระต้องห้าม
+ *
+ * เหมาะสำหรับ field ชื่อ, ชื่อสินค้า, หมวดหมู่ หรือข้อมูลข้อความที่ต้องการความสะอาด
+ */
 
 @Directive({
-  selector: '[appPreventSpecialChars]'
+  selector: '[appPreventSpecialChars]',
+  standalone: false
 })
 export class PreventSpecialCharsDirective {
 
   @Input() allowSpace: boolean = false;
 
   private allowedKeys: string[] = [
-    'Backspace', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Delete', 
+    'Backspace', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Delete',
     'Tab', 'Enter', 'Home', 'End', 'Shift', 'Control', 'Alt', 'Meta'
   ];
 
@@ -19,8 +32,8 @@ export class PreventSpecialCharsDirective {
 
   onInputChange(event: Event): void {
     const input = event.target as HTMLInputElement;
-    const regEx = this.allowSpace 
-      ? /[^a-zA-Z0-9ก-ฮ\u0E2F-\u0E3A\u0E40-\u0E4D- ]/g 
+    const regEx = this.allowSpace
+      ? /[^a-zA-Z0-9ก-ฮ\u0E2F-\u0E3A\u0E40-\u0E4D- ]/g
       : /[^a-zA-Z0-9ก-ฮ\u0E2F-\u0E3A\u0E40-\u0E4D-]/g;
     let value = input.value;
 
@@ -39,9 +52,9 @@ export class PreventSpecialCharsDirective {
     if (isCtrlCmd && allowedCodes.includes(event.code)) {
       return;
     }
-    
-    const regEx = this.allowSpace 
-      ? /^[a-zA-Z0-9ก-ฮ\u0E2F-\u0E3A\u0E40-\u0E4D- ]$/ 
+
+    const regEx = this.allowSpace
+      ? /^[a-zA-Z0-9ก-ฮ\u0E2F-\u0E3A\u0E40-\u0E4D- ]$/
       : /^[a-zA-Z0-9ก-ฮ\u0E2F-\u0E3A\u0E40-\u0E4D-]$/;
     if (!regEx.test(key) && !this.allowedKeys.includes(key)) {
       event.preventDefault();

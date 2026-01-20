@@ -1,4 +1,14 @@
 import { Directive, ElementRef, Renderer2 } from '@angular/core';
+/**
+ * Directive สำหรับจำกัดการพิมพ์ให้รับเฉพาะอักขระแบบ alphanumeric
+ * - ตัวอักษร a–z, A–Z
+ * - ตัวเลข 0–9
+ * - อักขระพิเศษที่อนุญาต: . _ -
+ *
+ * ใช้กับ input/textarea เพื่อป้องกันอักขระต้องห้าม
+ * ทั้งจากการพิมพ์โดยตรงและการ paste
+ * เหมาะกับข้อมูลประเภท username, code, slug หรือ identifier ต่าง ๆ
+ */
 
 @Directive({
   selector: '[maskAlphanumeric]'
@@ -34,7 +44,7 @@ export class AlphanumericDirective {
     if (isCtrlCmd && allowedCodes.includes(event.code)) {
       return;
     }
-    
+
     const regEx = /^[A-Za-z0-9._-]$/;
     if (!regEx.test(key) && !this.allowedKeys.includes(key)) {
       event.preventDefault();

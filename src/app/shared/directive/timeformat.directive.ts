@@ -1,5 +1,25 @@
 import { Directive, ElementRef, HostListener, Input, Renderer2 } from '@angular/core';
 import { NgControl } from '@angular/forms';
+/**
+ * Directive สำหรับจัดรูปแบบการกรอกเวลา (Time Format)
+ *
+ * โหมดการทำงาน:
+ * 1) ไม่กำหนด typeDate
+ *    - รับค่าในรูปแบบ HH:mm
+ *    - จำกัดชั่วโมงไม่เกิน 23 และนาทีไม่เกิน 59
+ *    - ใส่เครื่องหมาย ':' ให้อัตโนมัติขณะพิมพ์
+ *
+ * 2) กำหนด typeDate = 'hour' | 'minute' | 'second'
+ *    - ใช้สำหรับ input แยกช่อง
+ *    - hour   : จำกัดค่า 0–23
+ *    - minute : จำกัดค่า 0–59
+ *    - second : จำกัดค่า 0–59
+ *    - sync ค่าเข้ากับ Reactive Form ผ่าน NgControl
+ *
+ * ป้องกันการพิมพ์อักขระที่ไม่ใช่ตัวเลขจากคีย์บอร์ด
+ *
+ * เหมาะสำหรับฟอร์มตั้งเวลา, schedule, SLA, หรือการกรอกเวลาแบบกำหนดรูปแบบ
+ */
 
 @Directive({
   selector: '[appTimeFormat]'

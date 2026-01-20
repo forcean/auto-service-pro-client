@@ -26,6 +26,9 @@ import { CustomBrandOptionComponent } from './components/custom-brand-option/cus
 import { VehicleCardComponent } from './components/vehicle-card/vehicle-card.component';
 import { VehicleStepSelectorComponent } from './components/vehicle-step-selector/vehicle-step-selector.component';
 import { VehicleCompatibilityComponent } from './components/vehicle-compatibility/vehicle-compatibility.component';
+import { DecimalDirective } from './directive/app-decimal.directive';
+import { PreventSpecialCharsDirective } from './directive/preventspecialchars.directive';
+import { PriceDirective } from './directive/app-price.directive';
 
 const components = [
   ModalCommonComponent,
@@ -36,8 +39,6 @@ const components = [
   CustomSelectComponent,
   ResetPasswordModuleComponent,
   ModalConditionComponent,
-  NumericDirective,
-  PreventSpaceDirective,
   TableUserManagementComponent,
   PaginationComponent,
   SearchUserManagementComponent,
@@ -53,9 +54,18 @@ const components = [
   VehicleCompatibilityComponent,
 ];
 
+const directives = [
+  NumericDirective,
+  PreventSpaceDirective,
+  DecimalDirective,
+  PreventSpecialCharsDirective,
+  PriceDirective,
+];
+
 @NgModule({
   declarations: [
     ...components,
+    ...directives,
   ],
   imports: [
     CommonModule,
@@ -65,6 +75,7 @@ const components = [
   ],
   exports: [
     ...components,
+    ...directives,
   ]
 })
 export class SharedModule { }

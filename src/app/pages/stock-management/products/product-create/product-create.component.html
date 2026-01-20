@@ -16,7 +16,7 @@
         <label class="label">ชื่อสินค้า
           <span class="text-red-600">*</span>
         </label>
-        <input class="input" formControlName="name" />
+        <input class="input" formControlName="name" appPreventSpecialChars />
       </div>
 
       <div>
@@ -82,51 +82,6 @@
     </div>
   </section>
 
-  <!-- Vehicle Compatibility -->
-  <!-- <section class="card">
-    <h2 class="section-title">Vehicle Compatibility</h2>
-
-    <div formArrayName="vehicles" class="space-y-4">
-      <div
-        *ngFor="let v of vehicles.controls; let i = index"
-        [formGroupName]="i"
-        class="bg-slate-200 border border-slate-700 rounded-lg p-4 space-y-3">
-
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-          <input class="input" placeholder="Vehicle ID"
-            formControlName="vehicleId" />
-
-          <input type="number" class="input"
-            placeholder="From Year"
-            formControlName="from" />
-
-          <input type="number" class="input"
-            placeholder="To Year"
-            formControlName="to" />
-
-          <input class="input"
-            placeholder="Engines (2.0,2.5)"
-            formControlName="engines" />
-        </div>
-
-        <input class="input"
-          placeholder="Remark"
-          formControlName="remark" />
-
-        <button type="button"
-          class="text-red-400 text-xs"
-          (click)="removeVehicle(i)">
-          Remove
-        </button>
-      </div>
-    </div>
-
-    <button type="button"
-      class="btn-secondary mt-3"
-      (click)="addVehicle()">
-      + Add Vehicle
-    </button>
-  </section> -->
   <section class="card" *ngIf="isVehicleBinding">
     <app-vehicle-compatibility
       formControlName="vehicles">
@@ -141,7 +96,10 @@
       <div *ngFor="let p of prices.controls; let i = index"
         [formGroupName]="i">
         <label class="label">{{ p.value.type }}</label>
-        <input type="number" class="input"
+        <input
+          type="text"
+          class="input"
+          appPrice
           formControlName="amount" />
       </div>
     </div>
@@ -154,13 +112,29 @@
     <div formGroupName="spec"
       class="grid grid-cols-2 md:grid-cols-5 gap-3">
       <input class="input" placeholder="หน่วย" formControlName="unit" />
-      <input type="number" class="input" placeholder="น้ำหนัก"
+      <input
+        appDecimal
+        type="text"
+        class="input"
+        placeholder="น้ำหนัก"
         formControlName="weight" />
-      <input type="number" class="input" placeholder="ความกว้าง"
+      <input
+        appDecimal
+        type="text"
+        class="input"
+        placeholder="ความกว้าง"
         formControlName="width" />
-      <input type="number" class="input" placeholder="ความสูง"
+      <input
+        appDecimal
+        type="text"
+        class="input"
+        placeholder="ความสูง"
         formControlName="height" />
-      <input type="number" class="input" placeholder="ความลึก"
+      <input
+        appDecimal
+        type="text"
+        class="input"
+        placeholder="ความลึก"
         formControlName="depth" />
     </div>
   </section>

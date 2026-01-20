@@ -14,6 +14,7 @@ export class NumericDirective {
   constructor(private el: ElementRef, private renderer: Renderer2) {
     this.renderer.listen(this.el.nativeElement, 'input', this.onInputChange.bind(this));
     this.renderer.listen(this.el.nativeElement, 'keydown', this.onKeyDown.bind(this));
+    console.log('NumericDirective attached');
   }
 
   onInputChange(event: Event): void {

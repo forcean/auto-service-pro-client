@@ -1,4 +1,15 @@
 import { Directive, ElementRef, Renderer2 } from '@angular/core';
+/**
+ * Directive สำหรับจำกัดการพิมพ์ให้รับเฉพาะ
+ * - ตัวอักษร a–z, A–Z
+ * - ตัวเลข 0–9
+ * - ช่องว่าง (space)
+ * - อักขระพิเศษที่อนุญาต เช่น ! " # $ % & ( ) * + - . / : ; = ? @ _
+ *
+ * ใช้กับ input/textarea เพื่อป้องกันการพิมพ์อักขระต้องห้าม
+ * ทั้งจากการกดแป้นพิมพ์และการ paste
+ * เหมาะกับ: ชื่อสินค้า, รหัสสินค้า, input ที่ต้องการกัน emoji / ภาษาไทย / special chars แปลก ๆ
+ */
 
 @Directive({
   selector: '[allowedSpecialChars]'

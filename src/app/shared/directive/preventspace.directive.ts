@@ -1,6 +1,14 @@
 import { Directive, ElementRef, Renderer2 } from '@angular/core';
-// ห้ามกด spacebar ใน input
-// ห้าม paste ข้อความที่มี space — จะลบ space ออกอัตโนมัติ
+/**
+ * Directive สำหรับป้องกันการเว้นวรรค (space) ในช่อง input
+ * - ไม่อนุญาตให้กดปุ่ม Space จากคีย์บอร์ด
+ * - เมื่อ paste จะลบช่องว่างทั้งหมดออกโดยอัตโนมัติ
+ * - รองรับทั้ง input ทั่วไปและ input ประเภท email
+ * - dispatch event 'input' เพื่อให้ Reactive Form อัปเดตค่าได้ถูกต้อง
+ *
+ * เหมาะสำหรับ field ที่ห้ามมี space เช่น
+ * username, email, code, password, slug หรือ identifier ต่าง ๆ
+ */
 
 @Directive({
   selector: '[appPreventSpace]',
