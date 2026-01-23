@@ -16,7 +16,11 @@
         <label class="label">ชื่อสินค้า
           <span class="text-red-600">*</span>
         </label>
-        <input class="input" formControlName="name" appPreventSpecialChars />
+        <input
+          class="input"
+          formControlName="name"
+          type="text"
+          appPreventSpecialChars />
       </div>
 
       <div>
@@ -146,7 +150,7 @@
     </h2>
 
     <app-file-upload
-      (uploaded)="onTempImageAdded($event)">
+      (imagesChange)="onImagesChange($event)">
     </app-file-upload>
   </section>
 

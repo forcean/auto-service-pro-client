@@ -86,8 +86,8 @@ export class PermissionService {
       } else if (respPermission.resultCode !== RESPONSE.SUCCESS) {
         return this;
       }
-      const permissions = respPermission.data.permissions;
-      this.permissionsList = respPermission.data.permissions;
+      const permissions = respPermission.resultData.permissions;
+      this.permissionsList = respPermission.resultData.permissions;
 
       this.isViewUser = permissions.includes('view:user');
       this.isViewUserManagement = permissions.includes('view:user-management');
@@ -232,7 +232,7 @@ export class PermissionService {
       await this.permissions();
       const resMenu = await this.userService.getMenu();
       const permission = this.permissionsList;
-      const menus = resMenu.data.menus;
+      const menus = resMenu.resultData.menus;
       let endPoint = `/${routePath.split('/')[2]}/${routePath.split('/')[3]}`;
 
       if (!routePath.split('/')[3]) {

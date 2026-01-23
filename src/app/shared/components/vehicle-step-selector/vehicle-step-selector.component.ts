@@ -1,5 +1,8 @@
 import { Component, EventEmitter, model, Output } from '@angular/core';
 import { VehicleCompatibility } from '../../interface/vehicle.interface';
+import { CatalogService } from '../../services/catalog.service';
+import { RESPONSE } from '../../enum/response.enum';
+import { MOCK_VEHICLE_BRANDS, MOCK_VEHICLE_MODELS_1, MOCK_VEHICLE_MODELS_2, MOCK_VEHICLES } from '../../../pages/stock-management/products/product-create/mockData';
 
 @Component({
   selector: 'app-vehicle-step-selector',
@@ -19,43 +22,64 @@ export class VehicleStepSelectorComponent {
   modelId!: string;
 
   constructor(
-    // private vehicleService: VehicleService
+    private catalogService: CatalogService
   ) {
     this.loadBrands();
   }
 
-  loadBrands() {
-    this.brands = [
-      { id: '1', name: 'Toyota' },
-      { id: '2', name: 'Honda' },
-      { id: '3', name: 'Ford' }
-    ];
-    // this.vehicleService.getBrands().subscribe(res => this.brands = res);
+  async loadBrands() {
+    try {
+      const params = {
+        isActive: true,
+      };
+      const response = await this.catalogService.getVehicles(params);
+      if (response.resultCode === RESPONSE.SUCCESS) {
+        this.brands = response.resultData;
+      }
+    } catch (error) {
+      console.error('Error loading brands:', error);
+      this.brands = MOCK_VEHICLE_BRANDS;
+    }
   }
 
-  selectBrand(id: any) {
+  async selectBrand(id: any) {
     this.brandId = id;
     console.log('brandSelectedId:', id);
-
-    this.models = [
-      { id: '1', name: 'Model A' },
-      { id: '2', name: 'Model B' },
-      { id: '3', name: 'Model C' }
-    ];
     this.step = 2;
-    // this.vehicleService.getModels(id).subscribe(res => this.models = res);
+    try {
+      const params = {
+        brandId: this.brandId,
+      };
+      const response = await this.catalogService.getVehicles(params);
+      if (response.resultCode === RESPONSE.SUCCESS) {
+        this.models = response.resultData;
+      }
+    } catch (error) {
+      console.error('Error loading brands:', error);
+      if (this.brandId == '1') {
+        this.models = MOCK_VEHICLE_MODELS_1;
+      } else if (this.brandId == '2') {
+        this.models = MOCK_VEHICLE_MODELS_2;
+      }
+    }
   }
 
-  selectModel(id: any) {
+  async selectModel(id: any) {
     this.modelId = id;
     console.log('modelSelectedId:', id);
-    this.vehicles = [
-      { vehicleId: '1', model: 'Toyota Camry 2010-2015', brand: 'Toyota', yearFrom: 2010, yearTo: 2015, engines: ['1.6L', '2.0L'] },
-      { vehicleId: '2', model: 'Toyota Camry 2016-2020', brand: 'Toyota', yearFrom: 2016, yearTo: 2020, engines: ['1.8L', '2.2L'] },
-      { vehicleId: '3', model: 'Toyota Camry 2021-2024', brand: 'Toyota', yearFrom: 2021, yearTo: 2024, engines: ['2.0L Turbo'] }
-    ];
     this.step = 3;
-    // this.vehicleService.getVehicles(id).subscribe(res => this.vehicles = res);
+    try {
+      const params = {
+        modelId: this.modelId
+      };
+      const response = await this.catalogService.getVehicles(params);
+      if (response.resultCode === RESPONSE.SUCCESS) {
+        this.vehicles = response.resultData;
+      }
+    } catch (error) {
+      console.error('Error loading brands:', error);
+      this.vehicles = MOCK_VEHICLES;
+    }
   }
 
   selectVehicle(v: any) {
@@ -73,6 +97,9 @@ export class VehicleStepSelectorComponent {
 
   reset() {
     this.step = 1;
-    // this.models = [];
+    this.models = [];
+    this.vehicles = [];
+    this.brandId = '';
+    this.modelId = '';
   }
 }

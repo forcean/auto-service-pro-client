@@ -15,11 +15,12 @@ interface PreviewImage {
 })
 export class FileUploadComponent {
 
-  @Output() uploaded = new EventEmitter<{
+  @Output() imagesChange = new EventEmitter<{
     file: File;
     isPrimary: boolean;
     tempId: string;
-  }>();
+  }[]>();
+
 
   images: PreviewImage[] = [];
 
@@ -27,35 +28,33 @@ export class FileUploadComponent {
     const input = event.target as HTMLInputElement;
     if (!input.files?.length) return;
 
-    Array.from(input.files).forEach((file) => {
+    Array.from(input.files).forEach(file => {
       const reader = new FileReader();
       reader.onload = () => {
         const isPrimary = this.images.length === 0;
 
-        const image: PreviewImage = {
+        this.images.push({
           file,
           preview: reader.result as string,
           isPrimary,
           tempId: crypto.randomUUID(),
-        };
-
-        this.images.push(image);
-
-        this.uploaded.emit({
-          file,
-          isPrimary,
-          tempId: image.tempId,
         });
-      };
 
+        this.emitChange();
+      };
       reader.readAsDataURL(file);
     });
 
     input.value = '';
   }
 
+
   setPrimary(index: number): void {
-    this.images.forEach((img, i) => (img.isPrimary = i === index));
+    this.images.forEach((img, i) => {
+      img.isPrimary = i === index;
+    });
+
+    this.emitChange();
   }
 
   remove(index: number): void {
@@ -64,5 +63,18 @@ export class FileUploadComponent {
     if (!this.images.some(i => i.isPrimary) && this.images.length) {
       this.images[0].isPrimary = true;
     }
+
+    this.emitChange();
   }
+
+  private emitChange(): void {
+    this.imagesChange.emit(
+      this.images.map(img => ({
+        file: img.file,
+        isPrimary: img.isPrimary,
+        tempId: img.tempId,
+      }))
+    );
+  }
+
 }
