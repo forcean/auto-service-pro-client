@@ -18,9 +18,15 @@
         </label>
         <input
           class="input"
+          [class.border-red-500]="isInvalid('name')"
           formControlName="name"
           type="text"
           appPreventSpecialChars />
+
+        <p *ngIf="isInvalid('name')" class="text-red-500 text-xs mt-1">
+          {{ getError('name') }}
+        </p>
+
       </div>
 
       <div>
@@ -30,12 +36,18 @@
         <custom-select
           formControlName="status"
           placeholder="-- เลือกสถานะ --"
-          [isError]="form.controls['status'].invalid && form.controls['status'].touched">
+          [isError]="isInvalid('status')">
+
           <custom-option value="active">Active</custom-option>
           <custom-option value="inactive">Inactive</custom-option>
           <custom-option value="out_of_stock">Out of stock</custom-option>
           <custom-option value="discontinued">Discontinued</custom-option>
         </custom-select>
+
+        <p *ngIf="isInvalid('status')" class="text-red-500 text-xs mt-1">
+          {{ getError('status') }}
+        </p>
+
       </div>
 
       <div class="md:col-span-2">
@@ -56,16 +68,20 @@
           <span class="text-red-600">*</span>
         </label>
         <custom-select
-          placeholder="-- กรุณาเลือกหมวดหมู่ --"
           formControlName="categoryId"
-          (change)="onSelectedCategory()">
+          placeholder="-- กรุณาเลือกหมวดหมู่ --"
+          (change)="onSelectedCategory()"
+          [isError]="isInvalid('categoryId')">
 
           <custom-category-option
             *ngFor="let cat of categories"
             [node]="cat">
           </custom-category-option>
-
         </custom-select>
+
+        <p *ngIf="isInvalid('categoryId')" class="text-red-500 text-xs mt-1">
+          {{ getError('categoryId') }}
+        </p>
 
       </div>
 
@@ -75,22 +91,35 @@
         </label>
 
         <custom-select
+          formControlName="brandId"
           placeholder="-- กรุณาเลือกแบรนด์ --"
-          formControlName="brandId">
+          [isError]="isInvalid('brandId')">
+
           <app-custom-brand-option
             *ngFor="let brand of brands"
             [brand]="brand">
           </app-custom-brand-option>
         </custom-select>
+
+        <p *ngIf="isInvalid('brandId')" class="text-red-500 text-xs mt-1">
+          {{ getError('brandId') }}
+        </p>
+
       </div>
     </div>
   </section>
 
   <section class="card" *ngIf="isVehicleBinding">
     <app-vehicle-compatibility
-      formControlName="vehicles">
+      formControlName="vehicles"
+      [class.border-red-500]="isInvalid('vehicles')">
     </app-vehicle-compatibility>
+
+    <p *ngIf="isInvalid('vehicles')" class="text-red-500 text-xs mt-2">
+      กรุณาเลือกรถอย่างน้อย 1 รายการ
+    </p>
   </section>
+
   <!-- Prices -->
   <section class="card">
     <h2 class="section-title">ราคา</h2>
@@ -152,6 +181,11 @@
     <app-file-upload
       (imagesChange)="onImagesChange($event)">
     </app-file-upload>
+
+    <p *ngIf="isInvalid('images')" class="text-red-500 text-xs mt-2">
+      กรุณาอัปโหลดรูปสินค้าอย่างน้อย 1 รูป
+    </p>
+
   </section>
 
   <!-- Action -->

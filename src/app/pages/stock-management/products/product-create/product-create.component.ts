@@ -10,6 +10,9 @@ import { IQueryCatalogProducts } from '../../../../shared/interface/catalog.inte
 import { IUploadImagePayload } from '../../../../shared/interface/file-management.interface';
 import { IReqCreateProduct } from '../../../../shared/interface/stock-management.interface';
 import { FileManagementService } from '../../../../shared/services/file-management.service';
+import { ModalCommonService } from '../../../../shared/components/modal-common/modal-common.service';
+import { Subscription } from 'rxjs/internal/Subscription';
+import { StockManagementService } from '../../../../shared/services/stock-management.service';
 
 @Component({
   selector: 'app-product-create',
@@ -22,14 +25,19 @@ export class ProductCreateComponent implements OnInit {
   categories: ICategory[] = [];
   brands: ProductBrand[] = [];
   tempImages: IUploadImagePayload[] = [];
+  private modalSubscription: Subscription | null = null;
 
   isVehicleBinding: boolean = false;
+  formSubmitted = false;
+
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private catalogService: CatalogService,
     private fileService: FileManagementService,
+    private modalCommonService: ModalCommonService,
+    private stockManagementService: StockManagementService
   ) { }
 
   async ngOnInit(): Promise<void> {
@@ -41,14 +49,10 @@ export class ProductCreateComponent implements OnInit {
     this.form = this.fb.group({
       name: ['', Validators.required],
       description: [''],
-
       categoryId: ['', Validators.required],
       brandId: ['', Validators.required],
-
       status: ['active', Validators.required],
-
-      vehicles: this.fb.control([], Validators.required),
-
+      vehicles: this.fb.control([]),
       prices: this.fb.array([
         this.createPrice('RETAIL'),
         this.createPrice('WHOLESALE'),
@@ -62,8 +66,10 @@ export class ProductCreateComponent implements OnInit {
         height: [],
         depth: [],
       }),
-      images: this.fb.array([], Validators.required),
+
+      images: [[], Validators.required],
     });
+
   }
 
   private async loadMasterData(): Promise<void> {
@@ -99,90 +105,121 @@ export class ProductCreateComponent implements OnInit {
     });
   }
 
-  onImagesChange(images: any[]): void {
-    this.tempImages = images;
+  isInvalid(controlName: string): boolean {
+    const control = this.form.get(controlName);
+    return !!(control && control.invalid && (control.touched || this.formSubmitted));
   }
 
-  private mapToPayload(raw: any): IReqCreateProduct {
+  getError(controlName: string): string | null {
+    const control = this.form.get(controlName);
+    if (!control || !control.errors) return null;
+
+    if (control.errors['required']) {
+      return 'กรุณากรอกข้อมูล';
+    }
+
+    return null;
+  }
+
+
+  onImagesChange(images: any[]): void {
+    this.tempImages = images;
+    this.form.get('images')?.setValue(images);
+    this.form.get('images')?.markAsTouched();
+  }
+
+  private buildCreateProductPayload(
+    images: { fileId: string; isPrimary: boolean }[]
+  ): IReqCreateProduct {
+
+    const f = this.form.value;
+
     return {
-      name: raw.name,
-      description: raw.description || undefined,
+      name: f.name,
+      categoryId: f.categoryId,
+      brandId: f.brandId,
+      status: f.status,
 
-      categoryId: raw.categoryId,
-      brandId: raw.brandId,
+      ...(f.description?.trim() && { description: f.description.trim() }),
 
-      status: raw.status,
-
-      vehicle: raw.vehicles?.length
-        ? raw.vehicles.map((v: any) => ({
+      ...(f.vehicles?.length && {
+        vehicle: f.vehicles.map((v: any) => ({
           vehicleId: v.vehicleId,
-          yearRange: {
-            from: v.yearFrom,
-            to: v.yearTo,
-          },
-          engines: v.engines,
-          remark: v.remark,
-        }))
-        : undefined,
-
-
-      prices: raw.prices
-        ?.filter((p: any) => p.amount)
-        .map((p: any) => ({
-          type: p.type,
-          amount: Number(p.amount),
+          ...(v.yearFrom || v.yearTo ? {
+            yearRange: {
+              ...(v.yearFrom && { from: v.yearFrom }),
+              ...(v.yearTo && { to: v.yearTo }),
+            }
+          } : {}),
+          ...(v.engines?.length && { engines: v.engines }),
+          ...(v.remark?.trim() && { remark: v.remark.trim() }),
         })),
+      }),
 
-      spec: raw.spec?.unit
-        ? {
-          unit: raw.spec.unit,
-          weight: raw.spec.weight,
-          width: raw.spec.width,
-          height: raw.spec.height,
-          depth: raw.spec.depth,
-        } : {},
+      ...(f.prices?.some((p: any) => p.amount) && {
+        prices: f.prices
+          .filter((p: any) => p.amount)
+          .map((p: any) => ({
+            type: p.type,
+            amount: Number(p.amount),
+          })),
+      }),
+
+      ...(f.spec && Object.values(f.spec).some((v: any) => v) && {
+        spec: {
+          ...(f.spec.unit && { unit: f.spec.unit }),
+          ...(f.spec.weight && { weight: f.spec.weight }),
+          ...(f.spec.width && { width: f.spec.width }),
+          ...(f.spec.height && { height: f.spec.height }),
+          ...(f.spec.depth && { depth: f.spec.depth }),
+        },
+      }),
+
+      ...(images?.length && { images }),
     };
   }
 
   async submit(): Promise<void> {
-    // if (this.form.invalid) {
-    //   this.form.markAllAsTouched();
-    //   return;
-    // }
+    this.formSubmitted = true;
+
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
 
     try {
       const uploadedImages = await this.uploadAllImages();
-      const payload: IReqCreateProduct = this.mapToPayload({
-        ...this.form.value,
-        images: uploadedImages
-      });
-
+      const payload = this.buildCreateProductPayload(uploadedImages);
       console.log('Create Product Payload:', payload);
-
-      // 3. ยิง create product จริง
-      // await this.productService.create(payload);
-
-      // this.router.navigate(['/products']);
+      const res = await this.stockManagementService.createProduct(payload);
+      if (res.resultCode === RESPONSE.SUCCESS) {
+        this.handleModalSuccess();
+      }
     } catch (err) {
       console.error('Create product failed', err);
     }
   }
 
-  private async uploadAllImages(): Promise<
-    { fileId: string; isPrimary: boolean }[]
-  > {
+  private async uploadAllImages():
+    Promise<
+      { fileId: string; isPrimary: boolean }[]> {
     if (!this.tempImages.length) {
       throw new Error('No images to upload');
     }
 
-    const res = await this.fileService.uploadImage(this.tempImages);
+    // const res = await this.fileService.uploadImage(this.tempImages);
 
-    if (res.resultCode !== RESPONSE.SUCCESS) {
-      throw new Error('Upload images failed');
-    }
+    // if (res.resultCode !== RESPONSE.SUCCESS) {
+    //   throw new Error('Upload images failed');
+    // }
 
-    return res.resultData.map((img: any) => ({
-      fileId: img.fileId,
+    // return res.resultData.map((img: any) => ({
+    //   fileId: img.fileId,
+    //   isPrimary: img.isPrimary
+    // }));
+    // Mocked upload response
+    return this.tempImages.map(img => ({
+      fileId: 'mocked-file-id-' + Math.random().toString(36).substring(2, 15),
       isPrimary: img.isPrimary
     }));
   }
@@ -190,13 +227,23 @@ export class ProductCreateComponent implements OnInit {
   async onSelectedCategory(): Promise<void> {
     this.form.get('brandId')?.reset();
     this.brands = [];
+
     const catId = this.form.get('categoryId')?.value;
-    if (!catId) {
-      return;
-    }
+    if (!catId) return;
+
     const selectedCategory = this.findCategoryById(this.categories, catId);
     this.isVehicleBinding = selectedCategory?.allowVehicleBinding || false;
-    this.loadBrands(catId);
+
+    const vehiclesCtrl = this.form.get('vehicles');
+
+    if (this.isVehicleBinding) {
+      vehiclesCtrl?.setValidators([Validators.required]);
+    } else {
+      vehiclesCtrl?.clearValidators();
+      vehiclesCtrl?.setValue([]);
+    }
+    vehiclesCtrl?.updateValueAndValidity();
+    await this.loadBrands(catId);
   }
 
   async loadBrands(catId: string): Promise<void> {
@@ -234,5 +281,53 @@ export class ProductCreateComponent implements OnInit {
     return null;
   }
 
+  private handleCommonError() {
+    this.modalSubscription = this.modalCommonService.isOpen.subscribe((obj) => {
+      if (!obj?.isOpen) {
+        this.router.navigate(['/portal/stock-management/products']);
+        this.unsubscribeModal();
+      }
+    });
+  }
+
+  // private handleCommonSuccess() {
+  //   this.modalCommonService.open({
+  //     type: 'success',
+  //     title: 'สร้างผู้ใช้งานสำเร็จ',
+  //     subtitle: 'คุณได้สร้างผู้ใช้งานในองค์กรเรียบร้อยแล้ว',
+  //     buttonText: 'ยืนยัน'
+  //   });
+  //   this.modalSubscription = this.modalCommonService.isOpen.subscribe((obj) => {
+  //     if (!obj?.isOpen) {
+  //       this.router.navigate(['/portal/corporate-admin/account']);
+  //       this.unsubscribeModal();
+  //     }
+  //   });
+  // }
+
+  private handleModalSuccess() {
+    this.modalCommonService.open({
+      type: 'success',
+      title: 'สร้างผลิตภัณฑ์สำเร็จ',
+      subtitle: 'คุณได้สร้างผลิตภัณฑ์เรียบร้อยแล้ว',
+      buttonText: 'ยืนยัน'
+    });
+  }
+
+  private unsubscribeModal() {
+    if (this.modalSubscription) {
+      this.modalSubscription.unsubscribe();
+      this.modalSubscription = null;
+    }
+  }
+
+  private handleFailResponse() {
+    this.modalCommonService.open({
+      type: 'alert',
+      title: 'ขออภัย ระบบขัดข้องในขณะนี้',
+      subtitle: 'กรุณาทำรายการใหม่อีกครั้ง หรือ ติดต่อผู้ดูแลระบบในองค์กรของคุณ',
+      buttonText: 'เข้าใจแล้ว',
+    });
+  }
 }
 
