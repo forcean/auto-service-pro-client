@@ -44,15 +44,15 @@ export interface IReqUpdateProduct {
 
 export interface IResponseProductDetail {
     id: string;
-    publicId: string;
-    firstname: string;
-    lastname: string;
-    email: string;
-    role: string;
-    phoneNumber?: string;
-    managerId?: string;
-    createdDt: string;
-    createdBy: string;
+    name: string;
+    description: string;
+    categoryId: string;
+    brandId: string;
+    status: string;
+    vehicles?: string;
+    spec?: string;
+    images: string;
+    prices: [];
     updatedDt: string;
     updatedBy: string;
     activeFlag: boolean;

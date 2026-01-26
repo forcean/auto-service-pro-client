@@ -1,5 +1,5 @@
-import { ICategory } from "../../../../shared/interface/category.interface";
-import { VehicleCompatibility } from "../../../../shared/interface/vehicle.interface";
+import { ICategory } from "../../../shared/interface/category.interface";
+import { VehicleCompatibility } from "../../../shared/interface/vehicle.interface";
 
 
 export const CATEGORY_MOCK: ICategory[] = [

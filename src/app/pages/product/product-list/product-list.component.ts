@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { Router } from '@angular/router';
 export const MOCK_PRODUCTS: any[] = [
   {
     _id: 'p001',
@@ -123,6 +124,10 @@ export class ProductListComponent {
   @Input() isLoading: boolean = false;
   @Input() isDisableAction: boolean = false;
 
+  constructor(
+    private router: Router,
+  ) { }
+
   goToDetail(productId: string) {
     console.log('go to product detail:', productId);
   }
@@ -142,5 +147,9 @@ export class ProductListComponent {
 
   onPageChange(e: any) {
     // this.changePag.emit(e);
+  }
+
+  onClick(event: string) {
+    this.router.navigate(['/portal/product/update', event]);
   }
 }

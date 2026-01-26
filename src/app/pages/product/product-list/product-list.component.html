@@ -44,7 +44,8 @@
         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
           <app-product-card
             *ngFor="let product of products"
-            [product]="product"></app-product-card>
+            [product]="product"
+            (clicked)="onClick($event)"></app-product-card>
 
         </div>
         <app-pagination *ngIf="true" aligns="end"

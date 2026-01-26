@@ -2,7 +2,7 @@ import { Component, EventEmitter, model, Output } from '@angular/core';
 import { VehicleCompatibility } from '../../interface/vehicle.interface';
 import { CatalogService } from '../../services/catalog.service';
 import { RESPONSE } from '../../enum/response.enum';
-import { MOCK_VEHICLE_BRANDS, MOCK_VEHICLE_MODELS_1, MOCK_VEHICLE_MODELS_2, MOCK_VEHICLES } from '../../../pages/stock-management/products/product-create/mockData';
+import { MOCK_VEHICLE_BRANDS, MOCK_VEHICLE_MODELS_1, MOCK_VEHICLE_MODELS_2, MOCK_VEHICLES } from '../../../pages/product/product-create/mockData';
 
 @Component({
   selector: 'app-vehicle-step-selector',

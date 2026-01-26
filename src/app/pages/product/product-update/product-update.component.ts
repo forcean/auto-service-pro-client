@@ -1,26 +1,26 @@
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { ICategory } from '../../../../shared/interface/category.interface';
-import { ProductBrand } from '../../../../shared/interface/brand.interface';
-import { BRAND_MOCK, CATEGORY_MOCK } from './mockData';
-import { CatalogService } from '../../../../shared/services/catalog.service';
-import { RESPONSE } from '../../../../shared/enum/response.enum';
-import { IQueryCatalogProducts } from '../../../../shared/interface/catalog.interface';
-import { IUploadImagePayload } from '../../../../shared/interface/file-management.interface';
-import { IReqCreateProduct } from '../../../../shared/interface/stock-management.interface';
-import { FileManagementService } from '../../../../shared/services/file-management.service';
-import { ModalCommonService } from '../../../../shared/components/modal-common/modal-common.service';
+import { ActivatedRoute, Route, Router } from '@angular/router';
+import { ICategory } from '../../../shared/interface/category.interface';
+import { ProductBrand } from '../../../shared/interface/brand.interface';
+import { CatalogService } from '../../../shared/services/catalog.service';
+import { RESPONSE } from '../../../shared/enum/response.enum';
+import { IQueryCatalogProducts } from '../../../shared/interface/catalog.interface';
+import { IUploadImagePayload } from '../../../shared/interface/file-management.interface';
+import { IReqCreateProduct, IReqUpdateProduct } from '../../../shared/interface/stock-management.interface';
+import { FileManagementService } from '../../../shared/services/file-management.service';
+import { ModalCommonService } from '../../../shared/components/modal-common/modal-common.service';
 import { Subscription } from 'rxjs/internal/Subscription';
-import { StockManagementService } from '../../../../shared/services/stock-management.service';
+import { StockManagementService } from '../../../shared/services/stock-management.service';
+import { BRAND_MOCK, CATEGORY_MOCK } from '../product-create/mockData';
 
 @Component({
-  selector: 'app-product-create',
+  selector: 'app-product-update',
   standalone: false,
-  templateUrl: './product-create.component.html',
-  styleUrl: './product-create.component.scss'
+  templateUrl: './product-update.component.html',
+  styleUrl: './product-update.component.scss'
 })
-export class ProductCreateComponent implements OnInit {
+export class ProductUpdateComponent implements OnInit {
   form!: FormGroup;
   categories: ICategory[] = [];
   brands: ProductBrand[] = [];
@@ -34,6 +34,7 @@ export class ProductCreateComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private router: Router,
+    private route: ActivatedRoute,
     private catalogService: CatalogService,
     private fileService: FileManagementService,
     private modalCommonService: ModalCommonService,
@@ -43,6 +44,7 @@ export class ProductCreateComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     await this.loadMasterData();
     await this.initForm();
+    await this.loadProductDetail();
   }
 
   private async initForm(): Promise<void> {
@@ -51,13 +53,11 @@ export class ProductCreateComponent implements OnInit {
       description: [''],
       categoryId: ['', Validators.required],
       brandId: ['', Validators.required],
-      status: ['active', Validators.required],
+      status: ['', Validators.required],
+
       vehicles: this.fb.control([]),
-      prices: this.fb.array([
-        this.createPrice('RETAIL'),
-        this.createPrice('WHOLESALE'),
-        this.createPrice('COST'),
-      ]),
+
+      prices: this.fb.array([]),
 
       spec: this.fb.group({
         unit: [''],
@@ -69,7 +69,6 @@ export class ProductCreateComponent implements OnInit {
 
       images: [[], Validators.required],
     });
-
   }
 
   private async loadMasterData(): Promise<void> {
@@ -90,19 +89,55 @@ export class ProductCreateComponent implements OnInit {
     }
   }
 
+
+  async loadProductDetail(): Promise<void> {
+    const productId = this.route.snapshot.paramMap.get('id');
+    if (!productId) return;
+
+    const res = await this.stockManagementService.getProductDetail(productId);
+
+    if (res.resultCode !== RESPONSE.SUCCESS) return;
+
+    const product = res.resultData;
+
+    // 🔹 category → ต้องรู้ก่อนเพื่อ set vehicle validator
+    this.form.patchValue({
+      name: product.name,
+      description: product.description,
+      categoryId: product.categoryId,
+      brandId: product.brandId,
+      status: product.status,
+      vehicles: product.vehicles ?? [],
+      spec: product.spec ?? {},
+      images: product.images ?? [],
+    });
+
+    this.setVehicleValidatorByCategory(product.categoryId);
+
+    this.setPrices(product.prices);
+  }
+
+  private setVehicleValidatorByCategory(catId: string): void {
+    const selectedCategory = this.findCategoryById(this.categories, catId);
+    this.isVehicleBinding = selectedCategory?.allowVehicleBinding || false;
+
+    const vehiclesCtrl = this.form.get('vehicles');
+
+    if (this.isVehicleBinding) {
+      vehiclesCtrl?.setValidators([Validators.required]);
+    } else {
+      vehiclesCtrl?.clearValidators();
+      vehiclesCtrl?.setValue([]);
+    }
+
+    vehiclesCtrl?.updateValueAndValidity();
+  }
   get prices(): FormArray {
     return this.form.get('prices') as FormArray;
   }
 
   get images(): FormArray {
     return this.form.get('images') as FormArray;
-  }
-
-  private createPrice(type: 'RETAIL' | 'WHOLESALE' | 'COST'): FormGroup {
-    return this.fb.group({
-      type: [type],
-      amount: [null],
-    });
   }
 
   isInvalid(controlName: string): boolean {
@@ -128,9 +163,23 @@ export class ProductCreateComponent implements OnInit {
     this.form.get('images')?.markAsTouched();
   }
 
+  private setPrices(prices: any[]): void {
+    const pricesFA = this.form.get('prices') as FormArray;
+    pricesFA.clear();
+
+    prices.forEach(p => {
+      pricesFA.push(
+        this.fb.group({
+          type: [p.type],
+          amount: [p.amount],
+        })
+      );
+    });
+  }
+
   private buildCreateProductPayload(
     images: { fileId: string; isPrimary: boolean }[]
-  ): IReqCreateProduct {
+  ): IReqUpdateProduct {
 
     const f = this.form.value;
 
@@ -179,27 +228,6 @@ export class ProductCreateComponent implements OnInit {
     };
   }
 
-  async submit(): Promise<void> {
-    this.formSubmitted = true;
-
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
-
-    try {
-      const uploadedImages = await this.uploadAllImages();
-      const payload = this.buildCreateProductPayload(uploadedImages);
-      console.log('Create Product Payload:', payload);
-      const res = await this.stockManagementService.createProduct(payload);
-      if (res.resultCode === RESPONSE.SUCCESS) {
-        this.handleModalSuccess();
-      }
-    } catch (err) {
-      console.error('Create product failed', err);
-    }
-  }
-
   private async uploadAllImages():
     Promise<
       { fileId: string; isPrimary: boolean }[]> {
@@ -222,6 +250,30 @@ export class ProductCreateComponent implements OnInit {
       fileId: 'mocked-file-id-' + Math.random().toString(36).substring(2, 15),
       isPrimary: img.isPrimary
     }));
+  }
+
+  async submit(): Promise<void> {
+    this.formSubmitted = true;
+
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    try {
+      const uploadedImages = await this.uploadAllImages();
+      const payload = this.buildCreateProductPayload(uploadedImages);
+
+      const productId = this.route.snapshot.paramMap.get('id')!;
+      const res = await this.stockManagementService.updateProduct(productId, payload);
+
+      if (res.resultCode === RESPONSE.SUCCESS) {
+        this.handleModalSuccess();
+      }
+    } catch (err) {
+      console.error(err);
+      this.handleFailResponse();
+    }
   }
 
   async onSelectedCategory(): Promise<void> {
@@ -329,5 +381,5 @@ export class ProductCreateComponent implements OnInit {
       buttonText: 'เข้าใจแล้ว',
     });
   }
-}
 
+}

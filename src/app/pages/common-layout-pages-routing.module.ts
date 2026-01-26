@@ -25,11 +25,11 @@ const routes: Routes = [
         }
       },
       {
-        path: 'stock-management',
+        path: 'product',
         // canActivate: [AuthGuard],
         loadChildren: async () => {
           try {
-            return await import('./stock-management/stock-management.module').then((m) => m.StockManagementModule);
+            return await import('./product/product.module').then((m) => m.ProductModule);
           } catch (error) {
             throw new Error('Failed to load StockManagementModule');
           }

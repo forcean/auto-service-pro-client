@@ -61,9 +61,9 @@ export class StockManagementService {
     }
   }
 
-  async updateProductDetail(body: IReqUpdateProduct, userId: string) {
+  async updateProduct(productId: string, body: IReqUpdateProduct) {
     try {
-      const url = this.PREFIX_USER + `/products/${userId}/update`;
+      const url = this.PREFIX_USER + `/products/${productId}/update`;
       const response = await this.httpService.patch<any>(url, body);
       return response
     } catch (error) {
