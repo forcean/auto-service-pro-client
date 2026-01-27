@@ -32,14 +32,15 @@ export interface IPrices {
 }
 
 export interface IReqUpdateProduct {
-    publicId: string;
-    painTextPassword?: string;
-    firstname?: string;
-    lastname?: string;
-    email: string;
-    role: string;
-    phoneNumber?: string;
-    managerId?: string;
+    name: string;
+    description: string;
+    categoryId?: string;
+    brandId?: string;
+    vehicle?: VehicleCompatibility[];
+    prices: IPrices;
+    spec: ISpec;
+    images?: IImages[];
+    status: 'active' | 'inactive' | 'out_of_stock' | 'discontinued';
 }
 
 export interface IResponseProductDetail {

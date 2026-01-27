@@ -29,6 +29,7 @@ import { VehicleCompatibilityComponent } from './components/vehicle-compatibilit
 import { DecimalDirective } from './directive/app-decimal.directive';
 import { PreventSpecialCharsDirective } from './directive/preventspecialchars.directive';
 import { PriceDirective } from './directive/app-price.directive';
+import { ProductFormComponent } from './components/product-form/product-form.component';
 
 const components = [
   ModalCommonComponent,
@@ -52,6 +53,7 @@ const components = [
   VehicleCardComponent,
   VehicleStepSelectorComponent,
   VehicleCompatibilityComponent,
+  ProductFormComponent,
 ];
 
 const directives = [
@@ -66,6 +68,7 @@ const directives = [
   declarations: [
     ...components,
     ...directives,
+
   ],
   imports: [
     CommonModule,

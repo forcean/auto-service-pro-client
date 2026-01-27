@@ -1,0 +1,203 @@
+<form [formGroup]="form" class="max-w-6xl mx-auto p-6 space-y-8 text-sm">
+
+  <h1 class="text-xl font-semibold">
+    {{ mode === 'create' ? 'สร้างสินค้า' : 'แก้ไขสินค้า' }}
+  </h1>
+
+  <!-- Product Info -->
+  <!-- (โค้ดเหมือนเดิมทั้งหมด) -->
+
+  <!-- Product Info -->
+  <section class="card">
+    <h2 class="section-title">ข้อมูลสินค้า</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="label">ชื่อสินค้า
+          <span class="text-red-600">*</span>
+        </label>
+        <input
+          class="input"
+          [class.border-red-500]="isInvalid('name')"
+          formControlName="name"
+          type="text"
+          appPreventSpecialChars />
+
+        <p *ngIf="isInvalid('name')" class="text-red-500 text-xs mt-1">
+          {{ getError('name') }}
+        </p>
+
+      </div>
+
+      <div>
+        <label class="label">สถานะ
+          <span class="text-red-600">*</span>
+        </label>
+        <custom-select
+          formControlName="status"
+          placeholder="-- เลือกสถานะ --"
+          [isError]="isInvalid('status')">
+
+          <custom-option value="active">Active</custom-option>
+          <custom-option value="inactive">Inactive</custom-option>
+          <custom-option value="out_of_stock">Out of
+            stock</custom-option>
+          <custom-option
+            value="discontinued">Discontinued</custom-option>
+        </custom-select>
+
+        <p *ngIf="isInvalid('status')"
+          class="text-red-500 text-xs mt-1">
+          {{ getError('status') }}
+        </p>
+
+      </div>
+
+      <div class="md:col-span-2">
+        <label class="label">รายละเอียด</label>
+        <textarea class="input h-24"
+          formControlName="description"></textarea>
+      </div>
+    </div>
+  </section>
+
+  <!-- Category / Brand -->
+  <section class="card">
+    <h2 class="section-title">หมวดหมู่ / แบรนด์</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="label">หมวดหมู่
+          <span class="text-red-600">*</span>
+        </label>
+        <custom-select
+          formControlName="categoryId"
+          placeholder="-- กรุณาเลือกหมวดหมู่ --"
+          [isError]="isInvalid('categoryId')">
+
+          <custom-category-option
+            *ngFor="let cat of categories"
+            [node]="cat">
+          </custom-category-option>
+        </custom-select>
+
+        <p *ngIf="isInvalid('categoryId')"
+          class="text-red-500 text-xs mt-1">
+          {{ getError('categoryId') }}
+        </p>
+
+      </div>
+
+      <div *ngIf="isLoadedBrands">
+        <label class="label">แบรนด์
+          <span class="text-red-600">*</span>
+        </label>
+
+        <custom-select
+          formControlName="brandId"
+          placeholder="-- กรุณาเลือกแบรนด์ --"
+          [isError]="isInvalid('brandId')">
+
+          <app-custom-brand-option
+            *ngFor="let brand of brands"
+            [brand]="brand">
+          </app-custom-brand-option>
+        </custom-select>
+
+        <p *ngIf="isInvalid('brandId')"
+          class="text-red-500 text-xs mt-1">
+          {{ getError('brandId') }}
+        </p>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="card" *ngIf="isVehicleBinding">
+    <app-vehicle-compatibility
+      formControlName="vehicles"
+      [class.border-red-500]="isInvalid('vehicles')">
+    </app-vehicle-compatibility>
+
+    <p *ngIf="isInvalid('vehicles')" class="text-red-500 text-xs mt-2">
+      กรุณาเลือกรถอย่างน้อย 1 รายการ
+    </p>
+  </section>
+
+  <!-- Prices -->
+  <section class="card">
+    <h2 class="section-title">ราคา</h2>
+
+    <div formArrayName="prices"
+      class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div *ngFor="let p of prices.controls; let i = index"
+        [formGroupName]="i">
+        <label class="label">{{ p.value.type }}</label>
+        <input
+          type="text"
+          class="input"
+          appPrice
+          formControlName="amount" />
+      </div>
+    </div>
+  </section>
+
+  <!-- Spec -->
+  <section class="card">
+    <h2 class="section-title">ข้อมูลจำเพาะ</h2>
+
+    <div formGroupName="spec"
+      class="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <input class="input" placeholder="หน่วย" formControlName="unit" />
+      <input
+        appDecimal
+        type="text"
+        class="input"
+        placeholder="น้ำหนัก"
+        formControlName="weight" />
+      <input
+        appDecimal
+        type="text"
+        class="input"
+        placeholder="ความกว้าง"
+        formControlName="width" />
+      <input
+        appDecimal
+        type="text"
+        class="input"
+        placeholder="ความสูง"
+        formControlName="height" />
+      <input
+        appDecimal
+        type="text"
+        class="input"
+        placeholder="ความลึก"
+        formControlName="depth" />
+    </div>
+  </section>
+
+  <!-- Images -->
+  <section class="card">
+    <h2 class="section-title">รูปภาพสินค้า
+      <span class="text-red-600">*</span>
+    </h2>
+
+    <app-file-upload
+      (imagesChange)="onImagesChange($event)">
+    </app-file-upload>
+
+    <p *ngIf="isInvalid('images')" class="text-red-500 text-xs mt-2">
+      กรุณาอัปโหลดรูปสินค้าอย่างน้อย 1 รูป
+    </p>
+
+  </section>
+
+  <div class="flex justify-end gap-3">
+    <button class="btn-secondary" type="button"
+      (click)="onCancel()">ยกเลิก</button>
+    <button class="btn-primary" type="button" (click)="submit()">
+      บันทึกสินค้า
+    </button>
+  </div>
+
+</form>
