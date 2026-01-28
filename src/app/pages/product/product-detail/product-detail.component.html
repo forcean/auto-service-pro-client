@@ -1,0 +1,112 @@
+<div class="product-detail">
+
+  <div class="header-card header-flex">
+    <div class="header-left">
+      <div class="title-row">
+        <h1 class="product-name">{{ product.name }}</h1>
+
+        <span
+          class="status-badge"
+          [ngClass]="product.status">
+          {{ product.status | uppercase }}
+        </span>
+      </div>
+
+      <div class="product-meta">
+        <span>{{ product.brandName }}</span>
+        <span class="dot">•</span>
+        <span>{{ product.categoryName }}</span>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <button
+        class="btn-primary"
+        (click)="goEdit()">
+        <lucide-icon name="pencil"></lucide-icon>
+        แก้ไขสินค้า
+      </button>
+    </div>
+  </div>
+
+  <section class="main-grid">
+
+    <div class="left-col space-y-6">
+
+      <div class="card image-card">
+        <img [src]="mainImageUrl" alt="product image" />
+      </div>
+
+      <div *ngIf="galleryImages.length" class="card">
+        <h2 class="section-title">แกลเลอรี่สินค้า</h2>
+
+        <div class="gallery">
+          <img
+            *ngFor="let img of galleryImages"
+            [src]="img.url"
+            (click)="preview(img.url)" />
+        </div>
+      </div>
+
+    </div>
+
+    <div class="right-col space-y-6">
+
+      <div class="card">
+        <h2 class="section-title">ราคา</h2>
+
+        <div
+          *ngFor="let p of product.prices"
+          class="price-row">
+          <span class="price-type">{{ p.type }}</span>
+          <span class="price-amount">
+            {{ p.amount | number }} บาท
+          </span>
+        </div>
+      </div>
+
+      <div *ngIf="product.spec" class="card">
+        <h2 class="section-title">ข้อมูลจำเพาะ</h2>
+
+        <div class="spec-grid">
+          <div
+            *ngFor="let s of specEntries"
+            class="spec-item">
+            <div class="spec-label">{{ s.label }}</div>
+            <div class="spec-value">{{ s.value }}</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </section>
+
+  <section *ngIf="product.vehicles?.length" class="card">
+    <h2 class="section-title">รถที่รองรับ</h2>
+
+    <div class="vehicle-grid">
+      <div
+        *ngFor="let v of product.vehicles"
+        class="vehicle-card">
+        <div class="vehicle-name">
+          {{ v.brand }} {{ v.model }}
+        </div>
+        <div class="vehicle-year">
+          {{ v.yearFrom }} – {{ v.yearTo }}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="action-bar">
+    <button class="btn-secondary" (click)="goBack()">
+      ย้อนกลับ
+    </button>
+
+    <button class="btn-primary" (click)="goEdit()">
+      แก้ไขสินค้า
+    </button>
+  </div>
+
+</div>

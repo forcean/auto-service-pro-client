@@ -1,0 +1,121 @@
+@tailwind components;
+
+.product-detail {
+    @apply max-w-7xl mx-auto p-6 space-y-6;
+}
+
+.card {
+    @apply bg-white rounded-xl border border-gray-200 p-5 shadow-sm;
+}
+
+.header-card {
+    @apply p-6;
+}
+
+.header-flex {
+    @apply flex flex-col md:flex-row justify-between gap-4;
+}
+
+.title-row {
+    @apply flex items-center gap-3;
+}
+
+.product-name {
+    @apply text-2xl font-semibold text-gray-900;
+}
+
+.product-meta {
+    @apply flex items-center gap-2 mt-2 text-sm text-gray-500;
+}
+
+.status-badge {
+    @apply px-3 py-1 rounded-full text-xs font-semibold;
+
+    &.active {
+        @apply bg-green-100 text-green-700;
+    }
+
+    &.inactive {
+        @apply bg-gray-200 text-gray-600;
+    }
+
+    &.draft {
+        @apply bg-yellow-100 text-yellow-700;
+    }
+}
+
+.main-grid {
+    @apply grid grid-cols-1 lg:grid-cols-5 gap-6;
+}
+
+.left-col {
+    @apply lg:col-span-3;
+}
+
+.right-col {
+    @apply lg:col-span-2;
+}
+
+.image-card img {
+    @apply w-full h-[420px] object-cover rounded-lg;
+}
+
+.section-title {
+    @apply text-base font-semibold text-gray-800 mb-4;
+}
+
+.price-row {
+    @apply flex justify-between py-3 border-b last:border-none;
+
+    .price-type {
+        @apply text-sm text-gray-500;
+    }
+
+    .price-amount {
+        @apply text-sm font-semibold text-gray-900;
+    }
+}
+
+.gallery {
+    @apply flex gap-3 overflow-x-auto;
+
+    img {
+        @apply h-24 w-24 rounded-lg border object-cover cursor-pointer hover:scale-105 transition;
+    }
+}
+
+.spec-grid {
+    @apply grid grid-cols-2 gap-4;
+}
+
+.spec-item {
+    @apply bg-gray-50 rounded-lg p-3;
+
+    .spec-label {
+        @apply text-xs text-gray-500;
+    }
+
+    .spec-value {
+        @apply text-sm font-medium text-gray-800;
+    }
+}
+
+.vehicle-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-3;
+}
+
+.vehicle-card {
+    @apply border rounded-lg p-4 hover:bg-gray-50 transition;
+}
+
+.btn-primary {
+    @apply inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition;
+}
+
+.btn-secondary {
+    @apply px-5 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-100 transition;
+}
+
+.action-bar {
+    @apply flex justify-end gap-3 pt-6 border-t;
+}

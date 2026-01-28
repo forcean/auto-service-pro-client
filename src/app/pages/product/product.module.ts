@@ -7,19 +7,23 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { ProductListComponent } from './product-list/product-list.component';
 import { ProductCreateComponent } from './product-create/product-create.component';
 import { ProductUpdateComponent } from './product-update/product-update.component';
+import { ProductDetailComponent } from './product-detail/product-detail.component';
+import { LucideAngularModule, Pencil, Trash2 } from 'lucide-angular';
 
 
 @NgModule({
   declarations: [
     ProductListComponent,
     ProductCreateComponent,
-    ProductUpdateComponent
+    ProductUpdateComponent,
+    ProductDetailComponent
   ],
   imports: [
     CommonModule,
     ProductRoutingModule,
     SharedModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    LucideAngularModule.pick({ Pencil, Trash2 })
   ]
 })
 export class ProductModule { }

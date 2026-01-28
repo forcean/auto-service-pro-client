@@ -3,6 +3,7 @@ import { VehicleCompatibility } from '../../interface/vehicle.interface';
 import { CatalogService } from '../../services/catalog.service';
 import { RESPONSE } from '../../enum/response.enum';
 import { MOCK_VEHICLE_BRANDS, MOCK_VEHICLE_MODELS_1, MOCK_VEHICLE_MODELS_2, MOCK_VEHICLES } from '../../../pages/product/product-create/mockData';
+import { IQueryCatalogVehicles } from '../../interface/catalog.interface';
 
 @Component({
   selector: 'app-vehicle-step-selector',
@@ -29,7 +30,7 @@ export class VehicleStepSelectorComponent {
 
   async loadBrands() {
     try {
-      const params = {
+      const params: IQueryCatalogVehicles = {
         isActive: true,
       };
       const response = await this.catalogService.getVehicles(params);
@@ -47,7 +48,7 @@ export class VehicleStepSelectorComponent {
     console.log('brandSelectedId:', id);
     this.step = 2;
     try {
-      const params = {
+      const params: IQueryCatalogVehicles = {
         brandId: this.brandId,
       };
       const response = await this.catalogService.getVehicles(params);
@@ -69,7 +70,7 @@ export class VehicleStepSelectorComponent {
     console.log('modelSelectedId:', id);
     this.step = 3;
     try {
-      const params = {
+      const params: IQueryCatalogVehicles = {
         modelId: this.modelId
       };
       const response = await this.catalogService.getVehicles(params);

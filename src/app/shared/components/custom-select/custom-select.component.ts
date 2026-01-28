@@ -154,7 +154,7 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
       this.onTouched();
       this.isDropdownOpen = false;
 
-      this.change.emit(value);
+      // this.change.emit(value);
       this.toggle.emit(this.dropdownName);
 
       this.options.forEach(o => o.isSelected = o.value === value);

@@ -150,6 +150,6 @@ export class ProductListComponent {
   }
 
   onClick(event: string) {
-    this.router.navigate(['/portal/product/update', event]);
+    this.router.navigate(['/portal/product/detail', event]);
   }
 }
