@@ -2,8 +2,18 @@
 
   <div class="header-card header-flex">
     <div class="header-left">
+      <button
+        class="back-link mb-2"
+        (click)="goBack()">
+        <lucide-icon name="chevron-left"></lucide-icon>
+        ย้อนกลับ
+      </button>
+
+      <!-- Title -->
       <div class="title-row">
-        <h1 class="product-name">{{ product.name }}</h1>
+        <h1 class="product-name">
+          {{ product.name }}
+        </h1>
 
         <span
           class="status-badge"
@@ -12,21 +22,40 @@
         </span>
       </div>
 
+      <!-- SKU -->
+      <!-- SKU -->
+      <div class="product-sku">
+        SKU:
+        <span>{{ product.code }}</span>
+
+        <button
+          class="copy-sku-btn"
+          title="คัดลอก SKU"
+          (click)="copySku()">
+          <lucide-icon
+            [name]="skuCopied ? 'check' : 'copy'">
+          </lucide-icon>
+        </button>
+      </div>
+
       <div class="product-meta">
         <span>{{ product.brandName }}</span>
         <span class="dot">•</span>
         <span>{{ product.categoryName }}</span>
       </div>
+
     </div>
 
+    <!-- Right -->
     <div class="header-right">
       <button
-        class="btn-primary"
+        class="icon-action"
+        title="แก้ไขสินค้า"
         (click)="goEdit()">
         <lucide-icon name="pencil"></lucide-icon>
-        แก้ไขสินค้า
       </button>
     </div>
+
   </div>
 
   <section class="main-grid">
@@ -34,7 +63,9 @@
     <div class="left-col space-y-6">
 
       <div class="card image-card">
-        <img [src]="mainImageUrl" alt="product image" />
+        <img
+          [src]="mainImageUrl"
+          alt="product image" />
       </div>
 
       <div *ngIf="galleryImages.length" class="card">
@@ -72,8 +103,12 @@
           <div
             *ngFor="let s of specEntries"
             class="spec-item">
-            <div class="spec-label">{{ s.label }}</div>
-            <div class="spec-value">{{ s.value }}</div>
+            <div class="spec-label">
+              {{ s.label }}
+            </div>
+            <div class="spec-value">
+              {{ s.value }}
+            </div>
           </div>
         </div>
       </div>
@@ -98,15 +133,5 @@
       </div>
     </div>
   </section>
-
-  <div class="action-bar">
-    <button class="btn-secondary" (click)="goBack()">
-      ย้อนกลับ
-    </button>
-
-    <button class="btn-primary" (click)="goEdit()">
-      แก้ไขสินค้า
-    </button>
-  </div>
 
 </div>

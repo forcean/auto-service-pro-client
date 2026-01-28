@@ -28,6 +28,7 @@ export class ProductDetailComponent implements OnInit {
     // mock
     this.product = {
       id: 'prd-001',
+      code: 'BKFD-DFK23469',
 
       name: 'ผ้าเบรกหน้า Toyota Camry',
       status: 'active',
@@ -136,6 +137,20 @@ export class ProductDetailComponent implements OnInit {
   }
 
   goBack() {
-    // router back
+    this.router.navigate(['/portal/product/list']);
   }
+  skuCopied = false;
+
+  copySku() {
+    if (!this.product?.code) return;
+
+    navigator.clipboard.writeText(this.product.code);
+
+    this.skuCopied = true;
+
+    setTimeout(() => {
+      this.skuCopied = false;
+    }, 1500);
+  }
+
 }
