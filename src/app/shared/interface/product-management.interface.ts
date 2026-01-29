@@ -16,6 +16,7 @@ export interface IReqCreateProduct {
 export interface IImages {
     fileId: string;
     isPrimary: boolean;
+    url?: string;
 }
 
 export interface ISpec {
@@ -46,14 +47,17 @@ export interface IReqUpdateProduct {
 export interface IResponseProductDetail {
     id: string;
     name: string;
+    code: string;
     description: string;
     categoryId: string;
+    categoryName: string;
     brandId: string;
-    status: string;
-    vehicles?: string;
-    spec?: string;
-    images: string;
-    prices: [];
+    brandName: string;
+    status: 'active' | 'inactive' | 'out_of_stock' | 'discontinued';
+    vehicles?: VehicleCompatibility[];
+    spec?: ISpec;
+    images: IImages[];
+    prices: IPrices[];
     updatedDt: string;
     updatedBy: string;
     activeFlag: boolean;

@@ -1,22 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-export interface IProductCard {
-  _id: string;
-  sku: string;
-  name: string;
-  brandName: string;
-  categoryName: string;
-
-  price: {
-    retail: number;
-    wholesale?: number;
-  };
-
-  image?: string;
-  status: 'active' | 'out_of_stock' | 'inactive';
-
-  vehicles?: string[]; // เช่น ["Golf Mk7", "Passat B8"]
-}
-
+import { IProducts } from '../../interface/product-list.interface';
 @Component({
   selector: 'app-product-card',
   standalone: false,
@@ -24,11 +7,11 @@ export interface IProductCard {
   styleUrl: './product-card.component.scss'
 })
 export class ProductCardComponent {
-  @Input() product!: IProductCard;
+  @Input() product!: IProducts;
   @Output() clicked = new EventEmitter<string>();
 
   onClick() {
-    this.clicked.emit(this.product._id);
+    this.clicked.emit(this.product.id);
   }
 
   get isOutOfStock() {

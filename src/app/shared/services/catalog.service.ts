@@ -21,7 +21,7 @@ export class CatalogService {
 
   async getCategories(params: IQueryCatalogProducts): Promise<IBaseResponse<ICategory[]>> {
     try {
-      const uri = this.PREFIX_USER + `/products`;
+      const uri = this.PREFIX_USER + `/categories`;
       const response = await this.httpService.get<ICategory[]>(uri, params);
       return response;
     } catch (error) {

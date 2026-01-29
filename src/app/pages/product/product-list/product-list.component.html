@@ -37,13 +37,13 @@
             รายการอะไหล่
           </h2>
           <span class="text-sm text-white">
-            {{ products.length }} รายการ
+            {{ productList.products.length }} รายการ
           </span>
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
           <app-product-card
-            *ngFor="let product of products"
+            *ngFor="let product of productList.products"
             [product]="product"
             (clicked)="onClick($event)"></app-product-card>
 

@@ -6,8 +6,8 @@
   <!-- Image -->
   <div class="relative w-full h-44 bg-gray-100">
     <img
-      *ngIf="product.image; else noImage"
-      [src]="product.image"
+      *ngIf="product.images; else noImage"
+      [src]="product.images"
       class="w-full h-full object-cover" />
 
     <ng-template #noImage>
@@ -35,7 +35,7 @@
 
     <!-- SKU -->
     <p class="text-xs text-gray-400">
-      SKU: {{ product.sku }}
+      SKU: {{ product.code }}
     </p>
 
     <!-- Brand / Category -->
@@ -51,9 +51,9 @@
     </p>
 
     <!-- Price -->
-    <div class="mt-auto flex items-end justify-between">
+    <!-- <div class="mt-auto flex items-end justify-between">
       <span class="text-primary font-bold text-base">
-        ฿{{ product.price.retail | number }}
+        ฿{{ product.prices.type | number }}
       </span>
 
       <span
@@ -61,7 +61,7 @@
         class="text-xs text-gray-400">
         ช่าง ฿{{ product.price.wholesale | number }}
       </span>
-    </div>
+    </div> -->
 
   </div>
 </div>

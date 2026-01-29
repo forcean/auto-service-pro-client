@@ -7,7 +7,7 @@ import { CatalogService } from '../../../shared/services/catalog.service';
 import { RESPONSE } from '../../../shared/enum/response.enum';
 import { IQueryCatalogProducts } from '../../../shared/interface/catalog.interface';
 import { IUploadImagePayload } from '../../../shared/interface/file-management.interface';
-import { IReqCreateProduct, IReqUpdateProduct } from '../../../shared/interface/stock-management.interface';
+import { IReqCreateProduct, IReqUpdateProduct } from '../../../shared/interface/product-management.interface';
 import { FileManagementService } from '../../../shared/services/file-management.service';
 import { ModalCommonService } from '../../../shared/components/modal-common/modal-common.service';
 import { Subscription } from 'rxjs/internal/Subscription';
@@ -22,8 +22,8 @@ import { BRAND_MOCK, CATEGORY_MOCK } from '../product-create/mockData';
 })
 export class ProductUpdateComponent implements OnInit {
 
+  private modalSubscription!: Subscription | null;
   productId!: string;
-
   categories: ICategory[] = [];
   brands: ProductBrand[] = [];
   productDetail!: any; // แนะนำให้ทำ interface จริงในโปรเจค
@@ -35,60 +35,15 @@ export class ProductUpdateComponent implements OnInit {
     private catalogService: CatalogService,
     private stockService: StockManagementService,
     private fileService: FileManagementService,
-    private modal: ModalCommonService
+    private modalCommonService: ModalCommonService
   ) { }
 
   async ngOnInit(): Promise<void> {
     this.productId = this.route.snapshot.paramMap.get('id')!;
-    this.productDetail = {
-      name: 'ผ้าเบรกหน้า Toyota Camry',
-      description: 'ผ้าเบรกแท้ เกรด OEM สำหรับ Camry ปี 2018–2022',
-
-      categoryId: 'cat-brake-pad',
-      brandId: 'brand-toyota',
-      status: 'active',
-
-      vehicles: [
-        {
-          brand: 'Toyota',
-          model: 'Camry',
-          yearFrom: 2018,
-          yearTo: 2022
-        }
-      ],
-
-      prices: [
-        { type: 'RETAIL', amount: 1200 },
-        { type: 'WHOLESALE', amount: 950 },
-        { type: 'COST', amount: 800 }
-      ],
-
-      spec: {
-        unit: 'ชุด',
-        weight: 3.2,
-        width: 25,
-        height: 8,
-        depth: 18
-      },
-
-      images: [
-        {
-          fileId: 'img-001',
-          isPrimary: true
-        },
-        {
-          fileId: 'img-002',
-          isPrimary: false
-        }
-      ]
-    };
-    await this.loadCategories();
     await this.loadProductDetail();
-  }
+    await this.loadCategories();
 
-  // -----------------------------
-  // Load initial data
-  // -----------------------------
+  }
 
   async loadCategories() {
     try {
@@ -99,10 +54,11 @@ export class ProductUpdateComponent implements OnInit {
 
       if (res.resultCode === RESPONSE.SUCCESS) {
         this.categories = res.resultData;
+      } else {
+        this.handleCommonError();
       }
     } catch (error) {
       console.error(error);
-      this.categories = CATEGORY_MOCK;
     }
 
   }
@@ -111,14 +67,15 @@ export class ProductUpdateComponent implements OnInit {
     try {
       const res = await this.stockService.getProductDetail(this.productId);
 
-      if (res.resultCode !== RESPONSE.SUCCESS) return;
-
-      this.productDetail = res.resultData;
-      await this.onCategoryChange(this.productDetail.categoryId);
+      if (res.resultCode == RESPONSE.SUCCESS) {
+        this.productDetail = res.resultData;
+        await this.onCategoryChange(this.productDetail.categoryId);
+      } else {
+        return;
+      }
     } catch (error) {
       console.error(error);
     }
-
   }
 
   async onCategoryChange(catId: string): Promise<void> {
@@ -130,10 +87,12 @@ export class ProductUpdateComponent implements OnInit {
       const res = await this.catalogService.getBrands(params);
       if (res.resultCode === RESPONSE.SUCCESS) {
         this.brands = res.resultData;
+      } else {
+        this.handleCommonError();
       }
     } catch (err) {
       console.error(err);
-      this.brands = BRAND_MOCK['cat-brake-pad'];
+      this.handleCommonError();
     }
   }
 
@@ -155,14 +114,9 @@ export class ProductUpdateComponent implements OnInit {
       );
 
       if (res.resultCode === RESPONSE.SUCCESS) {
-        this.modal.open({
-          type: 'success',
-          title: 'อัปเดตผลิตภัณฑ์สำเร็จ',
-          subtitle: 'ข้อมูลถูกบันทึกเรียบร้อย',
-          buttonText: 'ยืนยัน'
-        });
-
-        this.router.navigate(['/stock/products']);
+        this.handleModalSuccess();
+      } else {
+        this.handleFailResponse()
       }
     } catch (err) {
       console.error(err);
@@ -170,7 +124,7 @@ export class ProductUpdateComponent implements OnInit {
   }
 
   onCancel() {
-    this.router.navigate(['/portal/product/list']);
+    this.router.navigate(['/portal/product/detail', this.productId]);
   }
 
   private async uploadImages(images: IUploadImagePayload[]) {
@@ -179,5 +133,45 @@ export class ProductUpdateComponent implements OnInit {
       fileId: 'mock-' + Math.random(),
       isPrimary: img.isPrimary
     }));
+  }
+
+  private handleModalSuccess() {
+    this.modalCommonService.open({
+      type: 'success',
+      title: 'สร้างแก้ไขผลิตภัณฑ์สำเร็จ',
+      subtitle: 'คุณได้แก้ไขผลิตภัณฑ์เรียบร้อยแล้ว',
+      buttonText: 'ยืนยัน'
+    });
+    this.modalSubscription = this.modalCommonService.isOpen.subscribe((obj) => {
+      if (!obj?.isOpen) {
+        this.router.navigate(['/portal/product/detail', this.productId]);
+        this.unsubscribeModal();
+      }
+    });
+  }
+
+  private handleCommonError() {
+    this.modalSubscription = this.modalCommonService.isOpen.subscribe((obj) => {
+      if (!obj?.isOpen) {
+        this.router.navigate(['/portal/product/detail', this.productId]);
+        this.unsubscribeModal();
+      }
+    });
+  }
+
+  private unsubscribeModal() {
+    if (this.modalSubscription) {
+      this.modalSubscription.unsubscribe();
+      this.modalSubscription = null;
+    }
+  }
+
+  private handleFailResponse() {
+    this.modalCommonService.open({
+      type: 'alert',
+      title: 'ขออภัย ระบบขัดข้องในขณะนี้',
+      subtitle: 'กรุณาทำรายการใหม่อีกครั้ง หรือ ติดต่อผู้ดูแลระบบในองค์กรของคุณ',
+      buttonText: 'เข้าใจแล้ว',
+    });
   }
 }

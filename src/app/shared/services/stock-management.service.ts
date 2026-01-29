@@ -6,7 +6,8 @@ import { IResponseMenu } from '../interface/sidebar.interface';
 import { IBaseResponse } from '../interface/base-http.interface';
 import { IReqCreateUser, IReqUpdateUser, IResponseUserDetail } from '../interface/user-management.interface';
 import { IQueryListUser, IUserResultData } from '../interface/table-user-management.interface';
-import { IReqCreateProduct, IReqUpdateProduct, IResponseProductDetail } from '../interface/stock-management.interface';
+import { IReqCreateProduct, IReqUpdateProduct, IResponseProductDetail } from '../interface/product-management.interface';
+import { IProductList, IQueryListProduct } from '../interface/product-list.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -19,14 +20,14 @@ export class StockManagementService {
     private httpService: HttpService,
   ) { }
 
-  async getListProduct(params: IQueryListUser): Promise<IBaseResponse<IUserResultData>> {
+  async getListProduct(params: IQueryListProduct): Promise<IBaseResponse<IProductList>> {
     try {
       const uri = this.PREFIX_USER + `/products`;
-      const response = await this.httpService.get<IUserResultData>(uri, params);
+      const response = await this.httpService.get<IProductList>(uri, params);
       return response;
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
-        return error.error as IBaseResponse<IUserResultData>;
+        return error.error as IBaseResponse<IProductList>;
       } else {
         throw error;
       }

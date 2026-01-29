@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ICategory } from '../../../shared/interface/category.interface';
 import { ProductBrand } from '../../../shared/interface/brand.interface';
-import { IReqCreateProduct } from '../../../shared/interface/stock-management.interface';
+import { IPrices, IReqCreateProduct } from '../../interface/product-management.interface';
 import { IUploadImagePayload } from '../../interface/file-management.interface';
 import { Subscription } from 'rxjs';
 
@@ -17,7 +17,7 @@ export class ProductFormComponent implements OnInit {
   @Input() mode: 'create' | 'update' = 'create';
   @Input() categories: ICategory[] = [];
   @Input() brands: ProductBrand[] = [];
-  @Input() initialData?: any;
+  @Input() initialData!: IPrices;
   @Output() categoryChange = new EventEmitter<string>();
   @Output() submitForm = new EventEmitter<{
     form: IReqCreateProduct;

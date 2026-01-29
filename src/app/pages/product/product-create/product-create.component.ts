@@ -8,7 +8,7 @@ import { CatalogService } from '../../../shared/services/catalog.service';
 import { RESPONSE } from '../../../shared/enum/response.enum';
 import { IQueryCatalogProducts } from '../../../shared/interface/catalog.interface';
 import { IUploadImagePayload } from '../../../shared/interface/file-management.interface';
-import { IReqCreateProduct } from '../../../shared/interface/stock-management.interface';
+import { IReqCreateProduct } from '../../../shared/interface/product-management.interface';
 import { FileManagementService } from '../../../shared/services/file-management.service';
 import { ModalCommonService } from '../../../shared/components/modal-common/modal-common.service';
 import { Subscription } from 'rxjs/internal/Subscription';
@@ -21,6 +21,8 @@ import { StockManagementService } from '../../../shared/services/stock-managemen
   styleUrl: './product-create.component.scss'
 })
 export class ProductCreateComponent implements OnInit {
+
+  private modalSubscription!: Subscription | null;
   categories: ICategory[] = [];
   brands: ProductBrand[] = [];
 
@@ -28,7 +30,7 @@ export class ProductCreateComponent implements OnInit {
     private catalogService: CatalogService,
     private stockService: StockManagementService,
     private fileService: FileManagementService,
-    private modal: ModalCommonService,
+    private modalCommonService: ModalCommonService,
     private router: Router
   ) { }
 
@@ -45,10 +47,12 @@ export class ProductCreateComponent implements OnInit {
 
       if (res.resultCode === RESPONSE.SUCCESS) {
         this.categories = res.resultData;
+      } else {
+        this.handleCommonError();
       }
     } catch (error) {
       console.error(error);
-      this.categories = CATEGORY_MOCK;
+      this.handleCommonError();
     }
   }
 
@@ -61,10 +65,12 @@ export class ProductCreateComponent implements OnInit {
       const res = await this.catalogService.getBrands(params);
       if (res.resultCode === RESPONSE.SUCCESS) {
         this.brands = res.resultData;
+      } else {
+        this.handleCommonError();
       }
     } catch (err) {
       console.error(err);
-      this.brands = BRAND_MOCK['cat-brake-pad'];
+      this.handleCommonError();
     }
   }
 
@@ -83,15 +89,13 @@ export class ProductCreateComponent implements OnInit {
       const res = await this.stockService.createProduct(finalPayload);
 
       if (res.resultCode === RESPONSE.SUCCESS) {
-        this.modal.open({
-          type: 'success',
-          title: 'สร้างผลิตภัณฑ์สำเร็จ',
-          subtitle: 'คุณได้สร้างผลิตภัณฑ์เรียบร้อยแล้ว',
-          buttonText: 'ยืนยัน'
-        });
+        this.handleModalSuccess();
+      } else {
+        this.handleFailResponse()
       }
     } catch (err) {
       console.error(err);
+      this.handleCommonError();
     }
   }
 
@@ -101,5 +105,45 @@ export class ProductCreateComponent implements OnInit {
       fileId: 'mock-' + Math.random(),
       isPrimary: img.isPrimary
     }));
+  }
+
+  private handleModalSuccess() {
+    this.modalCommonService.open({
+      type: 'success',
+      title: 'สร้างผลิตภัณฑ์สำเร็จ',
+      subtitle: 'คุณได้สร้างผลิตภัณฑ์เรียบร้อยแล้ว',
+      buttonText: 'ยืนยัน'
+    });
+    this.modalSubscription = this.modalCommonService.isOpen.subscribe((obj) => {
+      if (!obj?.isOpen) {
+        this.router.navigate(['/portal/product/list']);
+        this.unsubscribeModal();
+      }
+    });
+  }
+
+  private handleCommonError() {
+    this.modalSubscription = this.modalCommonService.isOpen.subscribe((obj) => {
+      if (!obj?.isOpen) {
+        this.router.navigate(['/portal/product/list']);
+        this.unsubscribeModal();
+      }
+    });
+  }
+
+  private unsubscribeModal() {
+    if (this.modalSubscription) {
+      this.modalSubscription.unsubscribe();
+      this.modalSubscription = null;
+    }
+  }
+
+  private handleFailResponse() {
+    this.modalCommonService.open({
+      type: 'alert',
+      title: 'ขออภัย ระบบขัดข้องในขณะนี้',
+      subtitle: 'กรุณาทำรายการใหม่อีกครั้ง หรือ ติดต่อผู้ดูแลระบบในองค์กรของคุณ',
+      buttonText: 'เข้าใจแล้ว',
+    });
   }
 }
