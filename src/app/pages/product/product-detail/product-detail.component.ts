@@ -61,10 +61,10 @@ export class ProductDetailComponent implements OnInit {
 
     this.specEntries = [
       { label: 'หน่วย', value: this.product.spec?.unit },
-      { label: 'น้ำหนัก', value: this.product.spec?.weight },
-      { label: 'กว้าง', value: this.product.spec?.width },
-      { label: 'สูง', value: this.product.spec?.height },
-      { label: 'ลึก', value: this.product.spec?.depth }
+      { label: 'น้ำหนัก (kg)', value: this.product.spec?.weight },
+      { label: 'กว้าง (mm)', value: this.product.spec?.width },
+      { label: 'สูง (mm)', value: this.product.spec?.height },
+      { label: 'ลึก (mm)', value: this.product.spec?.depth }
     ].filter(s => s.value);
   }
 

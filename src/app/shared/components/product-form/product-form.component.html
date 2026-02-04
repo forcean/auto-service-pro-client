@@ -70,16 +70,16 @@
         <label class="label">หมวดหมู่
           <span class="text-red-600">*</span>
         </label>
-        <custom-select
+        <app-custom-select-category
           formControlName="categoryId"
-          placeholder="-- กรุณาเลือกหมวดหมู่ --"
-          [isError]="isInvalid('categoryId')">
+          placeholder="-- กรุณาเลือกหมวดหมู่ --">
 
           <custom-category-option
             *ngFor="let cat of categories"
             [node]="cat">
           </custom-category-option>
-        </custom-select>
+
+        </app-custom-select-category>
 
         <p *ngIf="isInvalid('categoryId')"
           class="text-red-500 text-xs mt-1">
@@ -147,32 +147,50 @@
     <h2 class="section-title">ข้อมูลจำเพาะ</h2>
 
     <div formGroupName="spec"
-      class="grid grid-cols-2 md:grid-cols-5 gap-3">
-      <input class="input" placeholder="หน่วย" formControlName="unit" />
-      <input
-        appDecimal
-        type="text"
-        class="input"
-        placeholder="น้ำหนัก"
-        formControlName="weight" />
-      <input
-        appDecimal
-        type="text"
-        class="input"
-        placeholder="ความกว้าง"
-        formControlName="width" />
-      <input
-        appDecimal
-        type="text"
-        class="input"
-        placeholder="ความสูง"
-        formControlName="height" />
-      <input
-        appDecimal
-        type="text"
-        class="input"
-        placeholder="ความลึก"
-        formControlName="depth" />
+      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
+      <div class=" relative">
+        <label class="label">หน่วย</label>
+        <input class="input pr-12"
+          placeholder="หน่วย" formControlName="unit" />
+      </div>
+      <!-- น้ำหนัก -->
+      <div class="relative">
+        <label class="label">น้ำหนัก</label>
+
+        <input
+          appDecimal
+          type="text"
+          class="input pr-12"
+          placeholder="0.00"
+          formControlName="weight" />
+
+        <span class="unit-badge">kg</span>
+      </div>
+
+      <!-- กว้าง -->
+      <div class="relative">
+        <label class="label">ความกว้าง</label>
+        <input appDecimal type="text" class="input pr-12"
+          placeholder="0" formControlName="width" />
+        <span class="unit-badge">mm</span>
+      </div>
+
+      <!-- สูง -->
+      <div class="relative">
+        <label class="label">ความสูง</label>
+        <input appDecimal type="text" class="input pr-12"
+          placeholder="0" formControlName="height" />
+        <span class="unit-badge">mm</span>
+      </div>
+
+      <!-- ลึก -->
+      <div class="relative">
+        <label class="label">ความลึก</label>
+        <input appDecimal type="text" class="input pr-12"
+          placeholder="0" formControlName="depth" />
+        <span class="unit-badge">mm</span>
+      </div>
+
     </div>
   </section>
 

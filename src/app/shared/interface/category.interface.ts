@@ -10,6 +10,6 @@ export interface ICategory {
   isSelectable: boolean;
   allowVehicleBinding: boolean;
   allowStock: boolean;
-
+  isSelected?: boolean;
   children: ICategory[];
 }

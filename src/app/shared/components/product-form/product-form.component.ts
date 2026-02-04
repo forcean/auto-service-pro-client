@@ -1,10 +1,11 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ICategory } from '../../../shared/interface/category.interface';
 import { ProductBrand } from '../../../shared/interface/brand.interface';
 import { IPrices, IReqCreateProduct } from '../../interface/product-management.interface';
 import { IUploadImagePayload } from '../../interface/file-management.interface';
-import { Subscription } from 'rxjs';
+import { skip, Subscription } from 'rxjs';
+import { IProducts } from '../../interface/product-list.interface';
 
 @Component({
   selector: 'app-product-form',
@@ -12,12 +13,12 @@ import { Subscription } from 'rxjs';
   templateUrl: './product-form.component.html',
   styleUrl: './product-form.component.scss'
 })
-export class ProductFormComponent implements OnInit {
+export class ProductFormComponent implements OnInit, OnChanges {
 
   @Input() mode: 'create' | 'update' = 'create';
   @Input() categories: ICategory[] = [];
   @Input() brands: ProductBrand[] = [];
-  @Input() initialData!: IPrices;
+  @Input() initialData!: IProducts;
   @Output() categoryChange = new EventEmitter<string>();
   @Output() submitForm = new EventEmitter<{
     form: IReqCreateProduct;
@@ -39,14 +40,26 @@ export class ProductFormComponent implements OnInit {
 
     this.categorySub = this.form.get('categoryId')!
       .valueChanges
+      .pipe(skip(1))
       .subscribe(() => {
+        if (this.mode === 'update' && !this.form.dirty) return;
         this.onSelectedCategory();
       });
 
-    if (this.initialData) {
-      this.patchForm(this.initialData);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['initialData']?.currentValue) {
+      this.patchForm(changes['initialData'].currentValue);
+
+      // sync state ภายใน form เท่านั้น
+      const catId = this.form.get('categoryId')?.value;
+      const selectedCategory = this.findCategoryById(this.categories, catId);
+      this.isVehicleBinding = selectedCategory?.allowVehicleBinding || false;
+      this.isLoadedBrands = true;
     }
   }
+
 
   ngOnDestroy() {
     this.categorySub?.unsubscribe();
@@ -78,12 +91,28 @@ export class ProductFormComponent implements OnInit {
 
   private patchForm(data: any): void {
     this.form.patchValue({
-      ...data,
-      prices: data.prices ?? [],
+      name: data.name,
+      description: data.description,
+      categoryId: data.categoryId,
+      brandId: data.brandId,
+      status: data.status,
       spec: data.spec ?? {},
       images: data.images ?? []
     });
+
+    const pricesFA = this.form.get('prices') as FormArray;
+    pricesFA.clear();
+
+    (data.prices ?? []).forEach((p: any) => {
+      pricesFA.push(
+        this.fb.group({
+          type: [p.type],
+          amount: [p.amount],
+        })
+      );
+    });
   }
+
 
   private createPrice(type: 'RETAIL' | 'WHOLESALE' | 'COST'): FormGroup {
     return this.fb.group({
@@ -114,10 +143,11 @@ export class ProductFormComponent implements OnInit {
   }
 
   onSelectedCategory(): void {
-    const catId = this.form.get('categoryId')?.value;
-    console.log('test categories');
+    if (this.mode === 'update' && !this.form.dirty) return;
 
+    const catId = this.form.get('categoryId')?.value;
     if (!catId) return;
+
     this.categoryChange.emit(catId);
     this.isLoadedBrands = true;
     const selectedCategory = this.findCategoryById(this.categories, catId);

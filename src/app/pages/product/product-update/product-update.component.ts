@@ -13,6 +13,7 @@ import { ModalCommonService } from '../../../shared/components/modal-common/moda
 import { Subscription } from 'rxjs/internal/Subscription';
 import { StockManagementService } from '../../../shared/services/stock-management.service';
 import { BRAND_MOCK, CATEGORY_MOCK } from '../product-create/mockData';
+import { IProducts } from '../../../shared/interface/product-list.interface';
 
 @Component({
   selector: 'app-product-update',
@@ -26,7 +27,7 @@ export class ProductUpdateComponent implements OnInit {
   productId!: string;
   categories: ICategory[] = [];
   brands: ProductBrand[] = [];
-  productDetail!: any; // แนะนำให้ทำ interface จริงในโปรเจค
+  productDetail!: IProducts;
 
 
   constructor(

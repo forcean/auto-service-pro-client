@@ -1,0 +1,37 @@
+<div
+  class="relative w-full custom-select-container"
+  [ngClass]="positionClass">
+
+  <button
+    type="button"
+    #dropdown
+    [disabled]="isDisabled"
+    class="flex justify-between items-center w-full pl-4 pr-3 py-2 bg-white border border-gray-300 rounded-xl cursor-pointer whitespace-nowrap text-[0.92rem] overflow-hidden disabled:cursor-default focus:border-[#88c273] focus:outline-none"
+    (click)="toggleDropdown()"
+    [class.border-error]="isError">
+
+    <span
+      [class.text-gray-400]="isDisabled || placeholder === getSelectedLabel()"
+      class="truncate text-[#00162b]">
+      {{ getSelectedLabel() || ('- ' + noDataOptionText + ' -') }}
+    </span>
+
+    <i
+      class="ml-auto mr-1.5 w-4 h-4 bg-center bg-no-repeat bg-[length:16px]"
+      [ngClass]="{
+        'opacity-50': isDisabled,
+        'bg-[url(/assets/img/icon.arrowup.svg)]': isDropdownOpen,
+        'bg-[url(/assets/img/icon.arrowdown.svg)]': !isDropdownOpen
+      }">
+    </i>
+  </button>
+
+  <div
+    #customOptions
+    *ngIf="isDropdownOpen"
+    class="absolute left-0 top-full mt-1 min-w-full max-h-[50vh] w-auto bg-white border border-gray-300 shadow-md rounded-xl z-[1000] p-2 overflow-y-auto whitespace-nowrap">
+
+    <ng-content></ng-content>
+
+  </div>
+</div>

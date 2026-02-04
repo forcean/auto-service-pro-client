@@ -30,6 +30,7 @@ import { DecimalDirective } from './directive/app-decimal.directive';
 import { PreventSpecialCharsDirective } from './directive/preventspecialchars.directive';
 import { PriceDirective } from './directive/app-price.directive';
 import { ProductFormComponent } from './components/product-form/product-form.component';
+import { CustomSelectCategoryComponent } from './components/custom-select-category/custom-select-category.component';
 
 const components = [
   ModalCommonComponent,
@@ -54,6 +55,7 @@ const components = [
   VehicleStepSelectorComponent,
   VehicleCompatibilityComponent,
   ProductFormComponent,
+  CustomSelectCategoryComponent,
 ];
 
 const directives = [
@@ -68,6 +70,7 @@ const directives = [
   declarations: [
     ...components,
     ...directives,
+
 
   ],
   imports: [

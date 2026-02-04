@@ -25,8 +25,8 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
 
   @ContentChildren(CustomOptionComponent) options!: QueryList<CustomOptionComponent>;
   @ContentChildren(CustomBrandOptionComponent) brandOptions!: QueryList<CustomBrandOptionComponent>;
-  @ContentChildren(CustomCategoryOptionComponent, { descendants: true })
-  categoryOptions!: QueryList<CustomCategoryOptionComponent>;
+  // @ContentChildren(CustomCategoryOptionComponent, { descendants: true })
+  // categoryOptions!: QueryList<CustomCategoryOptionComponent>;
 
   @Input() placeholder: string = '';
   @Input() isDisabled = false;
@@ -71,13 +71,14 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
 
     this.brandOptions.changes.subscribe(() => {
       this.setupBrandOptionSubscriptions();
+      this.writeValue(this.selectedValue);
     });
 
-    this.categoryOptions?.forEach(option => {
-      option.selectCategory.subscribe(event => {
-        this.selectOption(event.value, event.label);
-      });
-    });
+    // this.categoryOptions?.forEach(option => {
+    //   option.selectCategory.subscribe(event => {
+    //     this.selectOption(event.value, event.label);
+    //   });
+    // });
 
     setTimeout(() => {
       if (this.selectedValue) {
@@ -107,9 +108,15 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
         this.selectOption(value, label);
       });
 
-      option.isSelected = option.value === this.selectedValue;
+      if (option.value === this.selectedValue) {
+        option.isSelected = true;
+        this.selectedLabel = option.getLabel();
+      } else {
+        option.isSelected = false;
+      }
     });
   }
+
 
 
   toggleDropdown() {
@@ -173,20 +180,39 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
 
   writeValue(value: unknown): void {
     this.selectedValue = value;
-    if (this.options) {
-      let hasSelected = false;
-      this.options.forEach(option => {
-        option.isSelected = option.value === value;
-        if (option.isSelected) {
-          this.selectedLabel = option.getLabel();
-          hasSelected = true;
-        }
-      });
-      if (!hasSelected) {
-        this.selectedLabel = '';
+    let hasSelected = false;
+
+    // 1️⃣ normal option
+    this.options?.forEach(option => {
+      option.isSelected = option.value === value;
+      if (option.isSelected) {
+        this.selectedLabel = option.getLabel();
+        hasSelected = true;
       }
+    });
+
+    // // 2️⃣ category option
+    // this.categoryOptions?.forEach(option => {
+    //   if (option.node.id === value) {
+    //     this.selectedLabel = option.node.name;
+    //     hasSelected = true;
+    //   }
+    // });
+
+    // 3️⃣ ✅ brand option (ตัวที่หายไป)
+    this.brandOptions?.forEach(option => {
+      option.isSelected = option.value === value;
+      if (option.isSelected) {
+        this.selectedLabel = option.getLabel();
+        hasSelected = true;
+      }
+    });
+
+    if (!hasSelected) {
+      this.selectedLabel = '';
     }
   }
+
 
 
   registerOnChange(fn: (value: unknown) => void): void {

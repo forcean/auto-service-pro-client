@@ -44,3 +44,8 @@
 .input.border-red-500 {
     border-color: #ef4444 !important;
 }
+
+.unit-badge {
+    @apply absolute right-3 -translate-y-1/2 text-gray-500 text-sm font-medium pointer-events-none;
+    top: 70%;
+}
