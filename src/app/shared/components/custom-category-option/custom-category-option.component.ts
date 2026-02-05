@@ -11,45 +11,15 @@ import { ICategory } from '../../interface/category.interface';
 export class CustomCategoryOptionComponent {
   @Input() node!: ICategory;
   @Input() level = 0;
-  @Output() selectCategory = new EventEmitter<{ value: string; label: string }>();
-
-  @ContentChildren(CustomCategoryOptionComponent, { descendants: true })
-  categoryOptions!: QueryList<CustomCategoryOptionComponent>;
-
-
-  expanded = false;
-  isSelected = false; // ⭐ เพิ่ม
-
-  markSelected(targetId: string): boolean {
-    this.isSelected = this.node.id === targetId;
-
-    if (this.node.children?.length) {
-      let foundInChild = false;
-
-      this.node.children.forEach(child => {
-        // NOTE: logic นี้จะถูกเรียกผ่าน component tree
-      });
-
-      if (foundInChild) {
-        this.expanded = true;
-        return true;
-      }
-    }
-
-    return this.isSelected;
-  }
+  @Output() selectCategory = new EventEmitter<ICategory>();
 
   toggle(event: MouseEvent): void {
     event.stopPropagation();
-    this.expanded = !this.expanded;
+    this.node.expanded = !this.node.expanded;
   }
 
   select(): void {
     if (!this.node.isSelectable) return;
-
-    this.selectCategory.emit({
-      value: this.node.id,
-      label: this.node.name
-    });
+    this.selectCategory.emit(this.node);
   }
 }

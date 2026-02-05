@@ -19,12 +19,12 @@ export class ProductFormComponent implements OnInit, OnChanges {
   @Input() categories: ICategory[] = [];
   @Input() brands: ProductBrand[] = [];
   @Input() initialData!: IProducts;
+
   @Output() categoryChange = new EventEmitter<string>();
   @Output() submitForm = new EventEmitter<{
     form: IReqCreateProduct;
     images: IUploadImagePayload[];
   }>();
-
   @Output() cancel = new EventEmitter<void>();
   private categorySub!: Subscription;
 
@@ -40,26 +40,21 @@ export class ProductFormComponent implements OnInit, OnChanges {
 
     this.categorySub = this.form.get('categoryId')!
       .valueChanges
-      .pipe(skip(1))
       .subscribe(() => {
         if (this.mode === 'update' && !this.form.dirty) return;
         this.onSelectedCategory();
       });
-
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['initialData']?.currentValue) {
       this.patchForm(changes['initialData'].currentValue);
-
-      // sync state ภายใน form เท่านั้น
       const catId = this.form.get('categoryId')?.value;
       const selectedCategory = this.findCategoryById(this.categories, catId);
       this.isVehicleBinding = selectedCategory?.allowVehicleBinding || false;
       this.isLoadedBrands = true;
     }
   }
-
 
   ngOnDestroy() {
     this.categorySub?.unsubscribe();
@@ -205,7 +200,6 @@ export class ProductFormComponent implements OnInit, OnChanges {
       ...(f.spec && Object.values(f.spec).some(v => v) && { spec: f.spec }),
     };
   }
-
 
   private findCategoryById(categories: ICategory[], id: string): ICategory | null {
     for (const cat of categories) {

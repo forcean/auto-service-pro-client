@@ -27,11 +27,14 @@
   </button>
 
   <div
-    #customOptions
     *ngIf="isDropdownOpen"
-    class="absolute left-0 top-full mt-1 min-w-full max-h-[50vh] w-auto bg-white border border-gray-300 shadow-md rounded-xl z-[1000] p-2 overflow-y-auto whitespace-nowrap">
-
-    <ng-content></ng-content>
+    #customOptions
+    class="absolute left-0 top-full mt-1 min-w-full max-h-[50vh] bg-white border border-gray-300 shadow-md rounded-xl z-[1000] p-2 overflow-y-auto whitespace-nowrap">
+    <custom-category-option
+      *ngFor="let node of categories"
+      [node]="node"
+      (selectCategory)="selectOption($event)">
+    </custom-category-option>
 
   </div>
 </div>

@@ -49,13 +49,13 @@ const components = [
   ProductCardComponent,
   ProductFilterComponent,
   FileUploadComponent,
-  CustomCategoryOptionComponent,
   CustomBrandOptionComponent,
   VehicleCardComponent,
   VehicleStepSelectorComponent,
   VehicleCompatibilityComponent,
   ProductFormComponent,
-  CustomSelectCategoryComponent,
+  CustomCategoryOptionComponent,
+  CustomSelectCategoryComponent
 ];
 
 const directives = [

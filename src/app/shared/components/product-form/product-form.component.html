@@ -4,10 +4,6 @@
     {{ mode === 'create' ? 'สร้างสินค้า' : 'แก้ไขสินค้า' }}
   </h1>
 
-  <!-- Product Info -->
-  <!-- (โค้ดเหมือนเดิมทั้งหมด) -->
-
-  <!-- Product Info -->
   <section class="card">
     <h2 class="section-title">ข้อมูลสินค้า</h2>
 
@@ -61,7 +57,6 @@
     </div>
   </section>
 
-  <!-- Category / Brand -->
   <section class="card">
     <h2 class="section-title">หมวดหมู่ / แบรนด์</h2>
 
@@ -72,13 +67,8 @@
         </label>
         <app-custom-select-category
           formControlName="categoryId"
+          [categories]="categories"
           placeholder="-- กรุณาเลือกหมวดหมู่ --">
-
-          <custom-category-option
-            *ngFor="let cat of categories"
-            [node]="cat">
-          </custom-category-option>
-
         </app-custom-select-category>
 
         <p *ngIf="isInvalid('categoryId')"
@@ -124,7 +114,6 @@
     </p>
   </section>
 
-  <!-- Prices -->
   <section class="card">
     <h2 class="section-title">ราคา</h2>
 
@@ -142,7 +131,6 @@
     </div>
   </section>
 
-  <!-- Spec -->
   <section class="card">
     <h2 class="section-title">ข้อมูลจำเพาะ</h2>
 
@@ -151,7 +139,7 @@
       <div class=" relative">
         <label class="label">หน่วย</label>
         <input class="input pr-12"
-          placeholder="หน่วย" formControlName="unit" />
+          placeholder="เช่น ชุด,ชิ้น" formControlName="unit" />
       </div>
       <!-- น้ำหนัก -->
       <div class="relative">
@@ -167,7 +155,6 @@
         <span class="unit-badge">kg</span>
       </div>
 
-      <!-- กว้าง -->
       <div class="relative">
         <label class="label">ความกว้าง</label>
         <input appDecimal type="text" class="input pr-12"
@@ -175,7 +162,6 @@
         <span class="unit-badge">mm</span>
       </div>
 
-      <!-- สูง -->
       <div class="relative">
         <label class="label">ความสูง</label>
         <input appDecimal type="text" class="input pr-12"
@@ -183,7 +169,6 @@
         <span class="unit-badge">mm</span>
       </div>
 
-      <!-- ลึก -->
       <div class="relative">
         <label class="label">ความลึก</label>
         <input appDecimal type="text" class="input pr-12"
@@ -194,7 +179,6 @@
     </div>
   </section>
 
-  <!-- Images -->
   <section class="card">
     <h2 class="section-title">รูปภาพสินค้า
       <span class="text-red-600">*</span>

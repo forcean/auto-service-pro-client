@@ -13,7 +13,7 @@
         type="button"
         class="caret"
         (click)="toggle($event)">
-        {{ expanded ? '▾' : '▸' }}
+        {{ node.expanded ? '▾' : '▸' }}
       </button>
 
       <span
@@ -27,11 +27,11 @@
     </div>
   </div>
 
-  <div *ngIf="expanded">
+  <div *ngIf="node.expanded">
     <custom-category-option
       *ngFor="let child of node.children"
       [node]="child"
-      [level]="level + 1.25"
+      [level]="level + 1"
       (selectCategory)="selectCategory.emit($event)">
     </custom-category-option>
   </div>

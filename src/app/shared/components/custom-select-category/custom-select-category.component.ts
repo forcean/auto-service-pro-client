@@ -15,6 +15,7 @@ import {
 } from '@angular/forms';
 import { createPopper } from '@popperjs/core';
 import { CustomCategoryOptionComponent } from '../custom-category-option/custom-category-option.component';
+import { ICategory } from '../../interface/category.interface';
 
 @Component({
   selector: 'app-custom-select-category',
@@ -29,57 +30,38 @@ import { CustomCategoryOptionComponent } from '../custom-category-option/custom-
     }
   ]
 })
-export class CustomSelectCategoryComponent implements ControlValueAccessor, AfterContentInit {
-
-  @ContentChildren(CustomCategoryOptionComponent, { descendants: true })
-  categoryOptions!: QueryList<CustomCategoryOptionComponent>;
-
+export class CustomSelectCategoryComponent implements ControlValueAccessor {
   @Input() placeholder = '';
   @Input() isDisabled = false;
-  @Input() isDropdownOpen = false;
-  @Input() dropdownName = '';
-  @Input() positionClass = '';
   @Input() isError = false;
+  @Input() positionClass = '';
+  @Input({ required: true }) categories: ICategory[] = [];
 
   @ViewChild('dropdown') dropdown!: ElementRef;
   @ViewChild('customOptions') customOptions!: ElementRef;
-
-  private pendingValue: string | null = null;
-  selectedValue: string | null = null;
-  selectedLabel = '';
-  noDataOptionText = 'ไม่มีข้อมูล';
+  @ContentChildren(CustomCategoryOptionComponent, { descendants: true })
+  categoryOptions!: QueryList<CustomCategoryOptionComponent>;
 
   private onChange: (value: string | null) => void = () => { };
   private onTouched: () => void = () => { };
 
+  selectedLabel = '';
+  selectedValue: string | null = null;
+  noDataOptionText = 'ไม่มีข้อมูล';
+  isDropdownOpen = false;
+
   ngAfterContentInit(): void {
-    this.bindCategoryOptions();
+    this.bindOptions();
 
     this.categoryOptions.changes.subscribe(() => {
-      this.bindCategoryOptions();
-
-      // ⭐ สำคัญ: defer ไป tick สุดท้าย
-      queueMicrotask(() => {
-        if (this.pendingValue) {
-          this.applyValueToOptions();
-        }
-      });
-    });
-
-    // ⭐ เผื่อกรณี options มาครบตั้งแต่แรก
-    queueMicrotask(() => {
-      if (this.pendingValue) {
-        this.applyValueToOptions();
-      }
+      this.bindOptions();
     });
   }
 
-
-
-  private bindCategoryOptions() {
+  private bindOptions() {
     this.categoryOptions.forEach(option => {
-      option.selectCategory.subscribe(event => {
-        this.selectOption(event.value, event.label);
+      option.selectCategory.subscribe(node => {
+        this.selectOption(node);
       });
     });
   }
@@ -103,28 +85,23 @@ export class CustomSelectCategoryComponent implements ControlValueAccessor, Afte
       {
         placement: 'bottom-start',
         modifiers: [
-          {
-            name: 'offset',
-            options: { offset: [0, 10] }
-          },
-          {
-            name: 'preventOverflow',
-            options: { boundary: 'viewport' }
-          }
+          { name: 'offset', options: { offset: [0, 10] } },
+          { name: 'preventOverflow', options: { boundary: 'viewport' } }
         ]
       }
     );
   }
 
-  selectOption(value: string, label: string) {
-    if (this.isDisabled) return;
+  selectOption(node: ICategory) {
+    if (!node.isSelectable) return;
 
-    this.selectedValue = value;
-    this.selectedLabel = label;
+    this.clearTree(this.categories);
+    node.isSelected = true;
+    this.selectedLabel = node.name;
+    this.selectedValue = node.id;
 
-    this.onChange(value);
+    this.onChange(node.id);
     this.onTouched();
-
     this.isDropdownOpen = false;
   }
 
@@ -133,16 +110,12 @@ export class CustomSelectCategoryComponent implements ControlValueAccessor, Afte
   }
 
   writeValue(value: string | null): void {
-    this.pendingValue = value;
     this.selectedValue = value;
+    if (!value) return;
 
-    if (!this.categoryOptions || this.categoryOptions.length === 0) {
-      return; // ⛔ ยังไม่มี option
-    }
-
-    this.applyValueToOptions();
+    this.clearTree(this.categories);
+    this.findAndSelect(this.categories, value);
   }
-
 
   registerOnChange(fn: any): void {
     this.onChange = fn;
@@ -156,6 +129,33 @@ export class CustomSelectCategoryComponent implements ControlValueAccessor, Afte
     this.isDisabled = isDisabled;
   }
 
+  private clearTree(nodes: ICategory[]) {
+    nodes.forEach(n => {
+      n.isSelected = false;
+      n.expanded = false;
+      if (n.children) this.clearTree(n.children);
+    });
+  }
+
+  private findAndSelect(nodes: ICategory[], targetId: string): boolean {
+    for (const node of nodes) {
+      if (node.id === targetId) {
+        node.isSelected = true;
+        this.selectedLabel = node.name;
+        return true;
+      }
+
+      if (node.children?.length) {
+        const found = this.findAndSelect(node.children, targetId);
+        if (found) {
+          node.expanded = true;
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   @HostListener('document:click', ['$event'])
   onClickOutside(event: MouseEvent) {
     const target = event.target as HTMLElement;
@@ -163,57 +163,4 @@ export class CustomSelectCategoryComponent implements ControlValueAccessor, Afte
       this.isDropdownOpen = false;
     }
   }
-
-  private applyValueToOptions() {
-    this.clearSelection(this.categoryOptions);
-
-    this.categoryOptions.forEach(option => {
-      if (option.node.id === this.pendingValue) {
-        option.node.isSelected = true;
-        this.selectedLabel = option.node.name;
-      }
-    });
-  }
-
-  private clearSelection(options: QueryList<CustomCategoryOptionComponent>) {
-    options.forEach(opt => opt.node.isSelected = false);
-  }
-
-
-
-  private markOptionAndParents(
-    option: CustomCategoryOptionComponent,
-    targetId: string
-  ): boolean {
-    // ตรงตัว
-    if (option.node.id === targetId) {
-      option.isSelected = true;
-      return true;
-    }
-
-    // เช็ก child
-    if (option.node.children?.length) {
-      let foundInChild = false;
-
-      option.node.children.forEach(() => {
-        // descendant options จะอยู่ใน ContentChildren อยู่แล้ว
-        this.categoryOptions.forEach(childOption => {
-          if (childOption.node.id !== option.node.id &&
-            this.markOptionAndParents(childOption, targetId)) {
-            foundInChild = true;
-          }
-        });
-      });
-
-      if (foundInChild) {
-        option.expanded = true; // ⭐ auto expand parent
-        return true;
-      }
-    }
-
-    option.isSelected = false;
-    return false;
-  }
-
-
 }

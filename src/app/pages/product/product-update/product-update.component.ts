@@ -41,9 +41,9 @@ export class ProductUpdateComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.productId = this.route.snapshot.paramMap.get('id')!;
-    await this.loadProductDetail();
-    await this.loadCategories();
 
+    await this.loadCategories();
+    await this.loadProductDetail();
   }
 
   async loadCategories() {
