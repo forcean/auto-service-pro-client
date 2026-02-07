@@ -51,7 +51,10 @@ export class VehicleCompatibilityComponent implements ControlValueAccessor {
   remove(index: number): void {
     if (this.disabled) return;
 
-    this.vehicles.splice(index, 1);
+    const newVehicles = [...this.vehicles];
+    newVehicles.splice(index, 1);
+    this.vehicles = newVehicles;
+
     this.onChange(this.vehicles);
     this.onTouched();
   }

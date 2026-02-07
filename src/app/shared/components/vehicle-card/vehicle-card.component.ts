@@ -18,7 +18,7 @@ export class VehicleCardComponent {
     if (Array.isArray(this.vehicle.engines)) {
       return this.vehicle.engines.join(', ');
     }
-    return this.vehicle.engines;
+    return this.vehicle.engines || '';
   }
 
   onRemove(): void {

@@ -4,6 +4,7 @@ export interface VehicleCompatibility {
     model: string;
     yearFrom: number;
     yearTo: number;
-    engines: string[];
+    engines?: string[];
+    availableEngines?: string[];
     remark?: string;
 }

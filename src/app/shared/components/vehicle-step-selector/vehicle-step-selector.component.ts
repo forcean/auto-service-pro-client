@@ -35,11 +35,10 @@ export class VehicleStepSelectorComponent {
       };
       const response = await this.catalogService.getVehicles(params);
       if (response.resultCode === RESPONSE.SUCCESS) {
-        this.brands = response.resultData;
+        this.brands = response.resultData.brands || [];
       }
     } catch (error) {
       console.error('Error loading brands:', error);
-      this.brands = MOCK_VEHICLE_BRANDS;
     }
   }
 
@@ -53,7 +52,7 @@ export class VehicleStepSelectorComponent {
       };
       const response = await this.catalogService.getVehicles(params);
       if (response.resultCode === RESPONSE.SUCCESS) {
-        this.models = response.resultData;
+        this.models = response.resultData.models || [];
       }
     } catch (error) {
       console.error('Error loading brands:', error);
@@ -75,7 +74,7 @@ export class VehicleStepSelectorComponent {
       };
       const response = await this.catalogService.getVehicles(params);
       if (response.resultCode === RESPONSE.SUCCESS) {
-        this.vehicles = response.resultData;
+        this.vehicles = response.resultData.vehicles || [];
       }
     } catch (error) {
       console.error('Error loading brands:', error);
@@ -90,9 +89,13 @@ export class VehicleStepSelectorComponent {
       model: v.model,
       yearFrom: v.yearFrom,
       yearTo: v.yearTo,
-      engines: v.engines,
+
+      availableEngines: v.engines ?? [],
+      engines: [...(v.engines ?? [])],
+
       remark: ''
     });
+
     this.reset();
   }
 

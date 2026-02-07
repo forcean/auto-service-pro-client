@@ -37,7 +37,9 @@ export class ProductFormComponent implements OnInit, OnChanges {
 
   ngOnInit(): void {
     this.initForm();
-
+    this.form.get('vehicles')?.valueChanges.subscribe(v => {
+      console.log('vehicles changed:', v);
+    });
     this.categorySub = this.form.get('categoryId')!
       .valueChanges
       .subscribe(() => {
@@ -48,6 +50,8 @@ export class ProductFormComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['initialData']?.currentValue) {
+      console.log('initialData:', changes['initialData'].currentValue);
+      console.log('initialData.vehicle:', changes['initialData'].currentValue.vehicle);
       this.patchForm(changes['initialData'].currentValue);
       const catId = this.form.get('categoryId')?.value;
       const selectedCategory = this.findCategoryById(this.categories, catId);
@@ -91,6 +95,7 @@ export class ProductFormComponent implements OnInit, OnChanges {
       categoryId: data.categoryId,
       brandId: data.brandId,
       status: data.status,
+      vehicles: data.vehicles ?? [],
       spec: data.spec ?? {},
       images: data.images ?? []
     });
@@ -107,7 +112,6 @@ export class ProductFormComponent implements OnInit, OnChanges {
       );
     });
   }
-
 
   private createPrice(type: 'RETAIL' | 'WHOLESALE' | 'COST'): FormGroup {
     return this.fb.group({
@@ -154,8 +158,12 @@ export class ProductFormComponent implements OnInit, OnChanges {
       vehiclesCtrl?.setValidators([Validators.required]);
     } else {
       vehiclesCtrl?.clearValidators();
-      vehiclesCtrl?.setValue([]);
+
+      if (this.mode !== 'update') {
+        vehiclesCtrl?.setValue([]);
+      }
     }
+
 
     vehiclesCtrl?.updateValueAndValidity();
   }
@@ -192,7 +200,6 @@ export class ProductFormComponent implements OnInit, OnChanges {
 
       ...(f.description?.trim() && { description: f.description.trim() }),
       ...(f.vehicles?.length && { vehicle: f.vehicles }),
-
       ...(f.prices?.some((p: any) => p.amount) && {
         prices: f.prices.filter((p: any) => p.amount)
       }),

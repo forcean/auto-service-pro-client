@@ -5,7 +5,7 @@ import { ApiPrefix } from '../enum/api-prefix.enum';
 import { IBaseResponse } from '../interface/base-http.interface';
 import { ICategory } from '../interface/category.interface';
 import { ProductBrand } from '../interface/brand.interface';
-import { IQueryCatalogProducts, IQueryCatalogVehicles } from '../interface/catalog.interface';
+import { IQueryCatalogProducts, IQueryCatalogVehicles, IResVehicles } from '../interface/catalog.interface';
 import { VehicleCompatibility } from '../interface/vehicle.interface';
 
 @Injectable({
@@ -47,14 +47,14 @@ export class CatalogService {
     }
   }
 
-  async getVehicles(params: IQueryCatalogVehicles): Promise<IBaseResponse<VehicleCompatibility[]>> {
+  async getVehicles(params: IQueryCatalogVehicles): Promise<IBaseResponse<IResVehicles>> {
     try {
       const uri = this.PREFIX_USER + `/vehicles`;
-      const response = await this.httpService.get<VehicleCompatibility[]>(uri, params);
+      const response = await this.httpService.get<IResVehicles>(uri, params);
       return response;
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
-        return error.error as IBaseResponse<VehicleCompatibility[]>;
+        return error.error as IBaseResponse<IResVehicles>;
       } else {
         throw error;
       }
