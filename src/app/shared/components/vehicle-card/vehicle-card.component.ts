@@ -14,6 +14,23 @@ export class VehicleCardComponent {
   @Output() remove = new EventEmitter<void>();
   @Output() remarkChange = new EventEmitter<string>();
 
+  onRemove(): void {
+    this.remove.emit();
+  }
+
+  onRemarkChange(value: string) {
+    this.remarkChange.emit(value);
+  }
+
+  toggleEngine(engine: string, checked: boolean) {
+    const set = new Set(this.vehicle.selectedEngines ?? []);
+
+    checked ? set.add(engine) : set.delete(engine);
+
+    this.vehicle.selectedEngines = Array.from(set);
+    this.remarkChange.emit(this.vehicle.remark ?? '');
+  }
+
   get enginesDisplay(): string {
     if (Array.isArray(this.vehicle.engines)) {
       return this.vehicle.engines.join(', ');
@@ -21,11 +38,11 @@ export class VehicleCardComponent {
     return this.vehicle.engines || '';
   }
 
-  onRemove(): void {
-    this.remove.emit();
-  }
-
-  onRemarkChange(value: string) {
-    this.remarkChange.emit(value);
+  get showEngineSelector(): boolean {
+    return !!(
+      this.vehicle.isNew &&
+      Array.isArray(this.vehicle.engines) &&
+      this.vehicle.engines.length > 1
+    );
   }
 }

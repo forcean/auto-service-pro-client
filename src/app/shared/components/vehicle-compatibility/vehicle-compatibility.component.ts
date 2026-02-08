@@ -36,14 +36,19 @@ export class VehicleCompatibilityComponent implements ControlValueAccessor {
     this.disabled = isDisabled;
   }
 
-  addVehicle(vehicle: any): void {
+  addVehicle(vehicle: VehicleCompatibility): void {
     if (this.disabled) return;
 
     if (this.vehicles.some(v => v.vehicleId === vehicle.vehicleId)) {
       return;
     }
 
-    this.vehicles = [...this.vehicles, vehicle];
+    const normalized: VehicleCompatibility = {
+      ...vehicle,
+      engines: vehicle.selectedEngines ?? vehicle.engines
+    };
+
+    this.vehicles = [...this.vehicles, normalized];
     this.onChange(this.vehicles);
     this.onTouched();
   }

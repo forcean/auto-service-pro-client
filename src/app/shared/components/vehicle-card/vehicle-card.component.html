@@ -1,16 +1,43 @@
-<div class="card">
-  <div class="row">
-    <input class="form-input" disabled [value]="vehicle.model" />
-    <input class="form-input" disabled [value]="vehicle.yearFrom" />
-    <input class="form-input" disabled [value]="vehicle.yearTo" />
-    <input class="form-input" disabled [value]="vehicle.engines" />
+<div class="vehicle-row">
+  <div class="vehicle-grid">
+    <div class="cell model">
+      {{ vehicle.model }}
+    </div>
+
+    <div class="cell year">
+      {{ vehicle.yearFrom }} - {{ vehicle.yearTo }}
+    </div>
+
+    <div class="cell engine">
+      <span *ngIf="!showEngineSelector">
+        {{ enginesDisplay }}
+      </span>
+
+      <div *ngIf="showEngineSelector" class="engine-inline">
+        <label
+          *ngFor="let e of vehicle.engines"
+          class="engine-check">
+          <input
+            type="checkbox"
+            class="engine-checkbox"
+            [checked]="vehicle.selectedEngines?.includes(e)"
+            (change)="toggleEngine(e, $any($event.target).checked)" />
+          <span>{{ e }}</span>
+        </label>
+      </div>
+    </div>
+    <div class="cell remark">
+      <input
+        class="remark-input"
+        [value]="vehicle.remark"
+        placeholder="หมายเหตุ"
+        (input)="onRemarkChange($any($event.target).value)" />
+    </div>
+    <div class="cell action">
+      <button class="remove" (click)="onRemove()">
+        ลบ
+      </button>
+    </div>
   </div>
 
-  <input
-    class="form-input remark"
-    [value]="vehicle.remark"
-    placeholder="Remark"
-    (input)="onRemarkChange($any($event.target).value)" />
-
-  <button class="remove" (click)="remove.emit()">Remove</button>
 </div>

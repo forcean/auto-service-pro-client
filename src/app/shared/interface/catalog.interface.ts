@@ -12,7 +12,7 @@ export interface IQueryCatalogVehicles extends IQueryCatalogProducts {
 
 export interface IResVehicles {
     vehicles?: IVehicle[];
-    brands?: IVehicle[];
+    brands?: IBrand[];
     models?: IVehicle[];
 }
 
@@ -24,4 +24,9 @@ export interface IVehicle {
     yearTo: number;
     engines: string[];
     remark?: string;
+}
+
+export interface IBrand {
+    id: string;
+    name: string;
 }

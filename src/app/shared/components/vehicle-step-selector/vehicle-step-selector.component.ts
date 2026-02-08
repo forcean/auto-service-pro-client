@@ -39,6 +39,7 @@ export class VehicleStepSelectorComponent {
       }
     } catch (error) {
       console.error('Error loading brands:', error);
+      this.brands = MOCK_VEHICLE_BRANDS;
     }
   }
 
@@ -89,10 +90,9 @@ export class VehicleStepSelectorComponent {
       model: v.model,
       yearFrom: v.yearFrom,
       yearTo: v.yearTo,
-
-      availableEngines: v.engines ?? [],
+      selectedEngines: v.engines ?? [],
       engines: [...(v.engines ?? [])],
-
+      isNew: true,
       remark: ''
     });
 

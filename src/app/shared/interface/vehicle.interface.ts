@@ -5,6 +5,7 @@ export interface VehicleCompatibility {
     yearFrom: number;
     yearTo: number;
     engines?: string[];
-    availableEngines?: string[];
+    isNew?: boolean;
+    selectedEngines?: string[];
     remark?: string;
 }
