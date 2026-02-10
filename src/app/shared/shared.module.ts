@@ -31,6 +31,7 @@ import { PreventSpecialCharsDirective } from './directive/preventspecialchars.di
 import { PriceDirective } from './directive/app-price.directive';
 import { ProductFormComponent } from './components/product-form/product-form.component';
 import { CustomSelectCategoryComponent } from './components/custom-select-category/custom-select-category.component';
+import { SpecInputDirective } from './directive/spec-input.directive';
 
 const components = [
   ModalCommonComponent,
@@ -64,6 +65,7 @@ const directives = [
   DecimalDirective,
   PreventSpecialCharsDirective,
   PriceDirective,
+  SpecInputDirective
 ];
 
 @NgModule({

@@ -74,6 +74,10 @@ export class ProductCreateComponent implements OnInit {
     }
   }
 
+  onCancel() {
+    this.router.navigate(['/portal/product/list']);
+  }
+
   async onSubmit(payload: {
     form: IReqCreateProduct;
     images: IUploadImagePayload[];

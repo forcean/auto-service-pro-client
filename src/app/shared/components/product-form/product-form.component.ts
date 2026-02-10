@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { ICategory } from '../../../shared/interface/category.interface';
 import { ProductBrand } from '../../../shared/interface/brand.interface';
 import { IPrices, IReqCreateProduct } from '../../interface/product-management.interface';
@@ -26,13 +26,17 @@ export class ProductFormComponent implements OnInit, OnChanges {
     images: IUploadImagePayload[];
   }>();
   @Output() cancel = new EventEmitter<void>();
+
   private categorySub!: Subscription;
-
   form!: FormGroup;
-  isVehicleBinding = false;
-  formSubmitted = false;
+  isVehicleBinding: boolean = false;
+  isFormSubmitted: boolean = false;
   isLoadedBrands: boolean = false;
-
+  priceTypeLabelMap: Record<string, string> = {
+    RETAIL: 'ราคาขายปลีก',
+    WHOLESALE: 'ราคาขายส่ง',
+    COST: 'ราคาทุน',
+  };
   constructor(private fb: FormBuilder) { }
 
   ngOnInit(): void {
@@ -72,17 +76,20 @@ export class ProductFormComponent implements OnInit, OnChanges {
       brandId: ['', Validators.required],
       status: ['active', Validators.required],
       vehicles: this.fb.control([]),
-      prices: this.fb.array([
-        this.createPrice('RETAIL'),
-        this.createPrice('WHOLESALE'),
-        this.createPrice('COST'),
-      ]),
+      prices: this.fb.array(
+        [
+          this.createPrice('RETAIL'),
+          this.createPrice('WHOLESALE'),
+          this.createPrice('COST'),
+        ],
+        { validators: this.atLeastOnePriceValidator() }
+      ),
       spec: this.fb.group({
         unit: [''],
-        weight: [],
-        width: [],
-        height: [],
-        depth: [],
+        weight: [''],
+        width: [''],
+        height: [''],
+        depth: [''],
       }),
       images: [[], Validators.required],
     });
@@ -116,8 +123,29 @@ export class ProductFormComponent implements OnInit, OnChanges {
   private createPrice(type: 'RETAIL' | 'WHOLESALE' | 'COST'): FormGroup {
     return this.fb.group({
       type: [type],
-      amount: [null],
+      amount: [
+        null,
+        [
+          Validators.min(0),
+        ]
+      ],
     });
+  }
+
+  private atLeastOnePriceValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+
+      if (!(control instanceof FormArray)) {
+        return null;
+      }
+
+      const hasPrice = control.controls.some(ctrl => {
+        const value = ctrl.get('amount')?.value;
+        return value !== null && value !== '' && Number(value) > 0;
+      });
+
+      return hasPrice ? null : { atLeastOnePrice: true };
+    };
   }
 
   get prices(): FormArray {
@@ -126,14 +154,7 @@ export class ProductFormComponent implements OnInit, OnChanges {
 
   isInvalid(controlName: string): boolean {
     const control = this.form.get(controlName);
-    return !!(control && control.invalid && (control.touched || this.formSubmitted));
-  }
-
-  getError(controlName: string): string | null {
-    const control = this.form.get(controlName);
-    if (!control || !control.errors) return null;
-    if (control.errors['required']) return 'กรุณากรอกข้อมูล';
-    return null;
+    return !!(control && control.invalid && (control.touched || this.isFormSubmitted));
   }
 
   onImagesChange(images: any[]): void {
@@ -169,12 +190,12 @@ export class ProductFormComponent implements OnInit, OnChanges {
   }
 
   submit(): void {
-    this.formSubmitted = true;
+    this.isFormSubmitted = true;
 
-    // if (this.form.invalid) {
-    //   this.form.markAllAsTouched();
-    //   return;
-    // }
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
 
     const payload = this.buildPayload();
 
@@ -199,7 +220,15 @@ export class ProductFormComponent implements OnInit, OnChanges {
       status: f.status,
 
       ...(f.description?.trim() && { description: f.description.trim() }),
-      ...(f.vehicles?.length && { vehicle: f.vehicles }),
+      ...(f.vehicles?.length && {
+        vehicle: f.vehicles.map((v: any) => ({
+          vehicleId: v.vehicleId,
+          yearFrom: v.yearFrom,
+          yearTo: v.yearTo,
+          remark: v.remark,
+          engines: v.selectedEngines ?? v.engines,
+        }))
+      }),
       ...(f.prices?.some((p: any) => p.amount) && {
         prices: f.prices.filter((p: any) => p.amount)
       }),

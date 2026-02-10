@@ -17,10 +17,11 @@
           [class.border-red-500]="isInvalid('name')"
           formControlName="name"
           type="text"
+          placeholder="กรุณากรอกชื่อสินค้า"
           appPreventSpecialChars />
 
-        <p *ngIf="isInvalid('name')" class="text-red-500 text-xs mt-1">
-          {{ getError('name') }}
+        <p *ngIf="isInvalid('name')" class="error">
+          กรุณากรอกชื่อสินค้า
         </p>
 
       </div>
@@ -43,8 +44,8 @@
         </custom-select>
 
         <p *ngIf="isInvalid('status')"
-          class="text-red-500 text-xs mt-1">
-          {{ getError('status') }}
+          class="error">
+          กรุณาเลือกสถานะ
         </p>
 
       </div>
@@ -52,7 +53,8 @@
       <div class="md:col-span-2">
         <label class="label">รายละเอียด</label>
         <textarea class="input h-24"
-          formControlName="description"></textarea>
+          formControlName="description"
+          placeholder="กรุณากรอกรายละเอียดสินค้า"></textarea>
       </div>
     </div>
   </section>
@@ -68,12 +70,13 @@
         <app-custom-select-category
           formControlName="categoryId"
           [categories]="categories"
-          placeholder="-- กรุณาเลือกหมวดหมู่ --">
+          placeholder="-- กรุณาเลือกหมวดหมู่ --"
+          [isError]="form.controls['categoryId'].invalid && form.controls['categoryId'].touched">
         </app-custom-select-category>
 
         <p *ngIf="isInvalid('categoryId')"
-          class="text-red-500 text-xs mt-1">
-          {{ getError('categoryId') }}
+          class="error">
+          กรุณาเลือกหมวดหมู่
         </p>
 
       </div>
@@ -95,8 +98,8 @@
         </custom-select>
 
         <p *ngIf="isInvalid('brandId')"
-          class="text-red-500 text-xs mt-1">
-          {{ getError('brandId') }}
+          class="error">
+          กรุณาเลือกแบรนด์
         </p>
 
       </div>
@@ -109,26 +112,33 @@
       [class.border-red-500]="isInvalid('vehicles')">
     </app-vehicle-compatibility>
 
-    <p *ngIf="isInvalid('vehicles')" class="text-red-500 text-xs mt-2">
+    <p *ngIf="isInvalid('vehicles')" class="error">
       กรุณาเลือกรถอย่างน้อย 1 รายการ
     </p>
   </section>
 
   <section class="card">
     <h2 class="section-title">ราคา</h2>
-
+    <span class="text-red-600">*</span>
     <div formArrayName="prices"
       class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div *ngFor="let p of prices.controls; let i = index"
         [formGroupName]="i">
-        <label class="label">{{ p.value.type }}</label>
+        <label class="label">
+          {{ priceTypeLabelMap[p.value.type] || p.value.type }}
+        </label>
         <input
           type="text"
           class="input"
           appPrice
+          placeholder="กรุณากรอก{{ priceTypeLabelMap[p.value.type] }}"
           formControlName="amount" />
       </div>
     </div>
+    <p *ngIf="isInvalid('prices')"
+      class="error">
+      กรุณากรอกราคาอย่างน้อย 1 ประเภท
+    </p>
   </section>
 
   <section class="card">
@@ -138,42 +148,60 @@
       class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
       <div class=" relative">
         <label class="label">หน่วย</label>
-        <input class="input pr-12"
-          placeholder="เช่น ชุด,ชิ้น" formControlName="unit" />
+        <input
+          class="input pr-12"
+          placeholder="กรุณากรอกหน่วย"
+          formControlName="unit" />
+        <div class="spec-hint"> ตัวอย่าง: ชุด, ชิ้น, อัน </div>
       </div>
-      <!-- น้ำหนัก -->
+
       <div class="relative">
         <label class="label">น้ำหนัก</label>
 
         <input
-          appDecimal
+          appSpecInput
+          [allowedUnits]="['g','kg']"
           type="text"
-          class="input pr-12"
-          placeholder="0.00"
+          class="input"
+          placeholder="กรุณากรอกน้ำหนัก"
           formControlName="weight" />
-
-        <span class="unit-badge">kg</span>
+        <div class="spec-hint"> ตัวอย่าง: 2.5 kg, 2500 g </div>
       </div>
 
       <div class="relative">
         <label class="label">ความกว้าง</label>
-        <input appDecimal type="text" class="input pr-12"
-          placeholder="0" formControlName="width" />
-        <span class="unit-badge">mm</span>
+        <input
+          appSpecInput
+          [allowedUnits]="['mm','cm','m','in']"
+          type="text"
+          class="input"
+          placeholder="กรุณากรอกความกว้าง"
+          formControlName="width" />
+        <div class="spec-hint"> ตัวอย่าง: 25 mm, 2.5 cm, 3 m, 1/4 in </div>
       </div>
 
       <div class="relative">
         <label class="label">ความสูง</label>
-        <input appDecimal type="text" class="input pr-12"
-          placeholder="0" formControlName="height" />
-        <span class="unit-badge">mm</span>
+        <input
+          appSpecInput
+          [allowedUnits]="['mm','cm','m','in']"
+          type="text"
+          class="input"
+          placeholder="กรุณากรอกความสูง"
+          formControlName="height" />
+        <div class="spec-hint"> ตัวอย่าง: 25 mm, 2.5 cm, 3 m, 1/4 in </div>
       </div>
 
       <div class="relative">
         <label class="label">ความลึก</label>
-        <input appDecimal type="text" class="input pr-12"
-          placeholder="0" formControlName="depth" />
-        <span class="unit-badge">mm</span>
+        <input
+          appSpecInput
+          [allowedUnits]="['mm','cm','m','in']"
+          type="text"
+          class="input"
+          placeholder="กรุณากรอกความลึก"
+          formControlName="depth" />
+        <div class="spec-hint"> ตัวอย่าง: 25 mm, 2.5 cm, 3 m, 1/4 in </div>
       </div>
 
     </div>
@@ -188,7 +216,7 @@
       (imagesChange)="onImagesChange($event)">
     </app-file-upload>
 
-    <p *ngIf="isInvalid('images')" class="text-red-500 text-xs mt-2">
+    <p *ngIf="isInvalid('images')" class="error">
       กรุณาอัปโหลดรูปสินค้าอย่างน้อย 1 รูป
     </p>
 
