@@ -13,6 +13,7 @@ import { PaginationComponent } from '../../../shared/components/pagination/pagin
 import { ResetPasswordModuleComponent } from '../../../shared/components/reset-password-modal/reset-password-modal.component';
 import { ResetPasswordModuleService } from '../../../shared/components/reset-password-modal/reset-password-modal.service';
 import { LoadingBarService } from '@ngx-loading-bar/core';
+import { PermissionService } from '../../../shared/services/permission.service';
 @Component({
   selector: 'app-corporate-admin-list',
   standalone: false,
@@ -33,12 +34,17 @@ export class CorporateAdminListComponent implements OnInit {
   userId: string = '';
   role: string = '';
   userList!: IUserResultData;
+  permissions!: PermissionService;
 
   isLoadingReset: boolean = false;
   isLoading: boolean = false;
-  isRoleSO: boolean = true;
-  isRoleAMD: boolean = true;
+  isRoleSO: boolean = false;
+  isRoleAMD: boolean = false;
+  isRoleMNG: boolean = false;
   isPasswordInvalid: boolean = false;
+  isResetPassword: boolean = false;
+  isViewUserList: boolean = false;
+
 
   private modalSubscription: Subscription | null = null;
 
@@ -61,12 +67,12 @@ export class CorporateAdminListComponent implements OnInit {
     private handleTokenService: HandleTokenService,
     private resetFormService: ResetPasswordModuleService,
     private loadingBarService: LoadingBarService,
+    private permissionService: PermissionService
   ) {
     this.role = this.handleTokenService.getRole();
     this.isRoleSO = this.role === ROLE.SO;
     this.isRoleAMD = this.role === ROLE.ADM;
-    // console.log(this.isRoleAMD);
-    // console.log(this.isRoleSO);
+    this.isRoleMNG = this.role === ROLE.MNG;
   }
 
   ngOnInit(): void {
@@ -74,24 +80,21 @@ export class CorporateAdminListComponent implements OnInit {
   }
 
   private async initializePermissions() {
-    this.route.queryParams.subscribe(params => this.updateQueryParams(params));
-    // try {
-    //   this.permissions = await this.permissionService.permissions();
-    //   this.isViewDetailReport = this.permissionService.isViewDetailReport;
-    // this.isDeleteUser=this.permissionService.isDeleteUser;
-    // this.isUpdateUser=this.permissionService.isUpdateUser;
-    // this.isResetPasswordUser=this.permissionService.isResetPasswordUser;
-    //   if (!this.isViewDetailReport) {
-    //     this.router.navigate(['/not-found']);
-    //   } else {
-    //     this.route.queryParams.subscribe(params => this.updateQueryParams(params));
-    //   }
-    // } catch (error) {
-    //   const errorObject = error as { message: string };
-    //   if (errorObject.message !== '504') {
-    //     this.handleCommonError();
-    //   }
-    // }
+    try {
+      this.permissions = await this.permissionService.permissions();
+      this.isViewUserList = this.permissionService.isViewUserList;
+      this.isResetPassword = this.permissionService.isResetPassword;
+      if (!this.isViewUserList) {
+        this.router.navigate(['/not-found']);
+      } else {
+        this.route.queryParams.subscribe(params => this.updateQueryParams(params));
+      }
+    } catch (error) {
+      const errorObject = error as { message: string };
+      if (errorObject.message !== '504') {
+        this.handleCommonError();
+      }
+    }
   }
 
   onSearchSubmit(criteria: ISearchCriteria) {

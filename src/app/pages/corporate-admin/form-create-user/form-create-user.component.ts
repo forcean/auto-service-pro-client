@@ -11,6 +11,7 @@ import { RESPONSE } from '../../../shared/enum/response.enum';
 import { UserManagementService } from '../../../shared/services/user-management.service';
 import { IReqCreateUser } from '../../../shared/interface/user-management.interface';
 import { UserList } from '../../../shared/interface/table-user-management.interface';
+import { PermissionService } from '../../../shared/services/permission.service';
 
 @Component({
   selector: 'app-form-create-user',
@@ -22,6 +23,7 @@ export class FormCreateUserComponent implements OnInit {
   private modalSubscription: Subscription | null = null;
   form!: FormGroup;
   managerList: UserList[] = [];
+  permissions!: PermissionService;
   page = 1;
   limit = 10;
   readonly role = 'MNG'
@@ -34,6 +36,7 @@ export class FormCreateUserComponent implements OnInit {
   isMobileNoInvalid: boolean = false;
   isPasswordVisible: boolean = false;
   isLoading = false;
+  isCreateUser: boolean = false;
 
   getInvalidControl = getInvalidControl;
 
@@ -46,11 +49,12 @@ export class FormCreateUserComponent implements OnInit {
     private router: Router,
     private loadingBarService: LoadingBarService,
     private userManagementService: UserManagementService,
+    private permissionService: PermissionService,
   ) { }
 
 
   ngOnInit() {
-    // this.initializePermissions();
+    this.initializePermissions();
     this.createForm();
     this.loadManagerList();
   }
@@ -60,23 +64,22 @@ export class FormCreateUserComponent implements OnInit {
     if (this.modalSubscription) this.modalSubscription.unsubscribe();
   }
 
-  //  private async initializePermissions() {
-  //   try {
-  //     this.permissions = await this.permissionService.permissions();
-  //     this.isViewAdminSender = this.permissionService.isViewAdminSender;
-  //     this.isDeleteAdminSender = this.permissionService.isDeleteAdminSender;
+  private async initializePermissions() {
+    try {
+      this.permissions = await this.permissionService.permissions();
+      this.isCreateUser = this.permissions.isCreateUser;
 
-  //     if (!this.isViewAdminSender) {
-  //       this.router.navigate(['/not-found']);
-  //     }
+      if (!this.isCreateUser) {
+        this.router.navigate(['/not-found']);
+      }
 
-  //   } catch (error) {
-  //     const errorObject = error as { message: string };
-  //     if (errorObject.message !== '504') {
-  //       this.handleCommonError();
-  //     }
-  //   }
-  // }
+    } catch (error) {
+      const errorObject = error as { message: string };
+      if (errorObject.message !== '504') {
+        this.handleCommonError();
+      }
+    }
+  }
 
   createForm() {
     this.form = this.fb.group({

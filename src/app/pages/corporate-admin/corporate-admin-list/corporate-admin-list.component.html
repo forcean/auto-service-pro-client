@@ -5,7 +5,7 @@
 
       <button class="create-user-btn flex items-center gap-2"
         (click)="onCreate()"
-        [disabled]="(isRoleAMD||isRoleSO)? false : true">
+        [disabled]="!isRoleAMD && !isRoleSO && !isRoleMNG">
         <i class="fa-solid fa-user-plus text-sm opacity-90"></i>
         <span>สร้างผู้ใช้งาน</span>
       </button>
@@ -28,7 +28,8 @@
       (onReset)="onReset($event)"
       (sortEmit)="onSort($event)"
       (changePage)="onChangePage($event)"
-      [isLoading]="isLoading">
+      [isLoading]="isLoading"
+      [isResetPassword]="isResetPassword">
     </app-table-user-management>
 
   </div>
