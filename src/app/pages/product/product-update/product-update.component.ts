@@ -1,18 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Route, Router } from '@angular/router';
-import { ICategory } from '../../../shared/interface/category.interface';
-import { ProductBrand } from '../../../shared/interface/brand.interface';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CatalogService } from '../../../shared/services/catalog.service';
 import { RESPONSE } from '../../../shared/enum/response.enum';
-import { IQueryCatalogProducts } from '../../../shared/interface/catalog.interface';
+import { ICategory, IProductBrand, IQueryCatalogProducts } from '../../../shared/interface/catalog.interface';
 import { IUploadImagePayload } from '../../../shared/interface/file-management.interface';
 import { IReqCreateProduct, IReqUpdateProduct } from '../../../shared/interface/product-management.interface';
 import { FileManagementService } from '../../../shared/services/file-management.service';
 import { ModalCommonService } from '../../../shared/components/modal-common/modal-common.service';
 import { Subscription } from 'rxjs/internal/Subscription';
 import { StockManagementService } from '../../../shared/services/stock-management.service';
-import { BRAND_MOCK, CATEGORY_MOCK } from '../product-create/mockData';
 import { IProducts } from '../../../shared/interface/product-list.interface';
 
 @Component({
@@ -26,7 +22,7 @@ export class ProductUpdateComponent implements OnInit {
   private modalSubscription!: Subscription | null;
   productId!: string;
   categories: ICategory[] = [];
-  brands: ProductBrand[] = [];
+  brands: IProductBrand[] = [];
   productDetail!: IProducts;
 
 
@@ -54,7 +50,7 @@ export class ProductUpdateComponent implements OnInit {
       });
 
       if (res.resultCode === RESPONSE.SUCCESS) {
-        this.categories = res.resultData;
+        this.categories = res.resultData.category;
       } else {
         this.handleCommonError();
       }
@@ -87,7 +83,7 @@ export class ProductUpdateComponent implements OnInit {
       };
       const res = await this.catalogService.getBrands(params);
       if (res.resultCode === RESPONSE.SUCCESS) {
-        this.brands = res.resultData;
+        this.brands = res.resultData.brands;
       } else {
         this.handleCommonError();
       }

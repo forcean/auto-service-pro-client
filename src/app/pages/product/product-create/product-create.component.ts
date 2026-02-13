@@ -1,12 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ICategory } from '../../../shared/interface/category.interface';
-import { ProductBrand } from '../../../shared/interface/brand.interface';
-import { BRAND_MOCK, CATEGORY_MOCK } from './mockData';
 import { CatalogService } from '../../../shared/services/catalog.service';
 import { RESPONSE } from '../../../shared/enum/response.enum';
-import { IQueryCatalogProducts } from '../../../shared/interface/catalog.interface';
+import { ICategory, IProductBrand, IQueryCatalogProducts } from '../../../shared/interface/catalog.interface';
 import { IUploadImagePayload } from '../../../shared/interface/file-management.interface';
 import { IReqCreateProduct } from '../../../shared/interface/product-management.interface';
 import { FileManagementService } from '../../../shared/services/file-management.service';
@@ -24,7 +20,7 @@ export class ProductCreateComponent implements OnInit {
 
   private modalSubscription!: Subscription | null;
   categories: ICategory[] = [];
-  brands: ProductBrand[] = [];
+  brands: IProductBrand[] = [];
 
   constructor(
     private catalogService: CatalogService,
@@ -46,7 +42,7 @@ export class ProductCreateComponent implements OnInit {
       });
 
       if (res.resultCode === RESPONSE.SUCCESS) {
-        this.categories = res.resultData;
+        this.categories = res.resultData.category;
       } else {
         this.handleCommonError();
       }
@@ -64,7 +60,7 @@ export class ProductCreateComponent implements OnInit {
       };
       const res = await this.catalogService.getBrands(params);
       if (res.resultCode === RESPONSE.SUCCESS) {
-        this.brands = res.resultData;
+        this.brands = res.resultData.brands;
       } else {
         this.handleCommonError();
       }

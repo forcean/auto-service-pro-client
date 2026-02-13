@@ -15,7 +15,7 @@ import {
 } from '@angular/forms';
 import { createPopper } from '@popperjs/core';
 import { CustomCategoryOptionComponent } from '../custom-category-option/custom-category-option.component';
-import { ICategory } from '../../interface/category.interface';
+import { ICategory } from '../../interface/catalog.interface';
 
 @Component({
   selector: 'app-custom-select-category',

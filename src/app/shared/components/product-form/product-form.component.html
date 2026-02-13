@@ -120,22 +120,42 @@
   <section class="card">
     <h2 class="section-title">ราคา</h2>
     <span class="text-red-600">*</span>
-    <div formArrayName="prices"
-      class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div *ngFor="let p of prices.controls; let i = index"
-        [formGroupName]="i">
-        <label class="label">
-          {{ priceTypeLabelMap[p.value.type] || p.value.type }}
-        </label>
+
+    <div formGroupName="price" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+      <div>
+        <label class="label">ราคาขายปลีก</label>
         <input
           type="text"
           class="input"
           appPrice
-          placeholder="กรุณากรอก{{ priceTypeLabelMap[p.value.type] }}"
-          formControlName="amount" />
+          formControlName="retail"
+          placeholder="กรุณากรอกราคาขายปลีก" />
       </div>
+
+      <div>
+        <label class="label">ราคาขายส่ง</label>
+        <input
+          type="text"
+          class="input"
+          appPrice
+          formControlName="wholesale"
+          placeholder="กรุณากรอกราคาขายส่ง" />
+      </div>
+
+      <div>
+        <label class="label">ราคาทุน</label>
+        <input
+          type="text"
+          class="input"
+          appPrice
+          formControlName="cost"
+          placeholder="กรุณากรอกราคาทุน" />
+      </div>
+
     </div>
-    <p *ngIf="isInvalid('prices')"
+
+    <p *ngIf="form.get('price')?.errors?.['atLeastOnePrice'] && isFormSubmitted"
       class="error">
       กรุณากรอกราคาอย่างน้อย 1 ประเภท
     </p>

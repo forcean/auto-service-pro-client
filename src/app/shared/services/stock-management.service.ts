@@ -50,7 +50,7 @@ export class StockManagementService {
 
   async createProduct(body: IReqCreateProduct) {
     try {
-      const uri = this.PREFIX_USER + '/products/create';
+      const uri = this.PREFIX_USER + '/products';
       const response = await this.httpService.post<any>(uri, body);
       return response;
     } catch (error) {

@@ -1,5 +1,5 @@
 import { Component, EventEmitter, HostListener, Input, Output } from '@angular/core';
-import { ProductBrand } from '../../interface/brand.interface';
+import { IProductBrand } from '../../interface/catalog.interface';
 
 @Component({
   selector: 'app-custom-brand-option',
@@ -9,7 +9,7 @@ import { ProductBrand } from '../../interface/brand.interface';
 })
 export class CustomBrandOptionComponent {
 
-  @Input({ required: true }) brand!: ProductBrand;
+  @Input({ required: true }) brand!: IProductBrand;
   @Input() value!: string;
   @Input() label!: string;
 

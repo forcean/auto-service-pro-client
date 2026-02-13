@@ -2,7 +2,6 @@ import { Component, EventEmitter, model, Output } from '@angular/core';
 import { VehicleCompatibility } from '../../interface/vehicle.interface';
 import { CatalogService } from '../../services/catalog.service';
 import { RESPONSE } from '../../enum/response.enum';
-import { MOCK_VEHICLE_BRANDS, MOCK_VEHICLE_MODELS_1, MOCK_VEHICLE_MODELS_2, MOCK_VEHICLES } from '../../../pages/product/product-create/mockData';
 import { IQueryCatalogVehicles } from '../../interface/catalog.interface';
 
 @Component({
@@ -39,7 +38,6 @@ export class VehicleStepSelectorComponent {
       }
     } catch (error) {
       console.error('Error loading brands:', error);
-      this.brands = MOCK_VEHICLE_BRANDS;
     }
   }
 
@@ -57,11 +55,6 @@ export class VehicleStepSelectorComponent {
       }
     } catch (error) {
       console.error('Error loading brands:', error);
-      if (this.brandId == '1') {
-        this.models = MOCK_VEHICLE_MODELS_1;
-      } else if (this.brandId == '2') {
-        this.models = MOCK_VEHICLE_MODELS_2;
-      }
     }
   }
 
@@ -79,7 +72,6 @@ export class VehicleStepSelectorComponent {
       }
     } catch (error) {
       console.error('Error loading brands:', error);
-      this.vehicles = MOCK_VEHICLES;
     }
   }
 

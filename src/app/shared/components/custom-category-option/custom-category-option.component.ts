@@ -1,5 +1,5 @@
 import { Component, ContentChildren, EventEmitter, Input, Output, QueryList } from '@angular/core';
-import { ICategory } from '../../interface/category.interface';
+import { ICategory } from '../../interface/catalog.interface';
 
 
 @Component({

@@ -3,10 +3,7 @@ import { HttpService } from './../../core/services/http-service/http.service';
 import { Injectable } from '@angular/core';
 import { ApiPrefix } from '../enum/api-prefix.enum';
 import { IBaseResponse } from '../interface/base-http.interface';
-import { ICategory } from '../interface/category.interface';
-import { ProductBrand } from '../interface/brand.interface';
-import { IQueryCatalogProducts, IQueryCatalogVehicles, IResVehicles } from '../interface/catalog.interface';
-import { VehicleCompatibility } from '../interface/vehicle.interface';
+import { IQueryCatalogProducts, IQueryCatalogVehicles, IResBrands, IResCategories, IResVehicles } from '../interface/catalog.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -19,28 +16,28 @@ export class CatalogService {
     private httpService: HttpService,
   ) { }
 
-  async getCategories(params: IQueryCatalogProducts): Promise<IBaseResponse<ICategory[]>> {
+  async getCategories(params: IQueryCatalogProducts): Promise<IBaseResponse<IResCategories>> {
     try {
-      const uri = this.PREFIX_USER + `/categories`;
-      const response = await this.httpService.get<ICategory[]>(uri, params);
+      const uri = this.PREFIX_USER + `/products/categories`;
+      const response = await this.httpService.get<IResCategories>(uri, params);
       return response;
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
-        return error.error as IBaseResponse<ICategory[]>;
+        return error.error as IBaseResponse<IResCategories>;
       } else {
         throw error;
       }
     }
   }
 
-  async getBrands(params: IQueryCatalogProducts): Promise<IBaseResponse<ProductBrand[]>> {
+  async getBrands(params: IQueryCatalogProducts): Promise<IBaseResponse<IResBrands>> {
     try {
-      const uri = this.PREFIX_USER + `/brands`;
-      const response = await this.httpService.get<ProductBrand[]>(uri, params);
+      const uri = this.PREFIX_USER + `/products/brands`;
+      const response = await this.httpService.get<IResBrands>(uri, params);
       return response;
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
-        return error.error as IBaseResponse<ProductBrand[]>;
+        return error.error as IBaseResponse<IResBrands>;
       } else {
         throw error;
       }
@@ -49,7 +46,7 @@ export class CatalogService {
 
   async getVehicles(params: IQueryCatalogVehicles): Promise<IBaseResponse<IResVehicles>> {
     try {
-      const uri = this.PREFIX_USER + `/vehicles`;
+      const uri = this.PREFIX_USER + `/products/vehicles`;
       const response = await this.httpService.get<IResVehicles>(uri, params);
       return response;
     } catch (error) {

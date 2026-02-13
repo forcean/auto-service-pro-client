@@ -8,7 +8,7 @@ export interface IReqCreateProduct {
   categoryId?: string;
   brandId?: string;
   vehicles?: VehicleCompatibility[];
-  prices: IPrices;
+  price: IPrices;
   spec: ISpec;
   images?: IImages[];
   status: 'active' | 'inactive' | 'out_of_stock' | 'discontinued';
@@ -38,7 +38,7 @@ export interface IReqUpdateProduct {
   categoryId?: string;
   brandId?: string;
   vehicles?: VehicleCompatibility[];
-  prices: IPrices;
+  price: IPrices;
   spec: ISpec;
   images?: IImages[];
   status: 'active' | 'inactive' | 'out_of_stock' | 'discontinued';

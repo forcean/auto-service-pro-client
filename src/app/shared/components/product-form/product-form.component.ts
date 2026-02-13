@@ -1,11 +1,10 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { AbstractControl, FormArray, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
-import { ICategory } from '../../../shared/interface/category.interface';
-import { ProductBrand } from '../../../shared/interface/brand.interface';
-import { IPrices, IReqCreateProduct } from '../../interface/product-management.interface';
+import { IReqCreateProduct } from '../../interface/product-management.interface';
 import { IUploadImagePayload } from '../../interface/file-management.interface';
-import { skip, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { IProducts } from '../../interface/product-list.interface';
+import { ICategory, IProductBrand } from '../../interface/catalog.interface';
 
 @Component({
   selector: 'app-product-form',
@@ -17,7 +16,7 @@ export class ProductFormComponent implements OnInit, OnChanges {
 
   @Input() mode: 'create' | 'update' = 'create';
   @Input() categories: ICategory[] = [];
-  @Input() brands: ProductBrand[] = [];
+  @Input() brands: IProductBrand[] = [];
   @Input() initialData!: IProducts;
 
   @Output() categoryChange = new EventEmitter<string>();
@@ -32,11 +31,6 @@ export class ProductFormComponent implements OnInit, OnChanges {
   isVehicleBinding: boolean = false;
   isFormSubmitted: boolean = false;
   isLoadedBrands: boolean = false;
-  priceTypeLabelMap: Record<string, string> = {
-    RETAIL: 'ราคาขายปลีก',
-    WHOLESALE: 'ราคาขายส่ง',
-    COST: 'ราคาทุน',
-  };
   constructor(private fb: FormBuilder) { }
 
   ngOnInit(): void {
@@ -76,12 +70,12 @@ export class ProductFormComponent implements OnInit, OnChanges {
       brandId: ['', Validators.required],
       status: ['active', Validators.required],
       vehicles: this.fb.control([]),
-      prices: this.fb.array(
-        [
-          this.createPrice('RETAIL'),
-          this.createPrice('WHOLESALE'),
-          this.createPrice('COST'),
-        ],
+      price: this.fb.group(
+        {
+          retail: [null, [Validators.min(0)]],
+          wholesale: [null, [Validators.min(0)]],
+          cost: [null, [Validators.min(0)]],
+        },
         { validators: this.atLeastOnePriceValidator() }
       ),
       spec: this.fb.group({
@@ -120,29 +114,15 @@ export class ProductFormComponent implements OnInit, OnChanges {
     });
   }
 
-  private createPrice(type: 'RETAIL' | 'WHOLESALE' | 'COST'): FormGroup {
-    return this.fb.group({
-      type: [type],
-      amount: [
-        null,
-        [
-          Validators.min(0),
-        ]
-      ],
-    });
-  }
-
   private atLeastOnePriceValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
+      if (!(control instanceof FormGroup)) return null;
 
-      if (!(control instanceof FormArray)) {
-        return null;
-      }
-
-      const hasPrice = control.controls.some(ctrl => {
-        const value = ctrl.get('amount')?.value;
-        return value !== null && value !== '' && Number(value) > 0;
-      });
+      const { retail, wholesale, cost } = control.value || {};
+      const hasPrice =
+        Number(retail) > 0 ||
+        Number(wholesale) > 0 ||
+        Number(cost) > 0;
 
       return hasPrice ? null : { atLeastOnePrice: true };
     };
@@ -229,8 +209,8 @@ export class ProductFormComponent implements OnInit, OnChanges {
           engines: v.selectedEngines ?? v.engines,
         }))
       }),
-      ...(f.prices?.some((p: any) => p.amount) && {
-        prices: f.prices.filter((p: any) => p.amount)
+      ...(f.price && Object.values(f.price).some(v => v) && {
+        price: f.price
       }),
 
       ...(f.spec && Object.values(f.spec).some(v => v) && { spec: f.spec }),
