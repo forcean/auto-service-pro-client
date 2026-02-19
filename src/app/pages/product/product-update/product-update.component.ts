@@ -65,7 +65,7 @@ export class ProductUpdateComponent implements OnInit {
       const res = await this.stockService.getProductDetail(this.productId);
 
       if (res.resultCode == RESPONSE.SUCCESS) {
-        this.productDetail = res.resultData;
+        // this.productDetail = res.resultData;
         await this.onCategoryChange(this.productDetail.categoryId);
       } else {
         return;

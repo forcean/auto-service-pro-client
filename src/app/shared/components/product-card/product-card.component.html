@@ -1,67 +1,67 @@
 <div
-  class="relative flex flex-col bg-white rounded-2xl shadow-md hover:shadow-xl transition cursor-pointer overflow-hidden"
-  [class.opacity-60]="isOutOfStock"
+  class="product-card"
+  [ngClass]="product.status"
   (click)="onClick()">
 
-  <!-- Image -->
-  <div class="relative w-full h-44 bg-gray-100">
+  <div class="product-image">
+
     <img
-      *ngIf="product.images; else noImage"
-      [src]="product.images"
-      class="w-full h-full object-cover" />
+      *ngIf="primaryImageUrl; else noImage"
+      [src]="primaryImageUrl"
+      alt="product image"
+      class="image" />
 
     <ng-template #noImage>
-      <div
-        class="flex items-center justify-center h-full text-gray-400 text-sm">
-        No Image
+      <div class="no-image">
+        ไม่มีรูปภาพ
       </div>
     </ng-template>
 
-    <!-- Status Badge -->
     <span
-      *ngIf="isOutOfStock"
-      class="absolute top-2 left-2 bg-gray-700 text-white text-xs px-2 py-0.5 rounded-full">
-      Out of stock
+      *ngIf="statusLabel"
+      class="status-badge"
+      [ngClass]="badgeClass">
+      {{ statusText }}
     </span>
+
   </div>
 
-  <!-- Content -->
-  <div class="flex flex-col gap-1 p-3 flex-1">
+  <div class="product-content">
 
-    <!-- Product Name -->
-    <h3 class="text-sm font-semibold truncate">
+    <h3 class="product-name">
       {{ product.name }}
     </h3>
 
-    <!-- SKU -->
-    <p class="text-xs text-gray-400">
+    <div class="product-sku">
       SKU: {{ product.code }}
-    </p>
+    </div>
 
-    <!-- Brand / Category -->
-    <p class="text-xs text-gray-600">
-      {{ product.brandName }} • {{ product.categoryName }}
-    </p>
+    <div class="product-meta">
+      <span>{{ product.brandName }}</span>
+      <span class="divider-dot"></span>
+      <span>{{ product.categoryName }}</span>
+    </div>
 
-    <!-- Vehicles -->
-    <p
-      *ngIf="product.vehicles?.length"
-      class="text-xs text-gray-500 line-clamp-2">
-      ใช้กับ: {{ product.vehicles!.join(', ') }}
-    </p>
+    <div
+      *ngIf="vehicleNames?.length"
+      class="product-vehicles">
+      ใช้กับ: {{ vehicleNames }}
+    </div>
 
-    <!-- Price -->
-    <!-- <div class="mt-auto flex items-end justify-between">
-      <span class="text-primary font-bold text-base">
-        ฿{{ product.prices.type | number }}
-      </span>
+    <div
+      *ngIf="hasPrice"
+      class="price-section">
 
-      <span
-        *ngIf="product.price.wholesale"
-        class="text-xs text-gray-400">
-        ช่าง ฿{{ product.price.wholesale | number }}
-      </span>
-    </div> -->
+      <div *ngIf="product.prices?.retail" class="price retail">
+        ฿ {{ product.prices?.retail | number:'1.0-2' }}
+      </div>
+
+      <div *ngIf="product.prices?.wholesale" class="price wholesale">
+        ราคาส่ง ฿ {{ product.prices?.wholesale | number:'1.0-2' }}
+      </div>
+
+    </div>
 
   </div>
+
 </div>

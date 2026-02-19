@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IProductList, IQueryListProduct } from '../../../shared/interface/product-list.interface';
 import { StockManagementService } from '../../../shared/services/stock-management.service';
@@ -15,6 +16,7 @@ import { ModalCommonService } from '../../../shared/components/modal-common/moda
 })
 export class ProductListComponent implements OnInit {
   private modalSubscription!: Subscription | null;
+  form!: FormGroup;
   productList!: IProductList;
   filters: any = {};
   paginationOption: number[] = [10, 15, 20, 30, 40, 50];
@@ -33,9 +35,19 @@ export class ProductListComponent implements OnInit {
     private stockManagementService: StockManagementService,
     private modalCommonService: ModalCommonService,
     private route: ActivatedRoute,
+    private fb: FormBuilder
   ) { }
 
   ngOnInit(): void {
+    this.form = this.fb.group({
+      sortBy: ['latest']
+    });
+
+    this.form.get('sortBy')?.valueChanges.subscribe(() => {
+      this.pageIndex = 1;
+      this.loadProducts();
+    });
+
     this.initializePermissions();
   }
 
@@ -60,11 +72,8 @@ export class ProductListComponent implements OnInit {
     // }
   }
 
-  goToDetail(productId: string) {
-    console.log('go to product detail:', productId);
-  }
-
   onFilterChange(filter: any) {
+    console.log('filterChange', filter);
     this.filters = filter;
     this.loadProducts();
   }
@@ -73,7 +82,7 @@ export class ProductListComponent implements OnInit {
     try {
       const params: IQueryListProduct = {
         page: 1,
-        limit: 10
+        limit: 10,
       };
 
       const res = await this.stockManagementService.getListProduct(params);
@@ -89,7 +98,14 @@ export class ProductListComponent implements OnInit {
   }
 
   onPageChange(e: any) {
-    // this.changePag.emit(e);
+    this.pageIndex = e.page;
+    this.pageSize = e.limit;
+    this.loadProducts();
+  }
+
+  onRoleChange() {
+    this.pageIndex = 1; // reset หน้า
+    this.loadProducts();
   }
 
   onClick(event: string) {

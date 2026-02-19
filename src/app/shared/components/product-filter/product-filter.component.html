@@ -1,58 +1,103 @@
-<div class="bg-white border rounded-xl p-4 space-y-4">
+<form
+  [formGroup]="form"
+  class="filter-card">
 
-  <h3 class="text-sm font-semibold text-gray-700">
-    ค้นหาอะไหล่
-  </h3>
+  <!-- HEADER -->
+  <div class="filter-header">
+    <div>
+      <h3 class="filter-title">
+        ค้นหาอะไหล่
+      </h3>
+      <p class="filter-subtitle">
+        กรองสินค้าในคลัง
+      </p>
+    </div>
 
-  <!-- Search -->
-  <input
-    type="text"
-    class="form-input"
-    placeholder="SKU / ชื่อสินค้า"
-    formControlName="search" />
+    <button
+      type="button"
+      class="filter-reset"
+      (click)="reset()">
+      ล้าง
+    </button>
+  </div>
 
-  <!-- Category -->
-  <select class="form-input" formControlName="categoryId">
-    <option value>หมวดสินค้า</option>
-    <!-- <option *ngFor="let c of categories" [value]="c._id">
-      {{ c.name }}
-    </option> -->
-  </select>
+  <!-- SEARCH -->
+  <div class="filter-group">
+    <label class="filter-label">
+      ค้นหา
+    </label>
+    <div class="input-wrapper">
+      <input
+        type="text"
+        class="form-input-custom"
+        placeholder="SKU / ชื่อสินค้า"
+        formControlName="search" />
+    </div>
+  </div>
 
-  <!-- Product Brand -->
-  <select class="form-input" formControlName="brandId">
-    <option value>แบรนด์อะไหล่</option>
-    <!-- <option *ngFor="let b of brands" [value]="b._id">
-      {{ b.name }}
-    </option> -->
-  </select>
+  <!-- CATEGORY -->
+  <div class="filter-group">
+    <label class="filter-label">
+      หมวดหมู่
+    </label>
+    <app-custom-select-category
+      formControlName="categoryId"
+      [categories]="categories"
+      placeholder="เลือกหมวดหมู่">
+    </app-custom-select-category>
+  </div>
 
-  <hr />
+  <!-- BRAND -->
+  <div class="filter-group">
+    <label class="filter-label">
+      แบรนด์
+    </label>
+    <custom-select
+      formControlName="brandId"
+      placeholder="เลือกแบรนด์">
+      <app-custom-brand-option
+        *ngFor="let brand of brands"
+        [brand]="brand">
+      </app-custom-brand-option>
+    </custom-select>
+  </div>
 
-  <h4 class="text-xs font-semibold text-gray-500">
-    รถที่รองรับ
-  </h4>
+  <hr class="divider" />
 
-  <!-- Vehicle -->
-  <select class="form-input" formControlName="vehicleBrandId">
-    <option value>ยี่ห้อรถ</option>
-  </select>
+  <!-- VEHICLE SECTION -->
+  <div class="vehicle-section">
+    <h4 class="vehicle-title">
+      รถที่รองรับ
+    </h4>
 
-  <select class="form-input" formControlName="vehicleModelId">
-    <option value>รุ่นรถ</option>
-  </select>
+    <div class="vehicle-grid">
+      <select class="form-input-custom" formControlName="vehicleBrandId">
+        <option [ngValue]="null">ยี่ห้อรถ</option>
+      </select>
 
-  <select class="form-input" formControlName="year">
-    <option value>ปี</option>
-  </select>
+      <select class="form-input-custom" formControlName="vehicleModelId">
+        <option [ngValue]="null">รุ่นรถ</option>
+      </select>
 
-  <select class="form-input" formControlName="engine">
-    <option value>เครื่องยนต์</option>
-  </select>
+      <select class="form-input-custom" formControlName="year">
+        <option [ngValue]="null">ปี</option>
+      </select>
 
-  <label class="flex items-center gap-2 text-sm">
-    <input type="checkbox" formControlName="inStock" />
-    มีของในสต็อก
-  </label>
+      <select class="form-input-custom" formControlName="engine">
+        <option [ngValue]="null">เครื่องยนต์</option>
+      </select>
+    </div>
+  </div>
 
-</div>
+  <!-- STOCK -->
+  <div class="stock-wrapper">
+    <label class="stock-check">
+      <input
+        type="checkbox"
+        formControlName="inStock"
+        class="stock-checkbox" />
+      <span>แสดงเฉพาะสินค้าที่มีในสต็อก</span>
+    </label>
+  </div>
+
+</form>

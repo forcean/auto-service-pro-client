@@ -111,11 +111,19 @@ export class CustomSelectCategoryComponent implements ControlValueAccessor {
 
   writeValue(value: string | null): void {
     this.selectedValue = value;
-    if (!value) return;
+
+    if (!this.categories?.length) return;
+
+    if (!value) {
+      this.clearTree(this.categories);
+      this.selectedLabel = '';
+      return;
+    }
 
     this.clearTree(this.categories);
     this.findAndSelect(this.categories, value);
   }
+
 
   registerOnChange(fn: any): void {
     this.onChange = fn;

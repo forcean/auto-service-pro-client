@@ -1,60 +1,78 @@
-<!-- <section class="w-full bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 py-6">
+<section class="product-page">
+  <div class="container">
 
-        <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold">สินค้าทั้งหมด</h2>
-            <span class="text-sm text-gray-500">
-                {{ products.length }} รายการ
-            </span>
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            <app-product-card
-                *ngFor="let product of products"
-                [product]="product"
-                (clicked)="goToDetail($event)" />
-        </div>
-
-    </div>
-</section> -->
-
-<section class="w-full">
-  <div class="max-w-7xl mx-auto px-4 py-6">
-
-    <div class="grid grid-cols-12 gap-6">
-
-      <!-- Filter -->
-      <aside class="col-span-12 lg:col-span-3">
+    <div class="layout">
+      <aside class="filter-panel">
         <app-product-filter
-          (filterChange)="onFilterChange($event)" />
+          class="sticky-filter"
+          (onSearchChange)="onFilterChange($event)">
+        </app-product-filter>
       </aside>
 
-      <!-- Product Grid -->
-      <main class="col-span-12 lg:col-span-9">
+      <main class="content-area">
 
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-lg font-semibold text-white">
-            รายการอะไหล่
-          </h2>
-          <span class="text-sm text-white">
-            {{ productList.products.length }} รายการ
-          </span>
+        <!-- HEADER -->
+        <div class="page-header">
+
+          <div class="header-left">
+            <h2 class="page-title">
+              รายการอะไหล่
+            </h2>
+            <p class="page-subtitle">
+              {{ productList?.products?.length || 0 }} รายการทั้งหมด
+            </p>
+          </div>
+
+          <div class="header-actions" [formGroup]="form">
+
+            <label class="sort-label">
+              เรียงตาม
+            </label>
+
+            <custom-select
+              formControlName="sortBy"
+              placeholder="เลือกการเรียงลำดับ">
+
+              <custom-option value="latest">ล่าสุด</custom-option>
+              <custom-option value="name_asc">ชื่อ A → Z</custom-option>
+              <custom-option value="name_desc">ชื่อ Z → A</custom-option>
+              <custom-option value="brand_asc">แบรนด์ A → Z</custom-option>
+              <custom-option value="stock_desc">สต็อกมาก → น้อย</custom-option>
+
+            </custom-select>
+          </div>
+
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div
+          *ngIf="productList?.products?.length; else emptyState"
+          class="product-grid">
+
           <app-product-card
             *ngFor="let product of productList.products"
             [product]="product"
-            (clicked)="onClick($event)"></app-product-card>
+            (clicked)="onClick($event)">
+          </app-product-card>
 
         </div>
-        <app-pagination *ngIf="true" aligns="end"
-          [paginationOption]="paginationOption"
-          [currentPage]="pageIndex"
-          [recordPerPage]="pageSize"
-          (changePage)="onPageChange($event)"
-          [totalRecord]="10">
-        </app-pagination>
+
+        <ng-template #emptyState>
+          <div class="empty-state">
+            ไม่พบสินค้า
+          </div>
+        </ng-template>
+
+        <div class="pagination-wrapper">
+          <app-pagination
+            aligns="end"
+            [paginationOption]="paginationOption"
+            [currentPage]="pageIndex"
+            [recordPerPage]="pageSize"
+            (changePage)="onPageChange($event)"
+            [totalRecord]="10">
+          </app-pagination>
+        </div>
+
       </main>
 
     </div>

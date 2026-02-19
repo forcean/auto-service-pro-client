@@ -1,6 +1,10 @@
-// .category-option {
-//     font-size: 0.875rem;
-// }
+@tailwind components;
+@import '../../../../assets/styles/variables';
+@import '../../../../assets/styles/color';
+
+.category-option {
+  font-size: $font-size-20;
+}
 
 // .row {
 //     display: flex;
