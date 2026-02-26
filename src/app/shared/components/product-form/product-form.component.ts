@@ -98,19 +98,12 @@ export class ProductFormComponent implements OnInit, OnChanges {
       status: data.status,
       vehicles: data.vehicles ?? [],
       spec: data.spec ?? {},
-      images: data.images ?? []
-    });
-
-    const pricesFA = this.form.get('prices') as FormArray;
-    pricesFA.clear();
-
-    (data.prices ?? []).forEach((p: any) => {
-      pricesFA.push(
-        this.fb.group({
-          type: [p.type],
-          amount: [p.amount],
-        })
-      );
+      images: data.images ?? [],
+      price: {
+        retail: data.prices?.retail ?? null,
+        wholesale: data.prices?.wholesale ?? null,
+        cost: data.prices?.cost ?? null,
+      }
     });
   }
 
@@ -126,10 +119,6 @@ export class ProductFormComponent implements OnInit, OnChanges {
 
       return hasPrice ? null : { atLeastOnePrice: true };
     };
-  }
-
-  get prices(): FormArray {
-    return this.form.get('prices') as FormArray;
   }
 
   isInvalid(controlName: string): boolean {

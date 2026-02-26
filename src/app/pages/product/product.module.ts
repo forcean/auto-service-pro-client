@@ -8,7 +8,7 @@ import { ProductListComponent } from './product-list/product-list.component';
 import { ProductCreateComponent } from './product-create/product-create.component';
 import { ProductUpdateComponent } from './product-update/product-update.component';
 import { ProductDetailComponent } from './product-detail/product-detail.component';
-import { ArrowLeft, Check, ChevronLeft, Copy, LucideAngularModule, Pencil, Trash2 } from 'lucide-angular';
+import { ArrowLeft, Check, ChevronLeft, Copy, Info, LucideAngularModule, Pencil, Settings, Trash2 } from 'lucide-angular';
 import { SortableDirective } from "../../shared/directive/sortable.directive";
 
 
@@ -24,7 +24,7 @@ import { SortableDirective } from "../../shared/directive/sortable.directive";
     ProductRoutingModule,
     SharedModule,
     ReactiveFormsModule,
-    LucideAngularModule.pick({ Pencil, Trash2, ChevronLeft, Check, Copy }),
+    LucideAngularModule.pick({ Pencil, Trash2, ChevronLeft, Check, Copy, Settings, Info }),
     SortableDirective
   ]
 })

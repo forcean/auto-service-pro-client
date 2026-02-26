@@ -1,10 +1,10 @@
-<div class="product-detail">
+<div *ngIf="product as p" class="product-detail">
 
-  <div class="header-card header-flex">
+  <!-- HEADER -->
+  <div class="header-card">
     <div class="header-left">
-      <button
-        class="back-link mb-2"
-        (click)="goBack()">
+
+      <button class="back-link" (click)="goBack()">
         <lucide-icon name="chevron-left"></lucide-icon>
         ย้อนกลับ
       </button>
@@ -14,20 +14,23 @@
           {{ product.name }}
         </h1>
 
-        <span
-          class="status-badge"
-          [ngClass]="product.status">
+        <span class="status-badge" [ngClass]="product.status">
           {{ product.status | uppercase }}
         </span>
+
+        <span *ngIf="isLowStock"
+          class="low-stock-badge">
+          LOW STOCK
+        </span>
+
       </div>
 
       <div class="product-sku">
-        SKU:
-        <span>{{ product.code }}</span>
+        <span class="sku-label">SKU</span>
+        <span class="sku-value">{{ product.code }}</span>
 
         <button
           class="copy-sku-btn"
-          title="คัดลอก SKU"
           (click)="copySku()">
           <lucide-icon
             [name]="isSkuCopied ? 'check' : 'copy'">
@@ -44,28 +47,29 @@
     </div>
 
     <div class="header-right">
-      <button
-        class="icon-action"
-        title="แก้ไขสินค้า"
-        (click)="goEdit()">
+      <button class="icon-action" (click)="goEdit()">
         <lucide-icon name="pencil"></lucide-icon>
       </button>
     </div>
-
   </div>
 
+  <!-- MAIN GRID -->
   <section class="main-grid">
 
-    <div class="left-col space-y-6">
+    <!-- LEFT -->
+    <div class="left-col">
 
-      <div class="card image-card">
-        <img
-          [src]="mainImageUrl"
-          alt="product image" />
+      <div class="image-card">
+        <img [src]="mainImageUrl" />
+      </div>
+
+      <div *ngIf="product.description" class="card">
+        <h3>รายละเอียดสินค้า</h3>
+        <p>{{ product.description }}</p>
       </div>
 
       <div *ngIf="galleryImages.length" class="card">
-        <h2 class="section-title">แกลเลอรี่สินค้า</h2>
+        <h3>แกลเลอรี่</h3>
 
         <div class="gallery">
           <img
@@ -77,34 +81,77 @@
 
     </div>
 
-    <div class="right-col space-y-6">
+    <!-- RIGHT -->
+    <div class="right-col">
 
-      <div class="card">
-        <h2 class="section-title">ราคา</h2>
+      <!-- PRICE HERO -->
+      <div class="price-highlight">
 
-        <div
-          *ngFor="let p of product.prices"
-          class="price-row">
-          <span class="price-type">{{ p.type }}</span>
-          <span class="price-amount">
-            {{ p.amount | number }} บาท
-          </span>
+        <div class="price-main">
+          ฿ {{ product.prices?.retail | number:'1.0-2' }}
+          <span>ราคาปลีก</span>
+        </div>
+
+        <div class="price-divider"></div>
+
+        <div class="price-sub-grid">
+
+          <div *ngIf="product.prices?.wholesale">
+            <label>ราคาส่ง</label>
+            <div class="value wholesale">
+              ฿ {{ product.prices?.wholesale | number:'1.0-2' }}
+            </div>
+          </div>
+
+          <div *ngIf="product.prices?.cost">
+            <label>ต้นทุน</label>
+            <div class="value cost">
+              ฿ {{ product.prices?.cost | number:'1.0-2' }}
+            </div>
+          </div>
+
+          <div *ngIf="margin">
+            <label>กำไร</label>
+            <div class="value text-purple-600">
+              {{ margin }} %
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="stock-card">
+        <h3>สต๊อกสินค้า</h3>
+
+        <div class="stock-grid">
+          <div>
+            <label>Available</label>
+            <div class="stock-number" [class.low]="isLowStock">
+              {{ stockInfo.available }}
+            </div>
+          </div>
+
+          <div>
+            <label>On Hand</label>
+            <div>{{ stockInfo.onHand }}</div>
+          </div>
+
+          <div>
+            <label>Reserved</label>
+            <div>{{ stockInfo.reserved }}</div>
+          </div>
         </div>
       </div>
 
-      <div *ngIf="product.spec" class="card">
-        <h2 class="section-title">ข้อมูลจำเพาะ</h2>
+      <!-- SPEC -->
+      <div *ngIf="product.spec" class="card spec-card">
+        <h3>ข้อมูลจำเพาะ</h3>
 
         <div class="spec-grid">
-          <div
-            *ngFor="let s of specEntries"
-            class="spec-item">
-            <div class="spec-label">
-              {{ s.label }}
-            </div>
-            <div class="spec-value">
-              {{ s.value }}
-            </div>
+          <div *ngFor="let s of specEntries" class="spec-item">
+            <span class="spec-label">{{ s.label }}</span>
+            <span class="spec-value">{{ s.value }}</span>
           </div>
         </div>
       </div>
@@ -113,20 +160,93 @@
 
   </section>
 
-  <section *ngIf="product.vehicles?.length" class="card">
-    <h2 class="section-title">รถที่รองรับ</h2>
+  <!-- VEHICLE -->
+  <section *ngIf="product.vehicles?.length" class="vehicle-section">
+
+    <div class="vehicle-header-main">
+      <div>
+        <h3>รถที่รองรับ</h3>
+        <p>Compatible Vehicle Fitment</p>
+      </div>
+
+      <div class="vehicle-count">
+        {{ product.vehicles.length }} รุ่น
+      </div>
+    </div>
 
     <div class="vehicle-grid">
-      <div
-        *ngFor="let v of product.vehicles"
-        class="vehicle-card">
-        <div class="vehicle-name">
-          {{ v.brand }} {{ v.model }}
+
+      <div *ngFor="let v of product.vehicles" class="vehicle-card">
+
+        <div class="vehicle-top">
+          <div>
+            <div class="vehicle-name">
+              {{ v.brand }} {{ v.model }}
+            </div>
+          </div>
+
+          <div class="vehicle-year">
+            {{ v.yearFrom }} – {{ v.yearTo }}
+          </div>
         </div>
-        <div class="vehicle-year">
-          {{ v.yearFrom }} – {{ v.yearTo }}
+
+        <div class="vehicle-divider"></div>
+
+        <!-- ENGINE -->
+        <div *ngIf="v.engines?.length" class="vehicle-section-block">
+          <div class="block-label">
+            <lucide-icon name="settings"></lucide-icon>
+            Engine
+          </div>
+
+          <div class="engine-tags">
+            <span *ngFor="let e of v.engines">
+              {{ e }}
+            </span>
+          </div>
         </div>
+
+        <!-- REMARK -->
+        <div *ngIf="v.remark" class="vehicle-section-block">
+          <div class="block-label">
+            <lucide-icon name="info"></lucide-icon>
+            หมายเหตุ
+          </div>
+
+          <div class="remark-text">
+            {{ v.remark }}
+          </div>
+        </div>
+
       </div>
+
+    </div>
+
+  </section>
+
+  <section *ngIf="recentMovements?.length"
+    class="card">
+
+    <h3>ความเคลื่อนไหวล่าสุด</h3>
+
+    <div class="movement-list">
+
+      <div *ngFor="let m of recentMovements"
+        class="movement-item">
+
+        <div>
+          <strong>{{ m.type }}</strong>
+          <div class="movement-date">
+            {{ m.createdDt | date:'dd/MM/yyyy HH:mm' }}
+          </div>
+        </div>
+
+        <div class="movement-qty">
+          {{ m.quantity }}
+        </div>
+
+      </div>
+
     </div>
   </section>
 

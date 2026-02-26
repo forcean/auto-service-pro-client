@@ -18,7 +18,7 @@ export interface IProducts {
   brandId: string;
   brandName: string;
   status: 'active' | 'inactive' | 'out_of_stock' | 'discontinued';
-  vehicles?: VehicleCompatibility[];
+  vehicles: VehicleCompatibility[];
   spec?: ISpec;
   images: IImages[];
   prices?: IPrices;

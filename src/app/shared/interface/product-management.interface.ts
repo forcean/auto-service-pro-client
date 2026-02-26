@@ -13,25 +13,6 @@ export interface IReqCreateProduct {
   images?: IImages[];
   status: 'active' | 'inactive' | 'out_of_stock' | 'discontinued';
 }
-export interface IImages {
-  fileId: string;
-  isPrimary: boolean;
-  url?: string;
-}
-
-export interface ISpec {
-  unit?: string;
-  weight?: number;
-  width?: number;
-  height?: number;
-  depth?: number;
-}
-
-export interface IPrices {
-  type: 'RETAIL' | 'WHOLESALE' | 'COST';
-  amount: number;
-}
-
 export interface IReqUpdateProduct {
   name: string;
   description: string;
@@ -43,8 +24,35 @@ export interface IReqUpdateProduct {
   images?: IImages[];
   status: 'active' | 'inactive' | 'out_of_stock' | 'discontinued';
 }
+export interface IImages {
+  fileId: string;
+  isPrimary: boolean;
+  url?: string;
+}
+
+export interface ISpec {
+  unit?: string;
+  weight?: string;
+  width?: string;
+  height?: string;
+  depth?: string;
+}
+
+export interface IPrices {
+  retail?: number;
+  wholesale?: number;
+  cost?: number;
+}
+
+
 
 export interface IResponseProductDetail {
+  product: IProductDetail;
+  stockInfo?: IProductStock;
+  recentMovements?: any[];
+}
+
+export interface IProductDetail {
   id: string;
   name: string;
   code: string;
@@ -57,8 +65,22 @@ export interface IResponseProductDetail {
   vehicles: VehicleCompatibility[];
   spec?: ISpec;
   images: IImages[];
-  prices: IPrices[];
+  prices?: IPrices;
   updatedDt: string;
   updatedBy: string;
   activeFlag: boolean;
+}
+
+export interface IProductStock {
+  onHand: number;
+  reserved: number;
+  available: number;
+  minStock: number;
+}
+
+export interface IProductMovement {
+  type: 'in' | 'out';
+  quantity: number;
+  date: string;
+  reference: string;
 }

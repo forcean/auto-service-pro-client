@@ -1,10 +1,10 @@
-import { Component, model, OnInit } from '@angular/core';
+import { Component, model, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { StockManagementService } from '../../../shared/services/stock-management.service';
 import { RESPONSE } from '../../../shared/enum/response.enum';
 import { Subscription } from 'rxjs';
 import { ModalCommonService } from '../../../shared/components/modal-common/modal-common.service';
-import { IResponseProductDetail } from '../../../shared/interface/product-management.interface';
+import { IProductDetail, IProductStock, IResponseProductDetail } from '../../../shared/interface/product-management.interface';
 
 @Component({
   selector: 'app-product-detail',
@@ -12,15 +12,26 @@ import { IResponseProductDetail } from '../../../shared/interface/product-manage
   templateUrl: './product-detail.component.html',
   styleUrl: './product-detail.component.scss'
 })
-export class ProductDetailComponent implements OnInit {
-
+export class ProductDetailComponent implements OnInit, OnDestroy {
   private modalSubscription!: Subscription | null;
-  product!: IResponseProductDetail;
+
+  product!: IProductDetail;
+
   mainImageUrl = '';
   galleryImages: any[] = [];
   specEntries: { label: string; value?: string | number }[] = [];
 
-  isSkuCopied: boolean = false;
+  stockInfo: IProductStock = {
+    onHand: 0,
+    reserved: 0,
+    available: 0,
+    minStock: 5
+  };
+
+  recentMovements: any[] = [];
+
+  isSkuCopied = false;
+  isLoading = false;
 
   constructor(
     private router: Router,
@@ -33,39 +44,86 @@ export class ProductDetailComponent implements OnInit {
     this.loadProduct();
   }
 
+  ngOnDestroy(): void {
+    this.unsubscribeModal();
+  }
+
   async loadProduct() {
     const productId = this.route.snapshot.paramMap.get('id');
+
     if (!productId) {
       this.router.navigate(['/portal/product/list']);
       return;
     }
 
+    this.isLoading = true;
+
     try {
       const res = await this.stockManagementService.getProductDetail(productId);
-      if (res.resultCode == RESPONSE.SUCCESS) {
-        this.product = res.resultData;
+
+      if (res.resultCode === RESPONSE.SUCCESS) {
+        if (res.resultData.product) {
+          this.product = res.resultData.product;
+          this.stockInfo = res.resultData.stockInfo || this.stockInfo;
+          this.recentMovements = res.resultData.recentMovements || [];
+        } else {
+          this.product = res.resultData.product;
+
+          this.stockInfo = {
+            onHand: 0,
+            reserved: 0,
+            available: 0,
+            minStock: 5
+          };
+        }
+
         this.patchData();
+
       } else {
         this.handleCommonError();
       }
+
     } catch (error) {
       console.error(error);
+      this.handleFailResponse();
+    } finally {
+      this.isLoading = false;
     }
   }
 
   private patchData() {
-    const main = this.product.images.find((i: any) => i.isPrimary);
-    this.mainImageUrl = main?.url || '';
+    if (!this.product) return;
 
-    this.galleryImages = this.product.images.filter((i: any) => !i.isPrimary);
+    const images = this.product.images || [];
+
+    const main = images.find((i: any) => i.isPrimary);
+    this.mainImageUrl = main?.url || images[0]?.url || '';
+
+    this.galleryImages = images.filter((i: any) => !i.isPrimary);
 
     this.specEntries = [
-      { label: 'หน่วย', value: this.product.spec?.unit },
-      { label: 'น้ำหนัก (kg)', value: this.product.spec?.weight },
-      { label: 'กว้าง (mm)', value: this.product.spec?.width },
-      { label: 'สูง (mm)', value: this.product.spec?.height },
-      { label: 'ลึก (mm)', value: this.product.spec?.depth }
-    ].filter(s => s.value);
+      { label: 'หน่วย: ', value: this.product.spec?.unit },
+      { label: 'น้ำหนัก: ', value: this.product.spec?.weight },
+      { label: 'กว้าง: ', value: this.product.spec?.width },
+      { label: 'สูง: ', value: this.product.spec?.height },
+      { label: 'ลึก: ', value: this.product.spec?.depth }
+    ].filter(s => s.value !== undefined && s.value !== null);
+  }
+
+  get isLowStock(): boolean {
+    return this.stockInfo.available <= this.stockInfo.minStock;
+  }
+
+  get margin(): number {
+    if (!this.product?.prices?.retail || !this.product?.prices?.cost) {
+      return 0;
+    }
+
+    const margin =
+      ((this.product.prices.retail - this.product.prices.cost)
+        / this.product.prices.retail) * 100;
+
+    return isNaN(margin) ? 0 : Math.round(margin);
   }
 
   preview(url: string) {
@@ -81,24 +139,24 @@ export class ProductDetailComponent implements OnInit {
   }
 
   copySku() {
-    if (!this.product?.code) {
-      return;
-    }
+    if (!this.product?.code) return;
 
     navigator.clipboard.writeText(this.product.code);
     this.isSkuCopied = true;
+
     setTimeout(() => {
       this.isSkuCopied = false;
     }, 1500);
   }
 
   private handleCommonError() {
-    this.modalSubscription = this.modalCommonService.isOpen.subscribe((obj) => {
-      if (!obj?.isOpen) {
-        this.router.navigate(['/portal/product/list']);
-        this.unsubscribeModal();
-      }
-    });
+    this.modalSubscription =
+      this.modalCommonService.isOpen.subscribe((obj) => {
+        if (!obj?.isOpen) {
+          this.router.navigate(['/portal/product/list']);
+          this.unsubscribeModal();
+        }
+      });
   }
 
   private unsubscribeModal() {
@@ -112,7 +170,7 @@ export class ProductDetailComponent implements OnInit {
     this.modalCommonService.open({
       type: 'alert',
       title: 'ขออภัย ระบบขัดข้องในขณะนี้',
-      subtitle: 'กรุณาทำรายการใหม่อีกครั้ง หรือ ติดต่อผู้ดูแลระบบในองค์กรของคุณ',
+      subtitle: 'กรุณาทำรายการใหม่อีกครั้ง หรือติดต่อผู้ดูแลระบบ',
       buttonText: 'เข้าใจแล้ว',
     });
   }

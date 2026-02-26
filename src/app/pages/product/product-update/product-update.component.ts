@@ -23,7 +23,7 @@ export class ProductUpdateComponent implements OnInit {
   productId!: string;
   categories: ICategory[] = [];
   brands: IProductBrand[] = [];
-  productDetail!: IProducts;
+  productDetail!: any;
 
 
   constructor(
@@ -65,7 +65,7 @@ export class ProductUpdateComponent implements OnInit {
       const res = await this.stockService.getProductDetail(this.productId);
 
       if (res.resultCode == RESPONSE.SUCCESS) {
-        // this.productDetail = res.resultData;
+        this.productDetail = res.resultData.product;
         await this.onCategoryChange(this.productDetail.categoryId);
       } else {
         return;
