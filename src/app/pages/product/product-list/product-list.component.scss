@@ -3,118 +3,179 @@
 @import '../../../../assets/styles/color';
 
 .product-page {
-    @apply w-full min-h-screen;
-    background-color: #f8fafc;
+  @apply w-full min-h-screen;
+  background-color: #f8fafc;
 }
 
 .container {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 py-6;
+  @apply max-w-7xl mx-auto px-4 sm:px-6 py-6;
 }
 
 .layout {
-    @apply grid gap-6;
-    grid-template-columns: 1fr;
+  @apply grid gap-6;
+  grid-template-columns: 1fr;
 
-    @media (min-width: 1024px) {
-        grid-template-columns: 280px 1fr;
-    }
+  @media (min-width: 1024px) {
+    grid-template-columns: 280px 1fr;
+  }
 }
 
 .filter-panel {
-    @apply w-full;
+  @apply w-full;
 }
 
 .sticky-filter {
-    position: sticky;
-    top: 24px;
+  position: sticky;
+  top: 24px;
 }
 
 @media (max-width: 1024px) {
-    .sticky-filter {
-        position: relative;
-        top: 0;
-    }
+  .sticky-filter {
+    position: relative;
+    top: 0;
+  }
 }
 
 
 .content-area {
-    @apply w-full;
+  @apply w-full;
 }
 
 .page-header {
-    @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6;
+  @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6;
 }
 
 .header-left {
-    @apply flex flex-col;
+  @apply flex flex-col;
 }
 
 .page-title {
-    @apply text-lg sm:text-xl font-semibold text-gray-800;
+  @apply text-lg sm:text-xl font-semibold text-gray-800;
 }
 
 .page-subtitle {
-    @apply text-sm text-gray-500 mt-1;
+  @apply text-sm text-gray-500 mt-1;
 }
 
 .header-actions {
-    @apply flex items-center gap-3;
+  @apply flex items-center gap-3;
 }
 
 .sort-label {
-    @apply text-xs font-medium text-gray-500;
+  @apply text-xs font-medium text-gray-500;
 }
 
 .sort-select {
-    @apply border border-gray-300 rounded-xl px-3 py-2 text-sm bg-white transition-all;
-    min-width: 180px;
+  @apply border border-gray-300 rounded-xl px-3 py-2 text-sm bg-white transition-all;
+  min-width: 180px;
 
-    &:focus {
-        outline: none;
-        border-color: $color-primary;
-        box-shadow: 0 0 0 3px rgba(184, 244, 22, 0.15);
-    }
+  &:focus {
+    outline: none;
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px rgba(184, 244, 22, 0.15);
+  }
 }
 
 .product-grid {
-    @apply grid gap-5;
+  @apply grid gap-5;
+  grid-template-columns: repeat(2, 1fr);
+
+  @media (min-width: 640px) {
     grid-template-columns: repeat(2, 1fr);
+  }
 
-    @media (min-width: 640px) {
-        grid-template-columns: repeat(2, 1fr);
-    }
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
 
-    @media (min-width: 768px) {
-        grid-template-columns: repeat(3, 1fr);
-    }
-
-    @media (min-width: 1280px) {
-        grid-template-columns: repeat(3, 1fr);
-    }
+  @media (min-width: 1280px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .empty-state {
-    @apply text-center text-gray-400 text-sm py-14;
+  @apply text-center text-gray-400 text-sm py-14;
 }
 
 .pagination-wrapper {
-    @apply mt-10 flex justify-end;
+  @apply mt-10 flex justify-end;
 }
 
 @media (max-width: 640px) {
-    .page-header {
-        @apply flex-col items-start;
-    }
+  .page-header {
+    @apply flex-col items-start;
+  }
 
-    .header-actions {
-        @apply w-full justify-between;
-    }
+  .header-actions {
+    @apply w-full justify-between;
+  }
 
-    .sort-select {
-        width: 100%;
-    }
+  .sort-select {
+    width: 100%;
+  }
 
-    .pagination-wrapper {
-        @apply justify-center;
-    }
+  .pagination-wrapper {
+    @apply justify-center;
+  }
+}
+
+
+.header-right {
+  @apply flex items-center gap-4;
+}
+
+.sort-wrapper {
+  @apply flex items-center gap-2;
+}
+
+.primary-btn {
+  @apply flex items-center gap-2 px-5 py-2.5;
+  @apply rounded-2xl font-medium text-sm;
+  @apply bg-gray-900 text-white;
+  @apply transition-all duration-200;
+  @apply shadow-sm;
+
+  white-space: nowrap;
+
+  &:hover {
+    @apply bg-gray-800 shadow-md;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.btn-icon {
+  @apply text-lg leading-none;
+}
+
+.fab-add {
+  @apply fixed bottom-6 right-6;
+  @apply w-14 h-14 rounded-full;
+  @apply bg-gray-900 text-white text-2xl;
+  @apply flex items-center justify-center;
+  @apply shadow-xl transition-all duration-200;
+
+  display: none;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+@media (max-width: 768px) {
+
+  .header-right {
+    @apply flex-col items-stretch gap-3 w-full;
+  }
+
+  .primary-btn {
+    display: none;
+  }
+
+  .fab-add {
+    display: flex;
+  }
 }

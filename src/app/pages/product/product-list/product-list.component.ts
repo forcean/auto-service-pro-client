@@ -78,6 +78,10 @@ export class ProductListComponent implements OnInit {
     this.loadProducts();
   }
 
+  onAddProduct() {
+    this.router.navigate(['/portal/product/create']);
+  }
+
   async loadProducts() {
     try {
       const params: IQueryListProduct = {

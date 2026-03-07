@@ -72,11 +72,11 @@ export class ProductFormComponent implements OnInit, OnChanges {
       vehicles: this.fb.control([]),
       price: this.fb.group(
         {
-          retail: [null, [Validators.min(0)]],
+          retail: [null, [Validators.required, Validators.min(0)]],
           wholesale: [null, [Validators.min(0)]],
-          cost: [null, [Validators.min(0)]],
+          cost: [null, [Validators.required, Validators.min(0)]],
         },
-        { validators: this.atLeastOnePriceValidator() }
+        { validators: this.priceCompareValidator() }
       ),
       spec: this.fb.group({
         unit: [''],
@@ -107,23 +107,47 @@ export class ProductFormComponent implements OnInit, OnChanges {
     });
   }
 
-  private atLeastOnePriceValidator(): ValidatorFn {
+  private priceCompareValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       if (!(control instanceof FormGroup)) return null;
 
-      const { retail, wholesale, cost } = control.value || {};
-      const hasPrice =
-        Number(retail) > 0 ||
-        Number(wholesale) > 0 ||
-        Number(cost) > 0;
+      const retail = control.get('retail')?.value;
+      const cost = control.get('cost')?.value;
 
-      return hasPrice ? null : { atLeastOnePrice: true };
+      if (retail == null || cost == null) return null;
+
+      if (Number(retail) <= Number(cost)) {
+        return { retailLessThanCost: true };
+      }
+
+      return null;
     };
   }
 
   isInvalid(controlName: string): boolean {
     const control = this.form.get(controlName);
     return !!(control && control.invalid && (control.touched || this.isFormSubmitted));
+  }
+
+  get retailValue(): number {
+    return this.form.get('price.retail')?.value ?? 0;
+  }
+
+  get costValue(): number {
+    return this.form.get('price.cost')?.value ?? 0;
+  }
+
+  get profit(): number {
+    const retail = Number(this.retailValue);
+    const cost = Number(this.costValue);
+
+    if (!retail || !cost) return 0;
+    return retail - cost;
+  }
+
+  get marginPercent(): number {
+    if (!this.retailValue) return 0;
+    return (this.profit / this.retailValue) * 100;
   }
 
   onImagesChange(images: any[]): void {
@@ -195,7 +219,9 @@ export class ProductFormComponent implements OnInit, OnChanges {
           yearFrom: v.yearFrom,
           yearTo: v.yearTo,
           remark: v.remark,
-          engines: v.selectedEngines ?? v.engines,
+          engines: (v.selectedEngines ?? []).map((code: string) =>
+            v.engines.find((e: any) => e.code === code)
+          ).filter(Boolean)
         }))
       }),
       ...(f.price && Object.values(f.price).some(v => v) && {

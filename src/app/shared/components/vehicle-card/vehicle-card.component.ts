@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { VehicleCompatibility } from '../../interface/vehicle.interface';
-
+import { IVehicle } from '../../interface/catalog.interface';
 @Component({
   selector: 'app-vehicle-card',
   standalone: false,
@@ -8,7 +7,7 @@ import { VehicleCompatibility } from '../../interface/vehicle.interface';
   styleUrl: './vehicle-card.component.scss'
 })
 export class VehicleCardComponent {
-  @Input() vehicle!: VehicleCompatibility;
+  @Input() vehicle!: IVehicle;
   @Input() readonly = true;
 
   @Output() remove = new EventEmitter<void>();
@@ -22,20 +21,36 @@ export class VehicleCardComponent {
     this.remarkChange.emit(value);
   }
 
-  toggleEngine(engine: string, checked: boolean) {
+  // toggleEngine(engine: string, checked: boolean) {
+  //   const set = new Set(this.vehicle.selectedEngines ?? []);
+
+  //   checked ? set.add(engine) : set.delete(engine);
+
+  //   this.vehicle.selectedEngines = Array.from(set);
+  //   this.remarkChange.emit(this.vehicle.remark ?? '');
+  // }
+
+  toggleEngine(engineCode: string, checked: boolean) {
     const set = new Set(this.vehicle.selectedEngines ?? []);
 
-    checked ? set.add(engine) : set.delete(engine);
+    checked ? set.add(engineCode) : set.delete(engineCode);
 
     this.vehicle.selectedEngines = Array.from(set);
-    this.remarkChange.emit(this.vehicle.remark ?? '');
   }
 
+  // get enginesDisplay(): string {
+  //   if (Array.isArray(this.vehicle.engines)) {
+  //     return this.vehicle.engines.join(', ');
+  //   }
+  //   return this.vehicle.engines || '';
+  // }
   get enginesDisplay(): string {
-    if (Array.isArray(this.vehicle.engines)) {
-      return this.vehicle.engines.join(', ');
+    if (Array.isArray(this.vehicle?.engines)) {
+      return this.vehicle.engines
+        .map((e: any) => `${e.code} (${e.fuel})`)
+        .join(', ');
     }
-    return this.vehicle.engines || '';
+    return '';
   }
 
   get showEngineSelector(): boolean {

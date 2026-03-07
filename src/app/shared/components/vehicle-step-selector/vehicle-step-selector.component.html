@@ -1,7 +1,7 @@
 <div class="step-box">
     <custom-select
         *ngIf="step === 1"
-        placeholder="Select Brand"
+        placeholder="กรุณเลือกยี่ห้อรถ"
         (change)="selectBrand($event)">
         <custom-option
             *ngFor="let b of brands"
@@ -12,7 +12,7 @@
 
     <custom-select
         *ngIf="step === 2"
-        placeholder="Select Model"
+        placeholder="กรุณเลือกโมเดลรถ"
         (change)="selectModel($event)">
         <custom-option
             *ngFor="let m of models"
@@ -23,12 +23,13 @@
 
     <custom-select
         *ngIf="step === 3"
-        placeholder="Select Vehicle"
+        placeholder="กรุณเลือกรถที่ต้องการ"
         (change)="selectVehicle($event)">
         <custom-option
             *ngFor="let v of vehicles"
             [value]="v">
-            {{ v.model }}
+            {{ v.model }} {{ v.generation ? ': ' + v.generation : '' }} ({{
+            v.yearFrom }}-{{ v.yearTo }})
         </custom-option>
     </custom-select>
 

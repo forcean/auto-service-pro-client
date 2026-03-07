@@ -1,4 +1,4 @@
-import { VehicleCompatibility } from "./vehicle.interface";
+import { IVehicle } from "./catalog.interface";
 
 export interface IProductList {
   keyword?: string;
@@ -18,7 +18,7 @@ export interface IProducts {
   brandId: string;
   brandName: string;
   status: 'active' | 'inactive' | 'out_of_stock' | 'discontinued';
-  vehicles: VehicleCompatibility[];
+  vehicles: IVehicle[];
   spec?: ISpec;
   images: IImages[];
   prices?: IPrices;

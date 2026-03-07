@@ -1,7 +1,7 @@
 <div class="vehicle-row">
   <div class="vehicle-grid">
     <div class="cell model">
-      {{ vehicle.model }}
+      {{ vehicle.model }} : {{ vehicle.generation }}
     </div>
 
     <div class="cell year">
@@ -20,9 +20,9 @@
           <input
             type="checkbox"
             class="engine-checkbox"
-            [checked]="vehicle.selectedEngines?.includes(e)"
-            (change)="toggleEngine(e, $any($event.target).checked)" />
-          <span>{{ e }}</span>
+            [checked]="vehicle.selectedEngines?.includes(e.code)"
+            (change)="toggleEngine(e.code, $any($event.target).checked)" />
+          <span>{{ e.code }} ({{ e.fuel }})</span>
         </label>
       </div>
     </div>

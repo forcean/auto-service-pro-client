@@ -1,8 +1,7 @@
-import { Component, EventEmitter, model, Output } from '@angular/core';
-import { VehicleCompatibility } from '../../interface/vehicle.interface';
+import { Component, EventEmitter, model, OnInit, Output } from '@angular/core';
 import { CatalogService } from '../../services/catalog.service';
 import { RESPONSE } from '../../enum/response.enum';
-import { IQueryCatalogVehicles } from '../../interface/catalog.interface';
+import { IBrandVehicle, IModelVehicle, IQueryCatalogVehicles, IVehicle } from '../../interface/catalog.interface';
 
 @Component({
   selector: 'app-vehicle-step-selector',
@@ -11,12 +10,12 @@ import { IQueryCatalogVehicles } from '../../interface/catalog.interface';
   styleUrl: './vehicle-step-selector.component.scss'
 })
 export class VehicleStepSelectorComponent {
-  @Output() selected = new EventEmitter<VehicleCompatibility>();
+  @Output() selected = new EventEmitter<IVehicle>();
 
   step: 1 | 2 | 3 = 1;
-  brands: any[] = [];
-  models: any[] = [];
-  vehicles: VehicleCompatibility[] = [];
+  brands: IBrandVehicle[] = [];
+  models: IModelVehicle[] = [];
+  vehicles: IVehicle[] = [];
 
   brandId!: string;
   modelId!: string;
@@ -80,9 +79,10 @@ export class VehicleStepSelectorComponent {
       vehicleId: v.vehicleId,
       brand: v.brand,
       model: v.model,
+      generation: v.generation,
       yearFrom: v.yearFrom,
       yearTo: v.yearTo,
-      selectedEngines: v.engines ?? [],
+      selectedEngines: [],
       engines: [...(v.engines ?? [])],
       isNew: true,
       remark: ''

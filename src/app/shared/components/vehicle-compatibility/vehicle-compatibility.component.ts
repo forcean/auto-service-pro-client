@@ -1,6 +1,6 @@
 import { Component, forwardRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { VehicleCompatibility } from '../../interface/vehicle.interface';
+import { IVehicle } from '../../interface/catalog.interface';
 
 @Component({
   selector: 'app-vehicle-compatibility',
@@ -14,7 +14,7 @@ import { VehicleCompatibility } from '../../interface/vehicle.interface';
   }]
 })
 export class VehicleCompatibilityComponent implements ControlValueAccessor {
-  vehicles: VehicleCompatibility[] = [];
+  vehicles: IVehicle[] = [];
   disabled = false;
 
   private onChange: (value: any) => void = () => { };
@@ -36,19 +36,21 @@ export class VehicleCompatibilityComponent implements ControlValueAccessor {
     this.disabled = isDisabled;
   }
 
-  addVehicle(vehicle: VehicleCompatibility): void {
+  addVehicle(vehicle: IVehicle): void {
     if (this.disabled) return;
 
     if (this.vehicles.some(v => v.vehicleId === vehicle.vehicleId)) {
       return;
     }
 
-    const normalized: VehicleCompatibility = {
-      ...vehicle,
-      engines: vehicle.selectedEngines ?? vehicle.engines
-    };
+    this.vehicles = [
+      ...this.vehicles,
+      {
+        ...vehicle,
+        selectedEngines: []
+      }
+    ];
 
-    this.vehicles = [...this.vehicles, normalized];
     this.onChange(this.vehicles);
     this.onTouched();
   }
@@ -73,7 +75,7 @@ export class VehicleCompatibilityComponent implements ControlValueAccessor {
   }
 
 
-  trackByVehicleId(index: number, item: VehicleCompatibility) {
+  trackByVehicleId(index: number, item: IVehicle) {
     return item.vehicleId;
   }
 }

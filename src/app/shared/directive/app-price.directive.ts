@@ -45,11 +45,7 @@ export class PriceDirective implements OnInit {
     if (parts[1]?.length > this.decimal) {
       raw = `${parts[0]}.${parts[1].slice(0, this.decimal)}`;
     }
-
-    const numeric =
-      raw === '' || raw === '.' ? null : Number(raw);
-
-    this.ngControl.control?.setValue(numeric, {
+    this.ngControl.control?.setValue(raw, {
       emitEvent: false
     });
   }
@@ -91,7 +87,15 @@ export class PriceDirective implements OnInit {
     ];
 
     if (allowed.includes(event.key)) return;
-    if (/^[0-9.]$/.test(event.key)) return;
+    if (event.key === '.') {
+      const value = this.el.nativeElement.value;
+      if (value.includes('.')) {
+        event.preventDefault();
+      }
+      return;
+    }
+
+    if (/^[0-9]$/.test(event.key)) return;
 
     event.preventDefault();
   }

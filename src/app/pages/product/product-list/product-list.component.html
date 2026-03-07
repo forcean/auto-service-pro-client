@@ -11,7 +11,6 @@
 
       <main class="content-area">
 
-        <!-- HEADER -->
         <div class="page-header">
 
           <div class="header-left">
@@ -23,23 +22,35 @@
             </p>
           </div>
 
-          <div class="header-actions" [formGroup]="form">
+          <div class="header-right">
 
-            <label class="sort-label">
-              เรียงตาม
-            </label>
+            <div class="sort-wrapper" [formGroup]="form">
+              <label class="sort-label">เรียงตาม</label>
 
-            <custom-select
-              formControlName="sortBy"
-              placeholder="เลือกการเรียงลำดับ">
+              <custom-select
+                formControlName="sortBy"
+                placeholder="เลือกการเรียงลำดับ">
 
-              <custom-option value="latest">ล่าสุด</custom-option>
-              <custom-option value="name_asc">ชื่อ A → Z</custom-option>
-              <custom-option value="name_desc">ชื่อ Z → A</custom-option>
-              <custom-option value="brand_asc">แบรนด์ A → Z</custom-option>
-              <custom-option value="stock_desc">สต็อกมาก → น้อย</custom-option>
+                <custom-option value="latest">ล่าสุด</custom-option>
+                <custom-option value="name_asc">ชื่อ A → Z</custom-option>
+                <custom-option value="name_desc">ชื่อ Z → A</custom-option>
+                <custom-option value="brand_asc">แบรนด์ A → Z</custom-option>
+                <custom-option value="stock_desc">สต็อกมาก →
+                  น้อย</custom-option>
 
-            </custom-select>
+              </custom-select>
+            </div>
+
+            <button
+              type="button"
+              class="primary-btn"
+              (click)="onAddProduct()">
+
+              <span class="btn-icon">+</span>
+              เพิ่มสินค้า
+
+            </button>
+
           </div>
 
         </div>
@@ -77,4 +88,11 @@
 
     </div>
   </div>
+  <button
+    class="fab-add"
+    (click)="onAddProduct()">
+
+    +
+
+  </button>
 </section>

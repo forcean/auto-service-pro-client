@@ -31,7 +31,28 @@ export class ProductCreateComponent implements OnInit {
   ) { }
 
   async ngOnInit(): Promise<void> {
-    await this.loadCategories();
+    await this.initializePermissions();
+  }
+
+  private async initializePermissions() {
+    this.loadCategories();
+    // try {
+    //   this.permissions = await this.permissionService.permissions();
+    //   this.isViewDetailReport = this.permissionService.isViewDetailReport;
+    // this.isDeleteUser=this.permissionService.isDeleteUser;
+    // this.isUpdateUser=this.permissionService.isUpdateUser;
+    // this.isResetPasswordUser=this.permissionService.isResetPasswordUser;
+    //   if (!this.isViewDetailReport) {
+    //     this.router.navigate(['/not-found']);
+    //   } else {
+    //     this.route.queryParams.subscribe(params => this.updateQueryParams(params));
+    //   }
+    // } catch (error) {
+    //   const errorObject = error as { message: string };
+    //   if (errorObject.message !== '504') {
+    //     this.handleCommonError();
+    //   }
+    // }
   }
 
   async loadCategories() {

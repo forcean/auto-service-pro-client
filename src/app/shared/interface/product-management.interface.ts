@@ -1,4 +1,4 @@
-import { VehicleCompatibility } from "./vehicle.interface";
+import { IVehicle } from "./catalog.interface";
 
 export type DataType = 'string' | 'number' | 'percent' | 'date';
 
@@ -7,7 +7,7 @@ export interface IReqCreateProduct {
   description: string;
   categoryId?: string;
   brandId?: string;
-  vehicles?: VehicleCompatibility[];
+  vehicles?: IVehicle[];
   price: IPrices;
   spec: ISpec;
   images?: IImages[];
@@ -18,7 +18,7 @@ export interface IReqUpdateProduct {
   description: string;
   categoryId?: string;
   brandId?: string;
-  vehicles?: VehicleCompatibility[];
+  vehicles?: IVehicle[];
   price: IPrices;
   spec: ISpec;
   images?: IImages[];
@@ -62,7 +62,7 @@ export interface IProductDetail {
   brandId: string;
   brandName: string;
   status: 'active' | 'inactive' | 'out_of_stock' | 'discontinued';
-  vehicles: VehicleCompatibility[];
+  vehicles: IVehicle[];
   spec?: ISpec;
   images: IImages[];
   prices?: IPrices;
