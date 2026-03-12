@@ -5,7 +5,7 @@
         (change)="selectBrand($event)">
         <custom-option
             *ngFor="let b of brands"
-            [value]="b.id">
+            [value]="b.code">
             {{ b.name }}
         </custom-option>
     </custom-select>
@@ -16,8 +16,8 @@
         (change)="selectModel($event)">
         <custom-option
             *ngFor="let m of models"
-            [value]="m.id">
-            {{ m.name }}
+            [value]="m.modelCode">
+            {{ m.model }} {{ m.generation ? ': ' + m.generation : '' }}
         </custom-option>
     </custom-select>
 

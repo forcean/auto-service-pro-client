@@ -1,10 +1,10 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { AbstractControl, FormArray, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
-import { IReqCreateProduct } from '../../interface/product-management.interface';
+import { IPrices, IReqCreateProduct, IVehicleCreate } from '../../interface/product-management.interface';
 import { IUploadImagePayload } from '../../interface/file-management.interface';
 import { Subscription } from 'rxjs';
 import { IProducts } from '../../interface/product-list.interface';
-import { ICategory, IProductBrand } from '../../interface/catalog.interface';
+import { ICategory, IEngine, IProductBrand, IVehicle } from '../../interface/catalog.interface';
 
 @Component({
   selector: 'app-product-form',
@@ -214,22 +214,32 @@ export class ProductFormComponent implements OnInit, OnChanges {
 
       ...(f.description?.trim() && { description: f.description.trim() }),
       ...(f.vehicles?.length && {
-        vehicle: f.vehicles.map((v: any) => ({
-          vehicleId: v.vehicleId,
-          yearFrom: v.yearFrom,
-          yearTo: v.yearTo,
-          remark: v.remark,
-          engines: (v.selectedEngines ?? []).map((code: string) =>
-            v.engines.find((e: any) => e.code === code)
-          ).filter(Boolean)
-        }))
+        vehicles: this.buildVehicles(f.vehicles)
       }),
-      ...(f.price && Object.values(f.price).some(v => v) && {
-        price: f.price
+      ...(f.price && Object.values(this.buildPrice(f.price)).length && {
+        price: this.buildPrice(f.price)
       }),
 
-      ...(f.spec && Object.values(f.spec).some(v => v) && { spec: f.spec }),
+      ...(f.spec && Object.values(f.spec).some(Boolean) && { spec: f.spec }),
     };
+  }
+
+  private buildPrice(price: IPrices): IPrices {
+    const result: IPrices = {};
+
+    if (price.retail != null) {
+      result.retail = price.retail;
+    }
+
+    if (price.cost != null) {
+      result.cost = price.cost;
+    }
+
+    if (price.wholesale != null) {
+      result.wholesale = price.wholesale;
+    }
+
+    return result;
   }
 
   private findCategoryById(categories: ICategory[], id: string): ICategory | null {
@@ -241,5 +251,24 @@ export class ProductFormComponent implements OnInit, OnChanges {
       }
     }
     return null;
+  }
+
+  private buildVehicles(vehicles: IVehicle[]): IVehicleCreate[] {
+    return vehicles.map(v => this.mapVehicle(v));
+  }
+
+  private mapVehicle(v: IVehicle): IVehicleCreate {
+
+    const engines =
+      (v.selectedEngines ?? [])
+        .map(code => v.engines.find(e => e.code === code))
+        .filter((e): e is IEngine => !!e)
+    return {
+      vehicleId: v.id,
+      yearFrom: v.yearFrom,
+      yearTo: v.yearTo,
+      engines: engines,
+      ...(v.remark?.trim() && { remark: v.remark.trim() })
+    };
   }
 }

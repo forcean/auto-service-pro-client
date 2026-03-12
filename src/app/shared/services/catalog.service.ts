@@ -44,10 +44,38 @@ export class CatalogService {
     }
   }
 
+  async getBrandsVehicles(params: IQueryCatalogVehicles): Promise<IBaseResponse<IResVehicles>> {
+    try {
+      const uri = this.PREFIX_USER + `/products/vehicles/brands`;
+      const response = await this.httpService.get<IResVehicles>(uri, params);
+      return response;
+    } catch (error) {
+      if (error instanceof HttpErrorResponse && error.error) {
+        return error.error as IBaseResponse<IResVehicles>;
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  async getModelsVehicles(params: IQueryCatalogVehicles): Promise<IBaseResponse<IResVehicles>> {
+    try {
+      const uri = this.PREFIX_USER + `/products/vehicles/${params.brandCode}/models`;
+      const response = await this.httpService.get<IResVehicles>(uri);
+      return response;
+    } catch (error) {
+      if (error instanceof HttpErrorResponse && error.error) {
+        return error.error as IBaseResponse<IResVehicles>;
+      } else {
+        throw error;
+      }
+    }
+  }
+
   async getVehicles(params: IQueryCatalogVehicles): Promise<IBaseResponse<IResVehicles>> {
     try {
-      const uri = this.PREFIX_USER + `/products/vehicles`;
-      const response = await this.httpService.get<IResVehicles>(uri, params);
+      const uri = this.PREFIX_USER + `/products/vehicles/${params.brandCode}/${params.modelCode}/${params.generation}`;
+      const response = await this.httpService.get<IResVehicles>(uri);
       return response;
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {

@@ -97,7 +97,7 @@ export class ProductFilterComponent implements OnInit, OnDestroy {
       };
       const res = await this.catalogService.getCategories(params);
       if (res.resultCode === RESPONSE.SUCCESS) {
-        this.categories = res.resultData.category;
+        this.categories = res.resultData.categories;
       }
     } catch (error) {
       console.error(error);

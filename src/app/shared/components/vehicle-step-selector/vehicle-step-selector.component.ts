@@ -17,8 +17,8 @@ export class VehicleStepSelectorComponent {
   models: IModelVehicle[] = [];
   vehicles: IVehicle[] = [];
 
-  brandId!: string;
-  modelId!: string;
+  brandCode!: string;
+  modelCode!: string;
 
   constructor(
     private catalogService: CatalogService
@@ -31,42 +31,45 @@ export class VehicleStepSelectorComponent {
       const params: IQueryCatalogVehicles = {
         isActive: true,
       };
-      const response = await this.catalogService.getVehicles(params);
-      if (response.resultCode === RESPONSE.SUCCESS) {
-        this.brands = response.resultData.brands || [];
+      const response = await this.catalogService.getBrandsVehicles(params);
+      if (response.resultCode == RESPONSE.SUCCESS) {
+        this.brands = response.resultData.vehicleBrands || [];
       }
     } catch (error) {
       console.error('Error loading brands:', error);
     }
   }
 
-  async selectBrand(id: any) {
-    this.brandId = id;
-    console.log('brandSelectedId:', id);
+  async selectBrand(code: any) {
+    this.brandCode = code;
+    console.log('brandSelectedCode:', code);
     this.step = 2;
     try {
       const params: IQueryCatalogVehicles = {
-        brandId: this.brandId,
+        brandCode: this.brandCode,
       };
-      const response = await this.catalogService.getVehicles(params);
-      if (response.resultCode === RESPONSE.SUCCESS) {
-        this.models = response.resultData.models || [];
+      const response = await this.catalogService.getModelsVehicles(params);
+      if (response.resultCode == RESPONSE.SUCCESS) {
+        this.models = response.resultData.vehicleModels || [];
       }
     } catch (error) {
       console.error('Error loading brands:', error);
     }
   }
 
-  async selectModel(id: any) {
-    this.modelId = id;
-    console.log('modelSelectedId:', id);
+  async selectModel(code: any) {
+    this.modelCode = code;
+    console.log('modelSelectedCode:', code);
     this.step = 3;
     try {
       const params: IQueryCatalogVehicles = {
-        modelId: this.modelId
+        brandCode: this.brandCode,
+        modelCode: this.modelCode,
+        generation: this.models.find(m => m.modelCode === this.modelCode)?.generation
+
       };
       const response = await this.catalogService.getVehicles(params);
-      if (response.resultCode === RESPONSE.SUCCESS) {
+      if (response.resultCode == RESPONSE.SUCCESS) {
         this.vehicles = response.resultData.vehicles || [];
       }
     } catch (error) {
@@ -76,10 +79,14 @@ export class VehicleStepSelectorComponent {
 
   selectVehicle(v: any) {
     this.selected.emit({
-      vehicleId: v.vehicleId,
+      id: v.id,
       brand: v.brand,
+      brandCode: v.brandCode,
       model: v.model,
+      modelCode: v.modelCode,
       generation: v.generation,
+      platform: v.platform,
+      isActive: v.isActive,
       yearFrom: v.yearFrom,
       yearTo: v.yearTo,
       selectedEngines: [],
@@ -95,7 +102,7 @@ export class VehicleStepSelectorComponent {
     this.step = 1;
     this.models = [];
     this.vehicles = [];
-    this.brandId = '';
-    this.modelId = '';
+    this.brandCode = '';
+    this.modelCode = '';
   }
 }

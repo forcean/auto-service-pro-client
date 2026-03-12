@@ -1,24 +1,33 @@
-import { IVehicle } from "./catalog.interface";
+import { IEngine, IVehicle } from "./catalog.interface";
 
 export type DataType = 'string' | 'number' | 'percent' | 'date';
 
 export interface IReqCreateProduct {
   name: string;
   description: string;
-  categoryId?: string;
-  brandId?: string;
-  vehicles?: IVehicle[];
+  categoryId: string;
+  brandId: string;
+  categoryPath: string[];
+  vehicles?: IVehicleCreate[];
   price: IPrices;
   spec: ISpec;
   images?: IImages[];
   status: 'active' | 'inactive' | 'out_of_stock' | 'discontinued';
+}
+
+export interface IVehicleCreate {
+  vehicleId: string;
+  yearFrom: number;
+  yearTo: number;
+  engines: IEngine[];
+  remark?: string;
 }
 export interface IReqUpdateProduct {
   name: string;
   description: string;
   categoryId?: string;
   brandId?: string;
-  vehicles?: IVehicle[];
+  // vehicles?: IVehicle[];
   price: IPrices;
   spec: ISpec;
   images?: IImages[];

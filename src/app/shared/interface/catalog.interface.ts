@@ -6,25 +6,30 @@ export interface IQueryCatalogProducts {
 
 export interface IQueryCatalogVehicles extends IQueryCatalogProducts {
   vehicleId?: string;
-  brandId?: string;
-  modelId?: string;
+  brandCode?: string;
+  modelCode?: string;
+  generation?: string;
 }
 
 export interface IResVehicles {
   vehicles?: IVehicle[];
-  brands?: IBrandVehicle[];
-  models?: IModelVehicle[];
+  vehicleBrands?: IBrandVehicle[];
+  vehicleModels?: IModelVehicle[];
 }
 
 export interface IVehicle {
-  vehicleId: string;
+  id: string;
   brand: string;
+  brandCode: string;
   model: string;
+  modelCode: string;
   generation: string;
+  platform: string;
   yearFrom: number;
   yearTo: number;
   engines: IEngine[];
   remark?: string;
+  isActive: boolean;
   selectedEngines?: string[];
   isNew?: boolean;
 }
@@ -37,15 +42,18 @@ export interface IEngine {
 export interface IBrandVehicle {
   id: string;
   name: string;
+  code: string;
 }
 
 export interface IModelVehicle {
   id: string;
-  name: string;
+  model: string;
+  modelCode: string;
+  generation: string;
 }
 
 export interface IResCategories {
-  category: ICategory[]
+  categories: ICategory[]
 }
 export interface ICategory {
   id: string;
@@ -53,6 +61,7 @@ export interface ICategory {
   slug: string;
   code: string;
   level: number;
+  parentId: string;
   path: string[];
   expanded?: boolean;
   isSelectable: boolean;

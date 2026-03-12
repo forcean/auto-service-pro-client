@@ -50,7 +50,7 @@ export class ProductUpdateComponent implements OnInit {
       });
 
       if (res.resultCode === RESPONSE.SUCCESS) {
-        this.categories = res.resultData.category;
+        this.categories = res.resultData.categories;
       } else {
         this.handleCommonError();
       }
@@ -98,23 +98,23 @@ export class ProductUpdateComponent implements OnInit {
     images: IUploadImagePayload[];
   }) {
     try {
-      const uploadedImages = await this.uploadImages(payload.images);
+      // const uploadedImages = await this.uploadImages(payload.images);
 
-      const finalPayload: IReqUpdateProduct = {
-        ...payload.form,
-        images: uploadedImages
-      };
+      // const finalPayload: IReqUpdateProduct = {
+      //   ...payload.form,
+      //   images: uploadedImages
+      // };
 
-      const res = await this.stockService.updateProduct(
-        this.productId,
-        finalPayload
-      );
+      // const res = await this.stockService.updateProduct(
+      //   this.productId,
+      //   finalPayload
+      // );
 
-      if (res.resultCode === RESPONSE.SUCCESS) {
-        this.handleModalSuccess();
-      } else {
-        this.handleFailResponse()
-      }
+      // if (res.resultCode === RESPONSE.SUCCESS) {
+      //   this.handleModalSuccess();
+      // } else {
+      //   this.handleFailResponse()
+      // }
     } catch (err) {
       console.error(err);
     }

@@ -39,7 +39,7 @@ export class VehicleCompatibilityComponent implements ControlValueAccessor {
   addVehicle(vehicle: IVehicle): void {
     if (this.disabled) return;
 
-    if (this.vehicles.some(v => v.vehicleId === vehicle.vehicleId)) {
+    if (this.vehicles.some(v => v.id === vehicle.id)) {
       return;
     }
 
@@ -76,6 +76,6 @@ export class VehicleCompatibilityComponent implements ControlValueAccessor {
 
 
   trackByVehicleId(index: number, item: IVehicle) {
-    return item.vehicleId;
+    return item.id;
   }
 }
