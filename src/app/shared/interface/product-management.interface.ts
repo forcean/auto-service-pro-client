@@ -64,7 +64,7 @@ export interface IResponseProductDetail {
 export interface IProductDetail {
   id: string;
   name: string;
-  code: string;
+  sku: string;
   description: string;
   categoryId: string;
   categoryName: string;
@@ -74,17 +74,27 @@ export interface IProductDetail {
   vehicles: IVehicle[];
   spec?: ISpec;
   images: IImages[];
-  prices?: IPrices;
+  price?: IPrices;
   updatedDt: string;
   updatedBy: string;
   activeFlag: boolean;
 }
 
 export interface IProductStock {
-  onHand: number;
-  reserved: number;
-  available: number;
-  minStock: number;
+   id: string;
+    productId: string;
+    sku: string;
+    warehouseId?: string;
+    quantity: number;
+    reserved: number;
+    available?: number;
+    minStock: number;
+    status?: string;
+    createdAt?: Date;
+    updatedAt?: Date;
+    createdBy?: string;
+    updatedBy?: string;
+    isDeleted?: boolean;
 }
 
 export interface IProductMovement {
