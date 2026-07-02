@@ -74,7 +74,7 @@ export interface IProductDetail {
   vehicles: IVehicle[];
   spec?: ISpec;
   images: IImages[];
-  price?: IPrices;
+  prices?: IPrices;
   updatedDt: string;
   updatedBy: string;
   activeFlag: boolean;

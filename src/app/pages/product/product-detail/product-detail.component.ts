@@ -4,13 +4,17 @@ import { StockManagementService } from '../../../shared/services/stock-managemen
 import { RESPONSE } from '../../../shared/enum/response.enum';
 import { Subscription } from 'rxjs';
 import { ModalCommonService } from '../../../shared/components/modal-common/modal-common.service';
-import { IProductDetail, IProductStock, IResponseProductDetail } from '../../../shared/interface/product-management.interface';
+import {
+  IProductDetail,
+  IProductStock,
+  IResponseProductDetail,
+} from '../../../shared/interface/product-management.interface';
 
 @Component({
   selector: 'app-product-detail',
   standalone: false,
   templateUrl: './product-detail.component.html',
-  styleUrl: './product-detail.component.scss'
+  styleUrl: './product-detail.component.scss',
 })
 export class ProductDetailComponent implements OnInit, OnDestroy {
   private modalSubscription!: Subscription | null;
@@ -22,10 +26,13 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   specEntries: { label: string; value?: string | number }[] = [];
 
   stockInfo: IProductStock = {
-    onHand: 0,
+    id: '',
+    productId: '',
+    sku: '',
+    quantity: 0,
     reserved: 0,
     available: 0,
-    minStock: 5
+    minStock: 5,
   };
 
   recentMovements: any[] = [];
@@ -38,7 +45,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private stockManagementService: StockManagementService,
     private modalCommonService: ModalCommonService,
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.loadProduct();
@@ -68,21 +75,12 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
           this.recentMovements = res.resultData.recentMovements || [];
         } else {
           this.product = res.resultData.product;
-
-          this.stockInfo = {
-            onHand: 0,
-            reserved: 0,
-            available: 0,
-            minStock: 5
-          };
         }
 
         this.patchData();
-
       } else {
         this.handleCommonError();
       }
-
     } catch (error) {
       console.error(error);
       this.handleFailResponse();
@@ -106,12 +104,12 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
       { label: 'น้ำหนัก: ', value: this.product.spec?.weight },
       { label: 'กว้าง: ', value: this.product.spec?.width },
       { label: 'สูง: ', value: this.product.spec?.height },
-      { label: 'ลึก: ', value: this.product.spec?.depth }
-    ].filter(s => s.value !== undefined && s.value !== null);
+      { label: 'ลึก: ', value: this.product.spec?.depth },
+    ].filter((s) => s.value !== undefined && s.value !== null);
   }
 
   get isLowStock(): boolean {
-    return this.stockInfo.available <= this.stockInfo.minStock;
+    return (this.stockInfo?.available ?? 0) <= (this.stockInfo?.minStock ?? 0);
   }
 
   get margin(): number {
@@ -120,8 +118,9 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     }
 
     const margin =
-      ((this.product.prices.retail - this.product.prices.cost)
-        / this.product.prices.retail) * 100;
+      ((this.product.prices.retail - this.product.prices.cost) /
+        this.product.prices.retail) *
+      100;
 
     return isNaN(margin) ? 0 : Math.round(margin);
   }
@@ -139,9 +138,9 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   }
 
   copySku() {
-    if (!this.product?.code) return;
+    if (!this.product?.sku) return;
 
-    navigator.clipboard.writeText(this.product.code);
+    navigator.clipboard.writeText(this.product.sku);
     this.isSkuCopied = true;
 
     setTimeout(() => {
@@ -150,13 +149,12 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   }
 
   private handleCommonError() {
-    this.modalSubscription =
-      this.modalCommonService.isOpen.subscribe((obj) => {
-        if (!obj?.isOpen) {
-          this.router.navigate(['/portal/product/list']);
-          this.unsubscribeModal();
-        }
-      });
+    this.modalSubscription = this.modalCommonService.isOpen.subscribe((obj) => {
+      if (!obj?.isOpen) {
+        this.router.navigate(['/portal/product/list']);
+        this.unsubscribeModal();
+      }
+    });
   }
 
   private unsubscribeModal() {
