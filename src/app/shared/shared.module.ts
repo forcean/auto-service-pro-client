@@ -48,6 +48,7 @@ import {
   SlidersHorizontal,
 } from 'lucide-angular';
 import { TableStockManagementComponent } from './components/table-stock-management/table-stock-management.component';
+import { CustomSearchSelectComponent } from './components/custom-search-select/custom-search-select.component';
 
 const components = [
   ModalCommonComponent,
@@ -76,6 +77,7 @@ const components = [
   StockSearchComponent,
   StockSummaryComponent,
   TableStockManagementComponent,
+  CustomSearchSelectComponent,
 ];
 
 const directives = [

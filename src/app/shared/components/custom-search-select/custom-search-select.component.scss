@@ -1,0 +1,178 @@
+@import '../../../../assets/styles/variables';
+@import '../../../../assets/styles/color';
+
+/* -----------------------------
+   Animation
+------------------------------*/
+
+@keyframes dropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.custom-search-dropdown {
+  animation: dropdownFade .15s ease;
+}
+
+/* -----------------------------
+   Button
+------------------------------*/
+
+.custom-search-trigger {
+  @apply flex items-center justify-between
+  w-full
+  pl-4
+  pr-3
+  py-2
+  bg-white
+  border
+  border-gray-300
+  rounded-xl
+  cursor-pointer
+  transition-colors;
+
+  min-height: 44px;
+
+  &:focus {
+    outline: none;
+    border-color: $color-primary;
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: .6;
+  }
+}
+
+.border-error {
+  border-color: $color-error !important;
+}
+
+/* -----------------------------
+   Dropdown
+------------------------------*/
+
+.custom-search-dropdown {
+  @apply absolute
+  left-0
+  top-full
+  mt-1
+  w-full
+  bg-white
+  rounded-xl
+  shadow-lg;
+
+  border: 1px solid #d1d5db;
+
+  z-index: 1000;
+}
+
+/* -----------------------------
+   Search
+------------------------------*/
+
+.custom-search-input {
+  @apply w-full
+  px-3
+  py-2
+  border
+  border-gray-300
+  rounded-lg
+  outline-none;
+
+  font-size: .92rem;
+
+  &:focus {
+    border-color: $color-primary;
+  }
+
+  &::placeholder {
+    color: #9ca3af;
+  }
+}
+
+/* -----------------------------
+   Option List
+------------------------------*/
+
+.custom-search-options {
+
+  max-height: 280px;
+
+  overflow-y: auto;
+
+  overflow-x: hidden;
+}
+
+/* Scrollbar */
+
+.custom-search-options::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-search-options::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 999px;
+}
+
+.custom-search-options::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* -----------------------------
+   Option
+------------------------------*/
+
+.custom-search-option {
+
+  @apply px-4 py-3 cursor-pointer transition-colors;
+
+  &:hover {
+    background: #F6F7F8;
+  }
+
+  &.active {
+    background: #F6F7F8;
+  }
+}
+
+.option-label {
+
+  font-size: .92rem;
+
+  font-weight: 600;
+
+  color: #00162B;
+}
+
+.option-sub-label {
+
+  margin-top: 4px;
+
+  font-size: .78rem;
+
+  color: #6b7280;
+}
+
+/* -----------------------------
+   Empty / Loading
+------------------------------*/
+
+.empty-state,
+.loading-state {
+
+  padding: 24px;
+
+  text-align: center;
+
+  color: #9ca3af;
+
+  font-size: .9rem;
+}
