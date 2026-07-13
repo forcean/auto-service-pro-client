@@ -2,13 +2,18 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { StockManagementRoutingModule } from './stock-management-routing.module';
+import { PartTransactionComponent } from './part-transaction/part-transaction.component';
+import { SharedModule } from '../../shared/shared.module';
 
 
 @NgModule({
-  declarations: [],
+  declarations: [
+    PartTransactionComponent
+  ],
   imports: [
     CommonModule,
-    StockManagementRoutingModule
+    StockManagementRoutingModule,
+    SharedModule
   ]
 })
 export class StockManagementModule { }

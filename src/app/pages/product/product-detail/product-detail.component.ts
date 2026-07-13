@@ -1,6 +1,6 @@
 import { Component, model, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { StockManagementService } from '../../../shared/services/stock-management.service';
+import { StockManagementService } from '../../../shared/services/product.service';
 import { RESPONSE } from '../../../shared/enum/response.enum';
 import { Subscription } from 'rxjs';
 import { ModalCommonService } from '../../../shared/components/modal-common/modal-common.service';

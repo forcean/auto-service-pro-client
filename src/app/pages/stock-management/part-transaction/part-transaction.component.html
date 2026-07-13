@@ -1,0 +1,30 @@
+<div class="w-full px-4">
+    <div class="layout-content">
+
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+
+            <app-content-title title ="จัดการสต๊อก" ></app-content-title>
+
+            <button class="create-stock-btn flex items-center gap-2">
+                <i class="fa-solid fa-plus text-sm opacity-90"></i>
+                <span>รับสินค้าเข้าคลัง</span>
+            </button>
+
+        </div>
+
+        <!-- Search -->
+        <app-stock-search (search)="onSearch($event)" (reset)="onReset()">
+        </app-stock-search>
+
+        <!-- Summary -->
+        <!-- <app-stock-summary [summary]="summary">
+        </app-stock-summary> -->
+
+        <!-- Table -->
+        <!-- <app-stock-table [headers]="headers" [config]="stockList" [pageIndex]="page" [pageSize]="limit"
+            [isLoading]="isLoading" (sortEmit)="onSort($event)" (changePage)="onChangePage($event)"
+            (viewDetail)="viewDetail($event)">
+        </app-stock-table> -->
+
+    </div>
+</div>

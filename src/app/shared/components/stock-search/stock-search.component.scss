@@ -1,0 +1,42 @@
+.search-card {
+  @apply bg-white rounded-2xl shadow-md p-6;
+}
+
+label {
+  @apply block mb-2 text-sm font-medium text-gray-700;
+}
+
+.form-control {
+  @apply w-full h-11 rounded-xl border border-gray-300 px-4;
+}
+
+.search-input {
+  position: relative;
+
+  input {
+    @apply w-full h-11 rounded-xl border border-gray-300 pl-4 pr-10;
+  }
+
+  i {
+    position: absolute;
+    right: 14px;
+    top: 14px;
+    color: #6b7280;
+  }
+}
+
+.btn-reset {
+  @apply px-6 h-11 rounded-xl border border-gray-300 bg-gray-100 hover:bg-gray-200 transition;
+}
+
+.btn-search {
+  @apply px-8 h-11 rounded-xl bg-green-600 text-white hover:bg-green-700 transition;
+}
+
+::ng-deep {
+  .ng-select .ng-select-container {
+    height: 44px;
+    min-height: 44px;
+    border-radius: 12px;
+  }
+}

@@ -8,7 +8,7 @@ import { IReqCreateProduct } from '../../../shared/interface/product-management.
 import { FileManagementService } from '../../../shared/services/file-management.service';
 import { ModalCommonService } from '../../../shared/components/modal-common/modal-common.service';
 import { Subscription } from 'rxjs/internal/Subscription';
-import { StockManagementService } from '../../../shared/services/stock-management.service';
+import { StockManagementService } from '../../../shared/services/product.service';
 
 @Component({
   selector: 'app-product-create',

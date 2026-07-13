@@ -32,6 +32,7 @@ import { PriceDirective } from './directive/app-price.directive';
 import { ProductFormComponent } from './components/product-form/product-form.component';
 import { CustomSelectCategoryComponent } from './components/custom-select-category/custom-select-category.component';
 import { SpecInputDirective } from './directive/spec-input.directive';
+import { StockSearchComponent } from './components/stock-search/stock-search.component';
 
 const components = [
   ModalCommonComponent,
@@ -56,7 +57,8 @@ const components = [
   VehicleCompatibilityComponent,
   ProductFormComponent,
   CustomCategoryOptionComponent,
-  CustomSelectCategoryComponent
+  CustomSelectCategoryComponent,
+  StockSearchComponent
 ];
 
 const directives = [

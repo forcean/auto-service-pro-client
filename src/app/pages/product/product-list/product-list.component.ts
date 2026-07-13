@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IProductList, IQueryListProduct } from '../../../shared/interface/product-list.interface';
-import { StockManagementService } from '../../../shared/services/stock-management.service';
+import { StockManagementService } from '../../../shared/services/product.service';
 import { RESPONSE } from '../../../shared/enum/response.enum';
 import { Subscription } from 'rxjs';
 import { ModalCommonService } from '../../../shared/components/modal-common/modal-common.service';
