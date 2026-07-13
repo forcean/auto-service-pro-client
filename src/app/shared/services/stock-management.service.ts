@@ -59,7 +59,7 @@ export class StockManagementService {
 
   async getMovementSummary(): Promise<IBaseResponse<IStockMovementSummary>> {
     try {
-      const uri = `${this.PREFIX}/stocks/movements/summary`;
+      const uri = `${this.PREFIX}/stock-management/stock-movements/summary`;
 
       return await this.httpService.get<IStockMovementSummary>(uri);
     } catch (error) {

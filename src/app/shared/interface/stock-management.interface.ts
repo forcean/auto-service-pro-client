@@ -1,4 +1,10 @@
-import { EProductStatus, EReferenceType, EStockMovementDirection, EStockMovementType, EStockStatus } from "../enum/stock.enum";
+import {
+  EProductStatus,
+  EReferenceType,
+  EStockMovementDirection,
+  EStockMovementType,
+  EStockStatus,
+} from '../enum/stock.enum';
 
 export interface IStock {
   id: string;
@@ -64,10 +70,13 @@ export interface IStockMovementSummary {
   return: number;
   reserve: number;
   release: number;
+  in: number;
+  out: number;
 }
 
 export interface ISearchStockMovement {
   keyword?: string;
+  sku?: string;
   movementType?: EStockMovementType;
   direction?: EStockMovementDirection;
   productId?: string;
@@ -85,7 +94,7 @@ export interface IQueryStockMovement extends ISearchStockMovement {
   sort?: string;
 }
 
-export interface ICreateStockReceiveRequest{
+export interface ICreateStockReceiveRequest {
   quantity: number;
   referenceType?: EReferenceType;
   referenceId?: string;

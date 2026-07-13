@@ -104,7 +104,7 @@
           </td>
         </tr>
 
-        <tr *ngIf="config == undefined">
+        <tr *ngIf="config == undefined || config.data.length === 0">
           <td colspan="10" class="text-center py-5">- ไม่พบข้อมูล -</td>
         </tr>
       </tbody>

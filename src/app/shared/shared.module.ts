@@ -37,6 +37,7 @@ import { StockSummaryComponent } from './components/stock-summary/stock-summary.
 import {
   ArrowRightLeft,
   ArrowUpFromDot,
+  ChevronDown,
   ChevronsDown,
   ChevronUp,
   List,
@@ -101,13 +102,15 @@ const directives = [
     LucideAngularModule.pick({
       ArrowUpFromDot,
       RotateCcw,
-      ChevronsDown,
+      ChevronDown,
       ArrowRightLeft,
       List,
       Search,
       SlidersHorizontal,
       ChevronUp,
-      PackagePlus
+      PackagePlus,
+      RotateCw,
+      ChevronsDown,
     }),
   ],
   exports: [...components, ...directives],

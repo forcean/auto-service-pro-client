@@ -36,16 +36,9 @@ export class PartTransactionComponent implements OnInit {
   sort = '';
   search!: IQueryStockMovement;
   movementList!: IStockMovementList;
-  summary: IStockMovementSummary = {
-    total: 50,
-    receive: 8,
-    issue: 2,
-    adjust: 5,
-    return: 17,
-    reserve: 20,
-    release: 10,
-  };
+  summary!: IStockMovementSummary;
   isLoading = false;
+  isLoadingSummary = false;
   headers: ITableHeaderStock[] = [
     {
       headerName: 'transactionDate',
@@ -152,9 +145,11 @@ export class PartTransactionComponent implements OnInit {
       relativeTo: this.route,
       queryParams: {
         keyword: null,
+        sku: null,
         movementType: null,
         warehouseId: null,
         referenceType: null,
+        referenceId: null,
         startDate: null,
         endDate: null,
         createdBy: null,
@@ -173,12 +168,15 @@ export class PartTransactionComponent implements OnInit {
       movementType: params['movementType'],
       warehouseId: params['warehouseId'],
       referenceType: params['referenceType'],
+      referenceId: params['referenceId'],
       startDate: params['startDate'],
       endDate: params['endDate'],
       createdBy: params['createdBy'],
+      sku: params['sku'],
       page: this.page,
       limit: this.limit,
     };
+    this.getMovementSummary();
     this.getMovementList();
   }
 
@@ -187,9 +185,11 @@ export class PartTransactionComponent implements OnInit {
       relativeTo: this.route,
       queryParams: {
         keyword: this.keyword || undefined,
+        sku: this.search.sku || undefined,
         movementType: this.search.movementType || undefined,
         warehouseId: this.search.warehouseId || undefined,
         referenceType: this.search.referenceType || undefined,
+        referenceId: this.search.referenceId || undefined,
         startDate: this.search.startDate || undefined,
         endDate: this.search.endDate || undefined,
         createdBy: this.search.createdBy || undefined,
@@ -211,9 +211,11 @@ export class PartTransactionComponent implements OnInit {
         movementType: this.search.movementType,
         warehouseId: this.search.warehouseId,
         referenceType: this.search.referenceType,
+        referenceId: this.search.referenceId,
         startDate: this.search.startDate,
         endDate: this.search.endDate,
         createdBy: this.search.createdBy,
+        sku: this.search.sku,
         // page: this.page,
         // limit: this.limit,
         sort: this.sort || undefined,
@@ -233,21 +235,48 @@ export class PartTransactionComponent implements OnInit {
     }
   }
 
+  async getMovementSummary(): Promise<void> {
+    this.isLoadingSummary = true;
+    // const loader = this.loadingBarService.useRef();
+    // loader.start();
+    try {
+      const res = await this.stockManagementService.getMovementSummary();
+      if (res.resultCode === RESPONSE.SUCCESS) {
+        this.summary = res.resultData;
+      } else {
+        this.handleFailResponse();
+      }
+    } catch (error) {
+      console.error(error);
+      this.handleFailResponse();
+    } finally {
+      this.isLoadingSummary = false;
+      // loader.complete();
+    }
+  }
+
   private handleFailResponse(): void {
     console.error('Cannot load stock movement');
   }
 
   openReceiveStockModal(): void {
-  this.receiveStockModalService.open({
-    title: 'รับสินค้าเข้าคลัง'
-  });
-}
+    this.receiveStockModalService.open({
+      title: 'รับสินค้าเข้าคลัง',
+    });
+  }
 
- async onReceiveStock(event: { productId: string; body: ICreateStockReceiveRequest }): Promise <void> {
+  async onReceiveStock(event: {
+    productId: string;
+    body: ICreateStockReceiveRequest;
+  }): Promise<void> {
     try {
-      const res = await this.stockManagementService.createStockReceive(event.productId, event.body);
+      const res = await this.stockManagementService.createStockReceive(
+        event.productId,
+        event.body,
+      );
       if (res.resultCode === RESPONSE.SUCCESS) {
         this.receiveStockModalService.close();
+        this.getMovementSummary();
         this.getMovementList();
       } else {
         this.handleFailResponse();

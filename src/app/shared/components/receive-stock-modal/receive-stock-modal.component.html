@@ -57,15 +57,20 @@
         <div class="form-group">
           <label class="modal-label"> ประเภทเอกสารอ้างอิง </label>
 
-          <select class="form-input-custom" formControlName="referenceType">
-            <option [ngValue]="null">เลือกประเภท</option>
+          <custom-select
+                formControlName="referenceType"
+                placeholder="เลือกประเภท">
 
-            <option value="PURCHASE_ORDER">Purchase Order</option>
-
-            <option value="TRANSFER">Transfer</option>
-
-            <option value="ADJUSTMENT">Adjustment</option>
-          </select>
+                <custom-option value="PURCHASE_ORDER">รับของจากใบสั่งซื้อ</custom-option>
+                <custom-option value="SALES_ORDER">ตัดของจากออเดอร์ขาย</custom-option>
+                <custom-option value="RETURN_ORDER">คืนสินค้า</custom-option>
+                <custom-option value="STOCK_ADJUSTMENT">ปรับสต๊อก</custom-option>
+                <custom-option value="STOCK_TRANSFER">ย้ายคลัง</custom-option>
+                <custom-option value="STOCK_COUNT">ตรวจนับสต๊อก</custom-option>
+                <custom-option value="INITIAL_STOCK">ตั้งต้นสินค้า</custom-option>
+                <custom-option value="MANUAL">แก้ไขด้วยคน</custom-option>
+                <custom-option value="SYSTEM">ระบบอัตโนมัติ</custom-option>
+              </custom-select>
         </div>
 
         <!-- Reference ID -->

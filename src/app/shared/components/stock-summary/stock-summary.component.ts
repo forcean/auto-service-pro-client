@@ -9,4 +9,5 @@ import { IStockMovementSummary } from '../../interface/stock-management.interfac
 })
 export class StockSummaryComponent {
   @Input() summary!: IStockMovementSummary;
+  @Input() loading = false;
 }

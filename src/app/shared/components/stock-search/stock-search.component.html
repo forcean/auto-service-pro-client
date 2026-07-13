@@ -1,43 +1,37 @@
 <form [formGroup]="searchForm" (ngSubmit)="onSubmit()">
   <div class="search-card">
-    <!-- ================= Mobile Toolbar ================= -->
+    <!-- ================= Mobile Header ================= -->
 
-    <div class="mobile-toolbar">
-      <div class="search-input flex-1">
-        <input
-          type="text"
-          formControlName="keyword"
-          placeholder="ค้นหา SKU, ชื่อสินค้า หรือ Reference"
-        />
-
-        <lucide-icon name="search" class="search-icon"> </lucide-icon>
+    <div class="mobile-filter-header" (click)="toggleFilter()">
+      <div class="left">
+        <lucide-icon name="sliders-horizontal"></lucide-icon>
+        <span>ตัวกรอง</span>
       </div>
 
-      <button type="button" class="btn-filter" (click)="toggleFilter()">
-        <lucide-icon
-          [name]="isMobileFilterOpen ? 'chevron-up' : 'sliders-horizontal'"
-        >
-        </lucide-icon>
-      </button>
+      <lucide-icon [name]="isMobileFilterOpen ? 'chevron-up' : 'chevron-down'">
+      </lucide-icon>
     </div>
 
-    <!-- ================= Search ================= -->
+    <!-- ================= Filter ================= -->
 
     <div class="search-grid" [class.mobile-open]="isMobileFilterOpen">
-      <!-- Keyword -->
+      <!-- Product -->
 
-      <div class="field keyword desktop-keyword">
-        <label>ค้นหา</label>
+      <div class="field product">
+        <label>สินค้า</label>
 
-        <div class="search-input">
-          <input
-            type="text"
-            formControlName="keyword"
-            placeholder="ค้นหา SKU, ชื่อสินค้า, เลขอ้างอิง..."
-          />
-
-          <lucide-icon name="search" class="search-icon"> </lucide-icon>
-        </div>
+        <app-custom-search-select
+          formControlName="sku"
+          [items]="products"
+          bindLabel="name"
+          bindValue="sku"
+          bindSubLabel="sku"
+          placeholder="ค้นหา SKU"
+          searchPlaceholder="พิมพ์ SKU"
+          [loading]="loadingProduct"
+          (search)="searchProduct($event)"
+        >
+        </app-custom-search-select>
       </div>
 
       <!-- Movement -->
@@ -46,99 +40,92 @@
         <label>ประเภทการเคลื่อนไหว</label>
 
         <custom-select formControlName="movementType">
-          <custom-option value="">ทั้งหมด</custom-option>
-          <custom-option value="RECEIVE">รับเข้า</custom-option>
-          <custom-option value="ISSUE">เบิกออก</custom-option>
-          <custom-option value="RETURN">คืนสินค้า</custom-option>
-          <custom-option value="ADJUST">ปรับสต๊อก</custom-option>
-          <custom-option value="RESERVE">สำรอง</custom-option>
-          <custom-option value="RELEASE">ปลดสำรอง</custom-option>
+          <custom-option value=""> ทั้งหมด </custom-option>
+
+          <custom-option value="RECEIVE"> รับเข้า </custom-option>
+
+          <custom-option value="ISSUE"> เบิกออก </custom-option>
+
+          <custom-option value="RETURN"> คืนสินค้า </custom-option>
+
+          <custom-option value="ADJUST"> ปรับสต๊อก </custom-option>
+
+          <custom-option value="RESERVE"> สำรอง </custom-option>
+
+          <custom-option value="RELEASE"> ปลดสำรอง </custom-option>
         </custom-select>
       </div>
 
-      <!-- Direction -->
+      <!-- Reference Type -->
 
       <div class="field">
-        <label>ทิศทาง</label>
+        <label>Reference Type</label>
 
-        <custom-select formControlName="direction">
-          <custom-option value="">ทั้งหมด</custom-option>
-          <custom-option value="IN">IN</custom-option>
-          <custom-option value="OUT">OUT</custom-option>
+        <custom-select formControlName="referenceType">
+          <custom-option value=""> ทั้งหมด </custom-option>
+
+          <custom-option value="PURCHASE_ORDER"> Purchase Order </custom-option>
+
+          <custom-option value="SALE_ORDER"> Sale Order </custom-option>
+
+          <custom-option value="WORK_ORDER"> Work Order </custom-option>
+
+          <custom-option value="MANUAL"> Manual </custom-option>
         </custom-select>
       </div>
 
-      <!-- SKU -->
+      <!-- User -->
 
       <div class="field">
-        <label>สินค้า / SKU</label>
+        <label>ผู้บันทึก</label>
 
-        <input
-          class="form-control"
-          formControlName="sku"
-          placeholder="SKU หรือชื่อสินค้า"
-        />
-      </div>
+        <custom-select formControlName="createdBy" placeholder="ทั้งหมด">
+          <custom-option value=""> ทั้งหมด </custom-option>
 
-      <!-- Warehouse -->
-
-      <div class="field">
-        <label>คลังสินค้า</label>
-
-        <custom-select formControlName="warehouseId">
-          <custom-option value="">ทั้งหมด</custom-option>
+          <custom-option *ngFor="let user of users" [value]="user.publicId">
+            {{ user.firstname }} {{ user.lastname }}
+          </custom-option>
         </custom-select>
-      </div>
-
-      <!-- Start -->
-
-      <div class="field">
-        <label>วันที่เริ่มต้น</label>
-
-        <input type="date" class="form-control" formControlName="startDate" />
-      </div>
-
-      <!-- End -->
-
-      <div class="field">
-        <label>วันที่สิ้นสุด</label>
-
-        <input type="date" class="form-control" formControlName="endDate" />
       </div>
 
       <!-- Reference -->
 
-      <div class="field reference">
-        <label>Reference</label>
+      <div class="field">
+        <label>Reference ID</label>
 
         <input
+          type="text"
           class="form-control"
           formControlName="referenceId"
-          placeholder="เลขเอกสาร / Job / PO"
+          placeholder="PO-000001"
         />
       </div>
 
-      <!-- Created By -->
+      <!-- Date -->
 
-      <div class="field">
-        <label>บันทึกโดย</label>
+      <div class="field date-range">
+        <label>ช่วงวันที่</label>
 
-        <custom-select formControlName="createdBy">
-          <custom-option value="">ทั้งหมด</custom-option>
-        </custom-select>
+        <div class="date-inputs">
+          <input type="date" class="form-control" formControlName="startDate" />
+
+          <span class="separator">—</span>
+
+          <input type="date" class="form-control" formControlName="endDate" />
+        </div>
       </div>
 
-      <!-- Button -->
+      <!-- Action -->
 
       <div class="button-group">
         <button type="button" class="btn-reset" (click)="onReset()">
-          <lucide-icon name="rotate-ccw" size="18"> </lucide-icon>
+          <lucide-icon name="rotate-ccw"></lucide-icon>
 
           <span>ล้างตัวกรอง</span>
         </button>
 
         <button type="submit" class="btn-search">
-          <lucide-icon name="search" size="18"> </lucide-icon>
+          <lucide-icon name="search"></lucide-icon>
 
           <span>ค้นหา</span>
         </button>

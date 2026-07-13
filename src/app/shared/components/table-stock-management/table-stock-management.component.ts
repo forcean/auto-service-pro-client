@@ -104,56 +104,57 @@ export class TableStockManagementComponent implements OnInit, OnChanges {
   }
 
   getDirectionClass(direction: string): string {
-    return direction === 'IN' ? 'direction in' : 'direction out';
+    switch (direction) {
+      case 'IN':
+        return 'direction in';
+
+      case 'OUT':
+        return 'direction out';
+
+      default:
+        return 'direction adjust';
+    }
   }
 
   quantityClass(row: IStockMovement): string {
-  switch (row.movementType) {
-    case 'ISSUE':
-    case 'RESERVE':
-      return 'qty-out';
+    switch (row.direction) {
+      case 'IN':
+        return 'qty-in';
 
-    case 'RECEIVE':
-    case 'RETURN':
-    case 'RELEASE':
-      return 'qty-in';
+      case 'OUT':
+        return 'qty-out';
 
-    case 'ADJUST':
-      return row.afterQty >= row.beforeQty
-        ? 'qty-in'
-        : 'qty-out';
+      case 'ADJUST':
+        return row.afterQty >= row.beforeQty ? 'qty-in' : 'qty-out';
 
-    default:
-      return '';
+      default:
+        return '';
+    }
   }
-}
 
   quantityText(row: IStockMovement): string {
-  switch (row.movementType) {
-    case 'ISSUE':
-    case 'RESERVE':
-      return `-${row.quantity}`;
-
-    case 'RECEIVE':
-    case 'RETURN':
-    case 'RELEASE':
-      return `+${row.quantity}`;
-
-    case 'ADJUST':
-      if (row.afterQty > row.beforeQty) {
+    switch (row.direction) {
+      case 'IN':
         return `+${row.quantity}`;
-      }
 
-      if (row.afterQty < row.beforeQty) {
+      case 'OUT':
         return `-${row.quantity}`;
-      }
 
-      return `${row.quantity}`;
+      case 'ADJUST':
+        if (row.afterQty > row.beforeQty) {
+          return `+${row.quantity}`;
+        }
 
-    default:
-      return `${row.quantity}`;
+        if (row.afterQty < row.beforeQty) {
+          return `-${row.quantity}`;
+        }
+
+        return `${row.quantity}`;
+
+      default:
+        return `${row.quantity}`;
+    }
   }
-}
 
   movementLabel(type: string): string {
     switch (type) {
