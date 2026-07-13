@@ -49,6 +49,7 @@ import {
 } from 'lucide-angular';
 import { TableStockManagementComponent } from './components/table-stock-management/table-stock-management.component';
 import { CustomSearchSelectComponent } from './components/custom-search-select/custom-search-select.component';
+import { ReceiveStockModalComponent } from './components/receive-stock-modal/receive-stock-modal.component';
 
 const components = [
   ModalCommonComponent,
@@ -78,6 +79,7 @@ const components = [
   StockSummaryComponent,
   TableStockManagementComponent,
   CustomSearchSelectComponent,
+  ReceiveStockModalComponent
 ];
 
 const directives = [

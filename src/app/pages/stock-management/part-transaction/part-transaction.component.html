@@ -2,7 +2,11 @@
   <div class="page-header">
     <app-content-title title="จัดการสต๊อก"> </app-content-title>
 
-    <button class="create-stock-btn" type="button">
+    <button
+      class="create-stock-btn"
+      type="button"
+      (click)="openReceiveStockModal()"
+    >
       <lucide-icon name="package-plus" size="18"> </lucide-icon>
 
       <span>รับสินค้าเข้าคลัง</span>
@@ -37,3 +41,6 @@
     </app-table-stock-management>
   </section>
 </div>
+
+<app-receive-stock-modal (confirm)="onReceiveStock($event)">
+</app-receive-stock-modal>

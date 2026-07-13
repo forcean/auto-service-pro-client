@@ -10,8 +10,13 @@ import { HandleTokenService } from '../../../core/services/handle-token-service/
 import { Subscription } from 'rxjs';
 import { RESPONSE } from '../../../shared/enum/response.enum';
 import { StockManagementService } from '../../../shared/services/stock-management.service';
-import { IQueryStockMovement, IStockMovementList, IStockMovementSummary } from '../../../shared/interface/stock-management.interface';
+import {
+  IQueryStockMovement,
+  IStockMovementList,
+  IStockMovementSummary,
+} from '../../../shared/interface/stock-management.interface';
 import { ITableHeaderStock } from '../../../shared/interface/table-stock-management.interface';
+import { ReceiveStockModalService } from '../../../shared/components/receive-stock-modal/receive-stock-modal.service';
 
 @Component({
   selector: 'app-part-transaction',
@@ -28,16 +33,16 @@ export class PartTransactionComponent implements OnInit {
   page = 1;
   limit = 20;
   sort = '';
-  search!: IQueryStockMovement
+  search!: IQueryStockMovement;
   movementList!: IStockMovementList;
-  summary: IStockMovementSummary={
-      total: 50,
-      receive: 8,
-      issue: 2,
-      adjust: 5,
-      return: 17,
-      reserve:20,
-      release: 10
+  summary: IStockMovementSummary = {
+    total: 50,
+    receive: 8,
+    issue: 2,
+    adjust: 5,
+    return: 17,
+    reserve: 20,
+    release: 10,
   };
   isLoading = false;
   headers: ITableHeaderStock[] = [
@@ -89,7 +94,12 @@ export class PartTransactionComponent implements OnInit {
       isSort: true,
       i18nKey: 'ผู้บันทึก',
     },
-    { headerName: 'action', valueType: 'string', isSort: false, i18nKey: 'จัดการ' },
+    {
+      headerName: 'action',
+      valueType: 'string',
+      isSort: false,
+      i18nKey: 'จัดการ',
+    },
   ];
 
   constructor(
@@ -97,6 +107,7 @@ export class PartTransactionComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly stockManagementService: StockManagementService,
     private readonly loadingBarService: LoadingBarService,
+    private readonly receiveStockModalService: ReceiveStockModalService,
   ) {}
 
   ngOnInit(): void {
@@ -134,7 +145,7 @@ export class PartTransactionComponent implements OnInit {
     this.page = 1;
     this.search = {
       page: this.page,
-      limit: this.limit
+      limit: this.limit,
     };
     this.router.navigate([], {
       relativeTo: this.route,
@@ -223,5 +234,21 @@ export class PartTransactionComponent implements OnInit {
 
   private handleFailResponse(): void {
     console.error('Cannot load stock movement');
+  }
+
+  openReceiveStockModal(): void {
+  this.receiveStockModalService.open({
+    title: 'รับสินค้าเข้าคลัง'
+  });
+}
+
+  onReceiveStock(data: any): void {
+    console.log(data);
+
+    /**
+     * ยิง API
+     *
+     * await stockManagementService.receiveStock(data)
+     */
   }
 }

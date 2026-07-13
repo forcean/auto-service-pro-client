@@ -1,5 +1,5 @@
-import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild } from '@angular/core';
-import { ControlValueAccessor } from '@angular/forms';
+import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild, forwardRef } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { createPopper, Instance } from '@popperjs/core';
 import { debounceTime, distinctUntilChanged, Subject, takeUntil } from 'rxjs';
 
@@ -7,7 +7,14 @@ import { debounceTime, distinctUntilChanged, Subject, takeUntil } from 'rxjs';
   selector: 'app-custom-search-select',
   standalone: false,
   templateUrl: './custom-search-select.component.html',
-  styleUrl: './custom-search-select.component.scss'
+  styleUrl: './custom-search-select.component.scss',
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => CustomSearchSelectComponent),
+      multi: true,
+    },
+  ],
 })
 export class CustomSearchSelectComponent implements ControlValueAccessor, AfterViewInit, OnChanges, OnDestroy
 {
@@ -169,6 +176,7 @@ export class CustomSearchSelectComponent implements ControlValueAccessor, AfterV
   selectItem(item: Record<string, unknown>): void {
     this.selectedValue = item[this.bindValue];
     this.selectedLabel = String(item[this.bindLabel] ?? '');
+    console.log(this.selectedValue);
     this.onChange(this.selectedValue);
     this.onTouched();
     this.change.emit(item);
