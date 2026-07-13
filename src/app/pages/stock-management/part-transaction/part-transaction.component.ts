@@ -11,6 +11,7 @@ import { Subscription } from 'rxjs';
 import { RESPONSE } from '../../../shared/enum/response.enum';
 import { StockManagementService } from '../../../shared/services/stock-management.service';
 import {
+  ICreateStockReceiveRequest,
   IQueryStockMovement,
   IStockMovementList,
   IStockMovementSummary,
@@ -71,10 +72,10 @@ export class PartTransactionComponent implements OnInit {
       i18nKey: 'SKU',
     },
     {
-      headerName: 'productId',
+      headerName: 'referenceId',
       valueType: 'string',
       isSort: true,
-      i18nKey: 'สินค้า',
+      i18nKey: 'เลขที่เอกสาร',
     },
     {
       headerName: 'quantity',
@@ -242,13 +243,19 @@ export class PartTransactionComponent implements OnInit {
   });
 }
 
-  onReceiveStock(data: any): void {
-    console.log(data);
-
-    /**
-     * ยิง API
-     *
-     * await stockManagementService.receiveStock(data)
-     */
+ async onReceiveStock(event: { productId: string; body: ICreateStockReceiveRequest }): Promise <void> {
+    try {
+      const res = await this.stockManagementService.createStockReceive(event.productId, event.body);
+      if (res.resultCode === RESPONSE.SUCCESS) {
+        this.receiveStockModalService.close();
+        this.getMovementList();
+      } else {
+        this.handleFailResponse();
+      }
+    } catch (error) {
+      console.error(error);
+      this.handleFailResponse();
+    } finally {
+    }
   }
 }

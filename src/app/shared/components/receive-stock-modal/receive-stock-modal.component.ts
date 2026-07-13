@@ -6,6 +6,14 @@ import {
   IReceiveStockModal,
   ReceiveStockModalService,
 } from './receive-stock-modal.service';
+import { ICreateStockReceiveRequest } from '../../interface/stock-management.interface';
+import { ProductService } from '../../services/product.service';
+import {
+  IProducts,
+  IQueryListProduct,
+} from '../../interface/product-list.interface';
+import { firstValueFrom } from 'rxjs';
+import { RESPONSE } from '../../enum/response.enum';
 
 @Component({
   selector: 'app-receive-stock-modal',
@@ -14,43 +22,26 @@ import {
   styleUrls: ['./receive-stock-modal.component.scss'],
 })
 export class ReceiveStockModalComponent implements OnInit {
-  @Output()
-  confirm = new EventEmitter<{
-    productId: number;
-
-    payload: {
-      quantity: number;
-
-      referenceType?: string;
-
-      referenceId?: string;
-
-      remark?: string;
-    };
+  @Output() confirm = new EventEmitter<{
+    productId: string;
+    body: ICreateStockReceiveRequest;
   }>();
 
   optionModal!: IReceiveStockModal;
-
   form: FormGroup;
-
   loadingProduct = false;
-
-  products: any[] = [];
+  products: IProducts[] = [];
 
   constructor(
     private readonly fb: FormBuilder,
-
     private readonly receiveStockModalService: ReceiveStockModalService,
+    private readonly productService: ProductService,
   ) {
     this.form = this.fb.group({
       productId: [null, Validators.required],
-
       quantity: [1, [Validators.required, Validators.min(1)]],
-
       referenceType: [null],
-
       referenceId: [''],
-
       remark: [''],
     });
   }
@@ -65,40 +56,30 @@ export class ReceiveStockModalComponent implements OnInit {
     });
   }
 
-  searchProduct(keyword: string): void {
+  async searchProduct(keyword: string): Promise<void> {
+    if (!keyword.trim()) {
+      this.products = [];
+      return;
+    }
     this.loadingProduct = true;
-
-    /**
-
-     * TODO
-
-     * ยิง API ค้นหาสินค้า
-
-     */
-
-    console.log('search product : ', keyword);
-
-    setTimeout(() => {
-      this.products = [
-        {
-          productId: 1,
-
-          sku: 'SKU-0001',
-
-          name: 'iPhone 16 Pro Max',
-        },
-
-        {
-          productId: 2,
-
-          sku: 'SKU-0002',
-
-          name: 'Samsung S25 Ultra',
-        },
-      ];
-
+    try {
+      const params: any = {
+        // page: 1,
+        // limit: 10,
+        sku: keyword,
+      };
+      const res = await this.productService.getListProduct(params);
+      if (res.resultCode == RESPONSE.SUCCESS) {
+        this.products = res.resultData.products;
+      } else {
+        // this.handleFailResponse()
+      }
+    } catch (error) {
+      console.error(error);
+      // this.handleCommonError()
+    } finally {
       this.loadingProduct = false;
-    }, 500);
+    }
   }
 
   submit(): void {
@@ -112,14 +93,10 @@ export class ReceiveStockModalComponent implements OnInit {
 
     this.confirm.emit({
       productId: value.productId,
-
-      payload: {
+      body: {
         quantity: value.quantity,
-
         referenceType: value.referenceType || undefined,
-
         referenceId: value.referenceId?.trim() || undefined,
-
         remark: value.remark?.trim() || undefined,
       },
     });
@@ -129,25 +106,19 @@ export class ReceiveStockModalComponent implements OnInit {
 
   closeModal(): void {
     this.resetForm();
-
     this.receiveStockModalService.close(this.optionModal);
   }
 
   private resetForm(): void {
     this.form.reset({
       productId: null,
-
       quantity: 1,
-
       referenceType: null,
-
       referenceId: '',
-
       remark: '',
     });
 
     this.products = [];
-
     this.loadingProduct = false;
   }
 }

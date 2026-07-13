@@ -84,3 +84,10 @@ export interface IQueryStockMovement extends ISearchStockMovement {
   limit: number;
   sort?: string;
 }
+
+export interface ICreateStockReceiveRequest{
+  quantity: number;
+  referenceType?: EReferenceType;
+  referenceId?: string;
+  remark?: string;
+}

@@ -12,7 +12,7 @@ import { IProductList, IQueryListProduct } from '../interface/product-list.inter
 @Injectable({
   providedIn: 'root'
 })
-export class StockManagementService {
+export class ProductService {
 
   private PREFIX_USER = ApiPrefix.ServiceManagement;
 
@@ -22,7 +22,7 @@ export class StockManagementService {
 
   async getListProduct(params: IQueryListProduct): Promise<IBaseResponse<IProductList>> {
     try {
-      const uri = this.PREFIX_USER + `/products`;
+      const uri = this.PREFIX_USER + `/products/listProducts`;
       const response = await this.httpService.get<IProductList>(uri, params);
       return response;
     } catch (error) {

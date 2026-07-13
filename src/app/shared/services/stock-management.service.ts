@@ -8,6 +8,7 @@ import { ApiPrefix } from '../enum/api-prefix.enum';
 import { IBaseResponse } from '../interface/base-http.interface';
 
 import {
+  ICreateStockReceiveRequest,
   IQueryStockMovement,
   IStock,
   IStockMovementList,
@@ -63,6 +64,15 @@ export class StockManagementService {
       return await this.httpService.get<IStockMovementSummary>(uri);
     } catch (error) {
       return this.handleError<IStockMovementSummary>(error);
+    }
+  }
+
+  async createStockReceive(id: string, body:ICreateStockReceiveRequest): Promise<IBaseResponse<unknown>> {
+    try {
+      const uri = `${this.PREFIX}/stock-management/stocks/${id}/receive`;
+      return await this.httpService.post<unknown>(uri,body);
+    } catch (error) {
+      return this.handleError<unknown>(error);
     }
   }
 

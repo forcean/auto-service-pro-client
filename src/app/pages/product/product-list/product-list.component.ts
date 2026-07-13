@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IProductList, IQueryListProduct } from '../../../shared/interface/product-list.interface';
-import { StockManagementService } from '../../../shared/services/product.service';
+import { ProductService } from '../../../shared/services/product.service';
 import { RESPONSE } from '../../../shared/enum/response.enum';
 import { Subscription } from 'rxjs';
 import { ModalCommonService } from '../../../shared/components/modal-common/modal-common.service';
@@ -32,7 +32,7 @@ export class ProductListComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private stockManagementService: StockManagementService,
+    private productService: ProductService,
     private modalCommonService: ModalCommonService,
     private route: ActivatedRoute,
     private fb: FormBuilder
@@ -89,7 +89,7 @@ export class ProductListComponent implements OnInit {
         limit: 10,
       };
 
-      const res = await this.stockManagementService.getListProduct(params);
+      const res = await this.productService.getListProduct(params);
       if (res.resultCode == RESPONSE.SUCCESS) {
         this.productList = res.resultData;
       } else {
