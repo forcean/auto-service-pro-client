@@ -1,30 +1,39 @@
-<div class="w-full px-4">
-    <div class="layout-content">
+<div class="stock-page">
+  <div class="page-header">
+    <app-content-title title="จัดการสต๊อก"> </app-content-title>
 
-        <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+    <button class="create-stock-btn" type="button">
+      <lucide-icon name="package-plus" size="18"> </lucide-icon>
 
-            <app-content-title title ="จัดการสต๊อก" ></app-content-title>
+      <span>รับสินค้าเข้าคลัง</span>
+    </button>
+  </div>
 
-            <button class="create-stock-btn flex items-center gap-2">
-                <i class="fa-solid fa-plus text-sm opacity-90"></i>
-                <span>รับสินค้าเข้าคลัง</span>
-            </button>
+  <!-- Search -->
 
-        </div>
+  <section class="section-card">
+    <app-stock-search (search)="onSearch($event)" (reset)="onReset()">
+    </app-stock-search>
+  </section>
 
-        <!-- Search -->
-        <app-stock-search (search)="onSearch($event)" (reset)="onReset()">
-        </app-stock-search>
+  <!-- Summary -->
 
-        <!-- Summary -->
-        <!-- <app-stock-summary [summary]="summary">
-        </app-stock-summary> -->
+  <section class="summary-section">
+    <app-stock-summary [summary]="summary"> </app-stock-summary>
+  </section>
 
-        <!-- Table -->
-        <!-- <app-stock-table [headers]="headers" [config]="stockList" [pageIndex]="page" [pageSize]="limit"
-            [isLoading]="isLoading" (sortEmit)="onSort($event)" (changePage)="onChangePage($event)"
-            (viewDetail)="viewDetail($event)">
-        </app-stock-table> -->
+  <!-- Table -->
 
-    </div>
+  <section class="table-section">
+    <app-table-stock-management
+      [headers]="headers"
+      [config]="movementList"
+      [pageIndex]="page"
+      [pageSize]="limit"
+      [isLoading]="isLoading"
+      (sortEmit)="onSort($event)"
+      (changePage)="onChangePage($event)"
+    >
+    </app-table-stock-management>
+  </section>
 </div>

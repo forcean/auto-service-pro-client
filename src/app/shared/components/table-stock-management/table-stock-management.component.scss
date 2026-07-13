@@ -1,0 +1,134 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 92px;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+/* ===========================
+   Movement Badge
+=========================== */
+
+.receive {
+  background: #ecfdf3;
+  color: #16a34a;
+  border-color: #bbf7d0;
+}
+
+.issue {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.return {
+  background: #eff6ff;
+  color: #2563eb;
+  border-color: #bfdbfe;
+}
+
+.adjust {
+  background: #fff7ed;
+  color: #ea580c;
+  border-color: #fed7aa;
+}
+
+.reserve {
+  background: #f5f3ff;
+  color: #7c3aed;
+  border-color: #ddd6fe;
+}
+
+.release {
+  background: #f3f4f6;
+  color: #4b5563;
+  border-color: #d1d5db;
+}
+
+/* ===========================
+   Direction
+=========================== */
+
+.direction {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.direction.in {
+  color: #16a34a;
+}
+
+.direction.out {
+  color: #dc2626;
+}
+
+.direction.adjust {
+  color: #ea580c;
+}
+
+/* ===========================
+   Quantity
+=========================== */
+
+.qty-in {
+  color: #16a34a;
+  font-weight: 700;
+}
+
+.qty-out {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+/* ===========================
+   Product
+=========================== */
+
+.fw-semibold {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+small {
+  display: block;
+  margin-top: 2px;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+/* ===========================
+   Action
+=========================== */
+
+.action-group {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: .75rem;
+}
+
+.action-icon {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+
+.action-icon:hover {
+  transform: scale(1.15);
+}
+
+.action-icon.disabled {
+  cursor: not-allowed;
+  opacity: .35;
+}

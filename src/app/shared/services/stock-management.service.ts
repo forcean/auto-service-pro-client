@@ -26,7 +26,7 @@ export class StockManagementService {
     params: IQueryStockMovement,
   ): Promise<IBaseResponse<IStockMovementList>> {
     try {
-      const uri = `${this.PREFIX}/stocks`;
+      const uri = `${this.PREFIX}/stock-management/stock-movements`;
 
       return await this.httpService.get<IStockMovementList>(uri, params);
     } catch (error) {

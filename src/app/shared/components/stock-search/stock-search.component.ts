@@ -16,6 +16,7 @@ export class StockSearchComponent implements OnInit {
   searchForm!: FormGroup;
   products: any[] = [];
   users: any[] = [];
+  isMobileFilterOpen = false;
 
   constructor(
     private fb: FormBuilder
@@ -51,4 +52,8 @@ export class StockSearchComponent implements OnInit {
     });
     this.reset.emit();
   }
+
+toggleFilter(): void {
+  this.isMobileFilterOpen = !this.isMobileFilterOpen;
+}
 }

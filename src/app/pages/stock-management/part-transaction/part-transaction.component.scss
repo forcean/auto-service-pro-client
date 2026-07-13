@@ -1,0 +1,109 @@
+.stock-page {
+
+  width: 100%;
+
+  padding: 1.5rem;
+
+}
+
+/* ================= HEADER ================= */
+
+.page-header {
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 1rem;
+
+  margin-bottom: 1.5rem;
+
+}
+
+/* ================= BUTTON ================= */
+
+.create-stock-btn {
+
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+
+  padding: .8rem 1.4rem;
+
+  border-radius: 14px;
+
+  border: none;
+
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+
+  color: white;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: all .25s ease;
+
+  box-shadow: 0 8px 20px rgba(22, 163, 74, .25);
+
+  &:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 12px 26px rgba(22, 163, 74, .35);
+
+  }
+
+  &:active {
+
+    transform: scale(.98);
+
+  }
+
+}
+
+/* ================= SECTION ================= */
+
+.section-card {
+
+  margin-bottom: 1.5rem;
+
+}
+
+.summary-section {
+
+  margin-bottom: 1.5rem;
+
+}
+
+.table-section {
+  border-radius: 0.5rem;
+  overflow: hidden;
+
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width:768px) {
+
+  .stock-page {
+
+    padding: 1rem;
+
+  }
+
+  .page-header {
+
+    flex-direction: column;
+    align-items: stretch;
+
+  }
+
+  .create-stock-btn {
+
+    width: 100%;
+    justify-content: center;
+
+  }
+
+}

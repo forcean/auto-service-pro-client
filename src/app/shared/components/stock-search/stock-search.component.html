@@ -1,127 +1,148 @@
 <form [formGroup]="searchForm" (ngSubmit)="onSubmit()">
+  <div class="search-card">
+    <!-- ================= Mobile Toolbar ================= -->
 
-    <div class="search-card">
+    <div class="mobile-toolbar">
+      <div class="search-input flex-1">
+        <input
+          type="text"
+          formControlName="keyword"
+          placeholder="ค้นหา SKU, ชื่อสินค้า หรือ Reference"
+        />
 
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-5">
+        <lucide-icon name="search" class="search-icon"> </lucide-icon>
+      </div>
 
-            <!-- Keyword -->
-            <div class="xl:col-span-2">
-                <label>ค้นหา</label>
+      <button type="button" class="btn-filter" (click)="toggleFilter()">
+        <lucide-icon
+          [name]="isMobileFilterOpen ? 'chevron-up' : 'sliders-horizontal'"
+        >
+        </lucide-icon>
+      </button>
+    </div>
 
-                <div class="search-input">
+    <!-- ================= Search ================= -->
 
-                    <input type="text" placeholder="ค้นหา SKU, ชื่อสินค้า, เลขอ้างอิง..." formControlName="keyword">
+    <div class="search-grid" [class.mobile-open]="isMobileFilterOpen">
+      <!-- Keyword -->
 
-                    <i class="fa-solid fa-magnifying-glass"></i>
+      <div class="field keyword desktop-keyword">
+        <label>ค้นหา</label>
 
-                </div>
-            </div>
+        <div class="search-input">
+          <input
+            type="text"
+            formControlName="keyword"
+            placeholder="ค้นหา SKU, ชื่อสินค้า, เลขอ้างอิง..."
+          />
 
-            <!-- Movement -->
-            <>
-
-                <label>ประเภทการเคลื่อนไหว</label>
-
-                <custom-select formControlName="movementType" placeholder="เลือกการเรียงลำดับ">
-
-                    <custom-option value="">ทั้งหมด</custom-option>
-                    <custom-option value="RECEIVE">รับเข้า</custom-option>
-                    <custom-option value="ISSUE">เบิกออก</custom-option>
-                    <custom-option value="RETURN">คืนสินค้า</custom-option>
-                    <custom-option value="ADJUST">ปรับสต๊อก</custom-option>
-                    <custom-option value="RESERVE">สำรอง</custom-option>
-                    <custom-option value="RELEASE">ปลดสำรอง</custom-option>
-
-                </custom-select>
-
-                <!-- Direction -->
-
-                <div>
-
-                    <label>ทิศทาง</label>
-
-                    <custom-select formControlName="direction">
-                        <custom-option value="">ทั้งหมด</custom-option>
-                        <custom-option value="IN">IN</custom-option>
-                        <custom-option value="OUT">OUT</custom-option>
-                    </custom-select>
-
-                </div>
-
-                <!-- SKU -->
-
-                <div>
-
-                    <label>สินค้า / SKU</label>
-
-                    <!-- <ng-select [items]="products" bindLabel="name" bindValue="sku" formControlName="sku">
-                    </ng-select> -->
-
-                </div>
-
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-5 mt-5">
-
-                <!-- Start -->
-
-                <div>
-
-                    <label>วันที่เริ่มต้น</label>
-
-                    <input type="date" class="form-control" formControlName="startDate">
-
-                </div>
-
-                <!-- End -->
-
-                <div>
-
-                    <label>วันที่สิ้นสุด</label>
-
-                    <input type="date" class="form-control" formControlName="endDate">
-
-                </div>
-
-                <!-- Reference -->
-
-                <div class="xl:col-span-2">
-
-                    <label>อ้างอิง (Reference)</label>
-
-                    <input class="form-control" placeholder="กรอกเลขเอกสาร / งาน / อื่น ๆ" formControlName="reference">
-
-                </div>
-
-                <!-- CreatedBy -->
-
-                <div>
-
-                    <label>บันทึกโดย</label>
-
-                    <!-- <ng-select [items]="users" bindLabel="name" bindValue="id" formControlName="createdBy">
-                    </ng-select> -->
-
-                </div>
-
-            </div>
-
-            <div class="flex justify-end gap-3 mt-6">
-
-                <button type="button" class="btn-reset" (click)="onReset()">
-
-                    ล้างตัวกรอง
-
-                </button>
-
-                <button type="submit" class="btn-search">
-
-                    ค้นหา
-
-                </button>
-
-            </div>
-
+          <lucide-icon name="search" class="search-icon"> </lucide-icon>
         </div>
+      </div>
 
+      <!-- Movement -->
+
+      <div class="field">
+        <label>ประเภทการเคลื่อนไหว</label>
+
+        <custom-select formControlName="movementType">
+          <custom-option value="">ทั้งหมด</custom-option>
+          <custom-option value="RECEIVE">รับเข้า</custom-option>
+          <custom-option value="ISSUE">เบิกออก</custom-option>
+          <custom-option value="RETURN">คืนสินค้า</custom-option>
+          <custom-option value="ADJUST">ปรับสต๊อก</custom-option>
+          <custom-option value="RESERVE">สำรอง</custom-option>
+          <custom-option value="RELEASE">ปลดสำรอง</custom-option>
+        </custom-select>
+      </div>
+
+      <!-- Direction -->
+
+      <div class="field">
+        <label>ทิศทาง</label>
+
+        <custom-select formControlName="direction">
+          <custom-option value="">ทั้งหมด</custom-option>
+          <custom-option value="IN">IN</custom-option>
+          <custom-option value="OUT">OUT</custom-option>
+        </custom-select>
+      </div>
+
+      <!-- SKU -->
+
+      <div class="field">
+        <label>สินค้า / SKU</label>
+
+        <input
+          class="form-control"
+          formControlName="sku"
+          placeholder="SKU หรือชื่อสินค้า"
+        />
+      </div>
+
+      <!-- Warehouse -->
+
+      <div class="field">
+        <label>คลังสินค้า</label>
+
+        <custom-select formControlName="warehouseId">
+          <custom-option value="">ทั้งหมด</custom-option>
+        </custom-select>
+      </div>
+
+      <!-- Start -->
+
+      <div class="field">
+        <label>วันที่เริ่มต้น</label>
+
+        <input type="date" class="form-control" formControlName="startDate" />
+      </div>
+
+      <!-- End -->
+
+      <div class="field">
+        <label>วันที่สิ้นสุด</label>
+
+        <input type="date" class="form-control" formControlName="endDate" />
+      </div>
+
+      <!-- Reference -->
+
+      <div class="field reference">
+        <label>Reference</label>
+
+        <input
+          class="form-control"
+          formControlName="referenceId"
+          placeholder="เลขเอกสาร / Job / PO"
+        />
+      </div>
+
+      <!-- Created By -->
+
+      <div class="field">
+        <label>บันทึกโดย</label>
+
+        <custom-select formControlName="createdBy">
+          <custom-option value="">ทั้งหมด</custom-option>
+        </custom-select>
+      </div>
+
+      <!-- Button -->
+
+      <div class="button-group">
+        <button type="button" class="btn-reset" (click)="onReset()">
+          <lucide-icon name="rotate-ccw" size="18"> </lucide-icon>
+
+          <span>ล้างตัวกรอง</span>
+        </button>
+
+        <button type="submit" class="btn-search">
+          <lucide-icon name="search" size="18"> </lucide-icon>
+
+          <span>ค้นหา</span>
+        </button>
+      </div>
+    </div>
+  </div>
 </form>

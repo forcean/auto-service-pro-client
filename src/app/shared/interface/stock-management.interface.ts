@@ -45,7 +45,7 @@ export interface IStockMovement {
   referenceId?: string;
   remark?: string;
   createdBy: string;
-  createdDt: string;
+  createdAt: string;
 }
 
 export interface IStockMovementList {
@@ -53,7 +53,7 @@ export interface IStockMovementList {
   limit: number;
   total: number;
   totalPages: number;
-  movements: IStockMovement[];
+  data: IStockMovement[];
 }
 
 export interface IStockMovementSummary {

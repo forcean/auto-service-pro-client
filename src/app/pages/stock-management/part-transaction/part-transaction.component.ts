@@ -10,7 +10,8 @@ import { HandleTokenService } from '../../../core/services/handle-token-service/
 import { Subscription } from 'rxjs';
 import { RESPONSE } from '../../../shared/enum/response.enum';
 import { StockManagementService } from '../../../shared/services/stock-management.service';
-import { IQueryStockMovement, IStockMovementList } from '../../../shared/interface/stock-management.interface';
+import { IQueryStockMovement, IStockMovementList, IStockMovementSummary } from '../../../shared/interface/stock-management.interface';
+import { ITableHeaderStock } from '../../../shared/interface/table-stock-management.interface';
 
 @Component({
   selector: 'app-part-transaction',
@@ -29,8 +30,17 @@ export class PartTransactionComponent implements OnInit {
   sort = '';
   search!: IQueryStockMovement
   movementList!: IStockMovementList;
+  summary: IStockMovementSummary={
+      total: 50,
+      receive: 8,
+      issue: 2,
+      adjust: 5,
+      return: 17,
+      reserve:20,
+      release: 10
+  };
   isLoading = false;
-  headers: any[] = [
+  headers: ITableHeaderStock[] = [
     {
       headerName: 'transactionDate',
       valueType: 'date',
@@ -56,6 +66,12 @@ export class PartTransactionComponent implements OnInit {
       i18nKey: 'SKU',
     },
     {
+      headerName: 'productId',
+      valueType: 'string',
+      isSort: true,
+      i18nKey: 'สินค้า',
+    },
+    {
       headerName: 'quantity',
       valueType: 'number',
       isSort: true,
@@ -68,17 +84,12 @@ export class PartTransactionComponent implements OnInit {
       i18nKey: 'คงเหลือ',
     },
     {
-      headerName: 'warehouseName',
-      valueType: 'string',
-      isSort: true,
-      i18nKey: 'คลัง',
-    },
-    {
       headerName: 'createdBy',
       valueType: 'string',
       isSort: true,
       i18nKey: 'ผู้บันทึก',
     },
+    { headerName: 'action', valueType: 'string', isSort: false, i18nKey: 'จัดการ' },
   ];
 
   constructor(
@@ -183,7 +194,7 @@ export class PartTransactionComponent implements OnInit {
     const loader = this.loadingBarService.useRef();
     loader.start();
     try {
-      const params: IQueryStockMovement = {
+      const params: any = {
         keyword: this.keyword || undefined,
         movementType: this.search.movementType,
         warehouseId: this.search.warehouseId,
@@ -191,8 +202,8 @@ export class PartTransactionComponent implements OnInit {
         startDate: this.search.startDate,
         endDate: this.search.endDate,
         createdBy: this.search.createdBy,
-        page: this.page,
-        limit: this.limit,
+        // page: this.page,
+        // limit: this.limit,
         sort: this.sort || undefined,
       };
       const res = await this.stockManagementService.getStockList(params);

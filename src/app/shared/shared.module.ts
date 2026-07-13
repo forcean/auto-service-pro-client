@@ -33,6 +33,21 @@ import { ProductFormComponent } from './components/product-form/product-form.com
 import { CustomSelectCategoryComponent } from './components/custom-select-category/custom-select-category.component';
 import { SpecInputDirective } from './directive/spec-input.directive';
 import { StockSearchComponent } from './components/stock-search/stock-search.component';
+import { StockSummaryComponent } from './components/stock-summary/stock-summary.component';
+import {
+  ArrowRightLeft,
+  ArrowUpFromDot,
+  ChevronsDown,
+  ChevronUp,
+  List,
+  LucideAngularModule,
+  PackagePlus,
+  RotateCcw,
+  RotateCw,
+  Search,
+  SlidersHorizontal,
+} from 'lucide-angular';
+import { TableStockManagementComponent } from './components/table-stock-management/table-stock-management.component';
 
 const components = [
   ModalCommonComponent,
@@ -58,7 +73,9 @@ const components = [
   ProductFormComponent,
   CustomCategoryOptionComponent,
   CustomSelectCategoryComponent,
-  StockSearchComponent
+  StockSearchComponent,
+  StockSummaryComponent,
+  TableStockManagementComponent,
 ];
 
 const directives = [
@@ -67,25 +84,28 @@ const directives = [
   DecimalDirective,
   PreventSpecialCharsDirective,
   PriceDirective,
-  SpecInputDirective
+  SpecInputDirective,
 ];
 
 @NgModule({
-  declarations: [
-    ...components,
-    ...directives,
-
-
-  ],
+  declarations: [...components, ...directives],
   imports: [
     CommonModule,
     SharedRoutingModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    LucideAngularModule.pick({
+      ArrowUpFromDot,
+      RotateCcw,
+      ChevronsDown,
+      ArrowRightLeft,
+      List,
+      Search,
+      SlidersHorizontal,
+      ChevronUp,
+      PackagePlus
+    }),
   ],
-  exports: [
-    ...components,
-    ...directives,
-  ]
+  exports: [...components, ...directives],
 })
-export class SharedModule { }
+export class SharedModule {}
