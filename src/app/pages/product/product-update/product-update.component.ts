@@ -8,7 +8,7 @@ import { IReqCreateProduct, IReqUpdateProduct } from '../../../shared/interface/
 import { FileManagementService } from '../../../shared/services/file-management.service';
 import { ModalCommonService } from '../../../shared/components/modal-common/modal-common.service';
 import { Subscription } from 'rxjs/internal/Subscription';
-import { StockManagementService } from '../../../shared/services/stock-management.service';
+import { ProductService } from '../../../shared/services/product.service';
 import { IProducts } from '../../../shared/interface/product-list.interface';
 
 @Component({
@@ -30,7 +30,7 @@ export class ProductUpdateComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private catalogService: CatalogService,
-    private stockService: StockManagementService,
+    private productService: ProductService,
     private fileService: FileManagementService,
     private modalCommonService: ModalCommonService
   ) { }
@@ -62,7 +62,7 @@ export class ProductUpdateComponent implements OnInit {
 
   async loadProductDetail() {
     try {
-      const res = await this.stockService.getProductDetail(this.productId);
+      const res = await this.productService.getProductDetail(this.productId);
 
       if (res.resultCode == RESPONSE.SUCCESS) {
         this.productDetail = res.resultData.product;

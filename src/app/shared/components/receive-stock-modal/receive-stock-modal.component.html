@@ -1,0 +1,122 @@
+<div *ngIf="optionModal.isOpen" class="modal-overlay">
+  <div class="modal-container">
+    <form class="modal-body" [formGroup]="form">
+      <!-- ================= Header ================= -->
+
+      <div class="modal-header">
+        <h2 class="modal-title">รับสินค้าเข้าคลัง</h2>
+
+        <button type="button" class="close-btn" (click)="closeModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- ================= Content ================= -->
+
+      <div class="modal-content">
+        <!-- Product -->
+
+        <div class="form-group">
+          <label class="modal-label">
+            SKU / สินค้า
+            <span class="required">*</span>
+          </label>
+
+          <app-custom-search-select
+            formControlName="productId"
+            [items]="products"
+            bindLabel="name"
+            bindValue="_id"
+            bindSubLabel="sku"
+            placeholder="ค้นหา SKU หรือชื่อสินค้า"
+            searchPlaceholder="พิมพ์ SKU หรือชื่อสินค้า..."
+            [loading]="loadingProduct"
+            (search)="searchProduct($event)"
+          >
+          </app-custom-search-select>
+        </div>
+
+        <!-- Quantity -->
+
+        <div class="form-group">
+          <label class="modal-label">
+            จำนวน
+            <span class="required">*</span>
+          </label>
+
+          <input
+            type="number"
+            min="1"
+            class="form-input-custom"
+            formControlName="quantity"
+          />
+        </div>
+
+        <!-- Reference Type -->
+
+        <div class="form-group">
+          <label class="modal-label"> ประเภทเอกสารอ้างอิง </label>
+
+          <custom-select
+                formControlName="referenceType"
+                placeholder="เลือกประเภท">
+
+                <custom-option value="PURCHASE_ORDER">รับของจากใบสั่งซื้อ</custom-option>
+                <custom-option value="SALES_ORDER">ตัดของจากออเดอร์ขาย</custom-option>
+                <custom-option value="RETURN_ORDER">คืนสินค้า</custom-option>
+                <custom-option value="STOCK_ADJUSTMENT">ปรับสต๊อก</custom-option>
+                <custom-option value="STOCK_TRANSFER">ย้ายคลัง</custom-option>
+                <custom-option value="STOCK_COUNT">ตรวจนับสต๊อก</custom-option>
+                <custom-option value="INITIAL_STOCK">ตั้งต้นสินค้า</custom-option>
+                <custom-option value="MANUAL">แก้ไขด้วยคน</custom-option>
+                <custom-option value="SYSTEM">ระบบอัตโนมัติ</custom-option>
+              </custom-select>
+        </div>
+
+        <!-- Reference ID -->
+
+        <div class="form-group">
+          <label class="modal-label"> เลขที่เอกสารอ้างอิง </label>
+
+          <input
+            type="text"
+            class="form-input-custom"
+            formControlName="referenceId"
+            placeholder="เช่น PO-000001"
+          />
+        </div>
+
+        <!-- Remark -->
+
+        <div class="form-group">
+          <label class="modal-label"> หมายเหตุ </label>
+
+          <textarea
+            rows="4"
+            class="form-input-custom"
+            formControlName="remark"
+            placeholder="รายละเอียดเพิ่มเติม"
+          >
+          </textarea>
+        </div>
+      </div>
+
+      <!-- ================= Footer ================= -->
+
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" (click)="closeModal()">
+          ยกเลิก
+        </button>
+
+        <button
+          type="button"
+          class="btn-submit"
+          [disabled]="form.invalid"
+          (click)="submit()"
+        >
+          รับสินค้าเข้าคลัง
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

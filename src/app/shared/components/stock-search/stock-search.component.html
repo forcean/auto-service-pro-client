@@ -1,0 +1,135 @@
+<form [formGroup]="searchForm" (ngSubmit)="onSubmit()">
+  <div class="search-card">
+    <!-- ================= Mobile Header ================= -->
+
+    <div class="mobile-filter-header" (click)="toggleFilter()">
+      <div class="left">
+        <lucide-icon name="sliders-horizontal"></lucide-icon>
+        <span>ตัวกรอง</span>
+      </div>
+
+      <lucide-icon [name]="isMobileFilterOpen ? 'chevron-up' : 'chevron-down'">
+      </lucide-icon>
+    </div>
+
+    <!-- ================= Filter ================= -->
+
+    <div class="search-grid" [class.mobile-open]="isMobileFilterOpen">
+      <!-- Product -->
+
+      <div class="field product">
+        <label>สินค้า</label>
+
+        <app-custom-search-select
+          formControlName="sku"
+          [items]="products"
+          bindLabel="name"
+          bindValue="sku"
+          bindSubLabel="sku"
+          placeholder="ค้นหา SKU"
+          searchPlaceholder="พิมพ์ SKU"
+          [loading]="loadingProduct"
+          (search)="searchProduct($event)"
+        >
+        </app-custom-search-select>
+      </div>
+
+      <!-- Movement -->
+
+      <div class="field">
+        <label>ประเภทการเคลื่อนไหว</label>
+
+        <custom-select formControlName="movementType">
+          <custom-option value=""> ทั้งหมด </custom-option>
+
+          <custom-option value="RECEIVE"> รับเข้า </custom-option>
+
+          <custom-option value="ISSUE"> เบิกออก </custom-option>
+
+          <custom-option value="RETURN"> คืนสินค้า </custom-option>
+
+          <custom-option value="ADJUST"> ปรับสต๊อก </custom-option>
+
+          <custom-option value="RESERVE"> สำรอง </custom-option>
+
+          <custom-option value="RELEASE"> ปลดสำรอง </custom-option>
+        </custom-select>
+      </div>
+
+      <!-- Reference Type -->
+
+      <div class="field">
+        <label>Reference Type</label>
+
+        <custom-select formControlName="referenceType">
+          <custom-option value=""> ทั้งหมด </custom-option>
+
+          <custom-option value="PURCHASE_ORDER"> Purchase Order </custom-option>
+
+          <custom-option value="SALE_ORDER"> Sale Order </custom-option>
+
+          <custom-option value="WORK_ORDER"> Work Order </custom-option>
+
+          <custom-option value="MANUAL"> Manual </custom-option>
+        </custom-select>
+      </div>
+
+      <!-- User -->
+
+      <div class="field">
+        <label>ผู้บันทึก</label>
+
+        <custom-select formControlName="createdBy" placeholder="ทั้งหมด">
+          <custom-option value=""> ทั้งหมด </custom-option>
+
+          <custom-option *ngFor="let user of users" [value]="user.publicId">
+            {{ user.firstname }} {{ user.lastname }}
+          </custom-option>
+        </custom-select>
+      </div>
+
+      <!-- Reference -->
+
+      <div class="field">
+        <label>Reference ID</label>
+
+        <input
+          type="text"
+          class="form-control"
+          formControlName="referenceId"
+          placeholder="PO-000001"
+        />
+      </div>
+
+      <!-- Date -->
+
+      <div class="field date-range">
+        <label>ช่วงวันที่</label>
+
+        <div class="date-inputs">
+          <input type="date" class="form-control" formControlName="startDate" />
+
+          <span class="separator">—</span>
+
+          <input type="date" class="form-control" formControlName="endDate" />
+        </div>
+      </div>
+
+      <!-- Action -->
+
+      <div class="button-group">
+        <button type="button" class="btn-reset" (click)="onReset()">
+          <lucide-icon name="rotate-ccw"></lucide-icon>
+
+          <span>ล้างตัวกรอง</span>
+        </button>
+
+        <button type="submit" class="btn-search">
+          <lucide-icon name="search"></lucide-icon>
+
+          <span>ค้นหา</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</form>

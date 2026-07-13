@@ -1,6 +1,6 @@
 import { Component, model, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { StockManagementService } from '../../../shared/services/stock-management.service';
+import { ProductService } from '../../../shared/services/product.service';
 import { RESPONSE } from '../../../shared/enum/response.enum';
 import { Subscription } from 'rxjs';
 import { ModalCommonService } from '../../../shared/components/modal-common/modal-common.service';
@@ -43,7 +43,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private stockManagementService: StockManagementService,
+    private productService: ProductService,
     private modalCommonService: ModalCommonService,
   ) {}
 
@@ -66,7 +66,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     this.isLoading = true;
 
     try {
-      const res = await this.stockManagementService.getProductDetail(productId);
+      const res = await this.productService.getProductDetail(productId);
 
       if (res.resultCode === RESPONSE.SUCCESS) {
         if (res.resultData.product) {

@@ -1,0 +1,74 @@
+<div class="summary-grid">
+  <ng-container *ngIf="!loading; else loadingTemplate">
+    <div class="summary-card">
+      <div class="summary-icon gray">
+        <lucide-icon name="list"></lucide-icon>
+      </div>
+
+      <div class="summary-content">
+        <p class="title">รายการทั้งหมด</p>
+        <h3>{{ summary.total }}</h3>
+        <small>รายการ</small>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-icon green">
+        <lucide-icon name="chevrons-down"></lucide-icon>
+      </div>
+
+      <div class="summary-content">
+        <p class="title">รับเข้า (IN)</p>
+        <h3>{{ summary.in }}</h3>
+        <small>รายการ</small>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-icon red">
+        <lucide-icon name="arrow-up-from-dot"></lucide-icon>
+      </div>
+
+      <div class="summary-content">
+        <p class="title">เบิกออก (OUT)</p>
+        <h3>{{ summary.out}}</h3>
+        <small>รายการ</small>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-icon orange">
+        <lucide-icon name="arrow-right-left"></lucide-icon>
+      </div>
+
+      <div class="summary-content">
+        <p class="title">ปรับสต๊อก</p>
+        <h3>{{ summary.adjust }}</h3>
+        <small>รายการ</small>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-icon blue">
+        <lucide-icon name="rotate-ccw"></lucide-icon>
+      </div>
+
+      <div class="summary-content">
+        <p class="title">คืน / ยกเลิก</p>
+        <h3>{{ summary.return }}</h3>
+        <small>รายการ</small>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-template #loadingTemplate>
+    <div class="summary-card skeleton-card" *ngFor="let i of [1, 2, 3, 4, 5]">
+      <div class="summary-icon skeleton"></div>
+
+      <div class="summary-content">
+        <div class="skeleton skeleton-title"></div>
+        <div class="skeleton skeleton-value"></div>
+      </div>
+    </div>
+  </ng-template>
+</div>

@@ -1,0 +1,129 @@
+<div class="table-container">
+  <div class="table-wrapper">
+    <table *ngIf="!isLoading" class="table">
+      <thead>
+        <tr>
+          <th>ลำดับ</th>
+
+          <ng-container *ngFor="let h of headers; let i = index">
+            <th
+              [ngClass]="{ sortable: h.isSort }"
+              (click)="h.isSort ? onSort(h.headerName) : null"
+            >
+              {{ h.i18nKey || h.headerName }}
+
+              <span *ngIf="h.isSort" class="inline-block ml-1">
+                <img
+                  *ngIf="sortField !== h.headerName"
+                  src="assets/img/icons/icon.sort.svg"
+                  class="sort-icon"
+                />
+
+                <img
+                  *ngIf="sortField === h.headerName && sortDirection === 'asc'"
+                  src="assets/img/icons/icon.sort.up.svg"
+                  class="sort-icon"
+                />
+
+                <img
+                  *ngIf="sortField === h.headerName && sortDirection === 'desc'"
+                  src="assets/img/icons/icon.sort.down.svg"
+                  class="sort-icon"
+                />
+              </span>
+            </th>
+          </ng-container>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let row of config?.data; let i = index">
+          <td>{{ i + 1 + (pageIndex - 1) * pageSize }}</td>
+          <td>{{ formatDate(row.createdAt) }}</td>
+          <td>
+            <span [class]="getMovementBadge(row.movementType)">
+              {{ movementLabel(row.movementType) }}
+            </span>
+          </td>
+
+          <td>
+            <span [class]="getDirectionClass(row.direction)">
+              <i *ngIf="row.direction === 'IN'" class="fa-solid fa-arrow-down">
+              </i>
+
+              <i *ngIf="row.direction === 'OUT'" class="fa-solid fa-arrow-up">
+              </i>
+
+              <i
+                *ngIf="row.direction === 'ADJUST'"
+                class="fa-solid fa-arrows-rotate"
+              >
+              </i>
+
+              {{ row.direction }}
+            </span>
+          </td>
+
+          <td>
+            <div class="fw-semibold">
+              {{ row.productName }}
+            </div>
+
+            <small>
+              {{ row.sku }}
+            </small>
+          </td>
+
+          <td>
+            <div>{{ row.referenceId || '-'}}</div>
+            <small>{{ row.referenceType }}</small>
+          </td>
+
+          <td>
+            <span [class]="quantityClass(row)">
+              {{ quantityText(row) }}
+            </span>
+          </td>
+
+          <td>{{ row.afterQty }}</td>
+          <td>{{ row.createdBy }}</td>
+
+          <td>
+            <div class="action-group">
+              <img
+                src="assets/img/icons/icon.viewdetail.svg"
+                class="action-icon"
+              />
+
+              <!-- <img src="assets/img/icons/icon.resetPwd.svg"
+                class="action-icon"
+                [ngClass]="{ 'disabled': !isResetPassword }"
+                [style.pointerEvents]="!isResetPassword ? 'none' : 'auto'"
+                (click)="onReset.emit(row.id)" /> -->
+            </div>
+          </td>
+        </tr>
+
+        <tr *ngIf="config == undefined || config.data.length === 0">
+          <td colspan="10" class="text-center py-5">- ไม่พบข้อมูล -</td>
+        </tr>
+      </tbody>
+    </table>
+    <app-lazy-load-table
+      *ngIf="isLoading"
+      [recordPerPage]="10"
+      tableClass="table table-custom"
+    ></app-lazy-load-table>
+  </div>
+</div>
+
+<app-pagination
+  *ngIf="config"
+  aligns="end"
+  [paginationOption]="paginationOption"
+  [currentPage]="pageIndex"
+  [recordPerPage]="pageSize"
+  (changePage)="onPageChange($event)"
+  [totalRecord]="config.total"
+>
+</app-pagination>

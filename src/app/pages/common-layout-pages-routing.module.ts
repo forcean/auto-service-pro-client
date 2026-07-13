@@ -35,6 +35,17 @@ const routes: Routes = [
           }
         }
       },
+      {
+        path: 'stock',
+        // canActivate: [AuthGuard],
+        loadChildren: async () => {
+          try {
+            return await import('./stock-management/stock-management.module').then((m) => m.StockManagementModule);
+          } catch (error) {
+            throw new Error('Failed to load StockManagementModule');
+          }
+        }
+      },
     ]
   }
 ];

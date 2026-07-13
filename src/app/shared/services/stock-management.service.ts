@@ -1,93 +1,86 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { HttpService } from './../../core/services/http-service/http.service';
 import { Injectable } from '@angular/core';
+
+import { HttpService } from '../../core/services/http-service/http.service';
+
 import { ApiPrefix } from '../enum/api-prefix.enum';
-import { IResponseMenu } from '../interface/sidebar.interface';
+
 import { IBaseResponse } from '../interface/base-http.interface';
-import { IReqCreateUser, IReqUpdateUser, IResponseUserDetail } from '../interface/user-management.interface';
-import { IQueryListUser, IUserResultData } from '../interface/table-user-management.interface';
-import { IReqCreateProduct, IReqUpdateProduct, IResponseProductDetail } from '../interface/product-management.interface';
-import { IProductList, IQueryListProduct } from '../interface/product-list.interface';
+
+import {
+  ICreateStockReceiveRequest,
+  IQueryStockMovement,
+  IStock,
+  IStockMovementList,
+  IStockMovementSummary,
+} from '../interface/stock-management.interface';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class StockManagementService {
+  private readonly PREFIX = ApiPrefix.ServiceManagement;
 
-  private PREFIX_USER = ApiPrefix.ServiceManagement;
+  constructor(private readonly httpService: HttpService) {}
 
-  constructor(
-    private httpService: HttpService,
-  ) { }
-
-  async getListProduct(params: IQueryListProduct): Promise<IBaseResponse<IProductList>> {
+  async getStockList(
+    params: IQueryStockMovement,
+  ): Promise<IBaseResponse<IStockMovementList>> {
     try {
-      const uri = this.PREFIX_USER + `/products`;
-      const response = await this.httpService.get<IProductList>(uri, params);
-      return response;
+      const uri = `${this.PREFIX}/stock-management/stock-movements`;
+
+      return await this.httpService.get<IStockMovementList>(uri, params);
     } catch (error) {
-      if (error instanceof HttpErrorResponse && error.error) {
-        return error.error as IBaseResponse<IProductList>;
-      } else {
-        throw error;
-      }
+      return this.handleError<IStockMovementList>(error);
     }
   }
 
-  async getProductDetail(productId: string | null): Promise<IBaseResponse<IResponseProductDetail>> {
+  async getStockDetail(productId: string): Promise<IBaseResponse<IStock>> {
     try {
-      const uri = this.PREFIX_USER + `/products/${productId}/detail`;
-      const response = await this.httpService.get<IResponseProductDetail>(uri);
-      return response;
+      const uri = `${this.PREFIX}/stocks/${productId}`;
+
+      return await this.httpService.get<IStock>(uri);
     } catch (error) {
-      if (error instanceof HttpErrorResponse && error.error) {
-        return error.error as IBaseResponse<IResponseProductDetail>;
-      } else {
-        throw error;
-      }
+      return this.handleError<IStock>(error);
     }
   }
 
-  async createProduct(body: IReqCreateProduct) {
+  async getMovementHistory(
+    productId: string,
+  ): Promise<IBaseResponse<IStockMovementList>> {
     try {
-      const uri = this.PREFIX_USER + '/products';
-      const response = await this.httpService.post<any>(uri, body);
-      return response;
+      const uri = `${this.PREFIX}/stocks/${productId}/movements`;
+
+      return await this.httpService.get<IStockMovementList>(uri);
     } catch (error) {
-      if (error instanceof HttpErrorResponse) {
-        return error.error as IBaseResponse<any>;
-      } else {
-        throw error;
-      }
+      return this.handleError<IStockMovementList>(error);
     }
   }
 
-  async updateProduct(productId: string, body: IReqUpdateProduct) {
+  async getMovementSummary(): Promise<IBaseResponse<IStockMovementSummary>> {
     try {
-      const url = this.PREFIX_USER + `/products/${productId}/update`;
-      const response = await this.httpService.patch<any>(url, body);
-      return response
+      const uri = `${this.PREFIX}/stock-management/stock-movements/summary`;
+
+      return await this.httpService.get<IStockMovementSummary>(uri);
     } catch (error) {
-      if (error instanceof HttpErrorResponse && error.error) {
-        return error.error as IBaseResponse<any>;
-      } else {
-        throw error;
-      }
+      return this.handleError<IStockMovementSummary>(error);
     }
   }
 
-  async deleteUser(userId: string) {
+  async createStockReceive(id: string, body:ICreateStockReceiveRequest): Promise<IBaseResponse<unknown>> {
     try {
-      const uri = this.PREFIX_USER + `/products/${userId}/delete`;
-      // const uri = this.PREFIX_USER + `/corps/users/${userId}/delete`;
-      const response = await this.httpService.post<unknown>(uri, {});
-      return response;
+      const uri = `${this.PREFIX}/stock-management/stocks/${id}/receive`;
+      return await this.httpService.post<unknown>(uri,body);
     } catch (error) {
-      if (error instanceof HttpErrorResponse && error.error) {
-        return error.error as IBaseResponse<unknown>;
-      } else {
-        throw error;
-      }
+      return this.handleError<unknown>(error);
     }
+  }
+
+  private handleError<T>(error: unknown): IBaseResponse<T> {
+    if (error instanceof HttpErrorResponse && error.error) {
+      return error.error as IBaseResponse<T>;
+    }
+
+    throw error;
   }
 }

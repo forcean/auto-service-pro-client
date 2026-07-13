@@ -67,7 +67,7 @@ export class ProductFilterComponent implements OnInit, OnDestroy {
     const raw = this.form.value;
 
     const data: ISearchProducts = {
-      keyword: raw.search?.trim() || undefined,
+      sku: raw.search?.trim() || undefined,
       categoryId: raw.categoryId || undefined,
       brandId: raw.brandId || undefined,
 

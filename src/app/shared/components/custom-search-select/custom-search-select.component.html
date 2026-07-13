@@ -1,0 +1,67 @@
+<div class="relative w-full custom-select-container" [ngClass]="positionClass">
+  <!-- Trigger -->
+  <button
+    #dropdown
+    type="button"
+    class="custom-search-trigger"
+    [disabled]="isDisabled"
+    [class.border-error]="isError"
+    (click)="toggleDropdown()"
+  >
+    <span class="truncate" [class.text-gray-400]="!selectedLabel">
+      {{ selectedLabel || placeholder }}
+    </span>
+
+    <i
+      class="ml-2 w-4 h-4 bg-center bg-no-repeat bg-[length:16px]"
+      [ngClass]="{
+        'bg-[url(/assets/img/icon.arrowup.svg)]': isDropdownOpen,
+        'bg-[url(/assets/img/icon.arrowdown.svg)]': !isDropdownOpen,
+        'opacity-50': isDisabled,
+      }"
+    >
+    </i>
+  </button>
+
+  <!-- Dropdown -->
+  <div #customOptions *ngIf="isDropdownOpen" class="custom-search-dropdown">
+    <!-- Search -->
+    <div class="p-3 border-b border-gray-200">
+      <input
+        #searchInput
+        type="text"
+        class="custom-search-input"
+        [placeholder]="searchPlaceholder"
+        [value]="keyword"
+        (input)="onSearch($event)"
+        (keydown)="onKeyDown($event)"
+      />
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="loading-state">กำลังค้นหา...</div>
+
+    <!-- Empty -->
+    <div *ngIf="!loading && items.length === 0" class="empty-state">
+      ไม่พบข้อมูล
+    </div>
+
+    <!-- Result -->
+    <div *ngIf="!loading && items.length" class="custom-search-options">
+      <div
+        *ngFor="let item of items; let i = index"
+        class="custom-search-option"
+        [class.active]="activeIndex === i"
+        (click)="selectItem(item)"
+      >
+        <div class="option-label">
+          {{ item[bindLabel] }}
+        </div>
+
+        <div *ngIf="bindSubLabel" class="option-sub-label">
+          {{ item[bindSubLabel] }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,46 @@
+<div class="stock-page">
+  <div class="page-header">
+    <app-content-title title="จัดการสต๊อก"> </app-content-title>
+
+    <button
+      class="create-stock-btn"
+      type="button"
+      (click)="openReceiveStockModal()"
+    >
+      <lucide-icon name="package-plus" size="18"> </lucide-icon>
+
+      <span>รับสินค้าเข้าคลัง</span>
+    </button>
+  </div>
+
+  <!-- Search -->
+
+  <section class="section-card">
+    <app-stock-search (search)="onSearch($event)" (reset)="onReset()">
+    </app-stock-search>
+  </section>
+
+  <!-- Summary -->
+
+  <section class="summary-section">
+    <app-stock-summary [summary]="summary" [loading]="isLoadingSummary"> </app-stock-summary>
+  </section>
+
+  <!-- Table -->
+
+  <section class="table-section">
+    <app-table-stock-management
+      [headers]="headers"
+      [config]="movementList"
+      [pageIndex]="page"
+      [pageSize]="limit"
+      [isLoading]="isLoading"
+      (sortEmit)="onSort($event)"
+      (changePage)="onChangePage($event)"
+    >
+    </app-table-stock-management>
+  </section>
+</div>
+
+<app-receive-stock-modal (confirm)="onReceiveStock($event)">
+</app-receive-stock-modal>

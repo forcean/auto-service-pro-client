@@ -8,7 +8,7 @@ import { IReqCreateProduct } from '../../../shared/interface/product-management.
 import { FileManagementService } from '../../../shared/services/file-management.service';
 import { ModalCommonService } from '../../../shared/components/modal-common/modal-common.service';
 import { Subscription } from 'rxjs/internal/Subscription';
-import { StockManagementService } from '../../../shared/services/stock-management.service';
+import { ProductService } from '../../../shared/services/product.service';
 
 @Component({
   selector: 'app-product-create',
@@ -25,7 +25,7 @@ export class ProductCreateComponent implements OnInit {
 
   constructor(
     private catalogService: CatalogService,
-    private stockService: StockManagementService,
+    private productService: ProductService,
     private fileService: FileManagementService,
     private modalCommonService: ModalCommonService,
     private router: Router
@@ -110,7 +110,7 @@ export class ProductCreateComponent implements OnInit {
         categoryPath
       };
 
-      const res = await this.stockService.createProduct(finalPayload);
+      const res = await this.productService.createProduct(finalPayload);
 
       if (res.resultCode === RESPONSE.SUCCESS) {
         this.handleModalSuccess();

@@ -53,7 +53,7 @@ export interface IQueryListProduct extends ISearchProducts {
   sort?: string;
 }
 export interface ISearchProducts {
-  keyword?: string;
+  sku?: string;
   categoryId?: string
   brandId?: string
   vehicleBrandId?: string
