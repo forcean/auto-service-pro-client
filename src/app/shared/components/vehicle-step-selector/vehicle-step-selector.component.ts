@@ -1,28 +1,33 @@
 import { Component, EventEmitter, model, OnInit, Output } from '@angular/core';
 import { CatalogService } from '../../services/catalog.service';
 import { RESPONSE } from '../../enum/response.enum';
-import { IBrandVehicle, IModelVehicle, IQueryCatalogVehicles, IVehicle } from '../../interface/catalog.interface';
+import {
+  IBrandVehicle,
+  IModelVehicle,
+  IQueryCatalogVehicles,
+  IVehicle,
+} from '../../interface/catalog.interface';
 
 @Component({
   selector: 'app-vehicle-step-selector',
   standalone: false,
   templateUrl: './vehicle-step-selector.component.html',
-  styleUrl: './vehicle-step-selector.component.scss'
+  styleUrl: './vehicle-step-selector.component.scss',
 })
 export class VehicleStepSelectorComponent {
   @Output() selected = new EventEmitter<IVehicle>();
 
-  step: 1 | 2 | 3 = 1;
   brands: IBrandVehicle[] = [];
   models: IModelVehicle[] = [];
   vehicles: IVehicle[] = [];
 
-  brandCode!: string;
-  modelCode!: string;
+  brandCode = '';
+  modelCode = '';
 
-  constructor(
-    private catalogService: CatalogService
-  ) {
+  loadingModels = false;
+  loadingVehicles = false;
+
+  constructor(private catalogService: CatalogService) {
     this.loadBrands();
   }
 
@@ -41,39 +46,54 @@ export class VehicleStepSelectorComponent {
   }
 
   async selectBrand(code: any) {
+    if (this.brandCode === code) {
+      return;
+    }
+
     this.brandCode = code;
-    console.log('brandSelectedCode:', code);
-    this.step = 2;
+    this.modelCode = '';
+    this.models = [];
+    this.vehicles = [];
+    this.loadingModels = true;
+
     try {
       const params: IQueryCatalogVehicles = {
-        brandCode: this.brandCode,
+        brandCode: code,
       };
+
       const response = await this.catalogService.getModelsVehicles(params);
-      if (response.resultCode == RESPONSE.SUCCESS) {
-        this.models = response.resultData.vehicleModels || [];
+
+      if (response.resultCode === RESPONSE.SUCCESS) {
+        this.models = response.resultData.vehicleModels ?? [];
       }
-    } catch (error) {
-      console.error('Error loading brands:', error);
+    } finally {
+      this.loadingModels = false;
     }
   }
 
   async selectModel(code: any) {
+    if (this.modelCode === code) {
+      return;
+    }
     this.modelCode = code;
-    console.log('modelSelectedCode:', code);
-    this.step = 3;
+    this.vehicles = [];
+    this.loadingVehicles = true;
     try {
-      const params: IQueryCatalogVehicles = {
-        brandCode: this.brandCode,
-        modelCode: this.modelCode,
-        generation: this.models.find(m => m.modelCode === this.modelCode)?.generation
+      const generation = this.models.find(
+        (x) => x.modelCode === code,
+      )?.generation;
 
-      };
-      const response = await this.catalogService.getVehicles(params);
-      if (response.resultCode == RESPONSE.SUCCESS) {
-        this.vehicles = response.resultData.vehicles || [];
+      const response = await this.catalogService.getVehicles({
+        brandCode: this.brandCode,
+        modelCode: code,
+        generation,
+      });
+
+      if (response.resultCode === RESPONSE.SUCCESS) {
+        this.vehicles = response.resultData.vehicles ?? [];
       }
-    } catch (error) {
-      console.error('Error loading brands:', error);
+    } finally {
+      this.loadingVehicles = false;
     }
   }
 
@@ -92,17 +112,7 @@ export class VehicleStepSelectorComponent {
       selectedEngines: [],
       engines: [...(v.engines ?? [])],
       isNew: true,
-      remark: ''
+      remark: '',
     });
-
-    this.reset();
-  }
-
-  reset() {
-    this.step = 1;
-    this.models = [];
-    this.vehicles = [];
-    this.brandCode = '';
-    this.modelCode = '';
   }
 }

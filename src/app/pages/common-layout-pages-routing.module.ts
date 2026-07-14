@@ -46,6 +46,17 @@ const routes: Routes = [
           }
         }
       },
+      {
+        path: 'vehicle',
+        // canActivate: [AuthGuard],
+        loadChildren: async () => {
+          try {
+            return await import('./vehicle/vehicle.module').then((m) => m.VehicleModule);
+          } catch (error) {
+            throw new Error('Failed to load VehicleModule');
+          }
+        }
+      },
     ]
   }
 ];

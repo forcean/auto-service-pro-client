@@ -37,6 +37,7 @@ import { StockSummaryComponent } from './components/stock-summary/stock-summary.
 import {
   ArrowRightLeft,
   ArrowUpFromDot,
+  CarFront,
   ChevronDown,
   ChevronsDown,
   ChevronUp,
@@ -51,6 +52,8 @@ import {
 import { TableStockManagementComponent } from './components/table-stock-management/table-stock-management.component';
 import { CustomSearchSelectComponent } from './components/custom-search-select/custom-search-select.component';
 import { ReceiveStockModalComponent } from './components/receive-stock-modal/receive-stock-modal.component';
+import { TableVehicleListComponent } from './components/table-vehicle-list/table-vehicle-list.component';
+import { SearchVehicleComponent } from './components/search-vehicle/search-vehicle.component';
 
 const components = [
   ModalCommonComponent,
@@ -80,7 +83,8 @@ const components = [
   StockSummaryComponent,
   TableStockManagementComponent,
   CustomSearchSelectComponent,
-  ReceiveStockModalComponent
+  ReceiveStockModalComponent,
+  TableVehicleListComponent
 ];
 
 const directives = [
@@ -90,6 +94,7 @@ const directives = [
   PreventSpecialCharsDirective,
   PriceDirective,
   SpecInputDirective,
+  SearchVehicleComponent,
 ];
 
 @NgModule({
@@ -111,6 +116,7 @@ const directives = [
       PackagePlus,
       RotateCw,
       ChevronsDown,
+      CarFront,
     }),
   ],
   exports: [...components, ...directives],

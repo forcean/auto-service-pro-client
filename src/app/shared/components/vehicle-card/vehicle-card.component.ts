@@ -4,11 +4,14 @@ import { IVehicle } from '../../interface/catalog.interface';
   selector: 'app-vehicle-card',
   standalone: false,
   templateUrl: './vehicle-card.component.html',
-  styleUrl: './vehicle-card.component.scss'
+  styleUrl: './vehicle-card.component.scss',
 })
 export class VehicleCardComponent {
   @Input() vehicle!: IVehicle;
   @Input() readonly = true;
+  @Input() showRemark = true;
+  @Input() showEngineSelection = true;
+  @Input() showRemove = true;
 
   @Output() remove = new EventEmitter<void>();
   @Output() remarkChange = new EventEmitter<string>();

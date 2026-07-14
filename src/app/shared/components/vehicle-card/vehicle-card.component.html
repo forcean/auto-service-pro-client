@@ -26,14 +26,14 @@
         </label>
       </div>
     </div>
-    <div class="cell remark">
+    <div *ngIf="showRemark" class="cell remark">
       <input
         class="remark-input"
         [value]="vehicle.remark"
         placeholder="หมายเหตุ"
         (input)="onRemarkChange($any($event.target).value)" />
     </div>
-    <div class="cell action">
+    <div *ngIf="showRemove" class="cell action">
       <button class="remove" (click)="onRemove()">
         ลบ
       </button>

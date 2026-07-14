@@ -1,0 +1,110 @@
+<div class="vehicle-page">
+  <div class="page-header">
+    <div>
+      <app-content-title title="Vehicle Management"></app-content-title>
+
+      <p class="page-subtitle">จัดการข้อมูลรถยนต์ของลูกค้า</p>
+    </div>
+
+    <button class="create-btn" (click)="onCreate()">
+      <i class="fa-solid fa-plus"></i>
+
+      <span>เพิ่มรถยนต์</span>
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="summary-icon blue">
+        <lucide-icon name="car-front"></lucide-icon>
+      </div>
+
+      <div class="summary-content">
+        <span class="summary-title"> รถทั้งหมด </span>
+
+        <h2>{{ 0 }}</h2>
+
+        <small>Vehicle</small>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-icon green">
+        <lucide-icon name="circle-check-big"></lucide-icon>
+      </div>
+
+      <div class="summary-content">
+        <span class="summary-title"> Active </span>
+
+        <h2>{{ 0 }}</h2>
+
+        <small>พร้อมใช้งาน</small>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-icon orange">
+        <lucide-icon name="wrench"></lucide-icon>
+      </div>
+
+      <div class="summary-content">
+        <span class="summary-title"> In Service </span>
+
+        <h2>{{ 0 }}</h2>
+
+        <small>กำลังซ่อม</small>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-icon red">
+        <lucide-icon name="circle-off"></lucide-icon>
+      </div>
+
+      <div class="summary-content">
+        <span class="summary-title"> Inactive </span>
+
+        <h2>{{ 0 }}</h2>
+
+        <small>ยกเลิก</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-8">
+    <app-search-vehicle (search)="onSearch($event)"> </app-search-vehicle>
+  </div>
+  <section class="content-card">
+    <div class="content-header">
+      <div>
+        <h3>รายการรถทั้งหมด</h3>
+
+        <p>แสดงข้อมูลรถทั้งหมดภายในระบบ</p>
+      </div>
+
+      <div class="vehicle-count">
+        {{ 0 }}
+
+        <span>คัน</span>
+      </div>
+    </div>
+
+    <app-table-vehicle-list
+      [headers]="headers"
+      [config]="userList"
+      [pageIndex]="page"
+      [pageSize]="limit"
+      [isLoading]="isLoading"
+      (onView)="viewDetail($event)"
+      (sortEmit)="onSort($event)"
+      (changePage)="onChangePage($event)"
+    >
+    </app-table-vehicle-list>
+  </section>
+</div>
+
+<app-modal-condition
+  [isLoading]="isLoadingReset"
+  (onConfirm)="handleOnModalConfirm($event)"
+>
+</app-modal-condition>

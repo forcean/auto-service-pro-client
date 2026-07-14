@@ -1,0 +1,66 @@
+<form [formGroup]="searchForm" (ngSubmit)="onSubmit()">
+  <section class="search-panel">
+    <div class="header">
+      <div class="icon">
+        <lucide-icon name="search"></lucide-icon>
+      </div>
+
+      <div>
+        <h2>ค้นหารถ</h2>
+        <p>ค้นหาจากทะเบียนรถ ชื่อลูกค้า ยี่ห้อ รุ่น และสถานะ</p>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="search-box">
+        <lucide-icon class="search-icon" name="search"> </lucide-icon>
+
+        <input
+          class="toolbar-input"
+          placeholder="ทะเบียนรถ / ชื่อลูกค้า"
+          formControlName="keyword"
+        />
+      </div>
+
+      <custom-select formControlName="brand">
+        <custom-option value=""> ทุกยี่ห้อ </custom-option>
+
+        <custom-option *ngFor="let item of brands" [value]="item.id">
+          {{ item.name }}
+        </custom-option>
+      </custom-select>
+
+      <custom-select formControlName="vehicle">
+        <custom-option value=""> ทุกรุ่น </custom-option>
+
+        <custom-option *ngFor="let item of vehicles" [value]="item.id">
+          {{ item.name }}
+        </custom-option>
+      </custom-select>
+
+      <custom-select formControlName="status">
+        <custom-option value=""> ทุกสถานะ </custom-option>
+
+        <custom-option value="ACTIVE"> Active </custom-option>
+
+        <custom-option value="IN_SERVICE"> In Service </custom-option>
+
+        <custom-option value="INACTIVE"> Inactive </custom-option>
+      </custom-select>
+    </div>
+
+    <div class="action">
+      <button class="btn-reset" type="button" (click)="onReset()">
+        <lucide-icon name="rotate-ccw"></lucide-icon>
+
+        รีเซ็ต
+      </button>
+
+      <button class="btn-search" type="submit">
+        <lucide-icon name="search"></lucide-icon>
+
+        ค้นหา
+      </button>
+    </div>
+  </section>
+</form>

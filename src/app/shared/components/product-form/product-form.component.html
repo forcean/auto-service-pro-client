@@ -109,6 +109,7 @@
   <section class="card" *ngIf="isVehicleBinding">
     <app-vehicle-compatibility
       formControlName="vehicles"
+      mode="product"
       [class.border-red-500]="isInvalid('vehicles')">
     </app-vehicle-compatibility>
 
