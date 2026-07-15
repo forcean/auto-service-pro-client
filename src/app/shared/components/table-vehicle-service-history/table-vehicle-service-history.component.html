@@ -1,0 +1,86 @@
+<div class="table-container">
+  <div class="table-wrapper">
+    <table *ngIf="!isLoading" class="table">
+      <thead>
+        <tr>
+          <th>ลำดับ</th>
+
+          <ng-container *ngFor="let h of headers; let i = index">
+            <th
+              [ngClass]="{ sortable: h.isSort }"
+              (click)="h.isSort ? onSort(h.headerName) : null"
+            >
+              {{ h.i18nKey || h.headerName }}
+
+              <span *ngIf="h.isSort" class="inline-block ml-1">
+                <img
+                  *ngIf="sortField !== h.headerName"
+                  src="assets/img/icons/icon.sort.svg"
+                  class="sort-icon"
+                />
+
+                <img
+                  *ngIf="sortField === h.headerName && sortDirection === 'asc'"
+                  src="assets/img/icons/icon.sort.up.svg"
+                  class="sort-icon"
+                />
+
+                <img
+                  *ngIf="sortField === h.headerName && sortDirection === 'desc'"
+                  src="assets/img/icons/icon.sort.down.svg"
+                  class="sort-icon"
+                />
+              </span>
+            </th>
+          </ng-container>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let row of config?.history; let i = index">
+          <td>{{ i + 1 + (pageIndex - 1) * pageSize }}</td>
+          <td>{{ row.id}}</td>
+          <td>{{ row.mileage}}</td>
+          <td>{{ row.service}}</td>
+          <td>{{ row.date}}</td>
+          <td>{{ row.mechanic}}</td>
+        
+          <td>
+            <div class="action-group">
+              <img
+                src="assets/img/icons/icon.viewdetail.svg"
+                class="action-icon"
+              />
+
+              <!-- <img src="assets/img/icons/icon.resetPwd.svg"
+                class="action-icon"
+                [ngClass]="{ 'disabled': !isResetPassword }"
+                [style.pointerEvents]="!isResetPassword ? 'none' : 'auto'"
+                (click)="onReset.emit(row.id)" /> -->
+            </div>
+          </td>
+        </tr>
+
+        <tr *ngIf="config == undefined || config.history.length === 0">
+          <td colspan="10" class="text-center py-5">- ไม่พบข้อมูล -</td>
+        </tr>
+      </tbody>
+    </table>
+    <app-lazy-load-table
+      *ngIf="isLoading"
+      [recordPerPage]="10"
+      tableClass="table table-custom"
+    ></app-lazy-load-table>
+  </div>
+</div>
+
+<app-pagination
+  *ngIf="config"
+  aligns="end"
+  [paginationOption]="paginationOption"
+  [currentPage]="pageIndex"
+  [recordPerPage]="pageSize"
+  (changePage)="onPageChange($event)"
+  [totalRecord]="config.total"
+>
+</app-pagination>

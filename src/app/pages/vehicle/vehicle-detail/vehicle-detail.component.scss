@@ -1,0 +1,369 @@
+/* ==========================================================================
+   Global & Layout Structure for ERP
+   ========================================================================== */
+.vehicle-detail-page {
+  padding: 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+  font-family: system-ui, -apple-system, sans-serif;
+  background-color: #f8fafc;
+}
+
+/* Page Header */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e2e8f0;
+
+  .back-btn {
+    background: none;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #64748b;
+    font-weight: 500;
+    font-size: 15px;
+    cursor: pointer;
+    min-height: 44px; /* Touch Target สำหรับมือถือ */
+    transition: color 0.2s;
+    
+    &:hover { color: #0f172a; }
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    
+    /* ควบคุมปุ่มกดให้กดง่ายขึ้นในจอสัมผัส */
+    .btn {
+      min-height: 40px;
+      padding: 0 16px;
+    }
+  }
+}
+
+/* Button UI */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+
+  &.btn-outline {
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    color: #334155;
+    &:hover { background: #f1f5f9; }
+  }
+
+  &.btn-danger {
+    background: #ef4444;
+    border: 1px solid #ef4444;
+    color: #fff;
+    &:hover { background: #dc2626; }
+  }
+}
+
+/* ==========================================================================
+   ERP Main Dashboard Layout (Split-pane)
+   ========================================================================== */
+.erp-main-grid {
+  display: grid;
+  /* ใช้ minmax ป้องกัน Sidebar บีบตัวจนฟอนต์แตก */
+  grid-template-columns: minmax(320px, 380px) 1fr; 
+  gap: 24px;
+  align-items: start;
+}
+
+/* Left Sidebar Panel */
+.side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Standard ERP Card Component */
+.erp-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+  .card-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 20px 0;
+    color: #1e293b;
+    font-size: 16px;
+    font-weight: 600;
+
+    i { color: #10b981; }
+  }
+}
+
+/* Hero / Identity Summary inside Left Panel */
+.hero-summary {
+  text-align: center;
+  padding: 12px 0;
+
+  .vehicle-icon {
+    width: 64px;
+    height: 64px;
+    background: #ecfdf5;
+    color: #10b981;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin-bottom: 16px;
+  }
+
+  .registration {
+    margin: 0 0 4px 0;
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #0f172a;
+  }
+
+  .vehicle-name {
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: #64748b;
+  }
+}
+
+/* Badges & Chips */
+.status-badge {
+  display: inline-flex;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  
+  &.status-active { background: #dcfce7; color: #15803d; }
+  &.status-inactive { background: #fee2e2; color: #b91c1c; }
+}
+
+/* Data List (Compact for ERP) */
+.data-table-list {
+  display: flex;
+  flex-direction: column;
+
+  .data-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px; /* ป้องกันข้อความยาวๆ ชนกัน */
+    padding: 12px 0; /* เพิ่ม Padding เล็กน้อยเพื่อให้กด/มองง่ายขึ้น */
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 14px;
+
+    &:last-child { border-bottom: none; }
+
+    label { color: #64748b; font-weight: 400; white-space: nowrap; }
+    span { color: #0f172a; font-weight: 500; text-align: right; word-break: break-word; }
+  }
+}
+
+/* Customer Section Inside Side Panel */
+.customer-profile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #f1f5f9;
+
+  .customer-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    background: #10b981;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 600;
+    flex-shrink: 0; /* ห้ามโดนบีบเบี้ยว */
+  }
+
+  .customer-info {
+    min-width: 0; /* บังคับให้ text truncation ทำงานได้ใน flex */
+    h3 { margin: 0; font-size: 15px; color: #1e293b; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    p { margin: 2px 0 0 0; font-size: 13px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  }
+}
+
+/* ==========================================================================
+   Right Panel - Dynamic Content Area (Tabs & Workspaces)
+   ========================================================================== */
+.main-content-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0; /* สำคัญมาก! ช่วยป้องกันไม่ให้คอมโพเนนต์ลูกขยายความกว้างจน Grid แตก */
+}
+
+/* Navigation Tabs (ERP Style: Clean Underline) */
+.erp-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid #e2e8f0;
+  
+  /* เปิดใช้งาน Smooth Scroll สำหรับ Mobile */
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* ซ่อน scrollbar ใน Firefox */
+  
+  &::-webkit-scrollbar { display: none; } /* ซ่อน scrollbar ใน Chrome/Safari */
+
+  button {
+    background: none;
+    border: none;
+    padding: 14px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    white-space: nowrap;
+    position: relative;
+    transition: all 0.2s;
+    min-height: 48px; /* ขนาดขั้นต่ำสำหรับนิ้วสัมผัส */
+
+    &:hover { color: #0f172a; }
+
+    &.active {
+      color: #10b981;
+      font-weight: 600;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        right: 0;
+        height: 2.5px;
+        background: #10b981;
+        border-radius: 999px;
+      }
+    }
+  }
+}
+
+/* Tab Component Workspace wrapper */
+.tab-workspace {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  min-height: 450px;
+}
+
+/* ==========================================================================
+   SUPER RESPONSIVE BREAKPOINTS (ปรับปรุงอย่างละเอียด)
+   ========================================================================== */
+
+/* 1. เมื่อหน้าจอเล็กกว่า Desktop ทั่วไป (เช่น จอ Tablet แนวนอน หรือ แล็ปท็อปขนาดเล็ก) */
+@media (max-width: 1280px) {
+  .erp-main-grid {
+    grid-template-columns: 1fr; /* ปรับเป็นแนวตั้งแถวเดียว */
+    gap: 20px;
+  }
+  
+  .side-panel {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* ขยายการ์ดสถิติต่างๆ ออกเป็น 3 คอลัมน์นอน */
+    gap: 16px;
+  }
+
+  .hero-summary {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+  }
+}
+
+/* 2. เมื่อหน้าจอยุบลงมาเท่าขนาด iPad / Tablet แนวตั้ง */
+@media (max-width: 960px) {
+  .side-panel {
+    grid-template-columns: repeat(2, 1fr); /* ยุบการ์ดฝั่งซ้ายเหลือ 2 คอลัมน์เนื่องจากพื้นที่น้อยลง */
+    
+    /* ให้การ์ดแรก (Hero การ์ดสำคัญที่สุด) ยึดเต็มความกว้างแถวแรกไปเลย */
+    & > *:first-child {
+      grid-column: span 2;
+    }
+  }
+}
+
+/* 3. สำหรับหน้าจอมือถือขนาดใหญ่และเล็ก (Mobile Responsive) */
+@media (max-width: 640px) {
+  .vehicle-detail-page {
+    padding: 12px; /* ลด Padding ขอบหน้าจอเพื่อเพิ่มพื้นที่แสดงผล */
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: stretch; /* ขยายเต็มความกว้าง */
+    gap: 14px;
+    margin-bottom: 16px;
+    
+    .back-btn {
+      padding: 0;
+      min-height: auto;
+    }
+
+    .header-actions {
+      width: 100%;
+      
+      .btn {
+        flex: 1; /* ปรับให้ปุ่ม Edit และ Delete แชร์พื้นที่เท่าๆ กัน กดง่ายเต็มๆ นิ้ว */
+        justify-content: center;
+      }
+    }
+  }
+  
+  .side-panel {
+    grid-template-columns: 1fr; /* ยุบการ์ดสรุปทั้งหมดกลับมาเป็น 1 คอลัมน์เรียงดิ่งลงมา */
+    gap: 12px;
+    
+    & > *:first-child {
+      grid-column: span 1;
+    }
+  }
+
+  .erp-card {
+    padding: 16px; /* ลด padding ข้างในการ์ดให้ข้อมูลกระชับขึ้น */
+  }
+
+  .hero-summary {
+    .registration {
+      font-size: 28px; /* ลดขนาดฟอนต์ป้ายทะเบียนไม่ให้ล้นจอ */
+    }
+  }
+
+  .tab-workspace {
+    padding: 16px; /* ลด padding ของกล่องเนื้อหาหลัก */
+    border-radius: 8px;
+  }
+}

@@ -95,6 +95,7 @@
       [pageIndex]="page"
       [pageSize]="limit"
       [isLoading]="isLoading"
+      (onEdit)="onEdit($event)"
       (onView)="viewDetail($event)"
       (sortEmit)="onSort($event)"
       (changePage)="onChangePage($event)"

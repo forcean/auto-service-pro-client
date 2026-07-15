@@ -1,1 +1,178 @@
-<p>vehicle-detail works!</p>
+<div class="vehicle-detail-page">
+  <!-- ================= 1. Page Header (Global Context) ================= -->
+  <header class="page-header">
+    <button class="back-btn" (click)="back()">
+      <i class="fa-solid fa-arrow-left"></i>
+      <span>Vehicle List</span>
+    </button>
+
+    <div class="header-actions">
+      <button class="btn btn-outline" (click)="editVehicle()">
+        <i class="fa-solid fa-pen"></i>
+        Edit Vehicle
+      </button>
+      <button class="btn btn-danger" (click)="deleteVehicle()">
+        <i class="fa-solid fa-trash"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= 2. ERP Main Grid Structure ================= -->
+  <main class="erp-main-grid">
+    <!-- [LEFT SIDEBAR]: ข้อมูลสรุปคงที่เพื่อให้ผู้ใช้มองเห็นภาพรวมตลอดเวลา -->
+    <aside class="side-panel">
+      <!-- Card 1: Identity & Primary Info -->
+      <section class="erp-card hero-summary">
+        <div class="vehicle-icon">
+          <i class="fa-solid fa-car-side"></i>
+        </div>
+        <h1 class="registration">{{ vehicle.registration }}</h1>
+        <h2 class="vehicle-name">
+          {{ vehicle.brand }} {{ vehicle.model }} {{ vehicle.variant }}
+        </h2>
+        <span class="status-badge" [ngClass]="getStatusClass(vehicle.status)">
+          {{ getStatusLabel(vehicle.status) }}
+        </span>
+      </section>
+
+      <!-- Card 2: Core Specifications -->
+      <section class="erp-card">
+        <h3 class="card-title">
+          <i class="fa-solid fa-car"></i>
+          Specifications
+        </h3>
+        <div class="data-table-list">
+          <div class="data-row">
+            <label>Year</label>
+            <span>{{ vehicle.year }}</span>
+          </div>
+          <div class="data-row">
+            <label>Mileage</label>
+            <span>{{ formatNumber(vehicle.mileage) }} km</span>
+          </div>
+          <div class="data-row">
+            <label>Color</label>
+            <span>{{ vehicle.color }}</span>
+          </div>
+          <div class="data-row">
+            <label>VIN</label>
+            <span>{{ vehicle.vin }}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Card 3: Owner / Customer -->
+      <section class="erp-card">
+        <h3 class="card-title">
+          <i class="fa-solid fa-user"></i>
+          Customer Assignment
+        </h3>
+
+        <div class="customer-profile">
+          <div class="customer-avatar">
+            {{ vehicle.customer.name.charAt(0) }}
+          </div>
+          <div class="customer-info">
+            <h3>{{ vehicle.customer.name }}</h3>
+            <p>ID: {{ vehicle.customer.id }}</p>
+          </div>
+        </div>
+
+        <div class="data-table-list">
+          <div class="data-row">
+            <label>Phone</label>
+            <span>{{ vehicle.customer.phone }}</span>
+          </div>
+          <div class="data-row">
+            <label>Email</label>
+            <span>{{ vehicle.customer.email }}</span>
+          </div>
+        </div>
+      </section>
+    </aside>
+
+    <!-- [RIGHT CONTENT]: พื้นที่การทำงานหลัก เปลี่ยนแปลงข้อมูลตาม Tab -->
+    <article class="main-content-panel">
+      <!-- Tabs Nav -->
+      <nav class="erp-tabs">
+        <button
+          [class.active]="activeTab === 'overview'"
+          (click)="changeTab('overview')"
+        >
+          Overview
+        </button>
+        <button
+          [class.active]="activeTab === 'history'"
+          (click)="changeTab('history')"
+        >
+          Service History
+        </button>
+        <button
+          [class.active]="activeTab === 'work-orders'"
+          (click)="changeTab('work-orders')"
+        >
+          Work Orders
+        </button>
+        <button
+          [class.active]="activeTab === 'documents'"
+          (click)="changeTab('documents')"
+        >
+          Documents
+        </button>
+        <button
+          [class.active]="activeTab === 'photos'"
+          (click)="changeTab('photos')"
+        >
+          Photos
+        </button>
+      </nav>
+
+      <!-- Tab Content Area Workspace -->
+      <div class="tab-workspace">
+        <app-vehicle-overview
+          *ngIf="activeTab === 'overview'"
+          [vehicle]="vehicle"
+        >
+        </app-vehicle-overview>
+
+        <app-table-vehicle-service-history
+          *ngIf="activeTab === 'history'"
+          [config]="serviceHistory"
+          [headers]="headers"
+          [config]="serviceHistory"
+          [pageIndex]="page"
+          [pageSize]="limit"
+          [isLoading]="isLoading"
+          (sortEmit)="onSort($event)"
+          (changePage)="onChangePage($event)"
+        >
+        </app-table-vehicle-service-history>
+
+        <app-vehicle-work-orders
+          *ngIf="activeTab === 'work-orders'"
+          [workOrders]="workOrders"
+        >
+        </app-vehicle-work-orders>
+
+        <app-vehicle-documents
+          *ngIf="activeTab === 'documents'"
+          [documents]="documents"
+        >
+        </app-vehicle-documents>
+        
+        <app-image-gallery
+          *ngIf="activeTab === 'photos'"
+          title="Vehicle Photos"
+          description="Vehicle images and inspection photos"
+          emptyTitle="No Photos"
+          emptyDescription="Upload vehicle photos."
+          [showUpload]="true"
+          [showDelete]="true"
+          [images]="photos"
+        >
+        </app-image-gallery>
+        
+      </div>
+    </article>
+  </main>
+</div>

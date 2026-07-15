@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ServiceHistoryComponent } from './service-history.component';
+import { ImageGalleryComponent } from './image-gallery.component';
 
-describe('ServiceHistoryComponent', () => {
-  let component: ServiceHistoryComponent;
-  let fixture: ComponentFixture<ServiceHistoryComponent>;
+describe('ImageGalleryComponent', () => {
+  let component: ImageGalleryComponent;
+  let fixture: ComponentFixture<ImageGalleryComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ServiceHistoryComponent]
+      declarations: [ImageGalleryComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ServiceHistoryComponent);
+    fixture = TestBed.createComponent(ImageGalleryComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

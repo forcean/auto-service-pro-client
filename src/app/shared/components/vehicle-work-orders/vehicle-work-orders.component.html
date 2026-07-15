@@ -1,0 +1,184 @@
+<div class="space-y-6">
+  <!-- ================= Header ================= -->
+
+  <div
+    class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
+  >
+    <div>
+      <h2 class="text-2xl font-bold text-slate-800">Work Orders</h2>
+
+      <p class="mt-1 text-sm text-slate-500">
+        Manage all repair jobs for this vehicle.
+      </p>
+    </div>
+
+    <button
+      class="rounded-xl bg-[#88C273] px-5 py-2.5 font-medium text-white transition hover:bg-[#77b462]"
+    >
+      <i class="fa-solid fa-plus mr-2"></i>
+
+      Create Work Order
+    </button>
+  </div>
+
+  <!-- ================= Summary ================= -->
+
+  <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div class="rounded-2xl border bg-white p-5 shadow-sm">
+      <p class="text-sm text-slate-500">Open</p>
+
+      <h3 class="mt-2 text-3xl font-bold text-blue-600">{{ totalOpen }}</h3>
+    </div>
+
+    <div class="rounded-2xl border bg-white p-5 shadow-sm">
+      <p class="text-sm text-slate-500">In Progress</p>
+
+      <h3 class="mt-2 text-3xl font-bold text-orange-500">{{ totalInProgress }}</h3>
+    </div>
+
+    <div class="rounded-2xl border bg-white p-5 shadow-sm">
+      <p class="text-sm text-slate-500">Completed</p>
+
+      <h3 class="mt-2 text-3xl font-bold text-green-600">{{ totalCompleted }}</h3>
+    </div>
+
+    <div class="rounded-2xl border bg-white p-5 shadow-sm">
+      <p class="text-sm text-slate-500">Total Repair Cost</p>
+
+      <h3 class="mt-2 text-3xl font-bold text-slate-800">฿{{ totalRepairCost | number }}</h3>
+    </div>
+  </div>
+
+  <!-- ================= List ================= -->
+
+  <div class="space-y-5">
+    <div
+      *ngFor="let item of workOrders"
+      class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-[#88C273] hover:shadow-md"
+    >
+      <!-- top -->
+
+      <div
+        class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between"
+      >
+        <div>
+          <div class="flex flex-wrap items-center gap-3">
+            <h3 class="text-xl font-bold text-slate-800">
+              {{ item.workOrderNo }}
+            </h3>
+
+            <span
+              class="rounded-full px-3 py-1 text-xs font-semibold"
+              [ngClass]="getStatusClass(item.status)"
+            >
+              {{ item.status }}
+            </span>
+          </div>
+
+          <p class="mt-3 text-lg text-slate-700">
+            {{ item.title }}
+          </p>
+        </div>
+
+        <button class="rounded-lg border px-4 py-2 hover:bg-slate-50">
+          View Detail
+        </button>
+      </div>
+
+      <!-- info -->
+
+      <div class="mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+        <div>
+          <p class="text-sm text-slate-400">Mechanic</p>
+
+          <h4 class="mt-1 font-semibold">
+            {{ item.mechanic }}
+          </h4>
+        </div>
+
+        <div>
+          <p class="text-sm text-slate-400">Created</p>
+
+          <h4 class="mt-1 font-semibold">
+            {{ item.createdAt }}
+          </h4>
+        </div>
+
+        <div>
+          <p class="text-sm text-slate-400">Estimated Cost</p>
+
+          <h4 class="mt-1 font-semibold">{{ item.total | number }} THB</h4>
+        </div>
+
+        <div>
+          <p class="text-sm text-slate-400">Updated</p>
+
+          <h4 class="mt-1 font-semibold">
+            {{ item.updatedAt }}
+          </h4>
+        </div>
+      </div>
+
+      <!-- cost -->
+
+      <div class="mt-8 grid gap-4 rounded-xl bg-slate-50 p-5 md:grid-cols-3">
+        <div>
+          <p class="text-sm text-slate-500">Labor</p>
+
+          <h4 class="mt-1 text-xl font-bold">฿{{ item.labor | number }}</h4>
+        </div>
+
+        <div>
+          <p class="text-sm text-slate-500">Parts</p>
+
+          <h4 class="mt-1 text-xl font-bold">฿{{ item.parts | number }}</h4>
+        </div>
+
+        <div>
+          <p class="text-sm text-slate-500">Total</p>
+
+          <h4 class="mt-1 text-2xl font-bold text-[#88C273]">
+            ฿{{ item.total | number }}
+          </h4>
+        </div>
+      </div>
+
+      <!-- progress -->
+
+      <div class="mt-8">
+        <div class="mb-2 flex items-center justify-between">
+          <span class="text-sm text-slate-500"> Progress </span>
+
+          <span class="font-semibold"> {{ item.progress }}% </span>
+        </div>
+
+        <div class="h-2 overflow-hidden rounded-full bg-slate-200">
+          <div
+            class="h-full rounded-full bg-[#88C273]"
+            [style.width.%]="item.progress"
+          ></div>
+        </div>
+      </div>
+
+      <!-- footer -->
+
+      <div class="mt-8 flex flex-wrap justify-end gap-3">
+        <button
+          class="rounded-lg border border-slate-300 px-4 py-2 hover:bg-slate-50"
+        >
+          <i class="fa-solid fa-print mr-2"></i>
+
+          Print
+        </button>
+
+        <button
+          class="rounded-lg bg-[#374870] px-4 py-2 text-white hover:bg-[#2d3d63]"
+        >
+          <i class="fa-solid fa-eye mr-2"></i>
+
+          View Detail
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

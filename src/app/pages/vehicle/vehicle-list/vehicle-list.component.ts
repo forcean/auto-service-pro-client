@@ -130,6 +130,10 @@ export class VehicleListComponent implements OnInit {
     this.router.navigate(['/portal/vehicle/', event]);
   }
 
+  onEdit(event: string) {
+    this.router.navigate(['/portal/vehicle/', event]);
+  }
+
   private updateQueryParams(params: any) {
     this.keyword = params['keyword'] || '';
     this.page = Number(params['page'] || this.page);
