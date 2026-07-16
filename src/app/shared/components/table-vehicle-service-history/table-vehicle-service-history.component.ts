@@ -16,9 +16,11 @@ export class TableVehicleServiceHistoryComponent implements OnInit, OnChanges {
   @Input() pageSize = 20;
   @Input() sort = '';
   @Input() isLoading = false;
+  @Input() isDeleteVehicle = false;
 
   @Output() sortEmit = new EventEmitter<string[]>();
   @Output() changePage = new EventEmitter<PaginationModel>();
+  @Output() onView = new EventEmitter<string>();
 
   sortField = '';
   sortDirection: 'asc' | 'desc' = 'asc';
@@ -171,5 +173,6 @@ export class TableVehicleServiceHistoryComponent implements OnInit, OnChanges {
   trackBy(index: number, row: any): string {
     return row.id;
   }
+
 }
 

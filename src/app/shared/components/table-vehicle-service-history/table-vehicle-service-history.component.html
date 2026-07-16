@@ -50,13 +50,8 @@
               <img
                 src="assets/img/icons/icon.viewdetail.svg"
                 class="action-icon"
+                (click)="onView.emit(row.id)"
               />
-
-              <!-- <img src="assets/img/icons/icon.resetPwd.svg"
-                class="action-icon"
-                [ngClass]="{ 'disabled': !isResetPassword }"
-                [style.pointerEvents]="!isResetPassword ? 'none' : 'auto'"
-                (click)="onReset.emit(row.id)" /> -->
             </div>
           </td>
         </tr>

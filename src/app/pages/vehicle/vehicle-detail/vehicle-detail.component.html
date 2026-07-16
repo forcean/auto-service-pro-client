@@ -140,11 +140,12 @@
           [config]="serviceHistory"
           [headers]="headers"
           [config]="serviceHistory"
-          [pageIndex]="page"
-          [pageSize]="limit"
-          [isLoading]="isLoading"
+          [pageIndex]="historyQuery.page"
+          [pageSize]="historyQuery.limit"
+          [isLoading]="isLoadingHistory"
           (sortEmit)="onSort($event)"
           (changePage)="onChangePage($event)"
+          (onView)="onViewService($event)"
         >
         </app-table-vehicle-service-history>
 
@@ -171,7 +172,7 @@
           [images]="photos"
         >
         </app-image-gallery>
-        
+
       </div>
     </article>
   </main>

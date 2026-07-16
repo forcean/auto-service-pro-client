@@ -41,29 +41,12 @@ export interface IVehicleDetail {
   styleUrl: './vehicle-overview.component.scss'
 })
 export class VehicleOverviewComponent {
+@Input() vehicle: any;
 
-  @Input() vehicle!: IVehicleDetail;
-  @Input() statCards: IStatCard[] = [];
-  @Input() serviceHistory: IServiceHistory[] = [];
-
-  formatNumber(value: number | null | undefined): string {
-    return new Intl.NumberFormat('en-US').format(value ?? 0);
-  }
-
-  getHealthClass(status: 'good' | 'warning' | 'danger'): string {
-    switch (status) {
-      case 'good':
-        return 'bg-green-100 text-green-700';
-
-      case 'warning':
-        return 'bg-yellow-100 text-yellow-700';
-
-      case 'danger':
-        return 'bg-red-100 text-red-700';
-
-      default:
-        return '';
-    }
+  // ฟังก์ชันจัดฟอร์แมตตัวเลขสำหรับระบบภายใน
+  formatNumber(value: number): string {
+    if (!value) return '0';
+    return new Intl.NumberFormat('th-TH').format(value);
   }
 
 }

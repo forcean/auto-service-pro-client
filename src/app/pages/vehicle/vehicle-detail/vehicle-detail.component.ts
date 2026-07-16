@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import {
   IQueryListHistory,
   IServiceHistoryResultData,
@@ -7,6 +7,17 @@ import {
 import { IWorkOrder } from '../../../shared/components/vehicle-work-orders/vehicle-work-orders.component';
 import { IVehicleDocument } from '../../../shared/components/vehicle-documents/vehicle-documents.component';
 import { IImageGalleryItem } from '../../../shared/components/image-gallery/image-gallery.component';
+import { PermissionService } from '../../../shared/services/permission.service';
+import { ActivatedRoute, Params, Router } from '@angular/router';
+import { ModalConditionService } from '../../../shared/components/modal-condition/modal-condition.service';
+import { ModalCommonService } from '../../../shared/components/modal-common/modal-common.service';
+import { HandleTokenService } from '../../../core/services/handle-token-service/handle-token.service';
+import { ResetPasswordModuleService } from '../../../shared/components/reset-password-modal/reset-password-modal.service';
+import { LoadingBarService } from '@ngx-loading-bar/core';
+import { ModalConditionComponent } from '../../../shared/components/modal-condition/modal-condition.component';
+import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
+import { Subscription } from 'rxjs';
+import { RESPONSE } from '../../../shared/enum/response.enum';
 
 interface IVehicleDetail {
   id: string;
@@ -33,7 +44,12 @@ interface IStatCard {
   value: string;
   icon: string;
 }
-
+export type VehicleDetailTab =
+  | 'overview'
+  | 'history'
+  | 'work-orders'
+  | 'documents'
+  | 'photos';
 @Component({
   selector: 'app-vehicle-detail',
   standalone: false,
@@ -41,9 +57,13 @@ interface IStatCard {
   styleUrl: './vehicle-detail.component.scss',
 })
 export class VehicleDetailComponent implements OnInit {
+  @ViewChild(ModalConditionComponent)
+  modalConditionComponent!: ModalConditionComponent;
+  @ViewChild(PaginationComponent) paginationComponent!: PaginationComponent;
+  // @ViewChild(ResetPasswordModuleComponent) resetPasswordModuleComponent!: ResetPasswordModuleComponent;
+
   loading = false;
-  activeTab: 'overview' | 'history' | 'work-orders' | 'documents' | 'photos' =
-    'overview';
+  activeTab: VehicleDetailTab = 'overview';
 
   vehicle!: IVehicleDetail;
   statCards: IStatCard[] = [];
@@ -51,12 +71,44 @@ export class VehicleDetailComponent implements OnInit {
   workOrders: IWorkOrder[] = [];
   documents: IVehicleDocument[] = [];
   photos: IImageGalleryItem[] = [];
-  page = 1;
-  limit = 20;
-  sort = '';
-  search!: IQueryListHistory;
+
+  permissions!: PermissionService;
+  historyQuery: IQueryListHistory = {
+    page: 1,
+    limit: 20,
+    sort: '',
+  };
+
+  workOrderQuery = {
+    page: 1,
+    limit: 20,
+    sort: '',
+    keyword: '',
+  };
+
+  documentQuery = {
+    page: 1,
+    limit: 20,
+    sort: '',
+  };
+
+  photoQuery = {
+    page: 1,
+    limit: 20,
+  };
+
+  // loading status
   isLoading = false;
-  isLoadingSummary = false;
+  isLoadingWorkOrder = false;
+  isLoadingOverView = false;
+  isLoadingHistory = false;
+  isLoadingDocument = false;
+  isLoadingPhoto = false;
+
+  private modalSubscription: Subscription | null = null;
+  private readonly loadedTabs = new Set<VehicleDetailTab>();
+
+  //Table
   headers: ITableHeaderServiceHistory[] = [
     {
       headerName: 'id',
@@ -95,234 +147,503 @@ export class VehicleDetailComponent implements OnInit {
       i18nKey: 'จัดการ',
     },
   ];
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private modalConditionService: ModalConditionService,
+    private modalCommonService: ModalCommonService,
+    private handleTokenService: HandleTokenService,
+    private resetFormService: ResetPasswordModuleService,
+    private loadingBarService: LoadingBarService,
+    private permissionService: PermissionService,
+  ) {}
 
   ngOnInit(): void {
-    this.loadVehicle();
-    this.loadOverview();
-    this.loadHistory();
-    this.loadWorkOrders();
-    this.loadDocuments();
-    this.loadPhotos();
+    this.initializePermissions();
   }
 
-  // ===========================
-  // Load Data
-  // ===========================
-
-  loadVehicle(): void {
-    this.vehicle = {
-      id: '1',
-      registration: '2กข1234',
-      brand: 'Toyota',
-      model: 'Camry',
-      variant: '2.0G',
-      year: 2021,
-      color: 'White',
-      mileage: 53500,
-      vin: 'JTNB11HK5M3000123',
-      status: 'ACTIVE',
-      customer: {
-        id: 'CUS000001',
-        name: 'John Smith',
-        phone: '0812345678',
-        email: 'john@email.com',
-      },
-    };
+  private async initializePermissions() {
+    try {
+      // this.permissions = await this.permissionService.permissions();
+      // this.isViewUserList = this.permissionService.isViewUserList;
+      // this.isResetPassword = this.permissionService.isResetPassword;
+      // if (!this.isViewUserList) {
+      //   this.router.navigate(['/not-found']);
+      // } else {
+      this.route.queryParams.subscribe((params) =>
+        this.updateQueryParams(params),
+      );
+      // }
+    } catch (error) {
+      const errorObject = error as { message: string };
+      if (errorObject.message !== '504') {
+        this.handleCommonError();
+      }
+    }
   }
 
-  loadOverview(): void {
-    this.statCards = [
-      {
-        title: 'Mileage',
-        value: `${this.formatNumber(this.vehicle.mileage)} km`,
-        icon: 'fa-road',
-      },
-      {
-        title: 'Last Service',
-        value: '12 Jun 2026',
-        icon: 'fa-screwdriver-wrench',
-      },
-      {
-        title: 'Total Services',
-        value: '15',
-        icon: 'fa-clock-rotate-left',
-      },
-      {
-        title: 'Open Work Orders',
-        value: '2',
-        icon: 'fa-file-circle-check',
-      },
-    ];
+  private updateQueryParams(params: Params): void {
+    this.activeTab = (params['tab'] as VehicleDetailTab) ?? 'overview';
+
+    switch (this.activeTab) {
+      case 'history':
+        this.historyQuery.page = Number(
+          params['historyPage'] ?? this.historyQuery.page,
+        );
+        this.historyQuery.limit = Number(
+          params['historyLimit'] ?? this.historyQuery.limit,
+        );
+        this.historyQuery.sort = params['historySort'] ?? undefined;
+        break;
+
+      case 'work-orders':
+        this.workOrderQuery.page = Number(
+          params['woPage'] ?? this.workOrderQuery.page,
+        );
+        this.workOrderQuery.limit = Number(
+          params['woLimit'] ?? this.workOrderQuery.limit,
+        );
+        this.workOrderQuery.sort = params['woSort'] ?? this.workOrderQuery.sort;
+        this.workOrderQuery.keyword =
+          params['woKeyword'] ?? this.workOrderQuery.keyword;
+        break;
+
+      case 'documents':
+        this.documentQuery.page = Number(
+          params['docPage'] ?? this.documentQuery.page,
+        );
+        this.documentQuery.limit = Number(
+          params['docLimit'] ?? this.documentQuery.limit,
+        );
+        this.documentQuery.sort = params['docSort'] ?? this.documentQuery.sort;
+        break;
+
+      case 'photos':
+        this.photoQuery.page = Number(
+          params['photoPage'] ?? this.photoQuery.page,
+        );
+        this.photoQuery.limit = Number(
+          params['photoLimit'] ?? this.photoQuery.limit,
+        );
+        break;
+    }
+
+    this.getVehicle();
+    this.loadCurrentTab();
   }
 
-  loadHistory(): void {
-    this.serviceHistory = {
-      page: 1,
-      limit: 10,
-      total: 5,
-      totalPage: 1,
-      history: [
-        {
-          id: '3274987239203803',
-          date: '21/05/2026',
-          mileage: '53,000 km',
-          mechanic: 'mike',
-          service: 'oil change',
+  async getVehicle(): Promise<void> {
+    this.isLoading = true;
+    const loader = this.loadingBarService.useRef();
+    loader.start();
+    try {
+      // const res = await this.userManagementService.getListUser();
+      // if (res.resultCode === RESPONSE.SUCCESS) {
+      //   this.vehicle = res.resultData;
+      //   // this.isDisableSearch = (!this.keyword && this.userList?.users.length === 0 && !this.reportStatus)
+      //   //   || !this.reportStatusList.length;
+      // } else if (res.resultCode === RESPONSE.INVALID_PERMISSION) {
+      //   this.router.navigate(['/not-found']);
+      // } else {
+      //   this.handleFailResponse();
+      // }
+      this.vehicle = {
+        id: '1',
+        registration: '2กข1234',
+        brand: 'Toyota',
+        model: 'Camry',
+        variant: '2.0G',
+        year: 2021,
+        color: 'White',
+        mileage: 53500,
+        vin: 'JTNB11HK5M3000123',
+        status: 'ACTIVE',
+        customer: {
+          id: 'CUS000001',
+          name: 'John Smith',
+          phone: '0812345678',
+          email: 'john@email.com',
         },
-      ],
-    };
+      };
+    } catch (error) {
+      // const errorObject = error as { message: string };
+      // if (errorObject.message !== '504') {
+      //   this.handleCommonError();
+      // }
+    } finally {
+      this.isLoading = false;
+      loader.complete();
+    }
   }
 
-  loadWorkOrders(): void {
-    this.workOrders = [
-      {
-        id: '2387498273942379847',
-        workOrderNo: '65',
-        title: 'example',
-        status: 'IN_PROGRESS',
-        mechanic: 'mike',
-        labor: 77,
-        parts: 546,
-        total: 3,
-        progress: 2,
-      },
-    ];
+  getOverview(): void {
+    this.isLoadingOverView = true;
+    try {
+      // const res = await this.userManagementService.getListUser();
+      // if (res.resultCode === RESPONSE.SUCCESS) {
+      //   this.vehicle = res.resultData;
+      //   // this.isDisableSearch = (!this.keyword && this.userList?.users.length === 0 && !this.reportStatus)
+      //   //   || !this.reportStatusList.length;
+      // } else if (res.resultCode === RESPONSE.INVALID_PERMISSION) {
+      //   this.router.navigate(['/not-found']);
+      // } else {
+      //   this.handleFailResponse();
+      // }
+      this.statCards = [
+        {
+          title: 'Mileage',
+          value: `${this.formatNumber(this.vehicle.mileage)} km`,
+          icon: 'fa-road',
+        },
+        {
+          title: 'Last Service',
+          value: '12 Jun 2026',
+          icon: 'fa-screwdriver-wrench',
+        },
+        {
+          title: 'Total Services',
+          value: '15',
+          icon: 'fa-clock-rotate-left',
+        },
+        {
+          title: 'Open Work Orders',
+          value: '2',
+          icon: 'fa-file-circle-check',
+        },
+      ];
+    } catch (error) {
+      // const errorObject = error as { message: string };
+      // if (errorObject.message !== '504') {
+      //   this.handleCommonError();
+      // }
+    } finally {
+      this.isLoadingOverView = false;
+    }
   }
 
-  loadDocuments(): void {
-    this.documents = [
-      {
-        id: 'DOC001',
-        name: 'Invoice_WO240715001.pdf',
-        category: 'Invoice',
-        type: 'pdf',
-        size: '1.8 MB',
-        uploadedAt: '15 Jul 2026',
-        url: '/assets/mock/documents/invoice-001.pdf',
-      },
-      {
-        id: 'DOC002',
-        name: 'Quotation_Brake_Service.pdf',
-        category: 'Quotation',
-        type: 'pdf',
-        size: '950 KB',
-        uploadedAt: '14 Jul 2026',
-        url: '/assets/mock/documents/quotation-001.pdf',
-      },
-      {
-        id: 'DOC003',
-        name: 'Receipt_Repair_240701.pdf',
-        category: 'Receipt',
-        type: 'pdf',
-        size: '780 KB',
-        uploadedAt: '10 Jul 2026',
-        url: '/assets/mock/documents/receipt-001.pdf',
-      },
-      {
-        id: 'DOC004',
-        name: 'Warranty_Battery.jpg',
-        category: 'Warranty',
-        type: 'jpg',
-        size: '2.4 MB',
-        uploadedAt: '08 Jul 2026',
-        url: '/assets/mock/documents/warranty-battery.jpg',
-      },
-      {
-        id: 'DOC005',
-        name: 'Insurance_Policy.pdf',
-        category: 'Insurance',
-        type: 'pdf',
-        size: '3.2 MB',
-        uploadedAt: '01 Jul 2026',
-        url: '/assets/mock/documents/insurance-policy.pdf',
-      },
-      {
-        id: 'DOC006',
-        name: 'Vehicle_Registration.pdf',
-        category: 'Other',
-        type: 'pdf',
-        size: '1.1 MB',
-        uploadedAt: '28 Jun 2026',
-        url: '/assets/mock/documents/vehicle-registration.pdf',
-      },
-      {
-        id: 'DOC007',
-        name: 'Engine_Diagnosis_Report.docx',
-        category: 'Other',
-        type: 'docx',
-        size: '540 KB',
-        uploadedAt: '20 Jun 2026',
-        url: '/assets/mock/documents/engine-report.docx',
-      },
-      {
-        id: 'DOC008',
-        name: 'Service_Checklist.xlsx',
-        category: 'Other',
-        type: 'xlsx',
-        size: '320 KB',
-        uploadedAt: '18 Jun 2026',
-        url: '/assets/mock/documents/service-checklist.xlsx',
-      },
-    ];
+  getHistory(): void {
+    this.isLoadingHistory = true;
+    try {
+      // const res = await this.userManagementService.getListUser();
+      // if (res.resultCode === RESPONSE.SUCCESS) {
+      //   this.vehicle = res.resultData;
+      //   // this.isDisableSearch = (!this.keyword && this.userList?.users.length === 0 && !this.reportStatus)
+      //   //   || !this.reportStatusList.length;
+      // } else if (res.resultCode === RESPONSE.INVALID_PERMISSION) {
+      //   this.router.navigate(['/not-found']);
+      // } else {
+      //   this.handleFailResponse();
+      // }
+      this.serviceHistory = {
+        page: 1,
+        limit: 10,
+        total: 5,
+        totalPage: 1,
+        history: [
+          {
+            id: '3274987239203803',
+            date: '21/05/2026',
+            mileage: '53,000 km',
+            mechanic: 'mike',
+            service: 'oil change',
+          },
+        ],
+      };
+    } catch (error) {
+      // const errorObject = error as { message: string };
+      // if (errorObject.message !== '504') {
+      //   this.handleCommonError();
+      // }
+    } finally {
+      this.isLoadingHistory = false;
+    }
   }
 
-  loadPhotos(): void {
-    this.photos = [
-      {
-        id: 'IMG001',
-        url: 'https://picsum.photos/id/1071/1200/800',
-        thumbnail: 'https://picsum.photos/id/1071/600/400',
-        title: 'Front View',
-        description: 'Vehicle front side',
-        uploadedAt: '15 Jul 2026',
-      },
-      {
-        id: 'IMG002',
-        url: 'https://picsum.photos/id/1072/1200/800',
-        thumbnail: 'https://picsum.photos/id/1072/600/400',
-        title: 'Rear View',
-        description: 'Vehicle rear side',
-        uploadedAt: '15 Jul 2026',
-      },
-      {
-        id: 'IMG003',
-        url: 'https://picsum.photos/id/1073/1200/800',
-        thumbnail: 'https://picsum.photos/id/1073/600/400',
-        title: 'Engine Bay',
-        description: 'Engine inspection',
-        uploadedAt: '14 Jul 2026',
-      },
-      {
-        id: 'IMG004',
-        url: 'https://picsum.photos/id/1074/1200/800',
-        thumbnail: 'https://picsum.photos/id/1074/600/400',
-        title: 'Interior',
-        description: 'Cabin condition',
-        uploadedAt: '14 Jul 2026',
-      },
-      {
-        id: 'IMG005',
-        url: 'https://picsum.photos/id/1075/1200/800',
-        thumbnail: 'https://picsum.photos/id/1075/600/400',
-        title: 'Left Side',
-        description: 'Body inspection',
-        uploadedAt: '13 Jul 2026',
-      },
-      {
-        id: 'IMG006',
-        url: 'https://picsum.photos/id/1076/1200/800',
-        thumbnail: 'https://picsum.photos/id/1076/600/400',
-        title: 'Right Side',
-        description: 'Body inspection',
-        uploadedAt: '13 Jul 2026',
-      },
-    ];
+  getWorkOrders(): void {
+    this.isLoadingWorkOrder = true;
+    try {
+      // const res = await this.userManagementService.getListUser();
+      // if (res.resultCode === RESPONSE.SUCCESS) {
+      //   this.vehicle = res.resultData;
+      //   // this.isDisableSearch = (!this.keyword && this.userList?.users.length === 0 && !this.reportStatus)
+      //   //   || !this.reportStatusList.length;
+      // } else if (res.resultCode === RESPONSE.INVALID_PERMISSION) {
+      //   this.router.navigate(['/not-found']);
+      // } else {
+      //   this.handleFailResponse();
+      // }
+      this.workOrders = [
+        {
+          id: '2387498273942379847',
+          workOrderNo: '65',
+          title: 'example',
+          status: 'IN_PROGRESS',
+          mechanic: 'mike',
+          labor: 77,
+          parts: 546,
+          total: 3,
+          progress: 2,
+        },
+      ];
+    } catch (error) {
+      // const errorObject = error as { message: string };
+      // if (errorObject.message !== '504') {
+      //   this.handleCommonError();
+      // }
+    } finally {
+      this.isLoadingWorkOrder = false;
+    }
   }
 
-  changeTab(
-    tab: 'overview' | 'history' | 'work-orders' | 'documents' | 'photos',
-  ): void {
-    this.activeTab = tab;
+  getDocuments(): void {
+    this.isLoadingDocument = true;
+    try {
+      // const res = await this.userManagementService.getListUser();
+      // if (res.resultCode === RESPONSE.SUCCESS) {
+      //   this.vehicle = res.resultData;
+      //   // this.isDisableSearch = (!this.keyword && this.userList?.users.length === 0 && !this.reportStatus)
+      //   //   || !this.reportStatusList.length;
+      // } else if (res.resultCode === RESPONSE.INVALID_PERMISSION) {
+      //   this.router.navigate(['/not-found']);
+      // } else {
+      //   this.handleFailResponse();
+      // }
+      this.documents = [
+        {
+          id: 'DOC001',
+          name: 'Invoice_WO240715001.pdf',
+          category: 'Invoice',
+          type: 'pdf',
+          size: '1.8 MB',
+          uploadedAt: '15 Jul 2026',
+          url: '/assets/mock/documents/invoice-001.pdf',
+        },
+        {
+          id: 'DOC002',
+          name: 'Quotation_Brake_Service.pdf',
+          category: 'Quotation',
+          type: 'pdf',
+          size: '950 KB',
+          uploadedAt: '14 Jul 2026',
+          url: '/assets/mock/documents/quotation-001.pdf',
+        },
+        {
+          id: 'DOC003',
+          name: 'Receipt_Repair_240701.pdf',
+          category: 'Receipt',
+          type: 'pdf',
+          size: '780 KB',
+          uploadedAt: '10 Jul 2026',
+          url: '/assets/mock/documents/receipt-001.pdf',
+        },
+        {
+          id: 'DOC004',
+          name: 'Warranty_Battery.jpg',
+          category: 'Warranty',
+          type: 'jpg',
+          size: '2.4 MB',
+          uploadedAt: '08 Jul 2026',
+          url: '/assets/mock/documents/warranty-battery.jpg',
+        },
+        {
+          id: 'DOC005',
+          name: 'Insurance_Policy.pdf',
+          category: 'Insurance',
+          type: 'pdf',
+          size: '3.2 MB',
+          uploadedAt: '01 Jul 2026',
+          url: '/assets/mock/documents/insurance-policy.pdf',
+        },
+        {
+          id: 'DOC006',
+          name: 'Vehicle_Registration.pdf',
+          category: 'Other',
+          type: 'pdf',
+          size: '1.1 MB',
+          uploadedAt: '28 Jun 2026',
+          url: '/assets/mock/documents/vehicle-registration.pdf',
+        },
+        {
+          id: 'DOC007',
+          name: 'Engine_Diagnosis_Report.docx',
+          category: 'Other',
+          type: 'docx',
+          size: '540 KB',
+          uploadedAt: '20 Jun 2026',
+          url: '/assets/mock/documents/engine-report.docx',
+        },
+        {
+          id: 'DOC008',
+          name: 'Service_Checklist.xlsx',
+          category: 'Other',
+          type: 'xlsx',
+          size: '320 KB',
+          uploadedAt: '18 Jun 2026',
+          url: '/assets/mock/documents/service-checklist.xlsx',
+        },
+      ];
+    } catch (error) {
+      // const errorObject = error as { message: string };
+      // if (errorObject.message !== '504') {
+      //   this.handleCommonError();
+      // }
+    } finally {
+      this.isLoadingDocument = false;
+    }
+  }
+
+  getPhotos(): void {
+    this.isLoadingPhoto = true;
+    try {
+      // const res = await this.userManagementService.getListUser();
+      // if (res.resultCode === RESPONSE.SUCCESS) {
+      //   this.vehicle = res.resultData;
+      //   // this.isDisableSearch = (!this.keyword && this.userList?.users.length === 0 && !this.reportStatus)
+      //   //   || !this.reportStatusList.length;
+      // } else if (res.resultCode === RESPONSE.INVALID_PERMISSION) {
+      //   this.router.navigate(['/not-found']);
+      // } else {
+      //   this.handleFailResponse();
+      // }
+      this.photos = [
+        {
+          id: 'IMG001',
+          url: 'https://picsum.photos/id/1071/1200/800',
+          thumbnail: 'https://picsum.photos/id/1071/600/400',
+          title: 'Front View',
+          description: 'Vehicle front side',
+          uploadedAt: '15 Jul 2026',
+        },
+        {
+          id: 'IMG002',
+          url: 'https://picsum.photos/id/1072/1200/800',
+          thumbnail: 'https://picsum.photos/id/1072/600/400',
+          title: 'Rear View',
+          description: 'Vehicle rear side',
+          uploadedAt: '15 Jul 2026',
+        },
+        {
+          id: 'IMG003',
+          url: 'https://picsum.photos/id/1073/1200/800',
+          thumbnail: 'https://picsum.photos/id/1073/600/400',
+          title: 'Engine Bay',
+          description: 'Engine inspection',
+          uploadedAt: '14 Jul 2026',
+        },
+        {
+          id: 'IMG004',
+          url: 'https://picsum.photos/id/1074/1200/800',
+          thumbnail: 'https://picsum.photos/id/1074/600/400',
+          title: 'Interior',
+          description: 'Cabin condition',
+          uploadedAt: '14 Jul 2026',
+        },
+        {
+          id: 'IMG005',
+          url: 'https://picsum.photos/id/1075/1200/800',
+          thumbnail: 'https://picsum.photos/id/1075/600/400',
+          title: 'Left Side',
+          description: 'Body inspection',
+          uploadedAt: '13 Jul 2026',
+        },
+        {
+          id: 'IMG006',
+          url: 'https://picsum.photos/id/1076/1200/800',
+          thumbnail: 'https://picsum.photos/id/1076/600/400',
+          title: 'Right Side',
+          description: 'Body inspection',
+          uploadedAt: '13 Jul 2026',
+        },
+      ];
+    } catch (error) {
+      // const errorObject = error as { message: string };
+      // if (errorObject.message !== '504') {
+      //   this.handleCommonError();
+      // }
+    } finally {
+      this.isLoadingPhoto = false;
+    }
+  }
+
+  changeTab(tab: VehicleDetailTab): void {
+    if (this.activeTab === tab) {
+      return;
+    }
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      replaceUrl: true,
+      queryParams: this.getTabQueryParams(tab),
+    });
+  }
+
+  private getTabQueryParams(tab: VehicleDetailTab): Params {
+    switch (tab) {
+      case 'history':
+        return {
+          tab,
+          historyPage: this.historyQuery.page,
+          historyLimit: this.historyQuery.limit,
+          historySort: this.historyQuery.sort || undefined,
+        };
+
+      case 'work-orders':
+        return {
+          tab,
+          woPage: this.workOrderQuery.page,
+          woLimit: this.workOrderQuery.limit,
+          woSort: this.workOrderQuery.sort,
+          woKeyword: this.workOrderQuery.keyword,
+        };
+
+      case 'documents':
+        return {
+          tab,
+          docPage: this.documentQuery.page,
+          docLimit: this.documentQuery.limit,
+          docSort: this.documentQuery.sort,
+        };
+
+      case 'photos':
+        return {
+          tab,
+          photoPage: this.photoQuery.page,
+          photoLimit: this.photoQuery.limit,
+        };
+
+      default:
+        return {
+          tab: 'overview',
+        };
+    }
+  }
+
+  private loadCurrentTab(): void {
+    switch (this.activeTab) {
+      case 'overview':
+        if (!this.loadedTabs.has('overview')) {
+          this.loadedTabs.add('overview');
+          this.getOverview();
+        }
+
+        break;
+
+      case 'history':
+        this.getHistory();
+        break;
+
+      case 'work-orders':
+        this.getWorkOrders();
+        break;
+
+      case 'documents':
+        this.getDocuments();
+        break;
+
+      case 'photos':
+        this.getPhotos();
+        break;
+    }
   }
 
   editVehicle(): void {
@@ -396,13 +717,91 @@ export class VehicleDetailComponent implements OnInit {
   }
 
   onSort(sort: string[]): void {
-    this.sort = sort.join(',');
-    // this.updateUrlParams();
+    this.historyQuery.sort = sort.join(',');
+    this.router.navigate([], {
+      relativeTo: this.route,
+      replaceUrl: true,
+      queryParams: {
+        tab: 'history',
+        historyPage: this.historyQuery.page,
+        historyLimit: this.historyQuery.limit,
+        historySort: this.historyQuery.sort,
+      },
+    });
   }
 
   onChangePage(event: any): void {
-    this.page = event.page;
-    this.limit = event.pageSize;
-    // this.updateUrlParams();
+    this.historyQuery.page = event.page;
+    this.historyQuery.limit = event.pageSize;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      replaceUrl: true,
+      queryParams: {
+        tab: 'history',
+        historyPage: this.historyQuery.page,
+        historyLimit: this.historyQuery.limit,
+        historySort: this.historyQuery.sort,
+      },
+    });
+  }
+
+  onViewService(event: string) {
+    console.log('View History Service: ', event)
+  }
+
+  private openResetPasswordForm() {
+    this.modalConditionComponent.onClose();
+    this.resetFormService.open({});
+  }
+
+  async handleOnModalConfirm(flag: string) {
+    if (flag === 'change') {
+      this.openResetPasswordForm();
+    }
+  }
+
+  private handleModalReset() {
+    this.modalConditionService.open({
+      type: 'change',
+      title: 'คุณต้องการรีเซ็ตรหัสผ่านหรือไม่?',
+      subtitle:
+        'คุณต้องการยืนยันการเปลี่ยนรหัสผ่านหรือไม่? การคลิก ยืนยัน <br>จะพาคุณไปยังหน้าการเปลี่ยนรหัสผ่าน คลิก ยกเลิก เพื่อออก',
+    });
+  }
+
+  private handleCommonError() {
+    this.modalSubscription = this.modalCommonService.isOpen.subscribe((obj) => {
+      if (!obj?.isOpen) {
+        // this.router.navigate(['/portal/landing']);
+        this.unsubscribeModal();
+      }
+    });
+  }
+
+  private handleFailResponse() {
+    this.modalCommonService.open({
+      type: 'alert',
+      title: 'ขออภัย ระบบขัดข้องในขณะนี้',
+      subtitle:
+        'กรุณาทำรายการใหม่อีกครั้ง หรือ ติดต่อผู้ดูแลระบบในองค์กรของคุณ',
+      buttonText: 'เข้าใจแล้ว',
+    });
+  }
+
+  private handleSuccessResetPassword() {
+    this.modalCommonService.open({
+      type: 'success',
+      title: 'การรีเซ็ตรหัสผ่านเสร็จสมบูรณ์',
+      subtitle:
+        'การรีเซ็ตรหัสผ่านเสร็จสมบูรณ์แล้ว กรุณาใช้รหัสผ่านใหม่ของคุณในการเข้าสู่ระบบ',
+      buttonText: 'ยืนยัน',
+    });
+  }
+
+  private unsubscribeModal() {
+    if (this.modalSubscription) {
+      this.modalSubscription.unsubscribe();
+      this.modalSubscription = null;
+    }
   }
 }
