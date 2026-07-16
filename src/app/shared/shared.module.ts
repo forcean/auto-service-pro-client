@@ -64,6 +64,7 @@ import { TableVehicleServiceHistoryComponent } from './components/table-vehicle-
 import { VehicleWorkOrdersComponent } from './components/vehicle-work-orders/vehicle-work-orders.component';
 import { VehicleDocumentsComponent } from './components/vehicle-documents/vehicle-documents.component';
 import { ImageGalleryComponent } from './components/image-gallery/image-gallery.component';
+import { ServiceHistoryPanelComponent } from './components/service-history-panel/service-history-panel.component';
 
 const components = [
   ModalCommonComponent,
@@ -100,6 +101,7 @@ const components = [
   VehicleWorkOrdersComponent,
   VehicleDocumentsComponent,
   ImageGalleryComponent,
+  ServiceHistoryPanelComponent
 ];
 
 const directives = [

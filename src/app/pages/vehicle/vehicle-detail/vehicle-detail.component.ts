@@ -18,6 +18,7 @@ import { ModalConditionComponent } from '../../../shared/components/modal-condit
 import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
 import { Subscription } from 'rxjs';
 import { RESPONSE } from '../../../shared/enum/response.enum';
+import { ServiceHistoryDetailData } from '../../../shared/components/service-history-panel/service-history-panel.component';
 
 interface IVehicleDetail {
   id: string;
@@ -71,6 +72,7 @@ export class VehicleDetailComponent implements OnInit {
   workOrders: IWorkOrder[] = [];
   documents: IVehicleDocument[] = [];
   photos: IImageGalleryItem[] = [];
+  selectedHistory: ServiceHistoryDetailData | null = null;
 
   permissions!: PermissionService;
   historyQuery: IQueryListHistory = {
@@ -662,10 +664,6 @@ export class VehicleDetailComponent implements OnInit {
     history.back();
   }
 
-  // ===========================
-  // Helpers
-  // ===========================
-
   formatNumber(value: number): string {
     return new Intl.NumberFormat('en-US').format(value);
   }
@@ -746,7 +744,46 @@ export class VehicleDetailComponent implements OnInit {
   }
 
   onViewService(event: string) {
-    console.log('View History Service: ', event)
+    console.log('View History Service: ', event);
+    try {
+      this.selectedHistory = {
+        invoiceNumber: 'INV2400233',
+        workOrderId: 'WO-2026-0892',
+        serviceDate: '12 Jul 2026',
+        mileage: 125340,
+        mechanicName: 'ช่างวิชัย พี.',
+        subTotal: 2580,
+        vatRate: 7,
+        vatAmount: 180.6,
+        totalAmount: 2760.6,
+        mechanicNotes:
+          'ตรวจพบผ้าเบรกหน้าเหลือประมาณ 4mm คาดว่าต้องเปลี่ยนในรอบถัดไป',
+        items: [
+          {
+            name: 'น้ำมันเครื่อง Fully Synthetic 5W-30',
+            sku: 'MOBIL1-5W30-4L',
+            quantity: 1,
+            price: 1850,
+          },
+          {
+            name: 'กรองน้ำมันเครื่อง แท้ศูนย์',
+            sku: 'TOY-04152-YZZA1',
+            quantity: 1,
+            price: 280,
+          },
+          {
+            name: 'สลับยางถ่วงล้อ 4 ล้อ',
+            category: 'ค่าบริการ/ค่าแรงช่าง',
+            quantity: 1,
+            price: 450,
+          },
+        ],
+      };
+    } catch (error) {}
+  }
+
+  onClosePanel() {
+    this.selectedHistory = null;
   }
 
   private openResetPasswordForm() {

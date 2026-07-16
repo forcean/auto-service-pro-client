@@ -177,3 +177,9 @@
     </article>
   </main>
 </div>
+
+<app-service-history-panel
+    *ngIf="selectedHistory"
+    [data]="selectedHistory"
+    (closePanel)="onClosePanel()">
+  </app-service-history-panel>
