@@ -72,7 +72,10 @@
   </div>
 
   <div class="mb-8">
-    <app-search-vehicle (search)="onSearch($event)"> </app-search-vehicle>
+    <app-search-vehicle 
+    (search)="onSearch($event)"
+    (reset)="onResetCriteria()"
+    > </app-search-vehicle>
   </div>
   <section class="content-card">
     <div class="content-header">
@@ -91,12 +94,13 @@
 
     <app-table-vehicle-list
       [headers]="headers"
-      [config]="userList"
+      [config]="vehicleList"
       [pageIndex]="page"
       [pageSize]="limit"
       [isLoading]="isLoading"
       (onEdit)="onEdit($event)"
       (onView)="viewDetail($event)"
+      (onDelete)="onDelete($event)"
       (sortEmit)="onSort($event)"
       (changePage)="onChangePage($event)"
     >

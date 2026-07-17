@@ -8,49 +8,345 @@ import { ModalCommonService } from '../../../shared/components/modal-common/moda
 import { HandleTokenService } from '../../../core/services/handle-token-service/handle-token.service';
 import { LoadingBarService } from '@ngx-loading-bar/core';
 import { ROLE } from '../../../shared/enum/role.enum';
-import { ITableHeaderVehicle } from '../../../shared/interface/table-vehicle.interface';
+import {
+  IQueryVehicle,
+  ISearchVehicle,
+  ITableHeaderVehicle,
+  IVehicleResultData,
+} from '../../../shared/interface/table-vehicle.interface';
+import { EVehicleStatus } from '../../../shared/enum/vehicle.enum';
+
+export const MOCK_VEHICLE_LIST: IVehicleResultData = {
+  keyword: '',
+
+  page: 1,
+
+  limit: 10,
+
+  total: 10,
+
+  totalPage: 1,
+
+  vehicles: [
+    {
+      id: 'VH001',
+
+      plateNumber: '1กข 1234',
+
+      ownerName: 'สมชาย ใจดี',
+
+      brand: 'Toyota',
+
+      model: 'Camry',
+
+      year: 2022,
+
+      mileage: 32540,
+
+      vin: 'JTNB11HK5N3000001',
+
+      engineNumber: '2ARFE123456',
+
+      color: 'White',
+
+      lastServiceDate: '2026-07-10T09:30:00Z',
+
+      status: EVehicleStatus.REPAIRING,
+    },
+
+    {
+      id: 'VH002',
+
+      plateNumber: '2ขค 5678',
+
+      ownerName: 'วิภา ศรีสุข',
+
+      brand: 'Honda',
+
+      model: 'Civic',
+
+      year: 2021,
+
+      mileage: 48720,
+
+      vin: 'MRHFC1670MT000002',
+
+      engineNumber: 'L15B7123456',
+
+      color: 'Black',
+
+      lastServiceDate: '2026-07-14T13:00:00Z',
+
+      status: EVehicleStatus.WAITING_PARTS,
+    },
+
+    {
+      id: 'VH003',
+
+      plateNumber: '3งจ 9012',
+
+      ownerName: 'อนุชา พงษ์ไทย',
+
+      brand: 'Mazda',
+
+      model: 'CX-5',
+
+      year: 2023,
+
+      mileage: 15200,
+
+      color: 'Red',
+
+      lastServiceDate: '2026-07-16T10:15:00Z',
+
+      status: EVehicleStatus.INSPECTING,
+    },
+
+    {
+      id: 'VH004',
+
+      plateNumber: '4ฉช 3456',
+
+      ownerName: 'กิตติชัย บุญมา',
+
+      brand: 'Ford',
+
+      model: 'Ranger',
+
+      year: 2020,
+
+      mileage: 89650,
+
+      color: 'Blue',
+
+      lastServiceDate: '2026-07-12T15:45:00Z',
+
+      status: EVehicleStatus.QUALITY_CHECK,
+    },
+
+    {
+      id: 'VH005',
+
+      plateNumber: '5ซญ 7890',
+
+      ownerName: 'นภัสสร แสงทอง',
+
+      brand: 'Toyota',
+
+      model: 'Hilux Revo',
+
+      year: 2024,
+
+      mileage: 8400,
+
+      color: 'Silver',
+
+      lastServiceDate: '2026-07-15T08:20:00Z',
+
+      status: EVehicleStatus.READY_FOR_PICKUP,
+    },
+
+    {
+      id: 'VH006',
+
+      plateNumber: '6ฎฏ 1122',
+
+      ownerName: 'ธนพล สุขใจ',
+
+      brand: 'Honda',
+
+      model: 'City',
+
+      year: 2019,
+
+      mileage: 112350,
+
+      color: 'Gray',
+
+      lastServiceDate: '2026-07-08T11:00:00Z',
+
+      status: EVehicleStatus.COMPLETED,
+    },
+
+    {
+      id: 'VH007',
+
+      plateNumber: '7ฐฑ 3344',
+
+      ownerName: 'ปรียา รัตนา',
+
+      brand: 'Isuzu',
+
+      model: 'D-Max',
+
+      year: 2021,
+
+      mileage: 65880,
+
+      color: 'White',
+
+      lastServiceDate: '2026-07-11T14:30:00Z',
+
+      status: EVehicleStatus.PENDING,
+    },
+
+    {
+      id: 'VH008',
+
+      plateNumber: '8ฒณ 5566',
+
+      ownerName: 'เอกชัย วัฒนา',
+
+      brand: 'Nissan',
+
+      model: 'Almera',
+
+      year: 2022,
+
+      mileage: 28640,
+
+      color: 'Black',
+
+      lastServiceDate: '2026-07-09T16:00:00Z',
+
+      status: EVehicleStatus.WAITING_APPROVAL,
+    },
+
+    {
+      id: 'VH009',
+
+      plateNumber: '9ดต 7788',
+
+      ownerName: 'ศศิธร คำดี',
+
+      brand: 'Mitsubishi',
+
+      model: 'Xpander',
+
+      year: 2023,
+
+      mileage: 19420,
+
+      color: 'Orange',
+
+      lastServiceDate: '2026-07-13T09:00:00Z',
+
+      status: EVehicleStatus.CANCELLED,
+    },
+
+    {
+      id: 'VH010',
+
+      plateNumber: '1กก 9999',
+
+      ownerName: 'วรพงษ์ เจริญ',
+
+      brand: 'BYD',
+
+      model: 'Atto 3',
+
+      year: 2025,
+
+      mileage: 5200,
+
+      color: 'Blue',
+
+      lastServiceDate: '2026-07-17T08:30:00Z',
+
+      status: EVehicleStatus.REPAIRING,
+    },
+  ],
+};
 
 @Component({
   selector: 'app-vehicle-list',
   standalone: false,
   templateUrl: './vehicle-list.component.html',
-  styleUrl: './vehicle-list.component.scss'
+  styleUrl: './vehicle-list.component.scss',
 })
 export class VehicleListComponent implements OnInit {
   // @ViewChild(ModalConditionComponent) modalConditionComponent!: ModalConditionComponent;
   @ViewChild(PaginationComponent) paginationComponent!: PaginationComponent;
   // @ViewChild(ResetPasswordModuleComponent) resetPasswordModuleComponent!: ResetPasswordModuleComponent;
 
-  keyword: string = '';
-  page: number = 1
+  licensePlate: string = '';
+  page: number = 1;
   limit: number = 10;
   sortList: string = '';
-  username: string = '';
-  phoneNumber: string = '';
-  userId: string = '';
-  role: string = '';
-  userList!: any;
+  brand: string = '';
+  vehicle: string = '';
+  vehicleId: string = '';
+  model: string = '';
+  status: EVehicleStatus | '' = '';
+  vehicleList!: IVehicleResultData;
   permissions!: PermissionService;
 
   isLoadingReset: boolean = false;
   isLoading: boolean = false;
-  isRoleSO: boolean = false;
-  isRoleAMD: boolean = false;
-  isRoleMNG: boolean = false;
-  isPasswordInvalid: boolean = false;
-  isResetPassword: boolean = false;
-  isViewUserList: boolean = false;
 
+  isViewVehicleList: boolean = false;
+  isCreateVehicle: boolean = false;
+  isUpdateVehicle: boolean = false;
+  isDeleteVehicle: boolean = false;
+  isViewVehicleDetail: boolean = false;
 
   private modalSubscription: Subscription | null = null;
 
   headers: ITableHeaderVehicle[] = [
-    { headerName: 'licensePlate', valueType: 'string', isSort: true, i18nKey: 'หมายเลขทะเบียน' },
-    { headerName: 'owner', valueType: 'string', isSort: true, i18nKey: 'ผู้ครอบครอง' },
-    { headerName: 'mileage', valueType: 'string', isSort: true, i18nKey: 'เลขไมล์' },
-    { headerName: 'lastDt', valueType: 'date', isSort: false, i18nKey: 'วันเข้ารับบริการล่าสุด' },
-    { headerName: 'status', valueType: 'string', isSort: false, i18nKey: 'สถานะ' },
-    { headerName: 'action', valueType: 'string', isSort: false, i18nKey: 'จัดการ' },
+    {
+      headerName: 'plateNumber',
+      valueType: 'string',
+      isSort: true,
+      i18nKey: 'ทะเบียนรถ',
+    },
+    {
+      headerName: 'ownerName',
+      valueType: 'string',
+      isSort: true,
+      i18nKey: 'ผู้ครอบครอง',
+    },
+    {
+      headerName: 'brand',
+      valueType: 'string',
+      isSort: true,
+      i18nKey: 'ยี่ห้อ',
+    },
+    {
+      headerName: 'model',
+      valueType: 'string',
+      isSort: true,
+      i18nKey: 'รุ่น',
+    },
+    {
+      headerName: 'year',
+      valueType: 'number',
+      isSort: true,
+      i18nKey: 'ปี',
+    },
+    {
+      headerName: 'mileage',
+      valueType: 'number',
+      isSort: true,
+      i18nKey: 'เลขไมล์',
+    },
+    {
+      headerName: 'lastServiceDate',
+      valueType: 'date',
+      isSort: true,
+      i18nKey: 'เข้ารับบริการล่าสุด',
+    },
+    {
+      headerName: 'status',
+      valueType: 'string',
+      isSort: true,
+      i18nKey: 'สถานะ',
+    },
+    {
+      headerName: 'action',
+      valueType: 'string',
+      isSort: false,
+      i18nKey: 'จัดการ',
+    },
   ];
 
   constructor(
@@ -62,13 +358,8 @@ export class VehicleListComponent implements OnInit {
     private handleTokenService: HandleTokenService,
     // private resetFormService: ResetPasswordModuleService,
     private loadingBarService: LoadingBarService,
-    private permissionService: PermissionService
-  ) {
-    this.role = this.handleTokenService.getRole();
-    this.isRoleSO = this.role === ROLE.SO;
-    this.isRoleAMD = this.role === ROLE.ADM;
-    this.isRoleMNG = this.role === ROLE.MNG;
-  }
+    private permissionService: PermissionService,
+  ) {}
 
   ngOnInit(): void {
     this.initializePermissions();
@@ -76,14 +367,16 @@ export class VehicleListComponent implements OnInit {
 
   private async initializePermissions() {
     try {
-      this.permissions = await this.permissionService.permissions();
-      this.isViewUserList = this.permissionService.isViewUserList;
-      this.isResetPassword = this.permissionService.isResetPassword;
-      if (!this.isViewUserList) {
-        this.router.navigate(['/not-found']);
-      } else {
-        this.route.queryParams.subscribe(params => this.updateQueryParams(params));
-      }
+      // this.permissions = await this.permissionService.permissions();
+      // this.isViewUserList = this.permissionService.isViewUserList;
+      // this.isResetPassword = this.permissionService.isResetPassword;
+      // if (!this.isViewUserList) {
+      //   this.router.navigate(['/not-found']);
+      // } else {
+      this.route.queryParams.subscribe((params) =>
+        this.updateQueryParams(params),
+      );
+      // }
     } catch (error) {
       const errorObject = error as { message: string };
       if (errorObject.message !== '504') {
@@ -92,28 +385,24 @@ export class VehicleListComponent implements OnInit {
     }
   }
 
-  onSearchSubmit(criteria: any) {
-    this.username = criteria.publicId ?? '';
-    this.role = criteria.role ?? '';
-    this.page = 1;
-    this.updateUrlParams();
-  }
-
   onResetCriteria() {
-    this.username = '';
-    this.role = '';
+    this.licensePlate = '';
+    this.model = '';
+    this.brand = '';
+    this.status = '';
     this.sortList = '';
     this.page = 1;
-
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: {
-        username: null,
-        role: null,
+        licensePlate: null,
+        brand: null,
+        model: null,
+        status: null,
         sort: null,
-        page: 1
+        page: 1,
       },
-      queryParamsHandling: 'merge'
+      queryParamsHandling: 'merge',
     });
   }
 
@@ -122,7 +411,7 @@ export class VehicleListComponent implements OnInit {
   }
 
   onReset(event: string) {
-    this.userId = event;
+    this.vehicleId = event;
     this.handleModalReset();
   }
 
@@ -131,16 +420,21 @@ export class VehicleListComponent implements OnInit {
   }
 
   onEdit(event: string) {
-    this.router.navigate(['/portal/vehicle/', event]);
+    this.router.navigate(['/portal/vehicle/', event, 'edit']);
+  }
+
+  onDelete(event: string) {
+    console.log('Delete', event);
   }
 
   private updateQueryParams(params: any) {
-    this.keyword = params['keyword'] || '';
     this.page = Number(params['page'] || this.page);
     this.limit = Number(params['limit'] || this.limit);
     this.sortList = params['sort'] || '';
-    this.username = params['username'] || '';
-    this.role = params['role'] || '';
+    this.licensePlate = params['licensePlate'] || '';
+    this.brand = params['brand'] || '';
+    this.model = params['model'] || '';
+    this.status = (params['status'] as EVehicleStatus) || '';
     this.getListVehicle();
   }
 
@@ -149,8 +443,11 @@ export class VehicleListComponent implements OnInit {
       page: this.page.toString(),
       limit: this.limit.toString(),
       sort: this.sortList || undefined,
-      username: this.username || undefined,
-      role: this.role || undefined,
+      vehicle: this.vehicle || undefined,
+      licensePlate: this.licensePlate || undefined,
+      brand: this.brand || undefined,
+      model: this.model || undefined,
+      status: this.status || undefined,
     };
 
     this.router.navigate([], {
@@ -160,8 +457,11 @@ export class VehicleListComponent implements OnInit {
     });
   }
 
-  onSearch(search: string) {
-    this.keyword = search;
+  onSearch(search: ISearchVehicle) {
+    this.licensePlate = search.licensePlate || '';
+    this.brand = search.brand || '';
+    this.model = search.model || '';
+    this.status = (search.status as EVehicleStatus) || '';
     this.page = 1;
     this.updateUrlParams();
   }
@@ -182,17 +482,22 @@ export class VehicleListComponent implements OnInit {
   }
 
   private async getListVehicle() {
-    this.isLoading = true;
-    const loader = this.loadingBarService.useRef();
-    loader.start();
+    // this.isLoading = true;
+    // const loader = this.loadingBarService.useRef();
+    // loader.start();
     try {
-      // const params: IQueryListUser = {
-      //   publicId: this.username || undefined,
-      //   role: this.role || undefined,
-      //   page: this.page,
-      //   limit: this.limit,
-      //   // sort: this.sortList ? this.sortList : 'createDt.desc'
-      // };
+      const params: IQueryVehicle = {
+        licensePlate: this.licensePlate || undefined,
+        brand: this.brand || undefined,
+        model: this.model || undefined,
+        status: this.status || undefined,
+        page: this.page,
+        limit: this.limit,
+        sort: this.sortList ? this.sortList : 'createDt.desc',
+      };
+      console.log('Api', params);
+      this.vehicleList = MOCK_VEHICLE_LIST;
+
       // const res = await this.userManagementService.getListUser(params);
       // if (res.resultCode === RESPONSE.SUCCESS) {
       //   this.userList = res.resultData;
@@ -209,8 +514,8 @@ export class VehicleListComponent implements OnInit {
       //   this.handleCommonError();
       // }
     } finally {
-      this.isLoading = false;
-      loader.complete();
+      // this.isLoading = false;
+      // loader.complete();
     }
   }
 
@@ -260,7 +565,8 @@ export class VehicleListComponent implements OnInit {
     this.modalConditionService.open({
       type: 'change',
       title: 'คุณต้องการรีเซ็ตรหัสผ่านหรือไม่?',
-      subtitle: 'คุณต้องการยืนยันการเปลี่ยนรหัสผ่านหรือไม่? การคลิก ยืนยัน <br>จะพาคุณไปยังหน้าการเปลี่ยนรหัสผ่าน คลิก ยกเลิก เพื่อออก',
+      subtitle:
+        'คุณต้องการยืนยันการเปลี่ยนรหัสผ่านหรือไม่? การคลิก ยืนยัน <br>จะพาคุณไปยังหน้าการเปลี่ยนรหัสผ่าน คลิก ยกเลิก เพื่อออก',
     });
   }
 
@@ -277,7 +583,8 @@ export class VehicleListComponent implements OnInit {
     this.modalCommonService.open({
       type: 'alert',
       title: 'ขออภัย ระบบขัดข้องในขณะนี้',
-      subtitle: 'กรุณาทำรายการใหม่อีกครั้ง หรือ ติดต่อผู้ดูแลระบบในองค์กรของคุณ',
+      subtitle:
+        'กรุณาทำรายการใหม่อีกครั้ง หรือ ติดต่อผู้ดูแลระบบในองค์กรของคุณ',
       buttonText: 'เข้าใจแล้ว',
     });
   }
@@ -286,7 +593,8 @@ export class VehicleListComponent implements OnInit {
     this.modalCommonService.open({
       type: 'success',
       title: 'การรีเซ็ตรหัสผ่านเสร็จสมบูรณ์',
-      subtitle: 'การรีเซ็ตรหัสผ่านเสร็จสมบูรณ์แล้ว กรุณาใช้รหัสผ่านใหม่ของคุณในการเข้าสู่ระบบ',
+      subtitle:
+        'การรีเซ็ตรหัสผ่านเสร็จสมบูรณ์แล้ว กรุณาใช้รหัสผ่านใหม่ของคุณในการเข้าสู่ระบบ',
       buttonText: 'ยืนยัน',
     });
   }

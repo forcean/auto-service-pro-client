@@ -1,5 +1,7 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, model, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { EVehicleStatus, SERVICE_STATUS_LABEL } from '../../enum/vehicle.enum';
+import { ISearchVehicle } from '../../interface/table-vehicle.interface';
 
 @Component({
   selector: 'app-search-vehicle',
@@ -8,14 +10,19 @@ import { FormBuilder, FormGroup } from '@angular/forms';
   styleUrl: './search-vehicle.component.scss',
 })
 export class SearchVehicleComponent implements OnInit {
-  @Output() search = new EventEmitter<any>();
+  @Output() search = new EventEmitter<ISearchVehicle>();
   @Output() reset = new EventEmitter<void>();
 
   searchForm!: FormGroup;
   brands: any[] = [];
-  vehicles: any[] = [];
+  model: any[] = [];
   loadingBrand = false;
   loadingVehicle = false;
+  
+  readonly statusOptions = Object.values(EVehicleStatus).map((status) => ({
+    value: status,
+    label: SERVICE_STATUS_LABEL[status],
+  }));
 
   constructor(private fb: FormBuilder) {}
 
@@ -27,9 +34,9 @@ export class SearchVehicleComponent implements OnInit {
 
   private buildForm(): void {
     this.searchForm = this.fb.group({
-      keyword: [''],
+      licensePlate: [''],
       brand: [''],
-      vehicle: [''],
+      model: [''],
       status: [''],
     });
 
@@ -37,7 +44,7 @@ export class SearchVehicleComponent implements OnInit {
     this.searchForm.get('brand')?.valueChanges.subscribe((value) => {
       this.searchForm.patchValue(
         {
-          vehicle: '',
+          model: '',
         },
         {
           emitEvent: false,
@@ -47,38 +54,32 @@ export class SearchVehicleComponent implements OnInit {
       if (value) {
         this.loadVehicles(value);
       } else {
-        this.vehicles = [];
+        this.model = [];
       }
     });
   }
 
   onSubmit(): void {
+    console.log(this.searchForm.getRawValue());
+    
     this.search.emit(this.searchForm.getRawValue());
   }
 
   onReset(): void {
     this.searchForm.reset({
-      keyword: '',
-
+      licensePlate: '',
       brand: '',
-
-      vehicle: '',
-
+      model: '',
       status: '',
     });
 
-    this.vehicles = [];
-
+    this.model = [];
     this.reset.emit();
   }
 
-  /**
-   * TODO : Call API
-   */
   private loadBrands(): void {
     this.loadingBrand = true;
 
-    // ตัวอย่างข้อมูล Mock
     this.brands = [
       {
         id: 'toyota',
@@ -101,15 +102,12 @@ export class SearchVehicleComponent implements OnInit {
     this.loadingBrand = false;
   }
 
-  /**
-   * TODO : Call API
-   */
   private loadVehicles(brandId: string): void {
     this.loadingVehicle = true;
 
     switch (brandId) {
       case 'toyota':
-        this.vehicles = [
+        this.model = [
           {
             id: 'camry',
             name: 'Camry',
@@ -127,7 +125,7 @@ export class SearchVehicleComponent implements OnInit {
         break;
 
       case 'honda':
-        this.vehicles = [
+        this.model = [
           {
             id: 'city',
             name: 'City',
@@ -145,7 +143,7 @@ export class SearchVehicleComponent implements OnInit {
         break;
 
       default:
-        this.vehicles = [];
+        this.model = [];
 
         break;
     }

@@ -1,3 +1,5 @@
+import { EVehicleStatus } from "../enum/vehicle.enum";
+
 export interface IVehicleResultData {
   keyword?: string;
   page: number;
@@ -19,11 +21,8 @@ export interface IVehicle {
   engineNumber?: string;
   color?: string;
   lastServiceDate?: string;
-  status: VehicleStatus;
+  status: EVehicleStatus;
 }
-
-export type VehicleStatus = 'active' | 'in_service' | 'inactive';
-
 export interface IQueryVehicle extends ISearchVehicle {
   page: number;
   limit: number;
@@ -31,13 +30,13 @@ export interface IQueryVehicle extends ISearchVehicle {
 }
 
 export interface ISearchVehicle {
-  keyword?: string;
+  licensePlate?: string;
   plateNumber?: string;
   ownerName?: string;
   brand?: string;
   model?: string;
   year?: number;
-  status?: VehicleStatus;
+  status?: EVehicleStatus;
 }
 
 export interface ITableHeaderVehicle {

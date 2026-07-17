@@ -18,7 +18,7 @@
         <input
           class="toolbar-input"
           placeholder="ทะเบียนรถ / ชื่อลูกค้า"
-          formControlName="keyword"
+          formControlName="licensePlate"
         />
       </div>
 
@@ -30,22 +30,22 @@
         </custom-option>
       </custom-select>
 
-      <custom-select formControlName="vehicle">
+      <custom-select formControlName="model">
         <custom-option value=""> ทุกรุ่น </custom-option>
 
-        <custom-option *ngFor="let item of vehicles" [value]="item.id">
+        <custom-option *ngFor="let item of model" [value]="item.id">
           {{ item.name }}
         </custom-option>
       </custom-select>
 
       <custom-select formControlName="status">
-        <custom-option value=""> ทุกสถานะ </custom-option>
-
-        <custom-option value="ACTIVE"> Active </custom-option>
-
-        <custom-option value="IN_SERVICE"> In Service </custom-option>
-
-        <custom-option value="INACTIVE"> Inactive </custom-option>
+        <custom-option value="">ทุกสถานะ</custom-option>
+        <custom-option
+          *ngFor="let status of statusOptions"
+          [value]="status.value"
+        >
+          {{ status.label }}
+        </custom-option>
       </custom-select>
     </div>
 
