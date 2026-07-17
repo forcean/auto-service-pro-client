@@ -46,9 +46,9 @@
 
           <td>{{ row.ownerName }}</td>
 
-          <td>{{ row.mileage }}</td>
+          <td>{{ row.brand }}</td>
 
-          <td>{{ row.year }}</td>
+          <td>{{ row.model }}</td>
 
           <td>{{ row.mileage | number }} km</td>
 
@@ -77,7 +77,7 @@
               />
 
               <img
-                src="assets/img/icons/icon.delete.svg"
+                src="assets/img/icons/icon.bin.svg"
                 class="action-icon"
                 (click)="onDelete.emit(row.id)"
               />

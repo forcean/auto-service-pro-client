@@ -15,6 +15,7 @@ import {
   IVehicleResultData,
 } from '../../../shared/interface/table-vehicle.interface';
 import { EVehicleStatus } from '../../../shared/enum/vehicle.enum';
+import { ModalConditionComponent } from '../../../shared/components/modal-condition/modal-condition.component';
 
 export const MOCK_VEHICLE_LIST: IVehicleResultData = {
   keyword: '',
@@ -265,7 +266,8 @@ export const MOCK_VEHICLE_LIST: IVehicleResultData = {
   styleUrl: './vehicle-list.component.scss',
 })
 export class VehicleListComponent implements OnInit {
-  // @ViewChild(ModalConditionComponent) modalConditionComponent!: ModalConditionComponent;
+  @ViewChild(ModalConditionComponent)
+  modalConditionComponent!: ModalConditionComponent;
   @ViewChild(PaginationComponent) paginationComponent!: PaginationComponent;
   // @ViewChild(ResetPasswordModuleComponent) resetPasswordModuleComponent!: ResetPasswordModuleComponent;
 
@@ -316,12 +318,6 @@ export class VehicleListComponent implements OnInit {
       valueType: 'string',
       isSort: true,
       i18nKey: 'รุ่น',
-    },
-    {
-      headerName: 'year',
-      valueType: 'number',
-      isSort: true,
-      i18nKey: 'ปี',
     },
     {
       headerName: 'mileage',
@@ -410,11 +406,6 @@ export class VehicleListComponent implements OnInit {
     this.router.navigate(['/portal/vehicle/create']);
   }
 
-  onReset(event: string) {
-    this.vehicleId = event;
-    this.handleModalReset();
-  }
-
   viewDetail(event: string) {
     this.router.navigate(['/portal/vehicle/', event]);
   }
@@ -424,7 +415,8 @@ export class VehicleListComponent implements OnInit {
   }
 
   onDelete(event: string) {
-    console.log('Delete', event);
+    this.vehicleId = event;
+    this.handleModalDelete();
   }
 
   private updateQueryParams(params: any) {
@@ -477,10 +469,6 @@ export class VehicleListComponent implements OnInit {
     this.updateUrlParams();
   }
 
-  closeModalResetPassword(): void {
-    // this.resetPasswordModuleComponent.closeModal();
-  }
-
   private async getListVehicle() {
     // this.isLoading = true;
     // const loader = this.loadingBarService.useRef();
@@ -519,7 +507,7 @@ export class VehicleListComponent implements OnInit {
     }
   }
 
-  async resetPasswordEvent(pwd: string) {
+  private deleteCustomerVehicle(id: string) {
     this.isLoadingReset = true;
     const loader = this.loadingBarService.useRef();
     loader.start();
@@ -545,28 +533,24 @@ export class VehicleListComponent implements OnInit {
       // }
     } catch (error) {
       console.error('Response error', error);
+    } finally {
+      this.isLoadingReset = false;
+      loader.complete();
     }
-    this.isLoadingReset = false;
-    loader.complete();
-  }
-
-  private openResetPasswordForm() {
-    // this.modalConditionComponent.onClose();
-    // this.resetFormService.open({});
   }
 
   async handleOnModalConfirm(flag: string) {
     if (flag === 'change') {
-      this.openResetPasswordForm();
+      this.deleteCustomerVehicle(this.vehicleId);
     }
   }
 
-  private handleModalReset() {
+  private handleModalDelete() {
     this.modalConditionService.open({
       type: 'change',
-      title: 'คุณต้องการรีเซ็ตรหัสผ่านหรือไม่?',
+      title: 'คุณต้องการลบรถลูกค้าคันนี้หรือไม่?',
       subtitle:
-        'คุณต้องการยืนยันการเปลี่ยนรหัสผ่านหรือไม่? การคลิก ยืนยัน <br>จะพาคุณไปยังหน้าการเปลี่ยนรหัสผ่าน คลิก ยกเลิก เพื่อออก',
+        'คุณต้องการยืนยันการลบหรือไม่? การคลิก ยืนยัน <br>จะลบอย่างถาวร คลิก ยกเลิก เพื่อออก',
     });
   }
 

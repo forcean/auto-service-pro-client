@@ -113,7 +113,11 @@
       </section>
 
       <section class="card">
-        <app-vehicle-compatibility formControlName="vehicles" mode="customer">
+        <app-vehicle-compatibility 
+        formControlName="vehicles" 
+        mode="customer"
+        [allowMultiple]= false 
+        headerText=" ยานยนต์ของลูกค้า">
         </app-vehicle-compatibility>
       </section>
     </div>
