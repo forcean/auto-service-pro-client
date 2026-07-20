@@ -2,6 +2,7 @@ import { Component, EventEmitter, model, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { EVehicleStatus, SERVICE_STATUS_LABEL } from '../../enum/vehicle.enum';
 import { ISearchVehicle } from '../../interface/table-vehicle.interface';
+import { PROVINCES } from '../../constant/province.constant';
 
 @Component({
   selector: 'app-search-vehicle',
@@ -18,7 +19,10 @@ export class SearchVehicleComponent implements OnInit {
   model: any[] = [];
   loadingBrand = false;
   loadingVehicle = false;
-  
+  private readonly provinces = [...PROVINCES].sort(
+  (a, b) => b.nameTH.length - a.nameTH.length,
+);
+
   readonly statusOptions = Object.values(EVehicleStatus).map((status) => ({
     value: status,
     label: SERVICE_STATUS_LABEL[status],
@@ -59,10 +63,45 @@ export class SearchVehicleComponent implements OnInit {
     });
   }
 
+  private parseLicensePlate(value: string): {
+    licensePlate: string;
+    province: string;
+  } {
+    value = value.trim();
+    if (!value) {
+      return {
+        licensePlate: '',
+        province: '',
+      };
+    }
+
+    const province = this.provinces.find((item) => value.endsWith(item.nameTH));
+
+    if (!province) {
+      return {
+        licensePlate: value,
+        province: '',
+      };
+    }
+
+    return {
+      licensePlate: value
+        .substring(0, value.length - province.nameTH.length)
+        .trim(),
+      province: province.code,
+    };
+  }
+
   onSubmit(): void {
-    console.log(this.searchForm.getRawValue());
-    
-    this.search.emit(this.searchForm.getRawValue());
+    const formValue = this.searchForm.getRawValue();
+    const result = this.parseLicensePlate(formValue.licensePlate);
+    // console.log(this.searchForm.getRawValue());
+
+    this.search.emit({
+      ...formValue,
+      licensePlate: result.licensePlate,
+      province: result.province
+    });
   }
 
   onReset(): void {

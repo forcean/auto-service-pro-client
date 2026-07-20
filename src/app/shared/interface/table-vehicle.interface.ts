@@ -31,6 +31,7 @@ export interface IQueryVehicle extends ISearchVehicle {
 
 export interface ISearchVehicle {
   licensePlate?: string;
+  province?: string;
   plateNumber?: string;
   ownerName?: string;
   brand?: string;

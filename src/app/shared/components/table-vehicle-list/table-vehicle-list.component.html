@@ -57,8 +57,17 @@
           </td>
 
           <td>
-            <span class="badge" [ngClass]="getStatusClass(row.status)">
-              {{ row.status }}
+            <span
+              class="badge"
+              [style.background]="getStatus(row.status)?.color + '20'"
+              [style.color]="getStatus(row.status)?.color"
+            >
+              <span
+                class="badge-dot"
+                [style.background]="getStatus(row.status)?.color"
+              ></span>
+
+              {{ getStatus(row.status)?.label }}
             </span>
           </td>
 

@@ -16,6 +16,8 @@ import {
 } from '../../../shared/interface/table-vehicle.interface';
 import { EVehicleStatus } from '../../../shared/enum/vehicle.enum';
 import { ModalConditionComponent } from '../../../shared/components/modal-condition/modal-condition.component';
+import { VehicleManagementService } from '../../../shared/services/vehicle-management.service';
+import { RESPONSE } from '../../../shared/enum/response.enum';
 
 export const MOCK_VEHICLE_LIST: IVehicleResultData = {
   keyword: '',
@@ -272,6 +274,7 @@ export class VehicleListComponent implements OnInit {
   // @ViewChild(ResetPasswordModuleComponent) resetPasswordModuleComponent!: ResetPasswordModuleComponent;
 
   licensePlate: string = '';
+  province:string = '';
   page: number = 1;
   limit: number = 10;
   sortList: string = '';
@@ -350,7 +353,7 @@ export class VehicleListComponent implements OnInit {
     private route: ActivatedRoute,
     private modalConditionService: ModalConditionService,
     private modalCommonService: ModalCommonService,
-    // private userManagementService: UserManagementService,
+    private vehicleManagementService: VehicleManagementService,
     private handleTokenService: HandleTokenService,
     // private resetFormService: ResetPasswordModuleService,
     private loadingBarService: LoadingBarService,
@@ -383,6 +386,7 @@ export class VehicleListComponent implements OnInit {
 
   onResetCriteria() {
     this.licensePlate = '';
+    this.province = '';
     this.model = '';
     this.brand = '';
     this.status = '';
@@ -392,6 +396,7 @@ export class VehicleListComponent implements OnInit {
       relativeTo: this.route,
       queryParams: {
         licensePlate: null,
+        province: null,
         brand: null,
         model: null,
         status: null,
@@ -416,6 +421,8 @@ export class VehicleListComponent implements OnInit {
 
   onDelete(event: string) {
     this.vehicleId = event;
+    console.log(this.vehicleId);
+    
     this.handleModalDelete();
   }
 
@@ -424,6 +431,7 @@ export class VehicleListComponent implements OnInit {
     this.limit = Number(params['limit'] || this.limit);
     this.sortList = params['sort'] || '';
     this.licensePlate = params['licensePlate'] || '';
+    this.province = params['province'] || '';
     this.brand = params['brand'] || '';
     this.model = params['model'] || '';
     this.status = (params['status'] as EVehicleStatus) || '';
@@ -437,6 +445,7 @@ export class VehicleListComponent implements OnInit {
       sort: this.sortList || undefined,
       vehicle: this.vehicle || undefined,
       licensePlate: this.licensePlate || undefined,
+      province: this.province || undefined,
       brand: this.brand || undefined,
       model: this.model || undefined,
       status: this.status || undefined,
@@ -451,6 +460,7 @@ export class VehicleListComponent implements OnInit {
 
   onSearch(search: ISearchVehicle) {
     this.licensePlate = search.licensePlate || '';
+    this.province = search.province || '';
     this.brand = search.brand || '';
     this.model = search.model || '';
     this.status = (search.status as EVehicleStatus) || '';
@@ -470,12 +480,13 @@ export class VehicleListComponent implements OnInit {
   }
 
   private async getListVehicle() {
-    // this.isLoading = true;
-    // const loader = this.loadingBarService.useRef();
-    // loader.start();
+    this.isLoading = true;
+    const loader = this.loadingBarService.useRef();
+    loader.start();
     try {
       const params: IQueryVehicle = {
         licensePlate: this.licensePlate || undefined,
+        province: this.province || undefined,
         brand: this.brand || undefined,
         model: this.model || undefined,
         status: this.status || undefined,
@@ -486,53 +497,43 @@ export class VehicleListComponent implements OnInit {
       console.log('Api', params);
       this.vehicleList = MOCK_VEHICLE_LIST;
 
-      // const res = await this.userManagementService.getListUser(params);
-      // if (res.resultCode === RESPONSE.SUCCESS) {
-      //   this.userList = res.resultData;
-      //   // this.isDisableSearch = (!this.keyword && this.userList?.users.length === 0 && !this.reportStatus)
-      //   //   || !this.reportStatusList.length;
-      // } else if (res.resultCode === RESPONSE.INVALID_PERMISSION) {
-      //   this.router.navigate(['/not-found']);
-      // } else {
-      //   this.handleFailResponse();
-      // }
+      const res = await this.vehicleManagementService.getListVehicle(params);
+      if (res.resultCode === RESPONSE.SUCCESS) {
+        this.vehicleList = res.resultData;
+        // this.isDisableSearch = (!this.keyword && this.userList?.users.length === 0 && !this.reportStatus)
+        //   || !this.reportStatusList.length;
+      } else if (res.resultCode === RESPONSE.INVALID_PERMISSION) {
+        this.router.navigate(['/not-found']);
+      } else {
+        this.handleFailResponse();
+      }
     } catch (error) {
       // const errorObject = error as { message: string };
       // if (errorObject.message !== '504') {
       //   this.handleCommonError();
       // }
     } finally {
-      // this.isLoading = false;
-      // loader.complete();
+      this.isLoading = false;
+      loader.complete();
     }
   }
 
-  private deleteCustomerVehicle(id: string) {
-    this.isLoadingReset = true;
+  private async deleteCustomerVehicle(id: string) {
+   this.isLoadingReset = true;
     const loader = this.loadingBarService.useRef();
     loader.start();
     try {
-      // const res = await this.userManagementService.resetPassword(pwd, this.userId);
-      // if (res.resultCode === RESPONSE.SUCCESS) {
-      //   this.closeModalResetPassword();
-      //   this.handleSuccessResetPassword();
-      // } else if (res.resultCode === RESPONSE.INVALID_ACCESS_TOKEN) {
-      //   // if (res.error?.code === ERR_CODE.PASSWORD_DUPLICATE) {
-      //   //   this.resetPasswordModuleComponent.isPasswordDuplicate = true;
-      //   // } else if (res.error?.code === ERR_CODE.PASSWORD_NOT_MATCH) {
-      //   //   this.resetPasswordModuleComponent.isPasswordInvalid = true;
-      //   // } else if (res.error?.code === ERR_CODE.ACCOUNT_INACTIVE) {
-      //   //   this.closeModal();
-      //   //   this.handleFailAccountUnavailable();
-      //   // }
-      // } else if (res.resultCode === RESPONSE.INVALID_PERMISSION) {
-      //   this.router.navigate(['/not-found']);
-      // } else {
-      //   this.closeModalResetPassword();
-      //   this.handleFailResponse();
-      // }
+      this.modalConditionComponent.onClose();
+      const res = await this.vehicleManagementService.deleteCustomerVehicle(id);
+      if (res.resultCode === RESPONSE.SUCCESS) {
+        this.handleSuccessDelete();
+        this.updateUrlParams();
+      } else {
+        this.handleFailDelete();
+      }
     } catch (error) {
       console.error('Response error', error);
+      this.handleCommonError();
     } finally {
       this.isLoadingReset = false;
       loader.complete();
@@ -573,12 +574,20 @@ export class VehicleListComponent implements OnInit {
     });
   }
 
-  private handleSuccessResetPassword() {
+  private handleSuccessDelete() {
     this.modalCommonService.open({
       type: 'success',
-      title: 'การรีเซ็ตรหัสผ่านเสร็จสมบูรณ์',
-      subtitle:
-        'การรีเซ็ตรหัสผ่านเสร็จสมบูรณ์แล้ว กรุณาใช้รหัสผ่านใหม่ของคุณในการเข้าสู่ระบบ',
+      title: 'ลบรถในลูกค้าสำเร็จ',
+      subtitle: 'รถคันนี้ถูกลบออกจากระบบเรียบร้อยแล้ว.',
+      buttonText: 'เข้าใจแล้ว',
+    });
+  }
+
+  private handleFailDelete() {
+    this.modalCommonService.open({
+      type: 'alert',
+      title: 'ไม่สามารถลบรถคันนี้ได้',
+      subtitle: 'ไม่สามารถลบรถคันนี้ได้ โปรดลองอีกครั้งหรือติดต่อ<br>ผู้ดูแลระบบหากปัญหายังคงอยู่',
       buttonText: 'ยืนยัน',
     });
   }

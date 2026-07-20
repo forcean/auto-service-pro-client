@@ -11,6 +11,8 @@ import {
   ITableHeaderVehicle,
   IVehicleResultData,
 } from '../../interface/table-vehicle.interface';
+import { VEHICLE_STATUS_OPTIONS } from '../../constant/vehicle-status.constant';
+import { EVehicleStatus } from '../../enum/vehicle.enum';
 
 @Component({
   selector: 'app-table-vehicle-list',
@@ -40,6 +42,9 @@ export class TableVehicleListComponent implements OnChanges {
   sortField: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
   paginationOption: number[] = [10, 15, 20, 30, 40, 50];
+  readonly statusMap = new Map(
+    VEHICLE_STATUS_OPTIONS.map((item) => [item.value, item]),
+  );
 
   ngOnChanges(): void {
     this.sorted = {};
@@ -71,21 +76,9 @@ export class TableVehicleListComponent implements OnChanges {
     this.sortEmit.emit(this.sortList);
   }
 
-  getStatusClass(status: string) {
-    switch (status) {
-      case 'active':
-        return 'badge-active';
-
-      case 'service':
-        return 'badge-service';
-
-      case 'inactive':
-        return 'badge-inactive';
-
-      default:
-        return 'badge-default';
-    }
-  }
+ getStatus(status: string) {
+  return this.statusMap.get(status as EVehicleStatus);
+}
 
   onPageChange(e: PaginationModel) {
     this.changePage.emit(e);
