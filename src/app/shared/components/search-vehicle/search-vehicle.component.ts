@@ -1,8 +1,11 @@
-import { Component, EventEmitter, model, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { EVehicleStatus, SERVICE_STATUS_LABEL } from '../../enum/vehicle.enum';
 import { ISearchVehicle } from '../../interface/table-vehicle.interface';
 import { PROVINCES } from '../../constant/province.constant';
+import { IQueryCatalogVehicles } from '../../interface/catalog.interface';
+import { CatalogService } from '../../services/catalog.service';
+import { RESPONSE } from '../../enum/response.enum';
+import { VEHICLE_STATUS_OPTIONS } from '../../constant/vehicle-status.constant';
 
 @Component({
   selector: 'app-search-vehicle',
@@ -17,22 +20,22 @@ export class SearchVehicleComponent implements OnInit {
   searchForm!: FormGroup;
   brands: any[] = [];
   model: any[] = [];
-  loadingBrand = false;
-  loadingVehicle = false;
+  isLoadingBrand = false;
+  isLoadingVehicle = false;
+  
   private readonly provinces = [...PROVINCES].sort(
-  (a, b) => b.nameTH.length - a.nameTH.length,
-);
+    (a, b) => b.nameTH.length - a.nameTH.length,
+  );
 
-  readonly statusOptions = Object.values(EVehicleStatus).map((status) => ({
-    value: status,
-    label: SERVICE_STATUS_LABEL[status],
-  }));
+  readonly statusOptions = VEHICLE_STATUS_OPTIONS;
 
-  constructor(private fb: FormBuilder) {}
+  constructor(
+    private fb: FormBuilder,
+    private catalogService: CatalogService,
+  ) {}
 
   ngOnInit(): void {
     this.buildForm();
-
     this.loadBrands();
   }
 
@@ -44,7 +47,6 @@ export class SearchVehicleComponent implements OnInit {
       status: [''],
     });
 
-    // เมื่อเปลี่ยน Brand ให้โหลด Model ใหม่
     this.searchForm.get('brand')?.valueChanges.subscribe((value) => {
       this.searchForm.patchValue(
         {
@@ -56,7 +58,7 @@ export class SearchVehicleComponent implements OnInit {
       );
 
       if (value) {
-        this.loadVehicles(value);
+        this.loadModels(value);
       } else {
         this.model = [];
       }
@@ -100,7 +102,7 @@ export class SearchVehicleComponent implements OnInit {
     this.search.emit({
       ...formValue,
       licensePlate: result.licensePlate,
-      province: result.province
+      province: result.province,
     });
   }
 
@@ -116,77 +118,38 @@ export class SearchVehicleComponent implements OnInit {
     this.reset.emit();
   }
 
-  private loadBrands(): void {
-    this.loadingBrand = true;
-
-    this.brands = [
-      {
-        id: 'toyota',
-        name: 'Toyota',
-      },
-      {
-        id: 'honda',
-        name: 'Honda',
-      },
-      {
-        id: 'mazda',
-        name: 'Mazda',
-      },
-      {
-        id: 'ford',
-        name: 'Ford',
-      },
-    ];
-
-    this.loadingBrand = false;
+  async loadBrands() {
+    this.isLoadingBrand = true;
+    try {
+      const params: IQueryCatalogVehicles = {
+        isActive: true,
+      };
+      const response = await this.catalogService.getBrandsVehicles(params);
+      if (response.resultCode == RESPONSE.SUCCESS) {
+        this.brands = response.resultData.vehicleBrands || [];
+      }
+    } catch (error) {
+      console.error('Error loading brands:', error);
+    } finally {
+      this.isLoadingBrand = false;
+    }
   }
 
-  private loadVehicles(brandId: string): void {
-    this.loadingVehicle = true;
+  private async loadModels(code: string) {
+    this.isLoadingVehicle = true;
 
-    switch (brandId) {
-      case 'toyota':
-        this.model = [
-          {
-            id: 'camry',
-            name: 'Camry',
-          },
-          {
-            id: 'corolla',
-            name: 'Corolla Altis',
-          },
-          {
-            id: 'hilux',
-            name: 'Hilux Revo',
-          },
-        ];
+    try {
+      const params: IQueryCatalogVehicles = {
+        brandCode: code,
+      };
 
-        break;
+      const response = await this.catalogService.getModelsVehicles(params);
 
-      case 'honda':
-        this.model = [
-          {
-            id: 'city',
-            name: 'City',
-          },
-          {
-            id: 'civic',
-            name: 'Civic',
-          },
-          {
-            id: 'crv',
-            name: 'CR-V',
-          },
-        ];
-
-        break;
-
-      default:
-        this.model = [];
-
-        break;
+      if (response.resultCode === RESPONSE.SUCCESS) {
+        this.model = response.resultData.vehicleModels ?? [];
+      }
+    } finally {
+      this.isLoadingVehicle = false;
     }
-
-    this.loadingVehicle = false;
   }
 }

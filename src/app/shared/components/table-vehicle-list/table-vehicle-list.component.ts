@@ -42,6 +42,7 @@ export class TableVehicleListComponent implements OnChanges {
   sortField: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
   paginationOption: number[] = [10, 15, 20, 30, 40, 50];
+  
   readonly statusMap = new Map(
     VEHICLE_STATUS_OPTIONS.map((item) => [item.value, item]),
   );
@@ -63,22 +64,21 @@ export class TableVehicleListComponent implements OnChanges {
   }
 
   onSort(field: string) {
-    if (!field) return;
+    if (!field) {
+      return;
+    }
 
     const isAsc = !this.sorted[field];
     this.sorted = { [field]: isAsc };
-
     this.sortDirection = isAsc ? 'asc' : 'desc';
     this.sortField = field;
-
     this.sortList = [`${field}.${this.sortDirection}`];
-
     this.sortEmit.emit(this.sortList);
   }
 
- getStatus(status: string) {
-  return this.statusMap.get(status as EVehicleStatus);
-}
+  getStatus(status: string) {
+    return this.statusMap.get(status as EVehicleStatus);
+  }
 
   onPageChange(e: PaginationModel) {
     this.changePage.emit(e);

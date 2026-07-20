@@ -25,16 +25,16 @@
       <custom-select formControlName="brand">
         <custom-option value=""> ทุกยี่ห้อ </custom-option>
 
-        <custom-option *ngFor="let item of brands" [value]="item.id">
+        <custom-option *ngFor="let item of brands" [value]="item.code">
           {{ item.name }}
         </custom-option>
       </custom-select>
 
       <custom-select formControlName="model">
-        <custom-option value=""> ทุกรุ่น </custom-option>
+        <custom-option value="">ทุกรุ่น</custom-option>
 
-        <custom-option *ngFor="let item of model" [value]="item.id">
-          {{ item.name }}
+        <custom-option *ngFor="let item of model" [value]="item.modelCode">
+          {{ item.model }}
         </custom-option>
       </custom-select>
 
