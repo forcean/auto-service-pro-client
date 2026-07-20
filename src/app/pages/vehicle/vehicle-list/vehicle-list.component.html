@@ -20,25 +20,11 @@
       </div>
 
       <div class="summary-content">
-        <span class="summary-title"> รถทั้งหมด </span>
+        <span class="summary-title">รถทั้งหมด</span>
 
-        <h2>{{ 0 }}</h2>
+        <h2>{{ dashboard.totalVehicles }}</h2>
 
-        <small>Vehicle</small>
-      </div>
-    </div>
-
-    <div class="summary-card">
-      <div class="summary-icon green">
-        <lucide-icon name="circle-check-big"></lucide-icon>
-      </div>
-
-      <div class="summary-content">
-        <span class="summary-title"> Active </span>
-
-        <h2>{{ 0 }}</h2>
-
-        <small>พร้อมใช้งาน</small>
+        <small>Vehicles in system</small>
       </div>
     </div>
 
@@ -48,36 +34,48 @@
       </div>
 
       <div class="summary-content">
-        <span class="summary-title"> In Service </span>
+        <span class="summary-title">กำลังเข้ารับบริการ</span>
 
-        <h2>{{ 0 }}</h2>
+        <h2>{{ dashboard.inService }}</h2>
 
-        <small>กำลังซ่อม</small>
+        <small>Vehicles in service</small>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-icon green">
+        <lucide-icon name="circle-check-big"></lucide-icon>
+      </div>
+
+      <div class="summary-content">
+        <span class="summary-title">ซ่อมเสร็จ</span>
+
+        <h2>{{ dashboard.completed }}</h2>
+
+        <small>Completed</small>
       </div>
     </div>
 
     <div class="summary-card">
       <div class="summary-icon red">
-        <lucide-icon name="circle-off"></lucide-icon>
+        <lucide-icon name="circle-x"></lucide-icon>
       </div>
 
       <div class="summary-content">
-        <span class="summary-title"> Inactive </span>
+        <span class="summary-title">ยกเลิก</span>
 
-        <h2>{{ 0 }}</h2>
+        <h2>{{ dashboard.cancelled }}</h2>
 
-        <small>ยกเลิก</small>
+        <small>Cancelled</small>
       </div>
     </div>
   </div>
 
   <div class="mb-8">
-    <app-search-vehicle 
-    (search)="onSearch($event)"
-    (reset)="onResetCriteria()"
-    > </app-search-vehicle>
+    <app-search-vehicle (search)="onSearch($event)" (reset)="onResetCriteria()">
+    </app-search-vehicle>
   </div>
-  <section class="content-card">
+  <section class="content-card p-2">
     <div class="content-header">
       <div>
         <h3>รายการรถทั้งหมด</h3>

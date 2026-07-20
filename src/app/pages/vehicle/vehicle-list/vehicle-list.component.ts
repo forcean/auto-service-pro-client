@@ -19,6 +19,13 @@ import { ModalConditionComponent } from '../../../shared/components/modal-condit
 import { VehicleManagementService } from '../../../shared/services/vehicle-management.service';
 import { RESPONSE } from '../../../shared/enum/response.enum';
 
+interface IVehicleDashboard {
+  totalVehicles: number;
+  inService: number;
+  completed: number;
+  cancelled: number;
+}
+
 export const MOCK_VEHICLE_LIST: IVehicleResultData = {
   keyword: '',
 
@@ -274,7 +281,7 @@ export class VehicleListComponent implements OnInit {
   // @ViewChild(ResetPasswordModuleComponent) resetPasswordModuleComponent!: ResetPasswordModuleComponent;
 
   licensePlate: string = '';
-  province:string = '';
+  province: string = '';
   page: number = 1;
   limit: number = 10;
   sortList: string = '';
@@ -347,6 +354,13 @@ export class VehicleListComponent implements OnInit {
       i18nKey: 'จัดการ',
     },
   ];
+
+  dashboard = {
+    totalVehicles: 1284,
+    inService: 93,
+    completed: 1145,
+    cancelled: 46,
+  };
 
   constructor(
     private router: Router,
@@ -422,7 +436,7 @@ export class VehicleListComponent implements OnInit {
   onDelete(event: string) {
     this.vehicleId = event;
     console.log(this.vehicleId);
-    
+
     this.handleModalDelete();
   }
 
@@ -519,7 +533,7 @@ export class VehicleListComponent implements OnInit {
   }
 
   private async deleteCustomerVehicle(id: string) {
-   this.isLoadingReset = true;
+    this.isLoadingReset = true;
     const loader = this.loadingBarService.useRef();
     loader.start();
     try {
@@ -587,7 +601,8 @@ export class VehicleListComponent implements OnInit {
     this.modalCommonService.open({
       type: 'alert',
       title: 'ไม่สามารถลบรถคันนี้ได้',
-      subtitle: 'ไม่สามารถลบรถคันนี้ได้ โปรดลองอีกครั้งหรือติดต่อ<br>ผู้ดูแลระบบหากปัญหายังคงอยู่',
+      subtitle:
+        'ไม่สามารถลบรถคันนี้ได้ โปรดลองอีกครั้งหรือติดต่อ<br>ผู้ดูแลระบบหากปัญหายังคงอยู่',
       buttonText: 'ยืนยัน',
     });
   }

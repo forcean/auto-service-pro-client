@@ -74,8 +74,8 @@ export class CatalogService {
 
   async getVehicles(params: IQueryCatalogVehicles): Promise<IBaseResponse<IResVehicles>> {
     try {
-      const uri = this.PREFIX_USER + `/products/vehicles/${params.brandCode}/${params.modelCode}/${params.generation}`;
-      const response = await this.httpService.get<IResVehicles>(uri);
+      const uri = this.PREFIX_USER + `/vehicles/${params.brandCode}/${params.modelCode}/${params.generation}`;
+      const response = await this.httpService.get<IResVehicles>(uri,{isActive: true});
       return response;
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
