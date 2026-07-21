@@ -65,6 +65,8 @@ import { VehicleWorkOrdersComponent } from './components/vehicle-work-orders/veh
 import { VehicleDocumentsComponent } from './components/vehicle-documents/vehicle-documents.component';
 import { ImageGalleryComponent } from './components/image-gallery/image-gallery.component';
 import { ServiceHistoryPanelComponent } from './components/service-history-panel/service-history-panel.component';
+import { ProvincePipe } from "./pipes/province.pipe";
+import { TimeAgoPipe } from './pipes/time-ago.pipe';
 
 const components = [
   ModalCommonComponent,
@@ -122,25 +124,27 @@ const directives = [
     FormsModule,
     ReactiveFormsModule,
     LucideAngularModule.pick({
-      ArrowUpFromDot,
-      RotateCcw,
-      ChevronDown,
-      ArrowRightLeft,
-      List,
-      Search,
-      SlidersHorizontal,
-      ChevronUp,
-      PackagePlus,
-      RotateCw,
-      ChevronsDown,
-      CarFront,
-      Upload,
-      Image,
-      Eye,
-      Download,
-      Trash2,
+        ArrowUpFromDot,
+        RotateCcw,
+        ChevronDown,
+        ArrowRightLeft,
+        List,
+        Search,
+        SlidersHorizontal,
+        ChevronUp,
+        PackagePlus,
+        RotateCw,
+        ChevronsDown,
+        CarFront,
+        Upload,
+        Image,
+        Eye,
+        Download,
+        Trash2,
     }),
-  ],
+    ProvincePipe,
+    TimeAgoPipe
+],
   exports: [...components, ...directives],
 })
 export class SharedModule {}

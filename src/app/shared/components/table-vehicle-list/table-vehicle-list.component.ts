@@ -8,7 +8,9 @@ import {
 import { PaginationModel } from '../../interface/pagination.model';
 import moment from 'moment';
 import {
+  ICustomerVehicle,
   ITableHeaderVehicle,
+  IVehicleKey,
   IVehicleResultData,
 } from '../../interface/table-vehicle.interface';
 import { VEHICLE_STATUS_OPTIONS } from '../../constant/vehicle-status.constant';
@@ -33,16 +35,16 @@ export class TableVehicleListComponent implements OnChanges {
 
   @Output() sortEmit = new EventEmitter<string[]>();
   @Output() changePage = new EventEmitter<PaginationModel>();
-  @Output() onView = new EventEmitter<string>();
-  @Output() onEdit = new EventEmitter<string>();
-  @Output() onDelete = new EventEmitter<string>();
+  @Output() onView = new EventEmitter<IVehicleKey>();
+  @Output() onEdit = new EventEmitter<IVehicleKey>();
+  @Output() onDelete = new EventEmitter<IVehicleKey>();
 
   sortList: string[] = [];
   sorted: { [key: string]: boolean } = {};
   sortField: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
   paginationOption: number[] = [10, 15, 20, 30, 40, 50];
-  
+
   readonly statusMap = new Map(
     VEHICLE_STATUS_OPTIONS.map((item) => [item.value, item]),
   );
@@ -87,4 +89,11 @@ export class TableVehicleListComponent implements OnChanges {
   formatDate(date: string | null): string {
     return date ? moment(date).format('DD/MM/YYYY HH:mm') : '-';
   }
+
+  createVehicleKey(row: ICustomerVehicle): IVehicleKey {
+  return {
+    licensePlate: row.licensePlate,
+    province: row.province,
+  };
+}
 }

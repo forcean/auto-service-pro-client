@@ -13,63 +13,63 @@
     </button>
   </div>
 
-  <div class="summary-grid">
-    <div class="summary-card">
-      <div class="summary-icon blue">
-        <lucide-icon name="car-front"></lucide-icon>
-      </div>
-
-      <div class="summary-content">
-        <span class="summary-title">รถทั้งหมด</span>
-
-        <h2>{{ dashboard.totalVehicles }}</h2>
-
-        <small>Vehicles in system</small>
-      </div>
+ <div class="summary-grid">
+  <div class="summary-card">
+    <div class="summary-icon blue">
+      <lucide-icon name="car-front"></lucide-icon>
     </div>
 
-    <div class="summary-card">
-      <div class="summary-icon orange">
-        <lucide-icon name="wrench"></lucide-icon>
-      </div>
+    <div class="summary-content">
+      <span class="summary-title">รถทั้งหมด</span>
 
-      <div class="summary-content">
-        <span class="summary-title">กำลังเข้ารับบริการ</span>
+      <h2>{{ dashboard.totalVehicles }}</h2>
 
-        <h2>{{ dashboard.inService }}</h2>
-
-        <small>Vehicles in service</small>
-      </div>
-    </div>
-
-    <div class="summary-card">
-      <div class="summary-icon green">
-        <lucide-icon name="circle-check-big"></lucide-icon>
-      </div>
-
-      <div class="summary-content">
-        <span class="summary-title">ซ่อมเสร็จ</span>
-
-        <h2>{{ dashboard.completed }}</h2>
-
-        <small>Completed</small>
-      </div>
-    </div>
-
-    <div class="summary-card">
-      <div class="summary-icon red">
-        <lucide-icon name="circle-x"></lucide-icon>
-      </div>
-
-      <div class="summary-content">
-        <span class="summary-title">ยกเลิก</span>
-
-        <h2>{{ dashboard.cancelled }}</h2>
-
-        <small>Cancelled</small>
-      </div>
+      <small>Vehicles in system</small>
     </div>
   </div>
+
+  <div class="summary-card">
+    <div class="summary-icon green">
+      <lucide-icon name="users"></lucide-icon>
+    </div>
+
+    <div class="summary-content">
+      <span class="summary-title">ลูกค้าทั้งหมด</span>
+
+      <h2>{{ dashboard.totalCustomers }}</h2>
+
+      <small>Customers</small>
+    </div>
+  </div>
+
+  <div class="summary-card">
+    <div class="summary-icon orange">
+      <lucide-icon name="badge-info"></lucide-icon>
+    </div>
+
+    <div class="summary-content">
+      <span class="summary-title">ยี่ห้อรถในระบบ</span>
+
+      <h2>{{ dashboard.totalBrands }}</h2>
+
+      <small>Vehicle brands</small>
+    </div>
+  </div>
+
+  <div class="summary-card">
+    <div class="summary-icon purple">
+      <lucide-icon name="car"></lucide-icon>
+    </div>
+
+    <div class="summary-content">
+      <span class="summary-title">เพิ่มใหม่เดือนนี้</span>
+
+      <h2>{{ dashboard.newVehicles }}</h2>
+
+      <small>New vehicles this month</small>
+    </div>
+  </div>
+</div>
 
   <div class="mb-8">
     <app-search-vehicle (search)="onSearch($event)" (reset)="onResetCriteria()">
@@ -84,7 +84,7 @@
       </div>
 
       <div class="vehicle-count">
-        {{ 0 }}
+        {{ vehicleList.total}}
 
         <span>คัน</span>
       </div>

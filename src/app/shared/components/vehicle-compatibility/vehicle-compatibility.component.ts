@@ -33,10 +33,7 @@ export class VehicleCompatibilityComponent
 
   ngOnInit() {
     if (this.mode === 'customer') {
-      this.allowRemark = false;
-
       this.allowEngineSelection = false;
-
       this.allowMultiple = false;
     }
   }
@@ -60,7 +57,7 @@ export class VehicleCompatibilityComponent
   addVehicle(vehicle: IVehicle): void {
     if (this.disabled) return;
 
-    if (this.vehicles.some((v) => v.id === vehicle.id)) {
+    if (this.vehicles.some((v) => v._id === vehicle._id)) {
       return;
     }
 
@@ -72,7 +69,7 @@ export class VehicleCompatibilityComponent
         },
       ];
     } else {
-      if (this.vehicles.some((v) => v.id === vehicle.id)) {
+      if (this.vehicles.some((v) => v._id === vehicle._id)) {
         return;
       }
 
@@ -108,6 +105,6 @@ export class VehicleCompatibilityComponent
   }
 
   trackByVehicleId(index: number, item: IVehicle) {
-    return item.id;
+    return item._id;
   }
 }

@@ -10,6 +10,9 @@ import { VEHICLE_STATUS_OPTIONS } from '../../../shared/constant/vehicle-status.
 import { IVehicle } from '../../../shared/interface/catalog.interface';
 import { EVehicleStatus } from '../../../shared/enum/vehicle.enum';
 import { ActivatedRoute, Router } from '@angular/router';
+import { VehicleManagementService } from '../../../shared/services/vehicle-management.service';
+import { RESPONSE } from '../../../shared/enum/response.enum';
+import { IVehicleKey } from '../../../shared/interface/table-vehicle.interface';
 
 export type VehicleFormMode = 'create' | 'update';
 
@@ -20,31 +23,32 @@ export type VehicleFormMode = 'create' | 'update';
   styleUrl: './vehicle-form.component.scss',
 })
 export class VehicleFormComponent implements OnInit {
-  mode: VehicleFormMode = 'create';
-  data: any | null = null;
-  isLoading = false;
-  private vehicleId: string | null = null;
-
   @Output() save = new EventEmitter<any>();
   @Output() cancel = new EventEmitter<void>();
 
   form!: FormGroup;
   statuses = VEHICLE_STATUS_OPTIONS;
+  mode: VehicleFormMode = 'create';
+  data: any | null = null;
+  isLoading = false;
+  private vehicleKey!: IVehicleKey;
 
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
+    private vehicleManagementService: VehicleManagementService,
   ) {}
 
   ngOnInit(): void {
     this.buildForm();
-    this.vehicleId = this.route.snapshot.paramMap.get('id');
-    if (this.vehicleId) {
+    const licensePlate = this.route.snapshot.paramMap.get('licensePlate');
+    const province = this.route.snapshot.paramMap.get('province');
+
+    if (licensePlate && province) {
+      this.vehicleKey = { licensePlate, province };
       this.mode = 'update';
-      this.loadVehicle(this.vehicleId);
-    } else {
-      this.mode = 'create';
+      this.loadVehicle(this.vehicleKey.licensePlate, this.vehicleKey.province);
     }
   }
 
@@ -53,12 +57,12 @@ export class VehicleFormComponent implements OnInit {
       firstname: ['', Validators.required],
       lastname: ['', Validators.required],
       phoneNumber: ['', [Validators.required, Validators.pattern(/^0\d{9}$/)]],
-      vehicle: this.fb.group({
+      customerVehicle: this.fb.group({
         licensePlate: ['', Validators.required],
         province: ['', Validators.required],
         status: [EVehicleStatus.PENDING, Validators.required],
       }),
-      vehicles: new FormControl<IVehicle[]>([], {
+      catalogVehicle: new FormControl<IVehicle[]>([], {
         nonNullable: true,
         validators: Validators.required,
       }),
@@ -70,49 +74,42 @@ export class VehicleFormComponent implements OnInit {
       firstname: data.firstname ?? '',
       lastname: data.lastname ?? '',
       phoneNumber: data.phoneNumber ?? '',
-      vehicle: {
-        licensePlate: data.vehicle?.licensePlate ?? '',
-        province: data.vehicle?.province ?? '',
-        status: data.vehicle?.status ?? EVehicleStatus.PENDING,
+
+      customerVehicle: {
+        licensePlate: data.licensePlate ?? '',
+        province: data.province ?? '',
+        status: data.status ?? EVehicleStatus.PENDING,
       },
-      vehicles: data.vehicles ?? [],
+
+      catalogVehicle: [
+        {
+          ...data.vehicle,
+          isNew: false,
+          selectedEngines: data.vehicle?.engines ?? [],
+          engines: data.vehicle?.engines ?? [],
+        },
+      ],
     });
   }
 
-  private async loadVehicle(id: string): Promise<void> {
+  private async loadVehicle(
+    licensePlate: string,
+    province: string,
+  ): Promise<void> {
     this.isLoading = true;
 
     try {
-      const data = {
-        firstname: 'สมชาย',
-        lastname: 'ใจดี',
-        phoneNumber: '0812345678',
-        vehicle: {
-          licensePlate: '2กข1234',
-          province: 'กรุงเทพมหานคร',
-          status: EVehicleStatus.REPAIRING,
-        },
-        vehicles: [
-          {
-            id: 'camry-2021',
-            brand: 'Toyota',
-            model: 'Camry',
-            generation: 'XV70',
-            yearFrom: 2021,
-            yearTo: 2024,
-            engines: [
-              {
-                code: '2.5',
-                fuel: 'Gasoline',
-              },
-            ],
-            selectedEngines: [],
-            remark: '',
-          },
-        ],
-      };
+      const res = await this.vehicleManagementService.getVehicleDetail(
+        licensePlate,
+        province,
+      );
 
-      this.patchForm(data);
+      if (res.resultCode == RESPONSE.SUCCESS) {
+        this.patchForm(res.resultData);
+      } else {
+      }
+    } catch (error) {
+      // this.router.navigate(['/portal/vehicle']);
     } finally {
       this.isLoading = false;
     }
@@ -124,39 +121,115 @@ export class VehicleFormComponent implements OnInit {
     if (this.form.invalid) {
       return;
     }
-    const payload = this.form.getRawValue();
     if (this.mode === 'create') {
-      this.createVehicle(payload);
+      this.createVehicle();
     } else {
-      this.updateVehicle(payload);
+      this.updateVehicle();
     }
   }
 
-  private createVehicle(payload: any): void {
-    console.log('Create', payload);
+  private async createVehicle() {
+    try {
+      const payload = this.buildPayload();
 
-    this.router.navigate(['/portal/vehicle']);
+      const res =
+        await this.vehicleManagementService.CreateCustomerVehicle(payload);
+
+      if (res.resultCode == RESPONSE.CREATED) {
+        console.log('created');
+      } else {
+      }
+    } catch (error) {}
+
+    // this.router.navigate(['/portal/vehicle']);
   }
 
-  private updateVehicle(payload: any): void {
-    console.log('Update', this.vehicleId, payload);
+  private async updateVehicle(): Promise<void> {
+    if (!this.vehicleKey.licensePlate || !this.vehicleKey.province) {
+      return;
+    }
 
-    this.router.navigate(['/portal/vehicle', this.vehicleId]);
+    // this.isLoading = true;
+
+    try {
+      const payload = this.buildPayload();
+      console.log('Updating payload', payload);
+      const res =
+        await this.vehicleManagementService.updateCustomerVehicleDetail(
+          payload,
+          this.vehicleKey.licensePlate,
+          this.vehicleKey.province,
+        );
+
+      if (res.resultCode === RESPONSE.SUCCESS) {
+        console.log('updated');
+        this.router.navigate([
+          '/portal/vehicle',
+          payload.licensePlate,
+          payload.province,
+        ]);
+      }
+    } catch (error) {
+      console.error('Update vehicle error', error);
+    } finally {
+      // this.isLoading = false;
+    }
   }
 
   onCancel(): void {
-    if (this.vehicleId) {
-      this.router.navigate(['/portal/vehicle', this.vehicleId]);
+    if (this.mode === 'update' && this.vehicleKey) {
+      this.router.navigate([
+        '/portal/vehicle',
+        this.vehicleKey.licensePlate,
+        this.vehicleKey.province,
+      ]);
     } else {
       this.router.navigate(['/portal/vehicle']);
     }
   }
 
   get vehicleGroup(): FormGroup {
-    return this.form.get('vehicle') as FormGroup;
+    return this.form.get('customerVehicle') as FormGroup;
   }
 
   get selectedVehicles(): IVehicle[] {
-    return this.form.get('vehicles')?.value ?? [];
+    return this.form.get('catalogVehicle')?.value ?? [];
+  }
+
+  private buildPayload() {
+    const form = this.form.getRawValue();
+    const selectedVehicle = form.catalogVehicle?.[0];
+    console.log('selectedVehicle', selectedVehicle);
+    console.log('selectedEngines', selectedVehicle.selectedEngines);
+
+    return {
+      firstname: form.firstname,
+      lastname: form.lastname,
+      phoneNumber: form.phoneNumber,
+      licensePlate: form.customerVehicle.licensePlate,
+      province: form.customerVehicle.province,
+      status: form.customerVehicle.status,
+
+      vehicle: {
+        brand: selectedVehicle.brand,
+        brandCode: selectedVehicle.brandCode,
+        model: selectedVehicle.model,
+        modelCode: selectedVehicle.modelCode,
+        generation: selectedVehicle.generation,
+        platform: selectedVehicle.platform,
+        yearFrom: selectedVehicle.yearFrom,
+        yearTo: selectedVehicle.yearTo,
+
+        engines: (selectedVehicle.selectedEngines?.length
+          ? selectedVehicle.selectedEngines
+          : selectedVehicle.engines
+        ).map((engine: any) => ({
+          code: engine.code,
+          fuel: engine.fuel,
+        })),
+
+        remark: selectedVehicle.remark ?? '',
+      },
+    };
   }
 }

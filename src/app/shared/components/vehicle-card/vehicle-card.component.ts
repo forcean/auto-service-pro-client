@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { IVehicle } from '../../interface/catalog.interface';
+import { IEngine, IVehicle } from '../../interface/catalog.interface';
 @Component({
   selector: 'app-vehicle-card',
   standalone: false,
@@ -33,12 +33,16 @@ export class VehicleCardComponent {
   //   this.remarkChange.emit(this.vehicle.remark ?? '');
   // }
 
-  toggleEngine(engineCode: string, checked: boolean) {
-    const set = new Set(this.vehicle.selectedEngines ?? []);
+  toggleEngine(engine: IEngine, checked: boolean) {
+    const selected = this.vehicle.selectedEngines ?? [];
 
-    checked ? set.add(engineCode) : set.delete(engineCode);
-
-    this.vehicle.selectedEngines = Array.from(set);
+    if (checked) {
+      this.vehicle.selectedEngines = [...selected, engine];
+    } else {
+      this.vehicle.selectedEngines = selected.filter(
+        (e) => e.code !== engine.code,
+      );
+    }
   }
 
   // get enginesDisplay(): string {
@@ -61,6 +65,13 @@ export class VehicleCardComponent {
       this.vehicle.isNew &&
       Array.isArray(this.vehicle.engines) &&
       this.vehicle.engines.length > 1
+    );
+  }
+
+  isEngineSelected(engine: IEngine): boolean {
+    return (
+      this.vehicle.selectedEngines?.some((se) => se.code === engine.code) ??
+      false
     );
   }
 }

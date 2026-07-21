@@ -91,6 +91,8 @@ export class VehicleStepSelectorComponent {
 
       if (response.resultCode === RESPONSE.SUCCESS) {
         this.vehicles = response.resultData.vehicles ?? [];
+        console.log(this.vehicles);
+        
       }
     } finally {
       this.loadingVehicles = false;
@@ -99,7 +101,7 @@ export class VehicleStepSelectorComponent {
 
   selectVehicle(v: any) {
     this.selected.emit({
-      id: v.id,
+      _id: v._id,
       brand: v.brand,
       brandCode: v.brandCode,
       model: v.model,

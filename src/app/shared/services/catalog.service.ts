@@ -3,20 +3,25 @@ import { HttpService } from './../../core/services/http-service/http.service';
 import { Injectable } from '@angular/core';
 import { ApiPrefix } from '../enum/api-prefix.enum';
 import { IBaseResponse } from '../interface/base-http.interface';
-import { IQueryCatalogProducts, IQueryCatalogVehicles, IResBrands, IResCategories, IResVehicles } from '../interface/catalog.interface';
+import {
+  IQueryCatalogProducts,
+  IQueryCatalogVehicles,
+  IResBrands,
+  IResCategories,
+  IResVehicles,
+} from '../interface/catalog.interface';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CatalogService {
-
   private PREFIX_USER = ApiPrefix.ServiceManagement;
 
-  constructor(
-    private httpService: HttpService,
-  ) { }
+  constructor(private httpService: HttpService) {}
 
-  async getCategories(params: IQueryCatalogProducts): Promise<IBaseResponse<IResCategories>> {
+  async getCategories(
+    params: IQueryCatalogProducts,
+  ): Promise<IBaseResponse<IResCategories>> {
     try {
       const uri = this.PREFIX_USER + `/products/categories`;
       const response = await this.httpService.get<IResCategories>(uri, params);
@@ -30,7 +35,9 @@ export class CatalogService {
     }
   }
 
-  async getBrands(params: IQueryCatalogProducts): Promise<IBaseResponse<IResBrands>> {
+  async getBrands(
+    params: IQueryCatalogProducts,
+  ): Promise<IBaseResponse<IResBrands>> {
     try {
       const uri = this.PREFIX_USER + `/products/brands`;
       const response = await this.httpService.get<IResBrands>(uri, params);
@@ -44,7 +51,9 @@ export class CatalogService {
     }
   }
 
-  async getBrandsVehicles(params: IQueryCatalogVehicles): Promise<IBaseResponse<IResVehicles>> {
+  async getBrandsVehicles(
+    params: IQueryCatalogVehicles,
+  ): Promise<IBaseResponse<IResVehicles>> {
     try {
       const uri = this.PREFIX_USER + `/products/vehicles/brands`;
       const response = await this.httpService.get<IResVehicles>(uri, params);
@@ -58,9 +67,12 @@ export class CatalogService {
     }
   }
 
-  async getModelsVehicles(params: IQueryCatalogVehicles): Promise<IBaseResponse<IResVehicles>> {
+  async getModelsVehicles(
+    params: IQueryCatalogVehicles,
+  ): Promise<IBaseResponse<IResVehicles>> {
     try {
-      const uri = this.PREFIX_USER + `/products/vehicles/${params.brandCode}/models`;
+      const uri =
+        this.PREFIX_USER + `/products/vehicles/${params.brandCode}/models`;
       const response = await this.httpService.get<IResVehicles>(uri);
       return response;
     } catch (error) {
@@ -72,17 +84,26 @@ export class CatalogService {
     }
   }
 
-  async getVehicles(params: IQueryCatalogVehicles): Promise<IBaseResponse<IResVehicles>> {
+  async getVehicles(
+    params: IQueryCatalogVehicles,
+  ): Promise<IBaseResponse<IResVehicles>> {
     try {
-      const uri = this.PREFIX_USER + `/vehicles/${params.brandCode}/${params.modelCode}/${params.generation}`;
-      const response = await this.httpService.get<IResVehicles>(uri,{isActive: true});
+      const uri = `${this.PREFIX_USER}/vehicles/details`;
+
+      const response = await this.httpService.get<IResVehicles>(uri, {
+        brandCode: params.brandCode,
+        modelCode: params.modelCode,
+        generation: params.generation,
+        isActive: true,
+      });
+
       return response;
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
         return error.error as IBaseResponse<IResVehicles>;
-      } else {
-        throw error;
       }
+
+      throw error;
     }
   }
 }

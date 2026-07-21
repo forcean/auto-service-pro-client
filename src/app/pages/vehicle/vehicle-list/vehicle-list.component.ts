@@ -12,6 +12,7 @@ import {
   IQueryVehicle,
   ISearchVehicle,
   ITableHeaderVehicle,
+  IVehicleKey,
   IVehicleResultData,
 } from '../../../shared/interface/table-vehicle.interface';
 import { EVehicleStatus } from '../../../shared/enum/vehicle.enum';
@@ -21,252 +22,10 @@ import { RESPONSE } from '../../../shared/enum/response.enum';
 
 interface IVehicleDashboard {
   totalVehicles: number;
-  inService: number;
-  completed: number;
-  cancelled: number;
+  totalCustomers: number;
+  totalBrands: number;
+  newVehicles: number;
 }
-
-export const MOCK_VEHICLE_LIST: IVehicleResultData = {
-  keyword: '',
-
-  page: 1,
-
-  limit: 10,
-
-  total: 10,
-
-  totalPage: 1,
-
-  vehicles: [
-    {
-      id: 'VH001',
-
-      plateNumber: '1กข 1234',
-
-      ownerName: 'สมชาย ใจดี',
-
-      brand: 'Toyota',
-
-      model: 'Camry',
-
-      year: 2022,
-
-      mileage: 32540,
-
-      vin: 'JTNB11HK5N3000001',
-
-      engineNumber: '2ARFE123456',
-
-      color: 'White',
-
-      lastServiceDate: '2026-07-10T09:30:00Z',
-
-      status: EVehicleStatus.REPAIRING,
-    },
-
-    {
-      id: 'VH002',
-
-      plateNumber: '2ขค 5678',
-
-      ownerName: 'วิภา ศรีสุข',
-
-      brand: 'Honda',
-
-      model: 'Civic',
-
-      year: 2021,
-
-      mileage: 48720,
-
-      vin: 'MRHFC1670MT000002',
-
-      engineNumber: 'L15B7123456',
-
-      color: 'Black',
-
-      lastServiceDate: '2026-07-14T13:00:00Z',
-
-      status: EVehicleStatus.WAITING_PARTS,
-    },
-
-    {
-      id: 'VH003',
-
-      plateNumber: '3งจ 9012',
-
-      ownerName: 'อนุชา พงษ์ไทย',
-
-      brand: 'Mazda',
-
-      model: 'CX-5',
-
-      year: 2023,
-
-      mileage: 15200,
-
-      color: 'Red',
-
-      lastServiceDate: '2026-07-16T10:15:00Z',
-
-      status: EVehicleStatus.INSPECTING,
-    },
-
-    {
-      id: 'VH004',
-
-      plateNumber: '4ฉช 3456',
-
-      ownerName: 'กิตติชัย บุญมา',
-
-      brand: 'Ford',
-
-      model: 'Ranger',
-
-      year: 2020,
-
-      mileage: 89650,
-
-      color: 'Blue',
-
-      lastServiceDate: '2026-07-12T15:45:00Z',
-
-      status: EVehicleStatus.QUALITY_CHECK,
-    },
-
-    {
-      id: 'VH005',
-
-      plateNumber: '5ซญ 7890',
-
-      ownerName: 'นภัสสร แสงทอง',
-
-      brand: 'Toyota',
-
-      model: 'Hilux Revo',
-
-      year: 2024,
-
-      mileage: 8400,
-
-      color: 'Silver',
-
-      lastServiceDate: '2026-07-15T08:20:00Z',
-
-      status: EVehicleStatus.READY_FOR_PICKUP,
-    },
-
-    {
-      id: 'VH006',
-
-      plateNumber: '6ฎฏ 1122',
-
-      ownerName: 'ธนพล สุขใจ',
-
-      brand: 'Honda',
-
-      model: 'City',
-
-      year: 2019,
-
-      mileage: 112350,
-
-      color: 'Gray',
-
-      lastServiceDate: '2026-07-08T11:00:00Z',
-
-      status: EVehicleStatus.COMPLETED,
-    },
-
-    {
-      id: 'VH007',
-
-      plateNumber: '7ฐฑ 3344',
-
-      ownerName: 'ปรียา รัตนา',
-
-      brand: 'Isuzu',
-
-      model: 'D-Max',
-
-      year: 2021,
-
-      mileage: 65880,
-
-      color: 'White',
-
-      lastServiceDate: '2026-07-11T14:30:00Z',
-
-      status: EVehicleStatus.PENDING,
-    },
-
-    {
-      id: 'VH008',
-
-      plateNumber: '8ฒณ 5566',
-
-      ownerName: 'เอกชัย วัฒนา',
-
-      brand: 'Nissan',
-
-      model: 'Almera',
-
-      year: 2022,
-
-      mileage: 28640,
-
-      color: 'Black',
-
-      lastServiceDate: '2026-07-09T16:00:00Z',
-
-      status: EVehicleStatus.WAITING_APPROVAL,
-    },
-
-    {
-      id: 'VH009',
-
-      plateNumber: '9ดต 7788',
-
-      ownerName: 'ศศิธร คำดี',
-
-      brand: 'Mitsubishi',
-
-      model: 'Xpander',
-
-      year: 2023,
-
-      mileage: 19420,
-
-      color: 'Orange',
-
-      lastServiceDate: '2026-07-13T09:00:00Z',
-
-      status: EVehicleStatus.CANCELLED,
-    },
-
-    {
-      id: 'VH010',
-
-      plateNumber: '1กก 9999',
-
-      ownerName: 'วรพงษ์ เจริญ',
-
-      brand: 'BYD',
-
-      model: 'Atto 3',
-
-      year: 2025,
-
-      mileage: 5200,
-
-      color: 'Blue',
-
-      lastServiceDate: '2026-07-17T08:30:00Z',
-
-      status: EVehicleStatus.REPAIRING,
-    },
-  ],
-};
 
 @Component({
   selector: 'app-vehicle-list',
@@ -287,7 +46,7 @@ export class VehicleListComponent implements OnInit {
   sortList: string = '';
   brand: string = '';
   vehicle: string = '';
-  vehicleId: string = '';
+  selectedVehicle!: IVehicleKey;
   model: string = '';
   status: EVehicleStatus | '' = '';
   vehicleList!: IVehicleResultData;
@@ -355,11 +114,11 @@ export class VehicleListComponent implements OnInit {
     },
   ];
 
-  dashboard = {
+  dashboard: IVehicleDashboard = {
     totalVehicles: 1284,
-    inService: 93,
-    completed: 1145,
-    cancelled: 46,
+    totalCustomers: 986,
+    totalBrands: 37,
+    newVehicles: 42,
   };
 
   constructor(
@@ -425,18 +184,25 @@ export class VehicleListComponent implements OnInit {
     this.router.navigate(['/portal/vehicle/create']);
   }
 
-  viewDetail(event: string) {
-    this.router.navigate(['/portal/vehicle/', event]);
+  viewDetail(event: IVehicleKey) {
+    this.router.navigate([
+      '/portal/vehicle',
+      event.licensePlate,
+      event.province,
+    ]);
   }
 
-  onEdit(event: string) {
-    this.router.navigate(['/portal/vehicle/', event, 'edit']);
+  onEdit(event: IVehicleKey) {
+    this.router.navigate([
+      '/portal/vehicle',
+      event.licensePlate,
+      event.province,
+      'edit',
+    ]);
   }
 
-  onDelete(event: string) {
-    this.vehicleId = event;
-    console.log(this.vehicleId);
-
+  onDelete(event: IVehicleKey) {
+    this.selectedVehicle = event;
     this.handleModalDelete();
   }
 
@@ -509,7 +275,7 @@ export class VehicleListComponent implements OnInit {
         sort: this.sortList ? this.sortList : 'createDt.desc',
       };
       console.log('Api', params);
-      this.vehicleList = MOCK_VEHICLE_LIST;
+      // this.vehicleList = MOCK_VEHICLE_LIST;
 
       const res = await this.vehicleManagementService.getListVehicle(params);
       if (res.resultCode === RESPONSE.SUCCESS) {
@@ -532,13 +298,16 @@ export class VehicleListComponent implements OnInit {
     }
   }
 
-  private async deleteCustomerVehicle(id: string) {
+  private async deleteCustomerVehicle(vehicle: IVehicleKey) {
     this.isLoadingReset = true;
     const loader = this.loadingBarService.useRef();
     loader.start();
     try {
       this.modalConditionComponent.onClose();
-      const res = await this.vehicleManagementService.deleteCustomerVehicle(id);
+      const res = await this.vehicleManagementService.deleteCustomerVehicle(
+        vehicle.licensePlate,
+        vehicle.province,
+      );
       if (res.resultCode === RESPONSE.SUCCESS) {
         this.handleSuccessDelete();
         this.updateUrlParams();
@@ -556,7 +325,7 @@ export class VehicleListComponent implements OnInit {
 
   async handleOnModalConfirm(flag: string) {
     if (flag === 'change') {
-      this.deleteCustomerVehicle(this.vehicleId);
+      this.deleteCustomerVehicle(this.selectedVehicle);
     }
   }
 

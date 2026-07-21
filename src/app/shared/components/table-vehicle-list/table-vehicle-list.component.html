@@ -42,18 +42,22 @@
             {{ i + 1 + (pageIndex - 1) * pageSize }}
           </td>
 
-          <td>{{ row.plateNumber }}</td>
+          <td>{{ row.licensePlate }} {{ row.province | province }}</td>
 
-          <td>{{ row.ownerName }}</td>
+          <td>{{ row.firstname }}  {{row.lastname}}</td>
 
-          <td>{{ row.brand }}</td>
+          <td>{{ row.vehicle.brand }}</td>
 
-          <td>{{ row.model }}</td>
+          <td>{{ row.vehicle.model }}</td>
 
-          <td>{{ row.mileage | number }} km</td>
+          <td>{{ 23342 }} km</td>
+
+          <!-- <td>
+            {{ row.lastServiceDate ? formatDate(row.lastServiceDate) : "-" }}
+          </td> -->
 
           <td>
-            {{ row.lastServiceDate ? formatDate(row.lastServiceDate) : "-" }}
+            {{ row.registrationDt | timeAgo}}
           </td>
 
           <td>
@@ -76,19 +80,19 @@
               <img
                 src="assets/img/icons/icon.viewdetail.svg"
                 class="action-icon"
-                (click)="onView.emit(row.id)"
+                (click)="onView.emit(createVehicleKey(row))"
               />
 
               <img
                 src="assets/img/icons/icon.edit.svg"
                 class="action-icon"
-                (click)="onEdit.emit(row.id)"
+                (click)="onEdit.emit(createVehicleKey(row))"
               />
 
               <img
                 src="assets/img/icons/icon.bin.svg"
                 class="action-icon"
-                (click)="onDelete.emit(row.id)"
+                (click)="onDelete.emit(createVehicleKey(row))"
               />
             </div>
           </td>

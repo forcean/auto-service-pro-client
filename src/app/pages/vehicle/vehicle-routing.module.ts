@@ -14,17 +14,17 @@ const routes: Routes = [
     component: VehicleFormComponent,
   },
   {
-    path: ':id',
+    path: ':licensePlate/:province',
     component: VehicleDetailComponent,
   },
   {
-    path: ':id/edit',
+    path: ':licensePlate/:province/edit',
     component: VehicleFormComponent,
-  }
+  },
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class VehicleRoutingModule { }
+export class VehicleRoutingModule {}
