@@ -1,232 +1,403 @@
-<div class="space-y-6">
-
-  <!-- ================= 1. KPI SUMMARY (ยอดบนสุด) ================= -->
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-    
+<div class="space-y-5">
+  <!-- 1. KPI Cards Summary: ปรับเป็น 2 คอลัมน์บน Tablet/Desktop กลาง (xl:grid-cols-4 ถึงจะคลายออกเป็น 4) -->
+  <div class="grid grid-cols-2 xl:grid-cols-4 gap-3.5">
     <!-- Total Visits -->
-    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
-      <div class="w-10 h-10 bg-slate-100 text-slate-600 rounded-lg flex items-center justify-center text-lg flex-shrink-0">
-        <i class="fa-solid fa-wrench"></i>
+    <div
+      class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center gap-3 min-w-0"
+    >
+      <div
+        class="w-10 h-10 bg-slate-100 text-slate-700 rounded-lg flex items-center justify-center flex-shrink-0 border border-slate-200/50"
+      >
+        <i-lucide name="wrench" class="h-4.5 w-4.5"></i-lucide>
       </div>
-      <div>
-        <span class="text-xs font-semibold text-slate-400 uppercase">Total Visits</span>
-        <h4 class="text-lg font-extrabold text-slate-900">28 ครั้ง</h4>
+      <div class="min-w-0 flex-1">
+        <span
+          class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block truncate"
+          >Total Visits</span
+        >
+        <h4 class="text-sm sm:text-base font-black text-slate-900 truncate">
+          28 <span class="text-xs font-semibold text-slate-400">ครั้ง</span>
+        </h4>
       </div>
     </div>
 
     <!-- Total Spend -->
-    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
-      <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-lg flex-shrink-0">
-        <i class="fa-solid fa-wallet"></i>
+    <div
+      class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center gap-3 min-w-0"
+    >
+      <div
+        class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center flex-shrink-0 border border-emerald-100"
+      >
+        <i-lucide name="wallet" class="h-4.5 w-4.5"></i-lucide>
       </div>
-      <div>
-        <span class="text-xs font-semibold text-slate-400 uppercase">Total Spend</span>
-        <h4 class="text-lg font-extrabold text-slate-900">฿125,400</h4>
+      <div class="min-w-0 flex-1">
+        <span
+          class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block truncate"
+          >Total Spend</span
+        >
+        <h4 class="text-sm sm:text-base font-black text-slate-900 truncate">
+          ฿125,400
+        </h4>
       </div>
     </div>
 
     <!-- Last Visit -->
-    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
-      <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-lg flex-shrink-0">
-        <i class="fa-solid fa-calendar-check"></i>
+    <div
+      class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center gap-3 min-w-0"
+    >
+      <div
+        class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center flex-shrink-0 border border-blue-100"
+      >
+        <i-lucide name="calendar-check" class="h-4.5 w-4.5"></i-lucide>
       </div>
-      <div>
-        <span class="text-xs font-semibold text-slate-400 uppercase">Last Visit</span>
-        <h4 class="text-lg font-extrabold text-slate-900">12 Jul 2026</h4>
+      <div class="min-w-0 flex-1">
+        <span
+          class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block truncate"
+          >Last Visit</span
+        >
+        <h4 class="text-xs sm:text-sm font-extrabold text-slate-900 truncate">
+          12 Jul 2026
+        </h4>
       </div>
     </div>
 
     <!-- Open WO -->
-    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
-      <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center text-lg flex-shrink-0">
-        <i class="fa-solid fa-folder-open"></i>
+    <div
+      class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center gap-3 min-w-0"
+    >
+      <div
+        class="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center flex-shrink-0 border border-amber-100"
+      >
+        <i-lucide name="folder-open" class="h-4.5 w-4.5"></i-lucide>
       </div>
-      <div>
-        <span class="text-xs font-semibold text-slate-400 uppercase">Open WO</span>
-        <h4 class="text-lg font-extrabold text-slate-900">2 รายการ</h4>
+      <div class="min-w-0 flex-1">
+        <span
+          class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block truncate"
+          >Open WO</span
+        >
+        <h4 class="text-sm sm:text-base font-black text-slate-900 truncate">
+          2 <span class="text-xs font-semibold text-slate-400">รายการ</span>
+        </h4>
       </div>
     </div>
-
   </div>
 
-  <!-- ================= 2. MAIN OPERATION DASHBOARD (แบ่งซ้าย-ขวา) ================= -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    
-    <!-- ฝั่งซ้าย (2/3 ส่วน): สุขภาพรถ & แผนการซ่อมถัดไป -->
-    <div class="lg:col-span-2 space-y-6">
-      
-      <!-- Card: Vehicle Health -->
-      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-          <div class="flex items-center gap-2">
-            <i class="fa-solid fa-heart-pulse text-rose-500"></i>
-            <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Vehicle Health</h3>
+  <!-- 2. Main Diagnostic & Activity Section: ปรับเป็น Single Column (grid-cols-1) ในช่วงจอ 1024px-1280px แล้วค่อยแยก 2 ฝั่งเมื่อจอใหญ่เกิน 1280px (xl:grid-cols-2) -->
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 items-start">
+    <!-- [LEFT SIDE] Vehicle Health & Plan Banner -->
+    <div class="space-y-4 min-w-0">
+      <!-- Card: Diagnostic Status -->
+      <div
+        class="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden"
+      >
+        <div
+          class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 gap-2"
+        >
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span
+              class="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-50 text-rose-600 border border-rose-100 flex-shrink-0"
+            >
+              <i-lucide name="activity" class="h-4 w-4"></i-lucide>
+            </span>
+            <div class="min-w-0">
+              <h3
+                class="text-xs font-bold text-slate-900 uppercase tracking-wider truncate"
+              >
+                Vehicle Health Diagnostic
+              </h3>
+              <p class="text-[11px] font-medium text-slate-400 truncate">
+                การวิเคราะห์สถานะอะไหล่ล่าสุด
+              </p>
+            </div>
           </div>
-          <div class="text-right">
-            <span class="text-xs text-slate-400 block uppercase">Current Mileage</span>
-            <span class="text-base font-extrabold text-slate-900">125,340 km</span>
+          <div class="text-right flex-shrink-0">
+            <span
+              class="text-[10px] font-bold text-slate-400 block uppercase tracking-wider"
+              >Current Mileage</span
+            >
+            <span class="text-xs font-black text-slate-900"
+              >53,500
+              <span class="text-[10px] font-bold text-slate-500">KM</span></span
+            >
           </div>
         </div>
 
-        <!-- รายการตรวจเช็คสุขภาพ -->
-        <div class="divide-y divide-slate-100">
-          
-          <!-- Engine Oil (Overdue) -->
-          <div class="p-4 flex items-center justify-between text-sm">
-            <div class="flex items-center gap-3">
-              <span class="w-2.5 h-2.5 bg-rose-500 rounded-full"></span>
-              <span class="font-medium text-slate-700">Engine Oil (น้ำมันเครื่อง)</span>
+        <div class="divide-y divide-slate-100 text-xs sm:text-sm">
+          <div
+            class="p-3.5 flex items-center justify-between hover:bg-slate-50/60 transition-colors gap-2"
+          >
+            <div class="flex items-center gap-2 min-w-0">
+              <span
+                class="w-2 h-2 bg-rose-500 rounded-full animate-pulse flex-shrink-0"
+              ></span>
+              <span class="font-bold text-slate-800 truncate"
+                >Engine Oil (น้ำมันเครื่อง)</span
+              >
             </div>
-            <span class="px-2.5 py-1 rounded bg-rose-50 text-rose-700 text-xs font-bold uppercase tracking-wide">
-              🔴 Overdue
+            <span
+              class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-rose-50 border border-rose-200/60 text-rose-700 text-[11px] font-extrabold uppercase flex-shrink-0"
+            >
+              <i-lucide name="alert-circle" class="h-3.5 w-3.5"></i-lucide>
+              Overdue
             </span>
           </div>
 
-          <!-- Air Filter (Replace) -->
-          <div class="p-4 flex items-center justify-between text-sm">
-            <div class="flex items-center gap-3">
-              <span class="w-2.5 h-2.5 bg-rose-500 rounded-full"></span>
-              <span class="font-medium text-slate-700">Air Filter (กรองอากาศ)</span>
+          <div
+            class="p-3.5 flex items-center justify-between hover:bg-slate-50/60 transition-colors gap-2"
+          >
+            <div class="flex items-center gap-2 min-w-0">
+              <span
+                class="w-2 h-2 bg-rose-500 rounded-full flex-shrink-0"
+              ></span>
+              <span class="font-bold text-slate-800 truncate"
+                >Air Filter (กรองอากาศ)</span
+              >
             </div>
-            <span class="px-2.5 py-1 rounded bg-rose-50 text-rose-700 text-xs font-bold uppercase tracking-wide">
-              🔴 Replace
+            <span
+              class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-rose-50 border border-rose-200/60 text-rose-700 text-[11px] font-extrabold uppercase flex-shrink-0"
+            >
+              <i-lucide name="alert-triangle" class="h-3.5 w-3.5"></i-lucide>
+              Replace
             </span>
           </div>
 
-          <!-- Brake Fluid (Due Soon) -->
-          <div class="p-4 flex items-center justify-between text-sm">
-            <div class="flex items-center gap-3">
-              <span class="w-2.5 h-2.5 bg-amber-400 rounded-full"></span>
-              <span class="font-medium text-slate-700">Brake Fluid (น้ำมันเบรก)</span>
+          <div
+            class="p-3.5 flex items-center justify-between hover:bg-slate-50/60 transition-colors gap-2"
+          >
+            <div class="flex items-center gap-2 min-w-0">
+              <span
+                class="w-2 h-2 bg-amber-500 rounded-full flex-shrink-0"
+              ></span>
+              <span class="font-bold text-slate-800 truncate"
+                >Brake Fluid (น้ำมันเบรก)</span
+              >
             </div>
-            <span class="px-2.5 py-1 rounded bg-amber-50 text-amber-700 text-xs font-bold">
-              🟡 Due in 1,000 km
+            <span
+              class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-50 border border-amber-200/60 text-amber-700 text-[11px] font-bold flex-shrink-0"
+            >
+              <i-lucide name="clock" class="h-3.5 w-3.5"></i-lucide>
+              Due in 1,000 KM
             </span>
           </div>
 
-          <!-- Tires (Warning) -->
-          <div class="p-4 flex items-center justify-between text-sm">
-            <div class="flex items-center gap-3">
-              <span class="w-2.5 h-2.5 bg-amber-400 rounded-full"></span>
-              <span class="font-medium text-slate-700">Tires (ยางรถยนต์)</span>
+          <div
+            class="p-3.5 flex items-center justify-between hover:bg-slate-50/60 transition-colors gap-2"
+          >
+            <div class="flex items-center gap-2 min-w-0">
+              <span
+                class="w-2 h-2 bg-amber-500 rounded-full flex-shrink-0"
+              ></span>
+              <span class="font-bold text-slate-800 truncate"
+                >Tires (ยางรถยนต์)</span
+              >
             </div>
-            <span class="px-2.5 py-1 rounded bg-amber-50 text-amber-700 text-xs font-bold">
-              🟡 สภาพ 60%
+            <span
+              class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-50 border border-amber-200/60 text-amber-700 text-[11px] font-bold flex-shrink-0"
+            >
+              <i-lucide name="info" class="h-3.5 w-3.5"></i-lucide>
+              สภาพ 60%
             </span>
           </div>
 
-          <!-- Battery (Good) -->
-          <div class="p-4 flex items-center justify-between text-sm">
-            <div class="flex items-center gap-3">
-              <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full"></span>
-              <span class="font-medium text-slate-700">Battery (แบตเตอรี่)</span>
+          <div
+            class="p-3.5 flex items-center justify-between hover:bg-slate-50/60 transition-colors gap-2"
+          >
+            <div class="flex items-center gap-2 min-w-0">
+              <span
+                class="w-2 h-2 bg-emerald-500 rounded-full flex-shrink-0"
+              ></span>
+              <span class="font-bold text-slate-800 truncate"
+                >Battery (แบตเตอรี่)</span
+              >
             </div>
-            <span class="px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 text-xs font-bold uppercase tracking-wide">
-              🟢 Good
+            <span
+              class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-50 border border-emerald-200/60 text-emerald-700 text-[11px] font-extrabold uppercase flex-shrink-0"
+            >
+              <i-lucide name="check-circle-2" class="h-3.5 w-3.5"></i-lucide>
+              Good
             </span>
           </div>
-
         </div>
       </div>
 
-      <!-- Card: Upcoming Service Plan -->
-      <div class="bg-gradient-to-r from-emerald-500 to-teal-600 p-6 rounded-xl border border-emerald-600 text-white shadow-sm relative overflow-hidden">
-        <div class="absolute right-4 bottom-0 opacity-10 text-9xl pointer-events-none">
-          <i class="fa-solid fa-screwdriver-wrench"></i>
-        </div>
-        <div class="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <span class="text-xs font-bold uppercase tracking-wider text-emerald-100">Upcoming Service Plan</span>
-            <h3 class="text-2xl font-black mt-1">รอบเช็คระยะถัดไป: 130,000 km</h3>
-            <p class="text-xs text-emerald-100 mt-1">อิงตามประวัติการวิเคราะห์สภาพรถยนต์ล่าสุด</p>
+      <!-- Banner: Service Plan (จัดระเบียบใหม่ไม่ให้ทับกัน) -->
+      <div
+        class="relative overflow-hidden rounded-xl border border-slate-800 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 p-4 sm:p-5 text-white shadow-md"
+      >
+        <div
+          class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+        >
+          <div class="min-w-0">
+            <div
+              class="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-emerald-400 border border-emerald-500/20 mb-1.5"
+            >
+              <i-lucide name="calendar" class="h-3 w-3"></i-lucide>
+              Upcoming Service Plan
+            </div>
+            <h3 class="text-sm sm:text-base font-extrabold text-white truncate">
+              รอบเช็คระยะถัดไป: 130,000 KM
+            </h3>
+            <p class="text-[11px] text-slate-400 mt-0.5">
+              คำนวณจากประวัติและอัตราการใช้งานเฉลี่ยล่าสุด
+            </p>
           </div>
-          <div class="bg-white/10 backdrop-blur-md px-4 py-3 rounded-lg border border-white/10">
-            <span class="text-xs text-emerald-100 block">ระยะทางที่เหลือ</span>
-            <span class="text-xl font-extrabold text-white">4,660 km</span>
+
+          <div
+            class="rounded-lg border border-slate-700/60 bg-slate-800/60 backdrop-blur-md px-3 py-2 text-left sm:text-right flex-shrink-0 w-full sm:w-auto"
+          >
+            <span class="text-[10px] font-bold text-slate-400 uppercase block"
+              >ระยะทางที่เหลือ</span
+            >
+            <span class="text-base font-black text-emerald-400"
+              >4,660
+              <span class="text-[10px] font-bold text-slate-300">KM</span></span
+            >
           </div>
         </div>
       </div>
-
     </div>
 
-    <!-- ฝั่งขวา (1/3 ส่วน): กิจกรรมล่าสุด, งานปัจจุบัน, บิลล่าสุด และบันทึกข้อความ -->
-    <div class="space-y-6">
-      
-      <!-- Card: Active Work Orders -->
-      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-        <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
-          <i class="fa-solid fa-gears text-blue-600"></i>
-          <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Active Work Orders</h3>
+    <!-- [RIGHT SIDE] Work Orders, Activity, Invoice, Note -->
+    <div class="space-y-4 min-w-0">
+      <!-- Card 1: Active Work Order -->
+      <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm">
+        <div
+          class="flex items-center gap-2 border-b border-slate-100 pb-2.5 mb-3"
+        >
+          <i-lucide
+            name="settings-2"
+            class="h-4 w-4 text-blue-600 flex-shrink-0"
+          ></i-lucide>
+          <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">
+            Active Work Order
+          </h3>
         </div>
-        <div class="p-4 bg-blue-50/50 rounded-lg border border-blue-100 flex items-center justify-between">
-          <div>
-            <span class="text-xs font-bold text-blue-700 block">#WO2400021</span>
-            <p class="text-sm font-bold text-slate-800">Brake Inspection (ตรวจเช็คระบบเบรก)</p>
+        <div
+          class="p-3 bg-blue-50/40 rounded-lg border border-blue-100/80 flex items-center justify-between gap-3"
+        >
+          <div class="min-w-0 flex-1">
+            <span class="text-[11px] font-bold text-blue-600 block"
+              >#WO2400021</span
+            >
+            <p class="text-xs sm:text-sm font-bold text-slate-800 truncate">
+              Brake Inspection (ตรวจเช็คระบบเบรก)
+            </p>
           </div>
-          <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded">
+          <span
+            class="px-2.5 py-1 bg-blue-600 text-white text-[10px] font-extrabold rounded-md shadow-xs whitespace-nowrap flex-shrink-0"
+          >
             In Progress
           </span>
         </div>
       </div>
 
-      <!-- Card: Recent Activity & Logs -->
-      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-        <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
-          <i class="fa-solid fa-history text-slate-600"></i>
-          <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Recent Activity</h3>
+      <!-- Card 2: Recent Activity -->
+      <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm">
+        <div
+          class="flex items-center gap-2 border-b border-slate-100 pb-2.5 mb-3"
+        >
+          <i-lucide
+            name="history"
+            class="h-4 w-4 text-slate-500 flex-shrink-0"
+          ></i-lucide>
+          <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">
+            Recent Activity
+          </h3>
         </div>
-        <div class="space-y-3">
-          <div class="text-xs text-slate-400 font-bold">12 Jul 2026</div>
-          <div class="space-y-2">
-            <div class="flex items-center gap-2 text-sm text-slate-700">
-              <i class="fa-solid fa-circle-check text-emerald-500 text-base"></i>
-              <span>เปลี่ยนน้ำมันเครื่อง (Engine Oil)</span>
+        <div class="space-y-2">
+          <div
+            class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider"
+          >
+            12 JUL 2026
+          </div>
+          <div
+            class="space-y-1.5 text-xs sm:text-sm text-slate-700 font-medium"
+          >
+            <div class="flex items-center gap-2 min-w-0">
+              <i-lucide
+                name="check-circle-2"
+                class="h-4 w-4 text-emerald-500 flex-shrink-0"
+              ></i-lucide>
+              <span class="truncate">เปลี่ยนน้ำมันเครื่อง (Engine Oil)</span>
             </div>
-            <div class="flex items-center gap-2 text-sm text-slate-700">
-              <i class="fa-solid fa-circle-check text-emerald-500 text-base"></i>
-              <span>เปลี่ยนกรองน้ำมันเครื่อง (Oil Filter)</span>
+            <div class="flex items-center gap-2 min-w-0">
+              <i-lucide
+                name="check-circle-2"
+                class="h-4 w-4 text-emerald-500 flex-shrink-0"
+              ></i-lucide>
+              <span class="truncate"
+                >เปลี่ยนกรองน้ำมันเครื่อง (Oil Filter)</span
+              >
             </div>
-            <div class="flex items-center gap-2 text-sm text-slate-700">
-              <i class="fa-solid fa-circle-check text-emerald-500 text-base"></i>
-              <span>สลับยางถ่วงล้อ (Tire Rotation)</span>
+            <div class="flex items-center gap-2 min-w-0">
+              <i-lucide
+                name="check-circle-2"
+                class="h-4 w-4 text-emerald-500 flex-shrink-0"
+              ></i-lucide>
+              <span class="truncate">สลับยางถ่วงล้อ (Tire Rotation)</span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Card: Recent Invoice -->
-      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+      <!-- Card 3: Recent Invoice -->
+      <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm">
+        <div
+          class="flex items-center justify-between border-b border-slate-100 pb-2.5 mb-2.5"
+        >
           <div class="flex items-center gap-2">
-            <i class="fa-solid fa-file-invoice-dollar text-slate-600"></i>
-            <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Recent Invoice</h3>
+            <i-lucide
+              name="receipt"
+              class="h-4 w-4 text-slate-500 flex-shrink-0"
+            ></i-lucide>
+            <h3
+              class="text-xs font-bold text-slate-900 uppercase tracking-wider"
+            >
+              Recent Invoice
+            </h3>
           </div>
-          <span class="text-xs font-semibold text-slate-400">#INV2400233</span>
+          <span class="text-xs font-bold text-slate-400">#INV2400233</span>
         </div>
         <div class="flex justify-between items-center">
           <div>
-            <span class="text-xs text-slate-400 block">Total Amount</span>
-            <span class="text-xl font-black text-slate-900">฿4,580</span>
+            <span class="text-[10px] font-bold text-slate-400 uppercase block"
+              >Total Amount</span
+            >
+            <span class="text-base sm:text-lg font-black text-slate-900"
+              >฿4,580</span
+            >
           </div>
-          <span class="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full">
-            Paid (ชำระเงินแล้ว)
+          <span
+            class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-md border border-emerald-100"
+          >
+            <i-lucide name="check" class="h-3.5 w-3.5"></i-lucide>
+            Paid
           </span>
         </div>
       </div>
 
-      <!-- Card: Internal Notes (บันทึกข้อความภายใน) -->
-      <div class="bg-amber-50/50 p-5 rounded-xl border border-amber-200 space-y-3">
-        <div class="flex items-center gap-2 text-amber-800 font-bold text-xs uppercase tracking-wider">
-          <i class="fa-solid fa-note-sticky text-sm"></i>
+      <!-- Card 4: Internal Note -->
+      <div
+        class="bg-amber-50/60 p-4 rounded-xl border border-amber-200/80 space-y-1"
+      >
+        <div
+          class="flex items-center gap-2 text-amber-800 font-extrabold text-xs uppercase tracking-wider"
+        >
+          <i-lucide
+            name="sticky-note"
+            class="h-4 w-4 text-amber-600 flex-shrink-0"
+          ></i-lucide>
           <span>Internal Note / บันทึกช่าง</span>
         </div>
-        <p class="text-sm text-amber-900 leading-relaxed font-medium">
-          "Customer requested OEM parts only." <br>
-          <span class="text-xs text-amber-700 font-normal">(ลูกค้าขอใช้อะไหล่แท้ศูนย์บริการเท่านั้น)</span>
+        <p
+          class="text-xs sm:text-sm text-amber-950 font-semibold leading-relaxed pt-1"
+        >
+          "Customer requested OEM parts only." <br />
+          <span class="text-xs text-amber-700 font-normal"
+            >(ลูกค้าขอใช้อะไหล่แท้ศูนย์บริการเท่านั้น)</span
+          >
         </p>
       </div>
-
     </div>
-
   </div>
 </div>

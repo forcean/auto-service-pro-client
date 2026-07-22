@@ -20,31 +20,6 @@ import { Subscription } from 'rxjs';
 import { RESPONSE } from '../../../shared/enum/response.enum';
 import { ServiceHistoryDetailData } from '../../../shared/components/service-history-panel/service-history-panel.component';
 
-interface IVehicleDetail {
-  id: string;
-  registration: string;
-  brand: string;
-  model: string;
-  variant: string;
-  year: number;
-  color: string;
-  mileage: number;
-  vin: string;
-  status: 'ACTIVE' | 'INACTIVE';
-
-  customer: {
-    id: string;
-    name: string;
-    phone: string;
-    email: string;
-  };
-}
-
-interface IStatCard {
-  title: string;
-  value: string;
-  icon: string;
-}
 export type VehicleDetailTab =
   | 'overview'
   | 'history'
@@ -66,8 +41,8 @@ export class VehicleDetailComponent implements OnInit {
   loading = false;
   activeTab: VehicleDetailTab = 'overview';
 
-  vehicle!: IVehicleDetail;
-  statCards: IStatCard[] = [];
+  vehicleData: any;
+  statCards: any[] = [];
   serviceHistory!: IServiceHistoryResultData;
   workOrders: IWorkOrder[] = [];
   documents: IVehicleDocument[] = [];
@@ -249,23 +224,37 @@ export class VehicleDetailComponent implements OnInit {
       // } else {
       //   this.handleFailResponse();
       // }
-      this.vehicle = {
-        id: '1',
-        registration: '2กข1234',
-        brand: 'Toyota',
-        model: 'Camry',
-        variant: '2.0G',
-        year: 2021,
-        color: 'White',
+      this.vehicleData = {
+        _id: '6a59e19dd12553515ccde6ef',
+        firstname: 'John',
+        lastname: 'Smith',
+        phoneNumber: '0812345678',
+        email: 'john@email.com',
+        licensePlate: '2กข1234',
+        province: 'กรุงเทพมหานคร',
         mileage: 53500,
         vin: 'JTNB11HK5M3000123',
-        status: 'ACTIVE',
-        customer: {
-          id: 'CUS000001',
-          name: 'John Smith',
-          phone: '0812345678',
-          email: 'john@email.com',
+        vehicle: {
+          brand: 'Toyota',
+          brandCode: 'TOYOTA',
+          model: 'Camry',
+          modelCode: 'CAMRY',
+          generation: 'XV70',
+          platform: 'TNGA-K',
+          yearFrom: 2018,
+          yearTo: 2024,
+          engines: [
+            {
+              code: '2.0G (6AR-FSE)',
+              fuel: 'petrol',
+            },
+          ],
+          remark: null,
         },
+        status: 'ACTIVE',
+        registrationDt: '2026-07-17T08:02:37.148Z',
+        createdBy: 'admin2',
+        __v: 0,
       };
     } catch (error) {
       // const errorObject = error as { message: string };
@@ -294,7 +283,7 @@ export class VehicleDetailComponent implements OnInit {
       this.statCards = [
         {
           title: 'Mileage',
-          value: `${this.formatNumber(this.vehicle.mileage)} km`,
+          value: `${this.formatNumber(this.vehicleData.mileage)} km`,
           icon: 'fa-road',
         },
         {
@@ -627,7 +616,6 @@ export class VehicleDetailComponent implements OnInit {
           this.loadedTabs.add('overview');
           this.getOverview();
         }
-
         break;
 
       case 'history':
@@ -839,6 +827,12 @@ export class VehicleDetailComponent implements OnInit {
     if (this.modalSubscription) {
       this.modalSubscription.unsubscribe();
       this.modalSubscription = null;
+    }
+  }
+  copyVin(vin: string): void {
+    if (vin) {
+      navigator.clipboard.writeText(vin);
+      // สามารถใส่ Notification หรือ Toast แจ้งเตือนตรงนี้ได้
     }
   }
 }

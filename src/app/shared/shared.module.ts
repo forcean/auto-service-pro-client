@@ -52,7 +52,23 @@ import {
   SlidersHorizontal,
   Trash2,
   Upload,
-  Image
+  Image,
+  StickyNote,
+  Check,
+  Receipt,
+  Settings2,
+  Calendar,
+  Wrench,
+  Wallet,
+  CalendarCheck,
+  FolderOpen,
+  Activity,         
+  AlertTriangle,
+  AlertCircle,
+  Clock,
+  Info,
+  CheckCircle2,
+  History
 } from 'lucide-angular';
 import { TableStockManagementComponent } from './components/table-stock-management/table-stock-management.component';
 import { CustomSearchSelectComponent } from './components/custom-search-select/custom-search-select.component';
@@ -65,7 +81,7 @@ import { VehicleWorkOrdersComponent } from './components/vehicle-work-orders/veh
 import { VehicleDocumentsComponent } from './components/vehicle-documents/vehicle-documents.component';
 import { ImageGalleryComponent } from './components/image-gallery/image-gallery.component';
 import { ServiceHistoryPanelComponent } from './components/service-history-panel/service-history-panel.component';
-import { ProvincePipe } from "./pipes/province.pipe";
+import { ProvincePipe } from './pipes/province.pipe';
 import { TimeAgoPipe } from './pipes/time-ago.pipe';
 
 const components = [
@@ -103,7 +119,7 @@ const components = [
   VehicleWorkOrdersComponent,
   VehicleDocumentsComponent,
   ImageGalleryComponent,
-  ServiceHistoryPanelComponent
+  ServiceHistoryPanelComponent,
 ];
 
 const directives = [
@@ -124,27 +140,43 @@ const directives = [
     FormsModule,
     ReactiveFormsModule,
     LucideAngularModule.pick({
-        ArrowUpFromDot,
-        RotateCcw,
-        ChevronDown,
-        ArrowRightLeft,
-        List,
-        Search,
-        SlidersHorizontal,
-        ChevronUp,
-        PackagePlus,
-        RotateCw,
-        ChevronsDown,
-        CarFront,
-        Upload,
-        Image,
-        Eye,
-        Download,
-        Trash2,
+      ArrowUpFromDot,
+      RotateCcw,
+      ChevronDown,
+      ArrowRightLeft,
+      List,
+      Search,
+      SlidersHorizontal,
+      ChevronUp,
+      PackagePlus,
+      RotateCw,
+      ChevronsDown,
+      CarFront,
+      Upload,
+      Image,
+      Eye,
+      Download,
+      Trash2,
+      Wrench,
+      Wallet,
+      CalendarCheck,
+      FolderOpen,
+      Activity,
+      AlertCircle,
+      AlertTriangle,
+      Clock,
+      Info,
+      CheckCircle2,
+      Calendar,
+      Settings2,
+      History,
+      Receipt,
+      Check,
+      StickyNote,
     }),
     ProvincePipe,
-    TimeAgoPipe
-],
+    TimeAgoPipe,
+  ],
   exports: [...components, ...directives],
 })
 export class SharedModule {}
