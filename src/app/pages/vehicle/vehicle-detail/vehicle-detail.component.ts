@@ -4,7 +4,6 @@ import {
   IServiceHistoryResultData,
   ITableHeaderServiceHistory,
 } from '../../../shared/interface/table-vehicle-service-history.interface';
-import { IWorkOrder } from '../../../shared/components/vehicle-work-orders/vehicle-work-orders.component';
 import { IVehicleDocument } from '../../../shared/components/vehicle-documents/vehicle-documents.component';
 import { IImageGalleryItem } from '../../../shared/components/image-gallery/image-gallery.component';
 import { PermissionService } from '../../../shared/services/permission.service';
@@ -20,8 +19,13 @@ import { Subscription } from 'rxjs';
 import { RESPONSE } from '../../../shared/enum/response.enum';
 import { ServiceHistoryDetailData } from '../../../shared/components/service-history-panel/service-history-panel.component';
 import { VehicleManagementService } from '../../../shared/services/vehicle-management.service';
-import { IVehicleKey } from '../../../shared/interface/table-vehicle.interface';
+import {
+  ICustomerVehicle,
+  IVehicleKey,
+} from '../../../shared/interface/table-vehicle.interface';
 import { IVehicleOverviewState } from '../../../shared/interface/customer-vehicle-management.interface';
+import { EVehicleStatus } from '../../../shared/enum/vehicle.enum';
+import { VEHICLE_STATUS_OPTIONS } from '../../../shared/constant/vehicle-status.constant';
 
 export type VehicleDetailTab =
   | 'overview'
@@ -44,11 +48,11 @@ export class VehicleDetailComponent implements OnInit {
   loading = false;
   activeTab: VehicleDetailTab = 'overview';
 
-  vehicleData: any;
+  vehicleData!: ICustomerVehicle;
   private vehicleKey!: IVehicleKey;
   overviewState!: IVehicleOverviewState;
   serviceHistory!: IServiceHistoryResultData;
-  workOrders: IWorkOrder[] = [];
+  workOrders: any[] = [];
   documents: IVehicleDocument[] = [];
   photos: IImageGalleryItem[] = [];
   selectedHistory: ServiceHistoryDetailData | null = null;
@@ -79,55 +83,72 @@ export class VehicleDetailComponent implements OnInit {
   };
 
   // loading status
-  isLoading = false;
-  isLoadingWorkOrder = false;
-  isLoadingOverView = false;
-  isLoadingHistory = false;
-  isLoadingDocument = false;
-  isLoadingPhoto = false;
+  isLoading: boolean = false;
+  isLoadingWorkOrder: boolean = false;
+  isLoadingOverView: boolean = false;
+  isLoadingHistory: boolean = false;
+  isLoadingDocument: boolean = false;
+  isLoadingPhoto: boolean = false;
+  isLoadingDelete: boolean = false;
 
   private modalSubscription: Subscription | null = null;
   private readonly loadedTabs = new Set<VehicleDetailTab>();
+  readonly statusMap = Object.fromEntries(
+    VEHICLE_STATUS_OPTIONS.map((item) => [item.value, item]),
+  );
 
   //Table
   headers: ITableHeaderServiceHistory[] = [
     {
-      headerName: 'id',
+      headerName: 'workOrderNo', 
       valueType: 'string',
       isSort: true,
       i18nKey: 'หมายเลขงาน',
     },
     {
-      headerName: 'mileage',
-      valueType: 'string',
+      headerName: 'date',
+      valueType: 'date',
       isSort: true,
-      i18nKey: 'ไมล์',
+      i18nKey: 'วันที่',
+    },
+    {
+      headerName: 'mileage',
+      valueType: 'number',
+      isSort: true,
+      i18nKey: 'ไมล์ (กม.)',
     },
     {
       headerName: 'service',
       valueType: 'string',
       isSort: false,
-      i18nKey: 'service',
+      i18nKey: 'รายการบริการ',
     },
     {
-      headerName: 'date',
-      valueType: 'string',
+      headerName: 'status',
+      valueType: 'badge',
       isSort: true,
-      i18nKey: 'วันที่',
+      i18nKey: 'สถานะ',
+    },
+    {
+      headerName: 'totalAmount',
+      valueType: 'currency',
+      isSort: true,
+      i18nKey: 'ค่าบริการ',
     },
     {
       headerName: 'mechanic',
       valueType: 'string',
       isSort: true,
-      i18nKey: 'mechanic',
+      i18nKey: 'ช่างผู้ดูแล',
     },
     {
       headerName: 'action',
-      valueType: 'string',
+      valueType: 'action',
       isSort: false,
       i18nKey: 'จัดการ',
     },
   ];
+
   constructor(
     private router: Router,
     private route: ActivatedRoute,
@@ -286,6 +307,7 @@ export class VehicleDetailComponent implements OnInit {
         this.router.navigate(['/not-found']);
       } else {
         this.handleFailResponse();
+        this.serviceHistory = res.resultData;
       }
     } catch (error) {
       // const errorObject = error as { message: string };
@@ -343,6 +365,8 @@ export class VehicleDetailComponent implements OnInit {
           size: '1.8 MB',
           uploadedAt: '15 Jul 2026',
           url: '/assets/mock/documents/invoice-001.pdf',
+          description: 'เอกสารบับ',
+          uploadedBy: 'Forcean',
         },
         {
           id: 'DOC002',
@@ -581,11 +605,7 @@ export class VehicleDetailComponent implements OnInit {
   }
 
   deleteVehicle(): void {
-    const confirmed = confirm('Are you sure you want to delete this vehicle?');
-
-    if (!confirmed) return;
-
-    console.log('Delete Vehicle');
+    this.handleModalDelete();
   }
 
   back(): void {
@@ -596,30 +616,13 @@ export class VehicleDetailComponent implements OnInit {
     return new Intl.NumberFormat('en-US').format(value);
   }
 
-  getStatusLabel(status: string): string {
-    switch (status) {
-      case 'ACTIVE':
-        return 'Active';
-
-      case 'INACTIVE':
-        return 'Inactive';
-
-      default:
-        return '-';
-    }
-  }
-
-  getStatusClass(status: string): string {
-    switch (status) {
-      case 'ACTIVE':
-        return 'status-active';
-
-      case 'INACTIVE':
-        return 'status-inactive';
-
-      default:
-        return '';
-    }
+  getStatus(status: EVehicleStatus | undefined) {
+    return (
+      this.statusMap[status as EVehicleStatus] ?? {
+        label: '-',
+        color: '#6B7280',
+      }
+    );
   }
 
   getWorkOrderClass(status: string): string {
@@ -635,6 +638,31 @@ export class VehicleDetailComponent implements OnInit {
 
       default:
         return '';
+    }
+  }
+
+  private async deleteCustomerVehicle(vehicle: IVehicleKey) {
+    this.isLoadingDelete = true;
+    const loader = this.loadingBarService.useRef();
+    loader.start();
+    try {
+      this.modalConditionComponent.onClose();
+      const res = await this.vehicleManagementService.deleteCustomerVehicle(
+        vehicle.licensePlate,
+        vehicle.province,
+      );
+      if (res.resultCode === RESPONSE.SUCCESS) {
+        this.handleSuccessDelete();
+        // this.updateUrlParams();
+      } else {
+        this.handleFailDelete();
+      }
+    } catch (error) {
+      console.error('Response error', error);
+      this.handleCommonError();
+    } finally {
+      this.isLoadingDelete = false;
+      loader.complete();
     }
   }
 
@@ -721,26 +749,36 @@ export class VehicleDetailComponent implements OnInit {
 
   async handleOnModalConfirm(flag: string) {
     if (flag === 'change') {
-      this.openResetPasswordForm();
+      this.deleteCustomerVehicle(this.vehicleKey);
     }
   }
 
-  private handleModalReset() {
+  private handleModalDelete() {
     this.modalConditionService.open({
       type: 'change',
-      title: 'คุณต้องการรีเซ็ตรหัสผ่านหรือไม่?',
+      title: 'คุณต้องการลบรถลูกค้าคันนี้หรือไม่?',
       subtitle:
-        'คุณต้องการยืนยันการเปลี่ยนรหัสผ่านหรือไม่? การคลิก ยืนยัน <br>จะพาคุณไปยังหน้าการเปลี่ยนรหัสผ่าน คลิก ยกเลิก เพื่อออก',
+        'คุณต้องการยืนยันการลบหรือไม่? การคลิก ยืนยัน <br>จะลบอย่างถาวร คลิก ยกเลิก เพื่อออก',
+    });
+  }
+
+  private handleFailDelete() {
+    this.modalCommonService.open({
+      type: 'alert',
+      title: 'ไม่สามารถลบรถคันนี้ได้',
+      subtitle:
+        'ไม่สามารถลบรถคันนี้ได้ โปรดลองอีกครั้งหรือติดต่อ<br>ผู้ดูแลระบบหากปัญหายังคงอยู่',
+      buttonText: 'ยืนยัน',
     });
   }
 
   private handleCommonError() {
-    this.modalSubscription = this.modalCommonService.isOpen.subscribe((obj) => {
-      if (!obj?.isOpen) {
-        // this.router.navigate(['/portal/landing']);
-        this.unsubscribeModal();
-      }
-    });
+    // this.modalSubscription = this.modalCommonService.isOpen.subscribe((obj) => {
+    //   if (!obj?.isOpen) {
+    //     // this.router.navigate(['/portal/landing']);
+    //     this.unsubscribeModal();
+    //   }
+    // });
   }
 
   private handleFailResponse() {
@@ -753,13 +791,12 @@ export class VehicleDetailComponent implements OnInit {
     });
   }
 
-  private handleSuccessResetPassword() {
+  private handleSuccessDelete() {
     this.modalCommonService.open({
       type: 'success',
-      title: 'การรีเซ็ตรหัสผ่านเสร็จสมบูรณ์',
-      subtitle:
-        'การรีเซ็ตรหัสผ่านเสร็จสมบูรณ์แล้ว กรุณาใช้รหัสผ่านใหม่ของคุณในการเข้าสู่ระบบ',
-      buttonText: 'ยืนยัน',
+      title: 'ลบรถในลูกค้าสำเร็จ',
+      subtitle: 'รถคันนี้ถูกลบออกจากระบบเรียบร้อยแล้ว.',
+      buttonText: 'เข้าใจแล้ว',
     });
   }
 
@@ -769,10 +806,10 @@ export class VehicleDetailComponent implements OnInit {
       this.modalSubscription = null;
     }
   }
+
   copyVin(vin: string): void {
     if (vin) {
       navigator.clipboard.writeText(vin);
-      // สามารถใส่ Notification หรือ Toast แจ้งเตือนตรงนี้ได้
     }
   }
 }

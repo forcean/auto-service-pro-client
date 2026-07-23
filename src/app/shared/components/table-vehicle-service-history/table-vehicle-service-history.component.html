@@ -39,25 +39,37 @@
       <tbody>
         <tr *ngFor="let row of config?.history; let i = index">
           <td>{{ i + 1 + (pageIndex - 1) * pageSize }}</td>
-          <td>{{ row.id}}</td>
-          <td>{{ row.mileage}}</td>
-          <td>{{ row.service}}</td>
-          <td>{{ row.date}}</td>
-          <td>{{ row.mechanic}}</td>
-        
+          <td>{{ row.workOrderNo }}</td>
+          <td>{{ formatDate(row.date) }}</td>
+          <td>{{ row.mileage | number }} กม.</td>
+          <td>{{ row.service }}</td>
+          <td>
+            <span
+              class="badge"
+              [style.color]="getStatus(row.status).color"
+              [style.backgroundColor]="getStatus(row.status).color + '20'"
+              [style.borderColor]="getStatus(row.status).color"
+            >
+              {{ getStatus(row.status).label }}
+            </span>
+          </td>
+          <td class="text-right">
+            {{ row.totalAmount ?? 0 | number: "1.2-2" }} บาท
+          </td>
+          <td>{{ row.mechanic }}</td>
           <td>
             <div class="action-group">
               <img
                 src="assets/img/icons/icon.viewdetail.svg"
                 class="action-icon"
-                (click)="onView.emit(row.id)"
+                (click)="onView.emit(row.workOrderId || row.id)"
               />
             </div>
           </td>
         </tr>
 
-        <tr *ngIf="config == undefined || config.history.length === 0">
-          <td colspan="10" class="text-center py-5">- ไม่พบข้อมูล -</td>
+        <tr *ngIf="!config || config.history.length === 0">
+          <td colspan="9" class="text-center py-5">- ไม่พบข้อมูล -</td>
         </tr>
       </tbody>
     </table>

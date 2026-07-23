@@ -1,184 +1,225 @@
-<div class="space-y-6">
+<div class="space-y-5">
   <!-- ================= Header ================= -->
-
-  <div
-    class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
-  >
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
     <div>
-      <h2 class="text-2xl font-bold text-slate-800">Work Orders</h2>
-
-      <p class="mt-1 text-sm text-slate-500">
-        Manage all repair jobs for this vehicle.
+      <h2 class="text-base sm:text-lg font-black text-slate-900 uppercase tracking-wide flex items-center gap-2">
+        <i-lucide name="wrench" class="h-5 w-5 text-slate-700"></i-lucide>
+        Work Orders Management
+      </h2>
+      <p class="text-xs font-medium text-slate-400 mt-0.5">
+        จัดการและติดตามรายการใบสั่งซ่อมทั้งหมดของรถคันนี้
       </p>
     </div>
 
     <button
-      class="rounded-xl bg-[#88C273] px-5 py-2.5 font-medium text-white transition hover:bg-[#77b462]"
+      (click)="onCreateWorkOrder()"
+      class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold rounded-xl transition-colors shadow-sm active:scale-95"
     >
-      <i class="fa-solid fa-plus mr-2"></i>
-
-      Create Work Order
+      <i-lucide name="plus" class="h-4 w-4"></i-lucide>
+      <span>สร้างใบสั่งซ่อม (WO)</span>
     </button>
   </div>
 
-  <!-- ================= Summary ================= -->
-
-  <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-    <div class="rounded-2xl border bg-white p-5 shadow-sm">
-      <p class="text-sm text-slate-500">Open</p>
-
-      <h3 class="mt-2 text-3xl font-bold text-blue-600">{{ totalOpen }}</h3>
+  <!-- ================= Summary KPI Cards ================= -->
+  <div class="grid grid-cols-2 xl:grid-cols-4 gap-3.5">
+    <!-- Open -->
+    <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center gap-3 min-w-0">
+      <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center flex-shrink-0 border border-blue-100">
+        <i-lucide name="folder-open" class="h-4.5 w-4.5"></i-lucide>
+      </div>
+      <div class="min-w-0 flex-1">
+        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block truncate">Open WO</span>
+        <h4 class="text-base sm:text-lg font-black text-slate-900 truncate">
+          {{ summary?.totalOpen || 0 }}
+          <span class="text-xs font-semibold text-slate-400">รายการ</span>
+        </h4>
+      </div>
     </div>
 
-    <div class="rounded-2xl border bg-white p-5 shadow-sm">
-      <p class="text-sm text-slate-500">In Progress</p>
-
-      <h3 class="mt-2 text-3xl font-bold text-orange-500">{{ totalInProgress }}</h3>
+    <!-- In Progress -->
+    <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center gap-3 min-w-0">
+      <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center flex-shrink-0 border border-amber-100">
+        <i-lucide name="settings-2" class="h-4.5 w-4.5"></i-lucide>
+      </div>
+      <div class="min-w-0 flex-1">
+        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block truncate">In Progress</span>
+        <h4 class="text-base sm:text-lg font-black text-slate-900 truncate">
+          {{ summary?.totalInProgress || 0 }}
+          <span class="text-xs font-semibold text-slate-400">รายการ</span>
+        </h4>
+      </div>
     </div>
 
-    <div class="rounded-2xl border bg-white p-5 shadow-sm">
-      <p class="text-sm text-slate-500">Completed</p>
-
-      <h3 class="mt-2 text-3xl font-bold text-green-600">{{ totalCompleted }}</h3>
+    <!-- Completed -->
+    <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center gap-3 min-w-0">
+      <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center flex-shrink-0 border border-emerald-100">
+        <i-lucide name="check-circle-2" class="h-4.5 w-4.5"></i-lucide>
+      </div>
+      <div class="min-w-0 flex-1">
+        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block truncate">Completed</span>
+        <h4 class="text-base sm:text-lg font-black text-slate-900 truncate">
+          {{ summary?.totalCompleted || 0 }}
+          <span class="text-xs font-semibold text-slate-400">รายการ</span>
+        </h4>
+      </div>
     </div>
 
-    <div class="rounded-2xl border bg-white p-5 shadow-sm">
-      <p class="text-sm text-slate-500">Total Repair Cost</p>
-
-      <h3 class="mt-2 text-3xl font-bold text-slate-800">฿{{ totalRepairCost | number }}</h3>
+    <!-- Total Repair Cost -->
+    <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center gap-3 min-w-0" *ngIf="canViewFinancials">
+      <div class="w-10 h-10 bg-slate-100 text-slate-700 rounded-lg flex items-center justify-center flex-shrink-0 border border-slate-200/50">
+        <i-lucide name="wallet" class="h-4.5 w-4.5"></i-lucide>
+      </div>
+      <div class="min-w-0 flex-1">
+        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block truncate">Total Repair Cost</span>
+        <h4 class="text-base sm:text-lg font-black text-slate-900 truncate">
+          ฿{{ formatNumber(summary?.totalRepairCost) }}
+        </h4>
+      </div>
     </div>
   </div>
 
-  <!-- ================= List ================= -->
-
-  <div class="space-y-5">
-    <div
-      *ngFor="let item of workOrders"
-      class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-[#88C273] hover:shadow-md"
-    >
-      <!-- top -->
-
+  <!-- ================= Work Orders List ================= -->
+  <div class="space-y-4">
+    <ng-container *ngIf="workOrders && workOrders.length > 0; else emptyState">
       <div
-        class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between"
+        *ngFor="let item of workOrders"
+        class="bg-white rounded-xl border border-slate-200/80 shadow-sm hover:border-slate-300 transition-all p-4 sm:p-5 space-y-4 min-w-0"
       >
-        <div>
-          <div class="flex flex-wrap items-center gap-3">
-            <h3 class="text-xl font-bold text-slate-800">
-              {{ item.workOrderNo }}
+        <!-- Top Section: Header & Status -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-2.5 flex-wrap">
+              <span class="text-xs font-black text-blue-600 tracking-wider">
+                #{{ item.workOrderNo }}
+              </span>
+              <!-- Status Badge Dynamic -->
+              <span
+                class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider border"
+                [ngClass]="getStatusBadgeClass(item.status)"
+              >
+                <i-lucide [name]="getStatusIcon(item.status)" class="h-3 w-3"></i-lucide>
+                {{ item.statusText || item.status }}
+              </span>
+            </div>
+            <h3 class="text-sm sm:text-base font-extrabold text-slate-900 mt-1 truncate">
+              {{ item.title }}
             </h3>
-
-            <span
-              class="rounded-full px-3 py-1 text-xs font-semibold"
-              [ngClass]="getStatusClass(item.status)"
-            >
-              {{ item.status }}
-            </span>
           </div>
 
-          <p class="mt-3 text-lg text-slate-700">
-            {{ item.title }}
-          </p>
+          <!-- Quick Action -->
+          <button
+            (click)="onViewDetail(item.id)"
+            class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/80 rounded-lg text-xs font-bold transition-colors flex-shrink-0 self-start sm:self-center"
+          >
+            <i-lucide name="file-text" class="h-3.5 w-3.5 text-slate-500"></i-lucide>
+            <span>ดูรายละเอียด</span>
+          </button>
         </div>
 
-        <button class="rounded-lg border px-4 py-2 hover:bg-slate-50">
-          View Detail
-        </button>
-      </div>
+        <!-- Meta Info Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+          <div class="space-y-0.5">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Mechanic / ช่างผู้ดูแล</span>
+            <div class="font-bold text-slate-800 truncate flex items-center gap-1.5">
+              <i-lucide name="user" class="h-3.5 w-3.5 text-slate-400"></i-lucide>
+              {{ item.mechanicName || '-' }}
+            </div>
+          </div>
 
-      <!-- info -->
+          <div class="space-y-0.5">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Created Date</span>
+            <div class="font-bold text-slate-800 truncate flex items-center gap-1.5">
+              <i-lucide name="calendar" class="h-3.5 w-3.5 text-slate-400"></i-lucide>
+              {{ item.createdAt }}
+            </div>
+          </div>
 
-      <div class="mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-        <div>
-          <p class="text-sm text-slate-400">Mechanic</p>
+          <div class="space-y-0.5">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Updated Date</span>
+            <div class="font-bold text-slate-800 truncate flex items-center gap-1.5">
+              <i-lucide name="clock" class="h-3.5 w-3.5 text-slate-400"></i-lucide>
+              {{ item.updatedAt || '-' }}
+            </div>
+          </div>
 
-          <h4 class="mt-1 font-semibold">
-            {{ item.mechanic }}
-          </h4>
+          <div class="space-y-0.5" *ngIf="canViewFinancials">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Estimated Total</span>
+            <div class="font-extrabold text-slate-900 truncate">
+              ฿{{ formatNumber(item.costs?.total) }}
+            </div>
+          </div>
         </div>
 
-        <div>
-          <p class="text-sm text-slate-400">Created</p>
-
-          <h4 class="mt-1 font-semibold">
-            {{ item.createdAt }}
-          </h4>
-        </div>
-
-        <div>
-          <p class="text-sm text-slate-400">Estimated Cost</p>
-
-          <h4 class="mt-1 font-semibold">{{ item.total | number }} THB</h4>
-        </div>
-
-        <div>
-          <p class="text-sm text-slate-400">Updated</p>
-
-          <h4 class="mt-1 font-semibold">
-            {{ item.updatedAt }}
-          </h4>
-        </div>
-      </div>
-
-      <!-- cost -->
-
-      <div class="mt-8 grid gap-4 rounded-xl bg-slate-50 p-5 md:grid-cols-3">
-        <div>
-          <p class="text-sm text-slate-500">Labor</p>
-
-          <h4 class="mt-1 text-xl font-bold">฿{{ item.labor | number }}</h4>
-        </div>
-
-        <div>
-          <p class="text-sm text-slate-500">Parts</p>
-
-          <h4 class="mt-1 text-xl font-bold">฿{{ item.parts | number }}</h4>
-        </div>
-
-        <div>
-          <p class="text-sm text-slate-500">Total</p>
-
-          <h4 class="mt-1 text-2xl font-bold text-[#88C273]">
-            ฿{{ item.total | number }}
-          </h4>
-        </div>
-      </div>
-
-      <!-- progress -->
-
-      <div class="mt-8">
-        <div class="mb-2 flex items-center justify-between">
-          <span class="text-sm text-slate-500"> Progress </span>
-
-          <span class="font-semibold"> {{ item.progress }}% </span>
-        </div>
-
-        <div class="h-2 overflow-hidden rounded-full bg-slate-200">
-          <div
-            class="h-full rounded-full bg-[#88C273]"
-            [style.width.%]="item.progress"
-          ></div>
-        </div>
-      </div>
-
-      <!-- footer -->
-
-      <div class="mt-8 flex flex-wrap justify-end gap-3">
-        <button
-          class="rounded-lg border border-slate-300 px-4 py-2 hover:bg-slate-50"
+        <!-- Breakdown Cost (ซ่อน/แสดง ตามสิทธิ์ Financials) -->
+        <div
+          *ngIf="canViewFinancials && item.costs"
+          class="grid grid-cols-3 gap-2 p-3 bg-slate-50/70 rounded-lg border border-slate-100 text-xs"
         >
-          <i class="fa-solid fa-print mr-2"></i>
+          <div>
+            <span class="text-[10px] font-bold text-slate-400 uppercase block">ค่าแรง (Labor)</span>
+            <span class="text-xs sm:text-sm font-extrabold text-slate-800">฿{{ formatNumber(item.costs.labor) }}</span>
+          </div>
+          <div>
+            <span class="text-[10px] font-bold text-slate-400 uppercase block">ค่าอะไหล่ (Parts)</span>
+            <span class="text-xs sm:text-sm font-extrabold text-slate-800">฿{{ formatNumber(item.costs.parts) }}</span>
+          </div>
+          <div>
+            <span class="text-[10px] font-bold text-slate-400 uppercase block">รวมทั้งสิ้น (Total)</span>
+            <span class="text-xs sm:text-sm font-black text-emerald-600">฿{{ formatNumber(item.costs.total) }}</span>
+          </div>
+        </div>
 
-          Print
-        </button>
+        <!-- Progress Bar -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Progress Status</span>
+            <span class="font-black text-slate-800">{{ item.progress || 0 }}%</span>
+          </div>
+          <div class="h-2 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200/50">
+            <div
+              class="h-full bg-slate-800 rounded-full transition-all duration-500"
+              [ngClass]="{
+                'bg-emerald-500': item.progress === 100,
+                'bg-amber-500': item.progress > 0 && item.progress < 100,
+                'bg-slate-300': item.progress === 0
+              }"
+              [style.width.%]="item.progress || 0"
+            ></div>
+          </div>
+        </div>
 
-        <button
-          class="rounded-lg bg-[#374870] px-4 py-2 text-white hover:bg-[#2d3d63]"
-        >
-          <i class="fa-solid fa-eye mr-2"></i>
+        <!-- Card Footer Action -->
+        <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
+          <button
+            (click)="onPrint(item.id)"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-lg text-xs font-bold transition-colors"
+          >
+            <i-lucide name="printer" class="h-3.5 w-3.5 text-slate-500"></i-lucide>
+            <span>พิมพ์ WO</span>
+          </button>
 
-          View Detail
-        </button>
+          <button
+            (click)="onViewDetail(item.id)"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-bold transition-colors shadow-xs"
+          >
+            <i-lucide name="eye" class="h-3.5 w-3.5"></i-lucide>
+            <span>ดูรายละเอียด</span>
+          </button>
+        </div>
       </div>
-    </div>
+    </ng-container>
+
+    <!-- Empty State -->
+    <ng-template #emptyState>
+      <div class="bg-white rounded-xl border border-slate-200/80 p-8 text-center space-y-3">
+        <div class="w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto">
+          <i-lucide name="folder-open" class="h-6 w-6"></i-lucide>
+        </div>
+        <div>
+          <h4 class="text-sm font-bold text-slate-800">ไม่พบรายการใบสั่งซ่อม</h4>
+          <p class="text-xs text-slate-400 mt-0.5">ยังไม่มีการสร้าง Work Order สำหรับรถคันนี้</p>
+        </div>
+      </div>
+    </ng-template>
   </div>
 </div>

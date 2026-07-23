@@ -133,7 +133,7 @@ export class VehicleFormComponent implements OnInit {
       const payload = this.buildPayload();
 
       const res =
-        await this.vehicleManagementService.CreateCustomerVehicle(payload);
+        await this.vehicleManagementService.createCustomerVehicle(payload);
 
       if (res.resultCode == RESPONSE.CREATED) {
         console.log('created');

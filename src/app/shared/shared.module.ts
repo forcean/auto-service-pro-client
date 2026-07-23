@@ -62,13 +62,17 @@ import {
   Wallet,
   CalendarCheck,
   FolderOpen,
-  Activity,         
+  Activity,
   AlertTriangle,
   AlertCircle,
   Clock,
   Info,
   CheckCircle2,
-  History
+  History,
+  File,
+  Archive,
+  FileType2,
+  Sheet
 } from 'lucide-angular';
 import { TableStockManagementComponent } from './components/table-stock-management/table-stock-management.component';
 import { CustomSearchSelectComponent } from './components/custom-search-select/custom-search-select.component';
@@ -173,6 +177,10 @@ const directives = [
       Receipt,
       Check,
       StickyNote,
+      File,
+      Archive,
+      FileType2,
+      Sheet
     }),
     ProvincePipe,
     TimeAgoPipe,

@@ -29,7 +29,8 @@ export interface ICustomerVehicle {
   // model: string;
   // year: number;
   mileage: number;
-  // vin?: string;
+  vin: string;
+  email: string;
   // engineNumber?: string;
   // color?: string;
   lastServiceDate?: string;

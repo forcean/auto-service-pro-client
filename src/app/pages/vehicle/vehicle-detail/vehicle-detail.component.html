@@ -88,18 +88,23 @@
             <!-- Status Badge -->
             <div class="mb-4">
               <span
-                [ngClass]="getStatusClass(vehicleData?.status)"
-                class="inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-xs font-bold uppercase tracking-wider shadow-sm border border-white/10"
+                class="inline-flex items-center gap-2 rounded-full border px-3.5 py-1 text-xs font-bold shadow-sm"
+                [style.color]="getStatus(vehicleData?.status).color"
+                [style.borderColor]="getStatus(vehicleData?.status).color"
+                [style.backgroundColor]="
+                  getStatus(vehicleData?.status).color + '20'
+                "
               >
                 <span class="relative flex h-2 w-2">
                   <span
-                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75"
+                    class="absolute inline-flex h-full w-full animate-ping rounded-full bg-current opacity-75"
                   ></span>
                   <span
-                    class="relative inline-flex rounded-full h-2 w-2 bg-current"
+                    class="relative inline-flex h-2 w-2 rounded-full bg-current"
                   ></span>
                 </span>
-                {{ getStatusLabel(vehicleData?.status) || vehicleData?.status }}
+
+                {{ getStatus(vehicleData?.status).label }}
               </span>
             </div>
 
@@ -207,11 +212,7 @@
                 class="text-xs font-bold text-slate-800 block truncate"
                 title="{{ vehicleData?.vehicle?.engines?.[0]?.code }}"
               >
-                {{
-                  vehicleData?.vehicle?.engines?.[0]?.code ||
-                    vehicleData?.engineCode ||
-                    "N/A"
-                }}
+                {{ vehicleData?.vehicle?.engines?.[0]?.code || "N/A" }}
               </span>
             </div>
           </div>
@@ -471,3 +472,15 @@
     </main>
   </div>
 </div>
+
+<app-modal-condition
+  [isLoading]="isLoadingDelete"
+  (onConfirm)="handleOnModalConfirm($event)"
+>
+</app-modal-condition>
+
+<app-service-history-panel
+    *ngIf="selectedHistory"
+    [data]="selectedHistory"
+    (closePanel)="onClosePanel()">
+  </app-service-history-panel>

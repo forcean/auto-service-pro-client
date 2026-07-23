@@ -1,13 +1,25 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+} from '@angular/core';
 import { PaginationModel } from '../../interface/pagination.model';
 import moment from 'moment';
-import { IServiceHistoryResultData, ITableHeaderServiceHistory } from '../../interface/table-vehicle-service-history.interface';
+import {
+  IServiceHistoryResultData,
+  ITableHeaderServiceHistory,
+} from '../../interface/table-vehicle-service-history.interface';
+import { VEHICLE_STATUS_OPTIONS } from '../../constant/vehicle-status.constant';
+import { EVehicleStatus } from '../../enum/vehicle.enum';
 
 @Component({
   selector: 'app-table-vehicle-service-history',
   standalone: false,
   templateUrl: './table-vehicle-service-history.component.html',
-  styleUrl: './table-vehicle-service-history.component.scss'
+  styleUrl: './table-vehicle-service-history.component.scss',
 })
 export class TableVehicleServiceHistoryComponent implements OnInit, OnChanges {
   @Input() headers: ITableHeaderServiceHistory[] = [];
@@ -67,112 +79,23 @@ export class TableVehicleServiceHistoryComponent implements OnInit, OnChanges {
     return moment(date).format('DD/MM/YYYY HH:mm:ss');
   }
 
-  getMovementBadge(type: string): string {
-    switch (type?.toLowerCase()) {
-      case 'receive':
-        return 'badge receive';
-
-      case 'issue':
-        return 'badge issue';
-
-      case 'return':
-        return 'badge return';
-
-      case 'adjust':
-        return 'badge adjust';
-
-      case 'reserve':
-        return 'badge reserve';
-
-      case 'release':
-        return 'badge release';
-
-      default:
-        return 'badge';
-    }
-  }
-
-  getDirectionClass(direction: string): string {
-    switch (direction) {
-      case 'IN':
-        return 'direction in';
-
-      case 'OUT':
-        return 'direction out';
-
-      default:
-        return 'direction adjust';
-    }
-  }
-
-  quantityClass(row: any): string {
-    switch (row.direction) {
-      case 'IN':
-        return 'qty-in';
-
-      case 'OUT':
-        return 'qty-out';
-
-      case 'ADJUST':
-        return row.afterQty >= row.beforeQty ? 'qty-in' : 'qty-out';
-
-      default:
-        return '';
-    }
-  }
-
-  quantityText(row: any): string {
-    switch (row.direction) {
-      case 'IN':
-        return `+${row.quantity}`;
-
-      case 'OUT':
-        return `-${row.quantity}`;
-
-      case 'ADJUST':
-        if (row.afterQty > row.beforeQty) {
-          return `+${row.quantity}`;
-        }
-
-        if (row.afterQty < row.beforeQty) {
-          return `-${row.quantity}`;
-        }
-
-        return `${row.quantity}`;
-
-      default:
-        return `${row.quantity}`;
-    }
-  }
-
-  movementLabel(type: string): string {
-    switch (type) {
-      case 'receive':
-        return 'รับเข้า';
-
-      case 'issue':
-        return 'เบิกออก';
-
-      case 'return':
-        return 'คืนสินค้า';
-
-      case 'adjust':
-        return 'ปรับสต็อก';
-
-      case 'reserve':
-        return 'สำรอง';
-
-      case 'release':
-        return 'ปลดสำรอง';
-
-      default:
-        return type;
-    }
-  }
-
   trackBy(index: number, row: any): string {
     return row.id;
   }
 
-}
+  readonly statusMap = Object.fromEntries(
+    VEHICLE_STATUS_OPTIONS.map((item) => [item.value, item]),
+  ) as Record<
+    EVehicleStatus,
+    { value: EVehicleStatus; label: string; color: string }
+  >;
 
+  getStatus(status: EVehicleStatus) {
+    return (
+      this.statusMap[status] ?? {
+        label: '-',
+        color: '#6B7280',
+      }
+    );
+  }
+}

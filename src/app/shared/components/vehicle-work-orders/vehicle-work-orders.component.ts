@@ -1,26 +1,30 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-export type WorkOrderStatus =
-  | 'OPEN'
-  | 'IN_PROGRESS'
-  | 'COMPLETED'
-  | 'CANCELLED';
+export type WorkOrderStatus = 'OPEN' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | string;
 
-export interface IWorkOrder {
-  id: string;
-  workOrderNo: string;
-  title: string;
-
-  status: WorkOrderStatus;
-
-  mechanic: string;
-
-  createdAt?: string;
-  updatedAt?: string;
-
+export interface IWorkOrderCost {
   labor: number;
   parts: number;
   total: number;
+}
+
+export interface IWorkOrderItem {
+  id: string | number;
+  workOrderNo: string;
+  title: string;
+  status: WorkOrderStatus;
+  statusText?: string;
+  mechanicName?: string;
+  createdAt: string;
+  updatedAt?: string;
   progress: number;
+  costs?: IWorkOrderCost;
+}
+
+export interface IWorkOrderSummary {
+  totalOpen: number;
+  totalInProgress: number;
+  totalCompleted: number;
+  totalRepairCost: number;
 }
 @Component({
   selector: 'app-vehicle-work-orders',
@@ -30,107 +34,56 @@ export interface IWorkOrder {
 })
 export class VehicleWorkOrdersComponent {
 
-  @Input()
-  workOrders: IWorkOrder[] = [];
+ @Input() workOrders: IWorkOrderItem[] = [];
+  @Input() summary?: IWorkOrderSummary;
+  @Input() canViewFinancials: boolean = true;
 
-  @Output()
-  create = new EventEmitter<void>();
+  @Output() createWorkOrder = new EventEmitter<void>();
+  @Output() viewDetail = new EventEmitter<string | number>();
+  @Output() printWorkOrder = new EventEmitter<string | number>();
 
-  @Output()
-  view = new EventEmitter<IWorkOrder>();
-
-  @Output()
-  print = new EventEmitter<IWorkOrder>();
-
-  get totalOpen(): number {
-    return this.workOrders.filter(x => x.status === 'OPEN').length;
+  // Helper สำหรับจัดรูปแบบตัวเลข ป้องกัน Null Pointer
+  formatNumber(value?: number | null): string {
+    if (value === null || value === undefined) return '0';
+    return new Intl.NumberFormat('th-TH').format(value);
   }
 
-  get totalInProgress(): number {
-    return this.workOrders.filter(
-      x => x.status === 'IN_PROGRESS'
-    ).length;
-  }
-
-  get totalCompleted(): number {
-    return this.workOrders.filter(
-      x => x.status === 'COMPLETED'
-    ).length;
-  }
-
-  get totalCancelled(): number {
-    return this.workOrders.filter(
-      x => x.status === 'CANCELLED'
-    ).length;
-  }
-
-  get totalRepairCost(): number {
-    return this.workOrders.reduce(
-      (sum, item) => sum + item.total,
-      0
-    );
-  }
-
-  getStatusLabel(status: WorkOrderStatus): string {
-
-    switch (status) {
-
+  // Helper กำหนด Dynamic Class สำหรับ Badge ตาม Status
+  getStatusBadgeClass(status: WorkOrderStatus): string {
+    switch (status?.toUpperCase()) {
       case 'OPEN':
-        return 'Open';
-
+        return 'bg-blue-50 border-blue-200 text-blue-700';
       case 'IN_PROGRESS':
-        return 'In Progress';
-
+        return 'bg-amber-50 border-amber-200 text-amber-700';
       case 'COMPLETED':
-        return 'Completed';
-
+        return 'bg-emerald-50 border-emerald-200 text-emerald-700';
       case 'CANCELLED':
-        return 'Cancelled';
-
+        return 'bg-rose-50 border-rose-200 text-rose-700';
       default:
-        return status;
-
+        return 'bg-slate-100 border-slate-200 text-slate-700';
     }
-
   }
 
-  getStatusClass(status: WorkOrderStatus): string {
-
-    switch (status) {
-
-      case 'OPEN':
-        return 'bg-blue-100 text-blue-700';
-
-      case 'IN_PROGRESS':
-        return 'bg-amber-100 text-amber-700';
-
-      case 'COMPLETED':
-        return 'bg-green-100 text-green-700';
-
-      case 'CANCELLED':
-        return 'bg-red-100 text-red-700';
-
-      default:
-        return 'bg-slate-100 text-slate-700';
-
+  // Helper สลับ Icon ตาม Status
+  getStatusIcon(status: WorkOrderStatus): string {
+    switch (status?.toUpperCase()) {
+      case 'OPEN': return 'folder-open';
+      case 'IN_PROGRESS': return 'settings-2';
+      case 'COMPLETED': return 'check-circle-2';
+      case 'CANCELLED': return 'x-circle';
+      default: return 'info';
     }
-
   }
 
-  onCreate(): void {
-    this.create.emit();
+  onCreateWorkOrder(): void {
+    this.createWorkOrder.emit();
   }
 
-  onView(item: IWorkOrder): void {
-    this.view.emit(item);
+  onViewDetail(id: string | number): void {
+    this.viewDetail.emit(id);
   }
 
-  onPrint(item: IWorkOrder): void {
-    this.print.emit(item);
+  onPrint(id: string | number): void {
+    this.printWorkOrder.emit(id);
   }
-
-  trackById(index: number, item: IWorkOrder): string {
-    return item.id;
-  }
-
 }

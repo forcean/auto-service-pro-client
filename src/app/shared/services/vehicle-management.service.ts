@@ -5,11 +5,11 @@ import { ApiPrefix } from '../enum/api-prefix.enum';
 import { IResponseMenu } from '../interface/sidebar.interface';
 import { IBaseResponse } from '../interface/base-http.interface';
 import {
+  ICustomerVehicle,
   IQueryVehicle,
   IVehicleResultData,
 } from '../interface/table-vehicle.interface';
 import { IServiceHistoryResultData } from '../interface/table-vehicle-service-history.interface';
-import { IWorkOrder } from '../components/vehicle-work-orders/vehicle-work-orders.component';
 import { IVehicleOverviewState } from '../interface/customer-vehicle-management.interface';
 
 @Injectable({
@@ -43,14 +43,14 @@ export class VehicleManagementService {
   async getVehicleDetail(
     licensePlate: string,
     province: string,
-  ): Promise<IBaseResponse<unknown>> {
+  ): Promise<IBaseResponse<ICustomerVehicle>> {
     try {
       const uri = this.apiPath + `/${licensePlate}/${province}/detail`;
-      const response = await this.httpService.get<unknown>(uri);
+      const response = await this.httpService.get<ICustomerVehicle>(uri);
       return response;
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
-        return error.error as IBaseResponse<unknown>;
+        return error.error as IBaseResponse<ICustomerVehicle>;
       } else {
         throw error;
       }
@@ -94,21 +94,21 @@ export class VehicleManagementService {
   async getVehicleWorkOrders(
     licensePlate: string,
     province: string,
-  ): Promise<IBaseResponse<IWorkOrder[]>> {
+  ): Promise<IBaseResponse<unknown[]>> {
     try {
       const uri = this.apiPath + `/${licensePlate}/${province}/workOrders`;
-      const response = await this.httpService.get<IWorkOrder[]>(uri);
+      const response = await this.httpService.get<unknown[]>(uri);
       return response;
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
-        return error.error as IBaseResponse<IWorkOrder[]>;
+        return error.error as IBaseResponse<unknown[]>;
       } else {
         throw error;
       }
     }
   }
 
-  async CreateCustomerVehicle(body: unknown) {
+  async createCustomerVehicle(body: unknown) {
     try {
       const uri = this.apiPath;
       const response = await this.httpService.post<any>(uri, body);
@@ -116,24 +116,6 @@ export class VehicleManagementService {
     } catch (error) {
       if (error instanceof HttpErrorResponse) {
         return error.error as IBaseResponse<IResponseMenu>;
-      } else {
-        throw error;
-      }
-    }
-  }
-
-  async resetPassword(pwd: string, userId: string) {
-    try {
-      const body = {
-        painTextPassword: pwd,
-      };
-      const url = this.PREFIX_USER + `/users/corps/${userId}/resetPassword`;
-      // const url = this.PREFIX_USER + `/users/${userId}/resetPassword`;
-      const response = await this.httpService.patch<any>(url, body);
-      return response;
-    } catch (error) {
-      if (error instanceof HttpErrorResponse && error.error) {
-        return error.error as IBaseResponse<any>;
       } else {
         throw error;
       }
@@ -160,7 +142,7 @@ export class VehicleManagementService {
 
   async deleteCustomerVehicle(licensePlate: string, province: string) {
     try {
-      const uri = this.apiPath + `/${licensePlate}/${province}`;
+      const uri = this.apiPath + `/${licensePlate}/${province}/delete`;
       // const uri = this.PREFIX_USER + `/corps/users/${userId}/delete`;
       const response = await this.httpService.post<unknown>(uri, {});
       return response;
