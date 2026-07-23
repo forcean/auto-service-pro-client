@@ -5,18 +5,12 @@ import { ApiPrefix } from '../enum/api-prefix.enum';
 import { IResponseMenu } from '../interface/sidebar.interface';
 import { IBaseResponse } from '../interface/base-http.interface';
 import {
-  IReqCreateUser,
-  IReqUpdateUser,
-  IResponseUserDetail,
-} from '../interface/user-management.interface';
-import {
-  IQueryListUser,
-  IUserResultData,
-} from '../interface/table-user-management.interface';
-import {
   IQueryVehicle,
   IVehicleResultData,
 } from '../interface/table-vehicle.interface';
+import { IServiceHistoryResultData } from '../interface/table-vehicle-service-history.interface';
+import { IWorkOrder } from '../components/vehicle-work-orders/vehicle-work-orders.component';
+import { IVehicleOverviewState } from '../interface/customer-vehicle-management.interface';
 
 @Injectable({
   providedIn: 'root',
@@ -57,6 +51,57 @@ export class VehicleManagementService {
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
         return error.error as IBaseResponse<unknown>;
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  async getVehicleOverview(
+    licensePlate: string,
+    province: string,
+  ): Promise<IBaseResponse<IVehicleOverviewState>> {
+    try {
+      const uri = this.apiPath + `/${licensePlate}/${province}/overview`;
+      const response = await this.httpService.get<IVehicleOverviewState>(uri);
+      return response;
+    } catch (error) {
+      if (error instanceof HttpErrorResponse && error.error) {
+        return error.error as IBaseResponse<IVehicleOverviewState>;
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  async getVehicleServices(
+    licensePlate: string,
+    province: string,
+  ): Promise<IBaseResponse<IServiceHistoryResultData>> {
+    try {
+      const uri = this.apiPath + `/${licensePlate}/${province}/services`;
+      const response = await this.httpService.get<IServiceHistoryResultData>(uri);
+      return response;
+    } catch (error) {
+      if (error instanceof HttpErrorResponse && error.error) {
+        return error.error as IBaseResponse<IServiceHistoryResultData>;
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  async getVehicleWorkOrders(
+    licensePlate: string,
+    province: string,
+  ): Promise<IBaseResponse<IWorkOrder[]>> {
+    try {
+      const uri = this.apiPath + `/${licensePlate}/${province}/workOrders`;
+      const response = await this.httpService.get<IWorkOrder[]>(uri);
+      return response;
+    } catch (error) {
+      if (error instanceof HttpErrorResponse && error.error) {
+        return error.error as IBaseResponse<IWorkOrder[]>;
       } else {
         throw error;
       }

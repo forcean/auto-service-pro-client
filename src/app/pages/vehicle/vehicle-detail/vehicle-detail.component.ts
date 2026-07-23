@@ -19,6 +19,9 @@ import { PaginationComponent } from '../../../shared/components/pagination/pagin
 import { Subscription } from 'rxjs';
 import { RESPONSE } from '../../../shared/enum/response.enum';
 import { ServiceHistoryDetailData } from '../../../shared/components/service-history-panel/service-history-panel.component';
+import { VehicleManagementService } from '../../../shared/services/vehicle-management.service';
+import { IVehicleKey } from '../../../shared/interface/table-vehicle.interface';
+import { IVehicleOverviewState } from '../../../shared/interface/customer-vehicle-management.interface';
 
 export type VehicleDetailTab =
   | 'overview'
@@ -42,7 +45,8 @@ export class VehicleDetailComponent implements OnInit {
   activeTab: VehicleDetailTab = 'overview';
 
   vehicleData: any;
-  statCards: any[] = [];
+  private vehicleKey!: IVehicleKey;
+  overviewState!: IVehicleOverviewState;
   serviceHistory!: IServiceHistoryResultData;
   workOrders: IWorkOrder[] = [];
   documents: IVehicleDocument[] = [];
@@ -133,9 +137,15 @@ export class VehicleDetailComponent implements OnInit {
     private resetFormService: ResetPasswordModuleService,
     private loadingBarService: LoadingBarService,
     private permissionService: PermissionService,
+    private vehicleManagementService: VehicleManagementService,
   ) {}
 
   ngOnInit(): void {
+    const licensePlate = this.route.snapshot.paramMap.get('licensePlate');
+    const province = this.route.snapshot.paramMap.get('province');
+    if (licensePlate && province) {
+      this.vehicleKey = { licensePlate, province };
+    }
     this.initializePermissions();
   }
 
@@ -147,6 +157,7 @@ export class VehicleDetailComponent implements OnInit {
       // if (!this.isViewUserList) {
       //   this.router.navigate(['/not-found']);
       // } else {
+      this.getVehicle();
       this.route.queryParams.subscribe((params) =>
         this.updateQueryParams(params),
       );
@@ -205,7 +216,6 @@ export class VehicleDetailComponent implements OnInit {
         break;
     }
 
-    this.getVehicle();
     this.loadCurrentTab();
   }
 
@@ -214,48 +224,17 @@ export class VehicleDetailComponent implements OnInit {
     const loader = this.loadingBarService.useRef();
     loader.start();
     try {
-      // const res = await this.userManagementService.getListUser();
-      // if (res.resultCode === RESPONSE.SUCCESS) {
-      //   this.vehicle = res.resultData;
-      //   // this.isDisableSearch = (!this.keyword && this.userList?.users.length === 0 && !this.reportStatus)
-      //   //   || !this.reportStatusList.length;
-      // } else if (res.resultCode === RESPONSE.INVALID_PERMISSION) {
-      //   this.router.navigate(['/not-found']);
-      // } else {
-      //   this.handleFailResponse();
-      // }
-      this.vehicleData = {
-        _id: '6a59e19dd12553515ccde6ef',
-        firstname: 'John',
-        lastname: 'Smith',
-        phoneNumber: '0812345678',
-        email: 'john@email.com',
-        licensePlate: '2กข1234',
-        province: 'กรุงเทพมหานคร',
-        mileage: 53500,
-        vin: 'JTNB11HK5M3000123',
-        vehicle: {
-          brand: 'Toyota',
-          brandCode: 'TOYOTA',
-          model: 'Camry',
-          modelCode: 'CAMRY',
-          generation: 'XV70',
-          platform: 'TNGA-K',
-          yearFrom: 2018,
-          yearTo: 2024,
-          engines: [
-            {
-              code: '2.0G (6AR-FSE)',
-              fuel: 'petrol',
-            },
-          ],
-          remark: null,
-        },
-        status: 'ACTIVE',
-        registrationDt: '2026-07-17T08:02:37.148Z',
-        createdBy: 'admin2',
-        __v: 0,
-      };
+      const res = await this.vehicleManagementService.getVehicleDetail(
+        this.vehicleKey.licensePlate,
+        this.vehicleKey.province,
+      );
+      if (res.resultCode === RESPONSE.SUCCESS) {
+        this.vehicleData = res.resultData;
+      } else if (res.resultCode === RESPONSE.INVALID_PERMISSION) {
+        this.router.navigate(['/not-found']);
+      } else {
+        this.handleFailResponse();
+      }
     } catch (error) {
       // const errorObject = error as { message: string };
       // if (errorObject.message !== '504') {
@@ -267,41 +246,23 @@ export class VehicleDetailComponent implements OnInit {
     }
   }
 
-  getOverview(): void {
+  async getOverview(): Promise<void> {
     this.isLoadingOverView = true;
     try {
-      // const res = await this.userManagementService.getListUser();
-      // if (res.resultCode === RESPONSE.SUCCESS) {
-      //   this.vehicle = res.resultData;
-      //   // this.isDisableSearch = (!this.keyword && this.userList?.users.length === 0 && !this.reportStatus)
-      //   //   || !this.reportStatusList.length;
-      // } else if (res.resultCode === RESPONSE.INVALID_PERMISSION) {
-      //   this.router.navigate(['/not-found']);
-      // } else {
-      //   this.handleFailResponse();
-      // }
-      this.statCards = [
-        {
-          title: 'Mileage',
-          value: `${this.formatNumber(this.vehicleData.mileage)} km`,
-          icon: 'fa-road',
-        },
-        {
-          title: 'Last Service',
-          value: '12 Jun 2026',
-          icon: 'fa-screwdriver-wrench',
-        },
-        {
-          title: 'Total Services',
-          value: '15',
-          icon: 'fa-clock-rotate-left',
-        },
-        {
-          title: 'Open Work Orders',
-          value: '2',
-          icon: 'fa-file-circle-check',
-        },
-      ];
+      const res = await this.vehicleManagementService.getVehicleOverview(
+        this.vehicleKey.licensePlate,
+        this.vehicleKey.province,
+      );
+      if (res.resultCode === RESPONSE.SUCCESS) {
+        this.overviewState = res.resultData;
+        // this.isDisableSearch = (!this.keyword && this.userList?.users.length === 0 && !this.reportStatus)
+        //   || !this.reportStatusList.length;
+      } else if (res.resultCode === RESPONSE.INVALID_PERMISSION) {
+        this.router.navigate(['/not-found']);
+      } else {
+        this.handleFailResponse();
+        this.overviewState = res.resultData;
+      }
     } catch (error) {
       // const errorObject = error as { message: string };
       // if (errorObject.message !== '504') {
@@ -312,34 +273,20 @@ export class VehicleDetailComponent implements OnInit {
     }
   }
 
-  getHistory(): void {
+  async getHistory(): Promise<void> {
     this.isLoadingHistory = true;
     try {
-      // const res = await this.userManagementService.getListUser();
-      // if (res.resultCode === RESPONSE.SUCCESS) {
-      //   this.vehicle = res.resultData;
-      //   // this.isDisableSearch = (!this.keyword && this.userList?.users.length === 0 && !this.reportStatus)
-      //   //   || !this.reportStatusList.length;
-      // } else if (res.resultCode === RESPONSE.INVALID_PERMISSION) {
-      //   this.router.navigate(['/not-found']);
-      // } else {
-      //   this.handleFailResponse();
-      // }
-      this.serviceHistory = {
-        page: 1,
-        limit: 10,
-        total: 5,
-        totalPage: 1,
-        history: [
-          {
-            id: '3274987239203803',
-            date: '21/05/2026',
-            mileage: '53,000 km',
-            mechanic: 'mike',
-            service: 'oil change',
-          },
-        ],
-      };
+      const res = await this.vehicleManagementService.getVehicleServices(
+        this.vehicleKey.licensePlate,
+        this.vehicleKey.province,
+      );
+      if (res.resultCode === RESPONSE.SUCCESS) {
+        this.serviceHistory = res.resultData;
+      } else if (res.resultCode === RESPONSE.INVALID_PERMISSION) {
+        this.router.navigate(['/not-found']);
+      } else {
+        this.handleFailResponse();
+      }
     } catch (error) {
       // const errorObject = error as { message: string };
       // if (errorObject.message !== '504') {
@@ -350,32 +297,20 @@ export class VehicleDetailComponent implements OnInit {
     }
   }
 
-  getWorkOrders(): void {
+  async getWorkOrders(): Promise<void> {
     this.isLoadingWorkOrder = true;
     try {
-      // const res = await this.userManagementService.getListUser();
-      // if (res.resultCode === RESPONSE.SUCCESS) {
-      //   this.vehicle = res.resultData;
-      //   // this.isDisableSearch = (!this.keyword && this.userList?.users.length === 0 && !this.reportStatus)
-      //   //   || !this.reportStatusList.length;
-      // } else if (res.resultCode === RESPONSE.INVALID_PERMISSION) {
-      //   this.router.navigate(['/not-found']);
-      // } else {
-      //   this.handleFailResponse();
-      // }
-      this.workOrders = [
-        {
-          id: '2387498273942379847',
-          workOrderNo: '65',
-          title: 'example',
-          status: 'IN_PROGRESS',
-          mechanic: 'mike',
-          labor: 77,
-          parts: 546,
-          total: 3,
-          progress: 2,
-        },
-      ];
+      const res = await this.vehicleManagementService.getVehicleWorkOrders(
+        this.vehicleKey.licensePlate,
+        this.vehicleKey.province,
+      );
+      if (res.resultCode === RESPONSE.SUCCESS) {
+        this.workOrders = res.resultData;
+      } else if (res.resultCode === RESPONSE.INVALID_PERMISSION) {
+        this.router.navigate(['/not-found']);
+      } else {
+        this.handleFailResponse();
+      }
     } catch (error) {
       // const errorObject = error as { message: string };
       // if (errorObject.message !== '504') {
@@ -637,7 +572,12 @@ export class VehicleDetailComponent implements OnInit {
   }
 
   editVehicle(): void {
-    console.log('Edit Vehicle');
+    this.router.navigate([
+      '/portal/vehicle',
+      this.vehicleKey.licensePlate,
+      this.vehicleKey.province,
+      'edit',
+    ]);
   }
 
   deleteVehicle(): void {
