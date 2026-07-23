@@ -72,7 +72,9 @@ import {
   File,
   Archive,
   FileType2,
-  Sheet
+  Sheet,
+  Inbox,
+  ArrowUpRight
 } from 'lucide-angular';
 import { TableStockManagementComponent } from './components/table-stock-management/table-stock-management.component';
 import { CustomSearchSelectComponent } from './components/custom-search-select/custom-search-select.component';
@@ -180,7 +182,9 @@ const directives = [
       File,
       Archive,
       FileType2,
-      Sheet
+      Sheet,
+      Inbox,
+      ArrowUpRight
     }),
     ProvincePipe,
     TimeAgoPipe,

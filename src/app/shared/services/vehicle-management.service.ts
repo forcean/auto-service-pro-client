@@ -11,6 +11,7 @@ import {
 } from '../interface/table-vehicle.interface';
 import { IServiceHistoryResultData } from '../interface/table-vehicle-service-history.interface';
 import { IVehicleOverviewState } from '../interface/customer-vehicle-management.interface';
+import { IWorkOrderItem } from '../components/vehicle-work-orders/vehicle-work-orders.component';
 
 @Injectable({
   providedIn: 'root',
@@ -94,14 +95,14 @@ export class VehicleManagementService {
   async getVehicleWorkOrders(
     licensePlate: string,
     province: string,
-  ): Promise<IBaseResponse<unknown[]>> {
+  ): Promise<IBaseResponse<IWorkOrderItem[]>> {
     try {
       const uri = this.apiPath + `/${licensePlate}/${province}/workOrders`;
-      const response = await this.httpService.get<unknown[]>(uri);
+      const response = await this.httpService.get<IWorkOrderItem[]>(uri);
       return response;
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
-        return error.error as IBaseResponse<unknown[]>;
+        return error.error as IBaseResponse<IWorkOrderItem[]>;
       } else {
         throw error;
       }

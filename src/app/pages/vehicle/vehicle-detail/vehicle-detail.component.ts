@@ -26,6 +26,7 @@ import {
 import { IVehicleOverviewState } from '../../../shared/interface/customer-vehicle-management.interface';
 import { EVehicleStatus } from '../../../shared/enum/vehicle.enum';
 import { VEHICLE_STATUS_OPTIONS } from '../../../shared/constant/vehicle-status.constant';
+import { IWorkOrderItem } from '../../../shared/components/vehicle-work-orders/vehicle-work-orders.component';
 
 export type VehicleDetailTab =
   | 'overview'
@@ -45,14 +46,12 @@ export class VehicleDetailComponent implements OnInit {
   @ViewChild(PaginationComponent) paginationComponent!: PaginationComponent;
   // @ViewChild(ResetPasswordModuleComponent) resetPasswordModuleComponent!: ResetPasswordModuleComponent;
 
-  loading = false;
   activeTab: VehicleDetailTab = 'overview';
-
   vehicleData!: ICustomerVehicle;
-  private vehicleKey!: IVehicleKey;
+  vehicleKey!: IVehicleKey;
   overviewState!: IVehicleOverviewState;
   serviceHistory!: IServiceHistoryResultData;
-  workOrders: any[] = [];
+  workOrders: IWorkOrderItem[] = [];
   documents: IVehicleDocument[] = [];
   photos: IImageGalleryItem[] = [];
   selectedHistory: ServiceHistoryDetailData | null = null;
@@ -91,16 +90,10 @@ export class VehicleDetailComponent implements OnInit {
   isLoadingPhoto: boolean = false;
   isLoadingDelete: boolean = false;
 
-  private modalSubscription: Subscription | null = null;
-  private readonly loadedTabs = new Set<VehicleDetailTab>();
-  readonly statusMap = Object.fromEntries(
-    VEHICLE_STATUS_OPTIONS.map((item) => [item.value, item]),
-  );
-
   //Table
   headers: ITableHeaderServiceHistory[] = [
     {
-      headerName: 'workOrderNo', 
+      headerName: 'workOrderNo',
       valueType: 'string',
       isSort: true,
       i18nKey: 'หมายเลขงาน',
@@ -148,6 +141,12 @@ export class VehicleDetailComponent implements OnInit {
       i18nKey: 'จัดการ',
     },
   ];
+
+  private modalSubscription: Subscription | null = null;
+  private readonly loadedTabs = new Set<VehicleDetailTab>();
+  readonly statusMap = Object.fromEntries(
+    VEHICLE_STATUS_OPTIONS.map((item) => [item.value, item]),
+  );
 
   constructor(
     private router: Router,
@@ -236,7 +235,6 @@ export class VehicleDetailComponent implements OnInit {
         );
         break;
     }
-
     this.loadCurrentTab();
   }
 
@@ -332,6 +330,7 @@ export class VehicleDetailComponent implements OnInit {
         this.router.navigate(['/not-found']);
       } else {
         this.handleFailResponse();
+        this.workOrders = res.resultData;
       }
     } catch (error) {
       // const errorObject = error as { message: string };
@@ -515,6 +514,70 @@ export class VehicleDetailComponent implements OnInit {
     }
   }
 
+  onViewService(event: string) {
+    console.log('View History Service: ', event);
+    try {
+      this.selectedHistory = {
+        invoiceNumber: 'INV2400233',
+        workOrderId: 'WO-2026-0892',
+        serviceDate: '12 Jul 2026',
+        mileage: 125340,
+        mechanicName: 'ช่างวิชัย พี.',
+        subTotal: 2580,
+        vatRate: 7,
+        vatAmount: 180.6,
+        totalAmount: 2760.6,
+        mechanicNotes:
+          'ตรวจพบผ้าเบรกหน้าเหลือประมาณ 4mm คาดว่าต้องเปลี่ยนในรอบถัดไป',
+        items: [
+          {
+            name: 'น้ำมันเครื่อง Fully Synthetic 5W-30',
+            sku: 'MOBIL1-5W30-4L',
+            quantity: 1,
+            price: 1850,
+          },
+          {
+            name: 'กรองน้ำมันเครื่อง แท้ศูนย์',
+            sku: 'TOY-04152-YZZA1',
+            quantity: 1,
+            price: 280,
+          },
+          {
+            name: 'สลับยางถ่วงล้อ 4 ล้อ',
+            category: 'ค่าบริการ/ค่าแรงช่าง',
+            quantity: 1,
+            price: 450,
+          },
+        ],
+      };
+    } catch (error) {}
+  }
+
+  private async deleteCustomerVehicle(vehicle: IVehicleKey) {
+    this.isLoadingDelete = true;
+    const loader = this.loadingBarService.useRef();
+    loader.start();
+    try {
+      this.modalConditionComponent.onClose();
+      const res = await this.vehicleManagementService.deleteCustomerVehicle(
+        vehicle.licensePlate,
+        vehicle.province,
+      );
+      if (res.resultCode === RESPONSE.SUCCESS) {
+        this.handleSuccessDelete();
+        // this.updateUrlParams();
+      } else {
+        this.handleFailDelete();
+      }
+    } catch (error) {
+      console.error('Response error', error);
+      this.handleCommonError();
+    } finally {
+      this.isLoadingDelete = false;
+      loader.complete();
+    }
+  }
+
   changeTab(tab: VehicleDetailTab): void {
     if (this.activeTab === tab) {
       return;
@@ -641,31 +704,6 @@ export class VehicleDetailComponent implements OnInit {
     }
   }
 
-  private async deleteCustomerVehicle(vehicle: IVehicleKey) {
-    this.isLoadingDelete = true;
-    const loader = this.loadingBarService.useRef();
-    loader.start();
-    try {
-      this.modalConditionComponent.onClose();
-      const res = await this.vehicleManagementService.deleteCustomerVehicle(
-        vehicle.licensePlate,
-        vehicle.province,
-      );
-      if (res.resultCode === RESPONSE.SUCCESS) {
-        this.handleSuccessDelete();
-        // this.updateUrlParams();
-      } else {
-        this.handleFailDelete();
-      }
-    } catch (error) {
-      console.error('Response error', error);
-      this.handleCommonError();
-    } finally {
-      this.isLoadingDelete = false;
-      loader.complete();
-    }
-  }
-
   trackById(index: number, item: any): string {
     return item.id;
   }
@@ -699,47 +737,14 @@ export class VehicleDetailComponent implements OnInit {
     });
   }
 
-  onViewService(event: string) {
-    console.log('View History Service: ', event);
-    try {
-      this.selectedHistory = {
-        invoiceNumber: 'INV2400233',
-        workOrderId: 'WO-2026-0892',
-        serviceDate: '12 Jul 2026',
-        mileage: 125340,
-        mechanicName: 'ช่างวิชัย พี.',
-        subTotal: 2580,
-        vatRate: 7,
-        vatAmount: 180.6,
-        totalAmount: 2760.6,
-        mechanicNotes:
-          'ตรวจพบผ้าเบรกหน้าเหลือประมาณ 4mm คาดว่าต้องเปลี่ยนในรอบถัดไป',
-        items: [
-          {
-            name: 'น้ำมันเครื่อง Fully Synthetic 5W-30',
-            sku: 'MOBIL1-5W30-4L',
-            quantity: 1,
-            price: 1850,
-          },
-          {
-            name: 'กรองน้ำมันเครื่อง แท้ศูนย์',
-            sku: 'TOY-04152-YZZA1',
-            quantity: 1,
-            price: 280,
-          },
-          {
-            name: 'สลับยางถ่วงล้อ 4 ล้อ',
-            category: 'ค่าบริการ/ค่าแรงช่าง',
-            quantity: 1,
-            price: 450,
-          },
-        ],
-      };
-    } catch (error) {}
-  }
-
   onClosePanel() {
     this.selectedHistory = null;
+  }
+
+  copyVin(vin: string): void {
+    if (vin) {
+      navigator.clipboard.writeText(vin);
+    }
   }
 
   private openResetPasswordForm() {
@@ -804,12 +809,6 @@ export class VehicleDetailComponent implements OnInit {
     if (this.modalSubscription) {
       this.modalSubscription.unsubscribe();
       this.modalSubscription = null;
-    }
-  }
-
-  copyVin(vin: string): void {
-    if (vin) {
-      navigator.clipboard.writeText(vin);
     }
   }
 }
