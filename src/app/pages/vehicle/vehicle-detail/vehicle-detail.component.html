@@ -12,7 +12,7 @@
           (click)="back()"
           class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/80 bg-slate-50/60 text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900 active:scale-95"
         >
-          <i-lucide name="arrow-left" class="h-4 w-4"></i-lucide>
+          <i-lucide name="chevron-left" class="h-4 w-4"></i-lucide>
         </button>
         <div>
           <div
@@ -133,7 +133,7 @@
               <span
                 class="text-[15px] font-bold uppercase text-slate-500 tracking-wider"
               >
-                {{ vehicleData?.province }}
+                {{ vehicleData.province | province}}
               </span>
             </div>
 

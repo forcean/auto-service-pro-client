@@ -29,9 +29,11 @@ import {
   Users,
   Wrench,
   Image,
-  History
+  History,
+  ChevronLeft
 } from 'lucide-angular';
 import { ReactiveFormsModule } from '@angular/forms';
+import { ProvincePipe } from "../../shared/pipes/province.pipe";
 
 @NgModule({
   declarations: [
@@ -45,29 +47,31 @@ import { ReactiveFormsModule } from '@angular/forms';
     VehicleRoutingModule,
     SharedModule,
     LucideAngularModule.pick({
-      Wrench,
-      CircleCheckBig,
-      CircleOff,
-      Users,
-      ClipboardList,
-      CircleX,
-      BadgeInfo,
-      Car,
-      User,
-      ArrowLeft,
-      ChevronRight,
-      Plus,
-      Pencil,
-      Trash2,
-      Gauge,
-      Copy,
-      Phone,
-      Mail,
-      LayoutDashboard,
-      History,
-      FileText,
-      Image,
+        Wrench,
+        CircleCheckBig,
+        CircleOff,
+        Users,
+        ClipboardList,
+        CircleX,
+        BadgeInfo,
+        Car,
+        User,
+        ArrowLeft,
+        ChevronRight,
+        ChevronLeft,
+        Plus,
+        Pencil,
+        Trash2,
+        Gauge,
+        Copy,
+        Phone,
+        Mail,
+        LayoutDashboard,
+        History,
+        FileText,
+        Image,
     }),
-  ],
+    ProvincePipe
+],
 })
 export class VehicleModule {}
