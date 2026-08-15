@@ -13,6 +13,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { VehicleManagementService } from '../../../shared/services/vehicle-management.service';
 import { RESPONSE } from '../../../shared/enum/response.enum';
 import { IVehicleKey } from '../../../shared/interface/table-vehicle.interface';
+import {
+  IProvince,
+  PROVINCES,
+} from '../../../shared/constant/province.constant';
 
 export type VehicleFormMode = 'create' | 'update';
 
@@ -32,6 +36,7 @@ export class VehicleFormComponent implements OnInit {
   data: any | null = null;
   isLoading = false;
   private vehicleKey!: IVehicleKey;
+  provinces: IProvince[] = PROVINCES;
 
   constructor(
     private fb: FormBuilder,
@@ -194,6 +199,10 @@ export class VehicleFormComponent implements OnInit {
 
   get selectedVehicles(): IVehicle[] {
     return this.form.get('catalogVehicle')?.value ?? [];
+  }
+
+  getProvinceName(code: string): string {
+    return this.provinces.find((p) => p.code === code)?.nameTH ?? code;
   }
 
   private buildPayload() {

@@ -5,7 +5,6 @@ export interface IProvince {
 
 export const PROVINCES: IProvince[] = [
   { code: 'BKK', nameTH: 'กรุงเทพมหานคร' },
-  { code: 'BKK_SHORT', nameTH: 'กทม.' }, // เพิ่มชื่อย่อกรุงเทพฯ ตามคำขอ
   { code: 'KBI', nameTH: 'กระบี่' },
   { code: 'KRI', nameTH: 'กาญจนบุรี' },
   { code: 'KSN', nameTH: 'กาฬสินธุ์' },
