@@ -1,0 +1,486 @@
+<div
+  class="min-h-screen bg-[#F8FAFC] text-slate-800 antialiased p-3 sm:p-6 lg:p-8"
+>
+  <div class="mx-auto max-w-[1680px]">
+    <!-- ================= 1. Enterprise Command Header ================= -->
+    <header
+      class="mb-6 flex flex-col gap-4 rounded-2xl border border-slate-200/70 bg-white/90 backdrop-blur-md p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between"
+    >
+      <!-- Back Link & Breadcrumb Navigation -->
+      <div class="flex items-center gap-3.5">
+        <button
+          (click)="back()"
+          class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/80 bg-slate-50/60 text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900 active:scale-95"
+        >
+          <i-lucide name="chevron-left" class="h-4 w-4"></i-lucide>
+        </button>
+        <div>
+          <div
+            class="flex items-center gap-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider"
+          >
+            <span>Fleet</span>
+            <i-lucide
+              name="chevron-right"
+              class="h-3 w-3 text-slate-300"
+            ></i-lucide>
+            <span class="text-emerald-600">Vehicles</span>
+            <i-lucide
+              name="chevron-right"
+              class="h-3 w-3 text-slate-300"
+            ></i-lucide>
+            <span class="text-slate-600">Details</span>
+          </div>
+          <h1
+            class="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900"
+          >
+            Vehicle Profile Workspace
+          </h1>
+        </div>
+      </div>
+
+      <!-- Operational Action Buttons -->
+      <div class="flex flex-wrap items-center gap-2">
+        <button
+          class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-xs sm:text-sm font-bold text-white shadow-md shadow-emerald-600/20 transition-all hover:bg-emerald-700 active:scale-95"
+        >
+          <i-lucide name="plus" class="h-4 w-4"></i-lucide>
+          <span>Create Work Order</span>
+        </button>
+
+        <div class="h-6 w-[1px] bg-slate-200 mx-1 hidden sm:block"></div>
+
+        <button
+          (click)="editVehicle()"
+          class="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 text-xs sm:text-sm font-bold text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:text-slate-900 active:scale-95"
+        >
+          <i-lucide name="pencil" class="h-3.5 w-3.5 text-slate-400"></i-lucide>
+          <span>Edit</span>
+        </button>
+
+        <button
+          (click)="deleteVehicle()"
+          class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-rose-200/80 bg-rose-50/50 text-rose-600 transition-all hover:bg-rose-100 hover:text-rose-700 active:scale-95"
+          title="Delete Record"
+        >
+          <i-lucide name="trash-2" class="h-4 w-4"></i-lucide>
+        </button>
+      </div>
+    </header>
+
+    <!-- ================= 2. Main ERP Dashboard Grid ================= -->
+    <main class="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-start">
+      <!-- [LEFT SIDEBAR]: Core Context (4/12 Grid) -->
+      <aside
+        class="flex flex-col gap-5 sm:grid sm:grid-cols-2 lg:col-span-4 lg:flex lg:flex-col"
+      >
+        <!-- Card 1: License Plate & Vehicle Identity -->
+        <section
+          class="relative overflow-hidden rounded-2xl border border-slate-800/90 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 p-6 shadow-xl text-white sm:col-span-2"
+        >
+          <div
+            class="absolute inset-0 bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:16px_16px] opacity-20 pointer-events-none"
+          ></div>
+          <div
+            class="absolute -right-8 -bottom-8 h-36 w-36 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none"
+          ></div>
+
+          <div class="relative flex flex-col items-center text-center">
+            <!-- Status Badge -->
+            <div class="mb-4">
+              <span
+                class="inline-flex items-center gap-2 rounded-full border px-3.5 py-1 text-xs font-bold shadow-sm"
+                [style.color]="getStatus(vehicleData?.status).color"
+                [style.borderColor]="getStatus(vehicleData?.status).color"
+                [style.backgroundColor]="
+                  getStatus(vehicleData?.status).color + '20'
+                "
+              >
+                <span class="relative flex h-2 w-2">
+                  <span
+                    class="absolute inline-flex h-full w-full animate-ping rounded-full bg-current opacity-75"
+                  ></span>
+                  <span
+                    class="relative inline-flex h-2 w-2 rounded-full bg-current"
+                  ></span>
+                </span>
+
+                {{ getStatus(vehicleData?.status).label }}
+              </span>
+            </div>
+
+            <!-- License Plate Rendering -->
+            <div
+              class="relative mb-3 flex flex-col items-center justify-center rounded-xl border-2 border-slate-300/60 bg-gradient-to-b from-slate-50 to-slate-100 px-8 py-2 shadow-2xl"
+            >
+              <div
+                class="absolute left-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-slate-400/80 shadow-inner"
+              ></div>
+              <div
+                class="absolute right-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-slate-400/80 shadow-inner"
+              ></div>
+              <div
+                class="absolute left-2.5 bottom-2.5 h-1.5 w-1.5 rounded-full bg-slate-400/80 shadow-inner"
+              ></div>
+              <div
+                class="absolute right-2.5 bottom-2.5 h-1.5 w-1.5 rounded-full bg-slate-400/80 shadow-inner"
+              ></div>
+
+              <span
+                class="text-2xl sm:text-3xl font-black tracking-widest text-slate-950 drop-shadow-sm select-all"
+              >
+                {{ vehicleData?.licensePlate }}
+              </span>
+              <span
+                class="text-[15px] font-bold uppercase text-slate-500 tracking-wider"
+              >
+                {{ vehicleData.province | province}}
+              </span>
+            </div>
+
+            <!-- Vehicle Make & Model -->
+            <h2 class="text-base sm:text-lg font-bold text-slate-100">
+              {{ vehicleData?.vehicle?.brand }}
+              {{ vehicleData?.vehicle?.model }}
+            </h2>
+            <p class="text-xs sm:text-sm font-medium text-slate-400 mt-0.5">
+              Gen: {{ vehicleData?.vehicle?.generation || "-" }} ({{
+                vehicleData?.vehicle?.platform
+              }})
+            </p>
+          </div>
+        </section>
+
+        <!-- Card 2: Core Specifications KPI Grid -->
+        <section
+          class="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm"
+        >
+          <div class="mb-4 flex items-center justify-between">
+            <h3
+              class="text-xs font-bold uppercase tracking-wider text-slate-400"
+            >
+              Specifications KPI
+            </h3>
+            <span
+              class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-slate-50 text-slate-500 border border-slate-100"
+            >
+              <i-lucide name="gauge" class="h-4 w-4"></i-lucide>
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div class="rounded-xl border border-slate-100 bg-slate-50/60 p-3">
+              <span
+                class="block text-xs font-semibold uppercase tracking-wider text-slate-400"
+                >Year Range</span
+              >
+              <span class="text-xs sm:text-sm font-bold text-slate-800">
+                {{ vehicleData?.vehicle?.yearFrom }} -
+                {{ vehicleData?.vehicle?.yearTo }}
+              </span>
+            </div>
+
+            <div
+              class="rounded-xl border border-emerald-100/80 bg-emerald-50/30 p-3"
+            >
+              <span
+                class="block text-xs font-semibold uppercase tracking-wider text-emerald-600"
+                >Odometer</span
+              >
+              <span class="text-xs sm:text-sm font-bold text-emerald-700">
+                {{ formatNumber(vehicleData?.mileage || 0) }}
+                <span class="text-xs font-normal">KM</span>
+              </span>
+            </div>
+
+            <div class="rounded-xl border border-slate-100 bg-slate-50/60 p-3">
+              <span
+                class="block text-xs font-semibold uppercase tracking-wider text-slate-400"
+                >Platform</span
+              >
+              <span class="text-xs sm:text-sm font-bold text-slate-800">{{
+                vehicleData?.vehicle?.platform || "-"
+              }}</span>
+            </div>
+
+            <!-- Engine / Fuel Block (รองรับ Array engines) -->
+            <div class="rounded-xl border border-slate-100 bg-slate-50/60 p-3">
+              <span
+                class="block text-xs font-semibold uppercase tracking-wider text-slate-400"
+                >Engine / Fuel</span
+              >
+              <span
+                class="text-xs font-bold text-slate-800 block truncate"
+                title="{{ vehicleData?.vehicle?.engines?.[0]?.code }}"
+              >
+                {{ vehicleData?.vehicle?.engines?.[0]?.code || "N/A" }}
+              </span>
+            </div>
+          </div>
+
+          <!-- VIN Code Highlight (เตรียมพร้อมรับ field VIN) -->
+          <div
+            class="mt-3 flex items-center justify-between rounded-xl bg-slate-900 px-3.5 py-2.5 text-white shadow-inner"
+          >
+            <div class="min-w-0 flex-1">
+              <span
+                class="block text-[10px] font-medium uppercase tracking-wider text-slate-400"
+                >VIN / Chassis Number</span
+              >
+              <span
+                class="text-xs sm:text-sm font-bold tracking-wider text-emerald-400 select-all truncate block"
+              >
+                {{ vehicleData?.vin || "— WAITING FOR DATA —" }}
+              </span>
+            </div>
+            <button
+              *ngIf="vehicleData?.vin"
+              (click)="copyVin(vehicleData.vin)"
+              class="ml-2 flex h-8 w-8 items-center justify-center rounded-lg bg-slate-800 text-slate-400 hover:text-white transition-colors active:scale-90"
+              title="Copy VIN"
+            >
+              <i-lucide name="copy" class="h-3.5 w-3.5"></i-lucide>
+            </button>
+          </div>
+        </section>
+
+        <!-- Card 3: Customer Assignment (ปรับปรุงให้โชว์เบอร์โทร และ อีเมล ครบถ้วน) -->
+        <section
+          class="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm"
+        >
+          <div class="mb-3.5 flex items-center justify-between">
+            <h3
+              class="text-xs font-bold uppercase tracking-wider text-slate-400"
+            >
+              Customer Assignment
+            </h3>
+            <span
+              class="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600 border border-slate-200/50 truncate max-w-[120px]"
+              title="{{ vehicleData?._id }}"
+            >
+              ID: {{ vehicleData?._id?.substring(0, 8) }}...
+            </span>
+          </div>
+
+          <!-- Customer Identity Header -->
+          <div
+            class="mb-4 flex items-center gap-3.5 border-b border-slate-100 pb-3.5"
+          >
+            <div
+              class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-slate-900 text-base font-extrabold text-emerald-400 shadow-sm uppercase"
+            >
+              {{ vehicleData?.firstname?.charAt(0) || "C" }}
+            </div>
+            <div class="min-w-0 flex-1">
+              <h4
+                class="truncate text-base font-extrabold text-slate-900 capitalize"
+              >
+                {{ vehicleData?.firstname }} {{ vehicleData?.lastname }}
+              </h4>
+              <span
+                class="inline-flex items-center gap-1.5 text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100/60 mt-0.5"
+              >
+                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                Verified Customer
+              </span>
+            </div>
+          </div>
+
+          <!-- Contact Details Display -->
+          <div class="space-y-2.5">
+            <!-- Phone Number Block -->
+            <div
+              class="flex items-center justify-between rounded-xl border border-slate-200/80 bg-slate-50/60 p-2.5 transition-all hover:border-emerald-200 hover:bg-emerald-50/20"
+            >
+              <div class="min-w-0 flex-1">
+                <span
+                  class="block text-[10px] font-bold uppercase tracking-wider text-slate-400"
+                  >Phone Number</span
+                >
+                <span
+                  class="text-sm font-extrabold text-slate-900 select-all tracking-wide block truncate"
+                >
+                  {{ vehicleData?.phoneNumber || "-" }}
+                </span>
+              </div>
+              <a
+                *ngIf="vehicleData?.phoneNumber"
+                href="tel:{{ vehicleData?.phoneNumber }}"
+                class="flex h-8 px-3 items-center justify-center gap-1.5 rounded-lg bg-emerald-600 text-xs font-bold text-white shadow-sm shadow-emerald-600/20 hover:bg-emerald-700 active:scale-95 transition-all flex-shrink-0"
+              >
+                <i-lucide name="phone" class="h-3.5 w-3.5"></i-lucide>
+                <span>โทรออก</span>
+              </a>
+            </div>
+
+            <!-- Email Block -->
+            <div
+              class="flex items-center justify-between rounded-xl border border-slate-200/80 bg-slate-50/60 p-2.5 transition-all hover:border-blue-200 hover:bg-blue-50/20"
+            >
+              <div class="min-w-0 flex-1 pr-2">
+                <span
+                  class="block text-[10px] font-bold uppercase tracking-wider text-slate-400"
+                  >Email Address</span
+                >
+                <span
+                  class="text-xs font-bold text-slate-800 select-all block truncate"
+                  title="{{ vehicleData?.email }}"
+                >
+                  {{ vehicleData?.email || "N/A" }}
+                </span>
+              </div>
+              <a
+                *ngIf="vehicleData?.email"
+                href="mailto:{{ vehicleData?.email }}"
+                class="flex h-8 px-3 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-700 shadow-xs hover:bg-slate-100 hover:text-slate-900 active:scale-95 transition-all flex-shrink-0"
+              >
+                <i-lucide
+                  name="mail"
+                  class="h-3.5 w-3.5 text-slate-500"
+                ></i-lucide>
+                <span>ส่งเมล</span>
+              </a>
+            </div>
+          </div>
+        </section>
+      </aside>
+
+      <!-- [RIGHT CONTENT PANEL]: Dynamic Workspaces (8/12 Grid) -->
+      <article class="flex flex-col gap-4 min-w-0 lg:col-span-8">
+        <!-- Tab Navigation -->
+        <div
+          class="rounded-2xl border border-slate-200/70 bg-white p-1.5 shadow-sm"
+        >
+          <nav
+            class="flex space-x-1 overflow-x-auto no-scrollbar"
+            aria-label="Tabs"
+          >
+            <button
+              (click)="changeTab('overview')"
+              [class]="
+                activeTab === 'overview'
+                  ? 'bg-slate-900 text-white shadow-sm font-bold ring-1 ring-emerald-500/30'
+                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-semibold'
+              "
+              class="flex-1 whitespace-nowrap rounded-xl py-2.5 px-4 text-xs sm:text-sm transition-all focus:outline-none flex items-center justify-center gap-2"
+            >
+              <i-lucide name="layout-dashboard" class="h-4 w-4"></i-lucide>
+              <span>Overview</span>
+            </button>
+
+            <button
+              (click)="changeTab('history')"
+              [class]="
+                activeTab === 'history'
+                  ? 'bg-slate-900 text-white shadow-sm font-bold ring-1 ring-emerald-500/30'
+                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-semibold'
+              "
+              class="flex-1 whitespace-nowrap rounded-xl py-2.5 px-4 text-xs sm:text-sm transition-all focus:outline-none flex items-center justify-center gap-2"
+            >
+              <i-lucide name="history" class="h-4 w-4"></i-lucide>
+              <span>Service History</span>
+            </button>
+
+            <button
+              (click)="changeTab('work-orders')"
+              [class]="
+                activeTab === 'work-orders'
+                  ? 'bg-slate-900 text-white shadow-sm font-bold ring-1 ring-emerald-500/30'
+                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-semibold'
+              "
+              class="flex-1 whitespace-nowrap rounded-xl py-2.5 px-4 text-xs sm:text-sm transition-all focus:outline-none flex items-center justify-center gap-2"
+            >
+              <i-lucide name="wrench" class="h-4 w-4"></i-lucide>
+              <span>Work Orders</span>
+            </button>
+
+            <button
+              (click)="changeTab('documents')"
+              [class]="
+                activeTab === 'documents'
+                  ? 'bg-slate-900 text-white shadow-sm font-bold ring-1 ring-emerald-500/30'
+                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-semibold'
+              "
+              class="flex-1 whitespace-nowrap rounded-xl py-2.5 px-4 text-xs sm:text-sm transition-all focus:outline-none flex items-center justify-center gap-2"
+            >
+              <i-lucide name="file-text" class="h-4 w-4"></i-lucide>
+              <span>Documents</span>
+            </button>
+
+            <button
+              (click)="changeTab('photos')"
+              [class]="
+                activeTab === 'photos'
+                  ? 'bg-slate-900 text-white shadow-sm font-bold ring-1 ring-emerald-500/30'
+                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-semibold'
+              "
+              class="flex-1 whitespace-nowrap rounded-xl py-2.5 px-4 text-xs sm:text-sm transition-all focus:outline-none flex items-center justify-center gap-2"
+            >
+              <i-lucide name="image" class="h-4 w-4"></i-lucide>
+              <span>Photos</span>
+            </button>
+          </nav>
+        </div>
+
+        <!-- Dynamic Workspace Content Container -->
+        <div
+          class="min-h-[580px] rounded-2xl border border-slate-200/70 bg-white p-5 sm:p-6 shadow-sm"
+        >
+          <app-vehicle-overview
+            *ngIf="activeTab === 'overview'"
+            [overviewData]="overviewState"
+          >
+          </app-vehicle-overview>
+
+          <app-table-vehicle-service-history
+            *ngIf="activeTab === 'history'"
+            [config]="serviceHistory"
+            [headers]="headers"
+            [pageIndex]="historyQuery.page"
+            [pageSize]="historyQuery.limit"
+            [isLoading]="isLoadingHistory"
+            (sortEmit)="onSort($event)"
+            (changePage)="onChangePage($event)"
+            (onView)="onViewService($event)"
+          >
+          </app-table-vehicle-service-history>
+
+          <app-vehicle-work-orders
+            *ngIf="activeTab === 'work-orders'"
+            [workOrders]="workOrders"
+          >
+          </app-vehicle-work-orders>
+
+          <app-vehicle-documents
+            *ngIf="activeTab === 'documents'"
+            [documents]="documents"
+          >
+          </app-vehicle-documents>
+
+          <app-image-gallery
+            *ngIf="activeTab === 'photos'"
+            title="Vehicle Photos"
+            description="Vehicle images and inspection photos"
+            emptyTitle="No Photos"
+            emptyDescription="Upload vehicle photos."
+            [showUpload]="true"
+            [showDelete]="true"
+            [images]="photos"
+          >
+          </app-image-gallery>
+        </div>
+      </article>
+    </main>
+  </div>
+</div>
+
+<app-modal-condition
+  [isLoading]="isLoadingDelete"
+  (onConfirm)="handleOnModalConfirm($event)"
+>
+</app-modal-condition>
+
+<app-service-history-panel
+    *ngIf="selectedHistory"
+    [data]="selectedHistory"
+    (closePanel)="onClosePanel()">
+  </app-service-history-panel>

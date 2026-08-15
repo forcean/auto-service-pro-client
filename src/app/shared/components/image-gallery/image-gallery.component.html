@@ -1,0 +1,104 @@
+<div class="space-y-6">
+  <!-- Header -->
+
+  <div *ngIf="title" class="flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-bold text-slate-800">
+        {{ title }}
+      </h2>
+
+      <p *ngIf="description" class="mt-1 text-sm text-slate-500">
+        {{ description }}
+      </p>
+    </div>
+
+    <button
+      *ngIf="showUpload"
+      (click)="upload.emit()"
+      class="inline-flex items-center gap-2 rounded-xl bg-[#88C273] px-5 py-2.5 text-white transition hover:bg-[#74b05e]"
+    >
+      <lucide-icon name="upload" class="h-5 w-5"> </lucide-icon>
+
+      Upload
+    </button>
+  </div>
+
+  <!-- Empty -->
+
+  <div
+    *ngIf="!images.length"
+    class="rounded-2xl border-2 border-dashed border-slate-300 bg-white py-20 text-center"
+  >
+    <div
+      class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-slate-100"
+    >
+      <lucide-icon name="image" class="h-10 w-10 text-slate-400"> </lucide-icon>
+    </div>
+
+    <h3 class="mt-5 text-xl font-semibold">
+      {{ emptyTitle }}
+    </h3>
+
+    <p class="mt-2 text-slate-500">
+      {{ emptyDescription }}
+    </p>
+  </div>
+
+  <!-- Gallery -->
+
+  <div
+    *ngIf="images.length"
+    class="grid grid-cols-2 gap-5 md:grid-cols-3 xl:grid-cols-4"
+  >
+    <div
+      *ngFor="let item of images"
+      class="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+    >
+      <div class="relative">
+        <img
+          [src]="item.thumbnail || item.url"
+          [alt]="item.title"
+          class="aspect-square w-full object-cover"
+        />
+
+        <div
+          class="absolute inset-0 flex items-center justify-center gap-3 bg-black/50 opacity-0 transition duration-200 group-hover:opacity-100"
+        >
+          <button
+            (click)="preview.emit(item)"
+            class="flex h-11 w-11 items-center justify-center rounded-full bg-white transition hover:scale-110"
+          >
+            <lucide-icon name="eye" class="h-5 w-5 text-slate-700">
+            </lucide-icon>
+          </button>
+
+          <button
+            (click)="download.emit(item)"
+            class="flex h-11 w-11 items-center justify-center rounded-full bg-white transition hover:scale-110"
+          >
+            <lucide-icon name="download" class="h-5 w-5 text-slate-700">
+            </lucide-icon>
+          </button>
+
+          <button
+            *ngIf="showDelete"
+            (click)="delete.emit(item)"
+            class="flex h-11 w-11 items-center justify-center rounded-full bg-red-500 text-white transition hover:scale-110"
+          >
+            <lucide-icon name="trash-2" class="h-5 w-5"> </lucide-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="p-4">
+        <h3 class="truncate font-semibold text-slate-800">
+          {{ item.title || "Untitled" }}
+        </h3>
+
+        <p *ngIf="item.uploadedAt" class="mt-1 text-sm text-slate-500">
+          {{ item.uploadedAt }}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

@@ -18,7 +18,7 @@ export interface IResVehicles {
 }
 
 export interface IVehicle {
-  id: string;
+  _id: string;
   brand: string;
   brandCode: string;
   model: string;
@@ -30,7 +30,7 @@ export interface IVehicle {
   engines: IEngine[];
   remark?: string;
   isActive: boolean;
-  selectedEngines?: string[];
+  selectedEngines?: IEngine[];
   isNew?: boolean;
 }
 

@@ -1,5 +1,5 @@
 export enum ROLE {
-  SO = 'System Owner',
+  SO = 'SO',
   ADM = 'ADM',
   MNG = 'MNG',
   SAL = 'SAL',

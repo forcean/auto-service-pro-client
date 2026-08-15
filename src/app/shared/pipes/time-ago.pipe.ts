@@ -3,7 +3,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 @Pipe({
     name: 'timeAgo',
     pure: false,
-    standalone: false
+    standalone: true
 })
 export class TimeAgoPipe implements PipeTransform {
 

@@ -93,7 +93,7 @@ export class ProductFilterComponent implements OnInit, OnDestroy {
     try {
       const params: IQueryCatalogProducts = {
         isActive: true,
-        isSelectable: true
+        // isSelectable: true
       };
       const res = await this.catalogService.getCategories(params);
       if (res.resultCode === RESPONSE.SUCCESS) {

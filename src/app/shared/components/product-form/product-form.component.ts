@@ -1,19 +1,43 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
-import { AbstractControl, FormArray, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
-import { IPrices, IReqCreateProduct, IVehicleCreate } from '../../interface/product-management.interface';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
+import {
+  AbstractControl,
+  FormArray,
+  FormBuilder,
+  FormGroup,
+  ValidationErrors,
+  ValidatorFn,
+  Validators,
+} from '@angular/forms';
+import {
+  IPrices,
+  IReqCreateProduct,
+  IVehicleCreate,
+} from '../../interface/product-management.interface';
 import { IUploadImagePayload } from '../../interface/file-management.interface';
 import { Subscription } from 'rxjs';
 import { IProducts } from '../../interface/product-list.interface';
-import { ICategory, IEngine, IProductBrand, IVehicle } from '../../interface/catalog.interface';
+import {
+  ICategory,
+  IEngine,
+  IProductBrand,
+  IVehicle,
+} from '../../interface/catalog.interface';
 
 @Component({
   selector: 'app-product-form',
   standalone: false,
   templateUrl: './product-form.component.html',
-  styleUrl: './product-form.component.scss'
+  styleUrl: './product-form.component.scss',
 })
 export class ProductFormComponent implements OnInit, OnChanges {
-
   @Input() mode: 'create' | 'update' = 'create';
   @Input() categories: ICategory[] = [];
   @Input() brands: IProductBrand[] = [];
@@ -31,16 +55,16 @@ export class ProductFormComponent implements OnInit, OnChanges {
   isVehicleBinding: boolean = false;
   isFormSubmitted: boolean = false;
   isLoadedBrands: boolean = false;
-  constructor(private fb: FormBuilder) { }
+  constructor(private fb: FormBuilder) {}
 
   ngOnInit(): void {
     this.initForm();
-    this.form.get('vehicles')?.valueChanges.subscribe(v => {
+    this.form.get('vehicles')?.valueChanges.subscribe((v) => {
       console.log('vehicles changed:', v);
     });
-    this.categorySub = this.form.get('categoryId')!
-      .valueChanges
-      .subscribe(() => {
+    this.categorySub = this.form
+      .get('categoryId')!
+      .valueChanges.subscribe(() => {
         if (this.mode === 'update' && !this.form.dirty) return;
         this.onSelectedCategory();
       });
@@ -49,7 +73,10 @@ export class ProductFormComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['initialData']?.currentValue) {
       console.log('initialData:', changes['initialData'].currentValue);
-      console.log('initialData.vehicle:', changes['initialData'].currentValue.vehicle);
+      console.log(
+        'initialData.vehicle:',
+        changes['initialData'].currentValue.vehicle,
+      );
       this.patchForm(changes['initialData'].currentValue);
       const catId = this.form.get('categoryId')?.value;
       const selectedCategory = this.findCategoryById(this.categories, catId);
@@ -76,7 +103,7 @@ export class ProductFormComponent implements OnInit, OnChanges {
           wholesale: [null, [Validators.min(0)]],
           cost: [null, [Validators.required, Validators.min(0)]],
         },
-        { validators: this.priceCompareValidator() }
+        { validators: this.priceCompareValidator() },
       ),
       spec: this.fb.group({
         unit: [''],
@@ -103,7 +130,7 @@ export class ProductFormComponent implements OnInit, OnChanges {
         retail: data.prices?.retail ?? null,
         wholesale: data.prices?.wholesale ?? null,
         cost: data.prices?.cost ?? null,
-      }
+      },
     });
   }
 
@@ -126,7 +153,11 @@ export class ProductFormComponent implements OnInit, OnChanges {
 
   isInvalid(controlName: string): boolean {
     const control = this.form.get(controlName);
-    return !!(control && control.invalid && (control.touched || this.isFormSubmitted));
+    return !!(
+      control &&
+      control.invalid &&
+      (control.touched || this.isFormSubmitted)
+    );
   }
 
   get retailValue(): number {
@@ -178,7 +209,6 @@ export class ProductFormComponent implements OnInit, OnChanges {
       }
     }
 
-
     vehiclesCtrl?.updateValueAndValidity();
   }
 
@@ -194,10 +224,9 @@ export class ProductFormComponent implements OnInit, OnChanges {
 
     this.submitForm.emit({
       form: payload,
-      images: this.form.get('images')?.value || []
+      images: this.form.get('images')?.value || [],
     });
   }
-
 
   onCancel(): void {
     this.cancel.emit();
@@ -214,11 +243,12 @@ export class ProductFormComponent implements OnInit, OnChanges {
 
       ...(f.description?.trim() && { description: f.description.trim() }),
       ...(f.vehicles?.length && {
-        vehicles: this.buildVehicles(f.vehicles)
+        vehicles: this.buildVehicles(f.vehicles),
       }),
-      ...(f.price && Object.values(this.buildPrice(f.price)).length && {
-        price: this.buildPrice(f.price)
-      }),
+      ...(f.price &&
+        Object.values(this.buildPrice(f.price)).length && {
+          price: this.buildPrice(f.price),
+        }),
 
       ...(f.spec && Object.values(f.spec).some(Boolean) && { spec: f.spec }),
     };
@@ -242,7 +272,10 @@ export class ProductFormComponent implements OnInit, OnChanges {
     return result;
   }
 
-  private findCategoryById(categories: ICategory[], id: string): ICategory | null {
+  private findCategoryById(
+    categories: ICategory[],
+    id: string,
+  ): ICategory | null {
     for (const cat of categories) {
       if (cat.id === id) return cat;
       if (cat.children?.length) {
@@ -254,21 +287,19 @@ export class ProductFormComponent implements OnInit, OnChanges {
   }
 
   private buildVehicles(vehicles: IVehicle[]): IVehicleCreate[] {
-    return vehicles.map(v => this.mapVehicle(v));
+    return vehicles.map((v) => this.mapVehicle(v));
   }
 
   private mapVehicle(v: IVehicle): IVehicleCreate {
-
-    const engines =
-      (v.selectedEngines ?? [])
-        .map(code => v.engines.find(e => e.code === code))
-        .filter((e): e is IEngine => !!e)
+    const engines = (v.selectedEngines ?? [])
+      .map((engine) => v.engines.find((e) => e.code === engine.code))
+      .filter((e): e is IEngine => !!e);
     return {
-      vehicleId: v.id,
+      vehicleId: v._id,
       yearFrom: v.yearFrom,
       yearTo: v.yearTo,
       engines: engines,
-      ...(v.remark?.trim() && { remark: v.remark.trim() })
+      ...(v.remark?.trim() && { remark: v.remark.trim() }),
     };
   }
 }

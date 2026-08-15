@@ -1,0 +1,113 @@
+<div class="vehicle-page">
+  <div class="page-header">
+    <div>
+      <app-content-title title="Vehicle Management"></app-content-title>
+
+      <p class="page-subtitle">จัดการข้อมูลรถยนต์ของลูกค้า</p>
+    </div>
+
+    <button class="create-btn" (click)="onCreate()">
+      <i class="fa-solid fa-plus"></i>
+
+      <span>เพิ่มรถยนต์</span>
+    </button>
+  </div>
+
+ <div class="summary-grid">
+  <div class="summary-card">
+    <div class="summary-icon blue">
+      <lucide-icon name="car-front"></lucide-icon>
+    </div>
+
+    <div class="summary-content">
+      <span class="summary-title">รถทั้งหมด</span>
+
+      <h2>{{ dashboard.totalVehicles }}</h2>
+
+      <small>Vehicles in system</small>
+    </div>
+  </div>
+
+  <div class="summary-card">
+    <div class="summary-icon green">
+      <lucide-icon name="users"></lucide-icon>
+    </div>
+
+    <div class="summary-content">
+      <span class="summary-title">ลูกค้าทั้งหมด</span>
+
+      <h2>{{ dashboard.totalCustomers }}</h2>
+
+      <small>Customers</small>
+    </div>
+  </div>
+
+  <div class="summary-card">
+    <div class="summary-icon orange">
+      <lucide-icon name="badge-info"></lucide-icon>
+    </div>
+
+    <div class="summary-content">
+      <span class="summary-title">ยี่ห้อรถในระบบ</span>
+
+      <h2>{{ dashboard.totalBrands }}</h2>
+
+      <small>Vehicle brands</small>
+    </div>
+  </div>
+
+  <div class="summary-card">
+    <div class="summary-icon purple">
+      <lucide-icon name="car"></lucide-icon>
+    </div>
+
+    <div class="summary-content">
+      <span class="summary-title">เพิ่มใหม่เดือนนี้</span>
+
+      <h2>{{ dashboard.newVehicles }}</h2>
+
+      <small>New vehicles this month</small>
+    </div>
+  </div>
+</div>
+
+  <div class="mb-8">
+    <app-search-vehicle (search)="onSearch($event)" (reset)="onResetCriteria()">
+    </app-search-vehicle>
+  </div>
+  <section class="content-card p-2">
+    <div class="content-header">
+      <div>
+        <h3>รายการรถทั้งหมด</h3>
+
+        <p>แสดงข้อมูลรถทั้งหมดภายในระบบ</p>
+      </div>
+
+      <div class="vehicle-count">
+        {{ vehicleList.total}}
+
+        <span>คัน</span>
+      </div>
+    </div>
+
+    <app-table-vehicle-list
+      [headers]="headers"
+      [config]="vehicleList"
+      [pageIndex]="page"
+      [pageSize]="limit"
+      [isLoading]="isLoading"
+      (onEdit)="onEdit($event)"
+      (onView)="viewDetail($event)"
+      (onDelete)="onDelete($event)"
+      (sortEmit)="onSort($event)"
+      (changePage)="onChangePage($event)"
+    >
+    </app-table-vehicle-list>
+  </section>
+</div>
+
+<app-modal-condition
+  [isLoading]="isLoadingReset"
+  (onConfirm)="handleOnModalConfirm($event)"
+>
+</app-modal-condition>

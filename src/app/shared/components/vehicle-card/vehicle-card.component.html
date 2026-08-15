@@ -1,12 +1,8 @@
 <div class="vehicle-row">
   <div class="vehicle-grid">
-    <div class="cell model">
-      {{ vehicle.model }} : {{ vehicle.generation }}
-    </div>
+    <div class="cell model">{{vehicle.brand}} {{ vehicle.model }} : {{ vehicle.generation }}</div>
 
-    <div class="cell year">
-      {{ vehicle.yearFrom }} - {{ vehicle.yearTo }}
-    </div>
+    <div class="cell year">{{ vehicle.yearFrom }} - {{ vehicle.yearTo }}</div>
 
     <div class="cell engine">
       <span *ngIf="!showEngineSelector">
@@ -14,30 +10,27 @@
       </span>
 
       <div *ngIf="showEngineSelector" class="engine-inline">
-        <label
-          *ngFor="let e of vehicle.engines"
-          class="engine-check">
+        <label *ngFor="let e of vehicle.engines" class="engine-check">
           <input
             type="checkbox"
             class="engine-checkbox"
-            [checked]="vehicle.selectedEngines?.includes(e.code)"
-            (change)="toggleEngine(e.code, $any($event.target).checked)" />
+            [checked]="isEngineSelected(e)"
+            (change)="toggleEngine(e, $any($event.target).checked)"
+          />
           <span>{{ e.code }} ({{ e.fuel }})</span>
         </label>
       </div>
     </div>
-    <div class="cell remark">
+    <div *ngIf="showRemark" class="cell remark">
       <input
         class="remark-input"
         [value]="vehicle.remark"
         placeholder="หมายเหตุ"
-        (input)="onRemarkChange($any($event.target).value)" />
+        (input)="onRemarkChange($any($event.target).value)"
+      />
     </div>
-    <div class="cell action">
-      <button class="remove" (click)="onRemove()">
-        ลบ
-      </button>
+    <div *ngIf="showRemove" class="cell action">
+      <button class="remove" (click)="onRemove()">ลบ</button>
     </div>
   </div>
-
 </div>

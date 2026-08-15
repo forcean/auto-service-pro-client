@@ -1,0 +1,212 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="vehicle-form p-6">
+  <div class="page-header">
+    <div>
+      <h1>
+        {{ mode === "create" ? "เพิ่มรถยนต์" : "แก้ไขข้อมูลรถยนต์" }}
+      </h1>
+
+      <p>
+        {{
+          mode === "create"
+            ? "กรอกข้อมูลลูกค้าและรถยนต์เพื่อเพิ่มเข้าสู่ระบบ"
+            : "แก้ไขข้อมูลลูกค้าและรายละเอียดรถยนต์"
+        }}
+      </p>
+    </div>
+
+    <div class="status-chip">
+      <lucide-icon name="car-front"></lucide-icon>
+      <span>Customer Vehicle</span>
+    </div>
+  </div>
+
+  <div class="grid xl:grid-cols-[1fr_360px] gap-8">
+    <div class="space-y-8">
+      <section class="card">
+        <div class="card-header">
+          <div class="card-icon blue">
+            <lucide-icon name="user"></lucide-icon>
+          </div>
+
+          <div>
+            <h2>ข้อมูลลูกค้า</h2>
+            <p>ข้อมูลเจ้าของรถ</p>
+          </div>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-5">
+          <div>
+            <label>ชื่อ</label>
+
+            <input
+              class="form-control"
+              formControlName="firstname"
+              placeholder="ชื่อ"
+            />
+          </div>
+
+          <div>
+            <label>นามสกุล</label>
+
+            <input
+              class="form-control"
+              formControlName="lastname"
+              placeholder="นามสกุล"
+            />
+          </div>
+
+          <div class="lg:col-span-2">
+            <label>เบอร์โทรศัพท์</label>
+
+            <input
+              class="form-control"
+              formControlName="phoneNumber"
+              placeholder="0812345678"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section class="card" formGroupName="customerVehicle">
+        <div class="card-header">
+          <div class="card-icon green">
+            <lucide-icon name="car-front"></lucide-icon>
+          </div>
+
+          <div>
+            <h2>ข้อมูลรถยนต์</h2>
+            <p>รายละเอียดรถของลูกค้า</p>
+          </div>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-5">
+          <div>
+            <label>ทะเบียนรถ</label>
+
+            <input
+              class="form-control"
+              formControlName="licensePlate"
+              placeholder="กข1234"
+            />
+          </div>
+
+          <div>
+            <label>จังหวัด</label>
+
+            <custom-select formControlName="province">
+              <custom-option
+                *ngFor="let province of provinces"
+                [value]="province.code"
+              >
+                {{ province.nameTH }}
+              </custom-option>
+            </custom-select>
+          </div>
+
+          <div class="lg:col-span-2">
+            <label>สถานะ</label>
+
+            <custom-select formControlName="status">
+              <custom-option *ngFor="let item of statuses" [value]="item.value">
+                {{ item.label }}
+              </custom-option>
+            </custom-select>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <app-vehicle-compatibility
+          formControlName="catalogVehicle"
+          mode="customer"
+          [allowRemark]="true"
+          headerText=" ยานยนต์ของลูกค้า"
+        >
+        </app-vehicle-compatibility>
+      </section>
+    </div>
+
+    <aside class="card summary-card">
+      <div class="card-header">
+        <div class="card-icon orange">
+          <lucide-icon name="clipboard-list"></lucide-icon>
+        </div>
+
+        <div>
+          <h2>สรุปข้อมูล</h2>
+
+          <p>ตรวจสอบก่อนบันทึก</p>
+        </div>
+      </div>
+
+      <div class="summary-list">
+        <div class="summary-item">
+          <span>ชื่อลูกค้า</span>
+
+          <strong>
+            {{ form.get("firstname")?.value || "-" }}
+            {{ form.get("lastname")?.value || "" }}
+          </strong>
+        </div>
+
+        <div class="summary-item">
+          <span>เบอร์โทร</span>
+
+          <strong>
+            {{ form.get("phoneNumber")?.value || "-" }}
+          </strong>
+        </div>
+
+        <div class="summary-item">
+          <span>ทะเบียน</span>
+
+          <strong>
+            {{ form.get("customerVehicle.licensePlate")?.value || "-" }}
+          </strong>
+        </div>
+
+        <div class="summary-item">
+          <span>จังหวัด</span>
+          <strong>
+            {{ getProvinceName(form.get("customerVehicle.province")?.value) }}
+          </strong>
+        </div>
+
+        <div class="summary-item">
+          <span>สถานะ</span>
+
+          <strong>
+            {{ form.get("customerVehicle.status")?.value || "-" }}
+          </strong>
+        </div>
+
+        <div class="summary-item">
+          <span>รถที่เลือก</span>
+
+          <strong>
+            {{ form.get("catalogVehicle")?.value?.length || 0 }}
+            คัน
+          </strong>
+        </div>
+      </div>
+
+      <div class="summary-footer">
+        <button type="button" class="btn-cancel w-full" (click)="onCancel()">
+          ยกเลิก
+        </button>
+
+        <button
+          type="submit"
+          class="btn-save w-full mt-3"
+          [disabled]="isLoading"
+        >
+          <span *ngIf="!isLoading">
+            {{ mode === "create" ? "เพิ่มรถยนต์" : "บันทึกข้อมูล" }}
+          </span>
+
+          <span *ngIf="isLoading"> กำลังบันทึก... </span>
+        </button>
+      </div>
+    </aside>
+  </div>
+</form>

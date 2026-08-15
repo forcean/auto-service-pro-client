@@ -37,9 +37,12 @@ import { StockSummaryComponent } from './components/stock-summary/stock-summary.
 import {
   ArrowRightLeft,
   ArrowUpFromDot,
+  CarFront,
   ChevronDown,
   ChevronsDown,
   ChevronUp,
+  Download,
+  Eye,
   List,
   LucideAngularModule,
   PackagePlus,
@@ -47,10 +50,45 @@ import {
   RotateCw,
   Search,
   SlidersHorizontal,
+  Trash2,
+  Upload,
+  Image,
+  StickyNote,
+  Check,
+  Receipt,
+  Settings2,
+  Calendar,
+  Wrench,
+  Wallet,
+  CalendarCheck,
+  FolderOpen,
+  Activity,
+  AlertTriangle,
+  AlertCircle,
+  Clock,
+  Info,
+  CheckCircle2,
+  History,
+  File,
+  Archive,
+  FileType2,
+  Sheet,
+  Inbox,
+  ArrowUpRight
 } from 'lucide-angular';
 import { TableStockManagementComponent } from './components/table-stock-management/table-stock-management.component';
 import { CustomSearchSelectComponent } from './components/custom-search-select/custom-search-select.component';
 import { ReceiveStockModalComponent } from './components/receive-stock-modal/receive-stock-modal.component';
+import { TableVehicleListComponent } from './components/table-vehicle-list/table-vehicle-list.component';
+import { SearchVehicleComponent } from './components/search-vehicle/search-vehicle.component';
+import { VehicleOverviewComponent } from './components/vehicle-overview/vehicle-overview.component';
+import { TableVehicleServiceHistoryComponent } from './components/table-vehicle-service-history/table-vehicle-service-history.component';
+import { VehicleWorkOrdersComponent } from './components/vehicle-work-orders/vehicle-work-orders.component';
+import { VehicleDocumentsComponent } from './components/vehicle-documents/vehicle-documents.component';
+import { ImageGalleryComponent } from './components/image-gallery/image-gallery.component';
+import { ServiceHistoryPanelComponent } from './components/service-history-panel/service-history-panel.component';
+import { ProvincePipe } from './pipes/province.pipe';
+import { TimeAgoPipe } from './pipes/time-ago.pipe';
 
 const components = [
   ModalCommonComponent,
@@ -80,7 +118,14 @@ const components = [
   StockSummaryComponent,
   TableStockManagementComponent,
   CustomSearchSelectComponent,
-  ReceiveStockModalComponent
+  ReceiveStockModalComponent,
+  TableVehicleListComponent,
+  VehicleOverviewComponent,
+  TableVehicleServiceHistoryComponent,
+  VehicleWorkOrdersComponent,
+  VehicleDocumentsComponent,
+  ImageGalleryComponent,
+  ServiceHistoryPanelComponent,
 ];
 
 const directives = [
@@ -90,6 +135,7 @@ const directives = [
   PreventSpecialCharsDirective,
   PriceDirective,
   SpecInputDirective,
+  SearchVehicleComponent,
 ];
 
 @NgModule({
@@ -111,7 +157,37 @@ const directives = [
       PackagePlus,
       RotateCw,
       ChevronsDown,
+      CarFront,
+      Upload,
+      Image,
+      Eye,
+      Download,
+      Trash2,
+      Wrench,
+      Wallet,
+      CalendarCheck,
+      FolderOpen,
+      Activity,
+      AlertCircle,
+      AlertTriangle,
+      Clock,
+      Info,
+      CheckCircle2,
+      Calendar,
+      Settings2,
+      History,
+      Receipt,
+      Check,
+      StickyNote,
+      File,
+      Archive,
+      FileType2,
+      Sheet,
+      Inbox,
+      ArrowUpRight
     }),
+    ProvincePipe,
+    TimeAgoPipe,
   ],
   exports: [...components, ...directives],
 })

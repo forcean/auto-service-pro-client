@@ -1,0 +1,165 @@
+<div class="space-y-4 font-sans">
+  <!-- ================= Header ================= -->
+  <div class="flex items-center justify-between pb-1 border-b border-slate-100">
+    <div class="flex items-center gap-2.5">
+      <div class="w-2.5 h-6 bg-emerald-500 rounded-full"></div>
+      <div>
+        <h3 class="text-base sm:text-lg font-bold text-slate-900 tracking-tight">Work Orders Management</h3>
+        <p class="text-xs sm:text-sm text-slate-500 font-normal">รายการใบสั่งซ่อมและสถานะการดำเนินงานทั้งหมด</p>
+      </div>
+    </div>
+
+    <button
+      (click)="onCreateWorkOrder()"
+      class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-xs shrink-0"
+    >
+      <i-lucide name="plus" class="h-4 w-4"></i-lucide>
+      <span>สร้าง WO</span>
+    </button>
+  </div>
+
+  <!-- ================= Modern KPI Bar (ขยายขนาดตัวเลขและฟอนต์) ================= -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <!-- Open -->
+    <div class="bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+        <span class="text-xs sm:text-sm text-slate-600 font-medium">Open</span>
+      </div>
+      <span class="text-sm sm:text-base font-bold text-slate-900 bg-slate-100 px-2.5 py-0.5 rounded-lg">
+        {{ summary?.totalOpen || 0 }}
+      </span>
+    </div>
+
+    <!-- In Progress -->
+    <div class="bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+        <span class="text-xs sm:text-sm text-slate-600 font-medium">In Progress</span>
+      </div>
+      <span class="text-sm sm:text-base font-bold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-lg border border-amber-200/60">
+        {{ summary?.totalInProgress || 0 }}
+      </span>
+    </div>
+
+    <!-- Completed -->
+    <div class="bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        <span class="text-xs sm:text-sm text-slate-600 font-medium">Completed</span>
+      </div>
+      <span class="text-sm sm:text-base font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-200/60">
+        {{ summary?.totalCompleted || 0 }}
+      </span>
+    </div>
+
+    <!-- Cost -->
+    <div class="bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200/80 shadow-2xs flex items-center justify-between" *ngIf="canViewFinancials">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+        <span class="text-xs sm:text-sm text-slate-600 font-medium">Total Cost</span>
+      </div>
+      <span class="text-sm sm:text-base font-bold text-slate-900">
+        ฿{{ formatNumber(summary?.totalRepairCost) }}
+      </span>
+    </div>
+  </div>
+
+  <!-- ================= Work Order Items Feed ================= -->
+  <div class="space-y-3">
+    <ng-container *ngIf="workOrders && workOrders.length > 0; else emptyState">
+      <div
+        *ngFor="let item of workOrders"
+        class="group bg-white rounded-xl border border-slate-200/80 hover:border-slate-300 hover:shadow-xs transition-all p-4 space-y-3"
+      >
+        <!-- Top Section: Badges & Actions -->
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5 flex-wrap min-w-0">
+            <!-- WO Number -->
+            <span class="text-xs sm:text-sm font-bold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200/60">
+              #{{ item.workOrderNo }}
+            </span>
+
+            <!-- Status Pill -->
+            <span
+              class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs sm:text-sm font-medium border"
+              [ngClass]="getStatusBadgeClass(item.status)"
+            >
+              <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+              {{ item.statusText || item.status }}
+            </span>
+          </div>
+
+          <!-- Quick Action Buttons -->
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button
+              (click)="onPrint(item.id)"
+              title="พิมพ์ WO"
+              class="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
+            >
+              <i-lucide name="printer" class="h-4 w-4"></i-lucide>
+            </button>
+            <button
+              (click)="onViewDetail(item.id)"
+              class="inline-flex items-center gap-1 px-3 py-1.5 text-xs sm:text-sm font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors border border-emerald-200/80"
+            >
+              <span>รายละเอียด</span>
+              <lucide-icon name="arrow-up-right" class="h-4 w-4"></lucide-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- Title (ขยายใหญ่ชัดเจน) -->
+        <h4 class="text-base sm:text-lg font-bold text-slate-900 truncate">
+          {{ item.title }}
+        </h4>
+
+        <!-- Inline Meta Details (ปรับสีเข้มขึ้น + ฟอนต์ใหญ่ขึ้น) -->
+        <div class="flex items-center justify-between text-xs sm:text-sm text-slate-600 pt-2 border-t border-slate-100">
+          <div class="flex items-center gap-4 truncate">
+            <span class="flex items-center gap-1.5 truncate">
+              <i-lucide name="user" class="h-4 w-4 text-slate-400 shrink-0"></i-lucide>
+              <span class="font-medium text-slate-800">{{ item.mechanicName || '-' }}</span>
+            </span>
+            <span class="text-slate-300">•</span>
+            <span class="flex items-center gap-1.5 shrink-0">
+              <i-lucide name="calendar" class="h-4 w-4 text-slate-400 shrink-0"></i-lucide>
+              <span>{{ item.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+            </span>
+          </div>
+
+          <!-- Total Cost -->
+          <div *ngIf="canViewFinancials" class="font-bold text-base text-slate-900 shrink-0">
+            ฿{{ formatNumber(item.costs?.total) }}
+          </div>
+        </div>
+
+        <!-- Progress Indicator Bar -->
+        <div class="flex items-center gap-3">
+          <div class="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+            <div
+              class="h-full rounded-full transition-all duration-300"
+              [ngClass]="{
+                'bg-emerald-500': item.progress === 100,
+                'bg-amber-500': item.progress > 0 && item.progress < 100,
+                'bg-slate-300': item.progress === 0
+              }"
+              [style.width.%]="item.progress || 0"
+            ></div>
+          </div>
+          <span class="text-xs sm:text-sm font-semibold text-slate-600 shrink-0">{{ item.progress || 0 }}%</span>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Empty State -->
+    <ng-template #emptyState>
+      <div class="bg-white rounded-xl border border-slate-200/80 p-10 text-center">
+        <div class="w-10 h-10 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-2">
+          <lucide-icon name="inbox" class="h-5 w-5"></lucide-icon>
+        </div>
+        <p class="text-sm font-medium text-slate-500">ยังไม่มีรายการใบสั่งซ่อม</p>
+      </div>
+    </ng-template>
+  </div>
+</div>

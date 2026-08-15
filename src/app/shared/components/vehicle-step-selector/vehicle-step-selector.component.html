@@ -1,36 +1,51 @@
-<div class="step-box">
-    <custom-select
-        *ngIf="step === 1"
-        placeholder="กรุณเลือกยี่ห้อรถ"
-        (change)="selectBrand($event)">
-        <custom-option
-            *ngFor="let b of brands"
-            [value]="b.code">
-            {{ b.name }}
-        </custom-option>
+<div class="vehicle-selector">
+  <div class="selector-item">
+    <label class="selector-label">
+      ยี่ห้อรถ
+      <span class="step-number">1</span>
+    </label>
+
+    <custom-select placeholder="เลือกยี่ห้อรถ" (change)="selectBrand($event)">
+      <custom-option *ngFor="let b of brands" [value]="b.code">
+        {{ b.name }}
+      </custom-option>
     </custom-select>
+  </div>
+
+  <div class="selector-item">
+    <label class="selector-label" [class.disabled]="!brandCode">
+      รุ่นรถ
+      <span class="step-number">2</span>
+    </label>
 
     <custom-select
-        *ngIf="step === 2"
-        placeholder="กรุณเลือกโมเดลรถ"
-        (change)="selectModel($event)">
-        <custom-option
-            *ngFor="let m of models"
-            [value]="m.modelCode">
-            {{ m.model }} {{ m.generation ? ': ' + m.generation : '' }}
-        </custom-option>
+      placeholder="เลือกรุ่นรถ"
+      [isDisabled]="!brandCode"
+      (change)="selectModel($event)"
+    >
+      <custom-option *ngFor="let m of models" [value]="m.modelCode">
+        {{ m.model }}
+        {{ m.generation ? ": " + m.generation : "" }}
+      </custom-option>
     </custom-select>
+  </div>
+
+  <div class="selector-item">
+    <label class="selector-label" [class.disabled]="!modelCode">
+      ปี / รุ่นย่อย
+      <span class="step-number">3</span>
+    </label>
 
     <custom-select
-        *ngIf="step === 3"
-        placeholder="กรุณเลือกรถที่ต้องการ"
-        (change)="selectVehicle($event)">
-        <custom-option
-            *ngFor="let v of vehicles"
-            [value]="v">
-            {{ v.model }} {{ v.generation ? ': ' + v.generation : '' }} ({{
-            v.yearFrom }}-{{ v.yearTo }})
-        </custom-option>
+      placeholder="เลือกรถที่ต้องการ"
+      [isDisabled]="!modelCode"
+      (change)="selectVehicle($event)"
+    >
+      <custom-option *ngFor="let v of vehicles" [value]="v">
+        {{ v.model }}
+        {{ v.generation ? ": " + v.generation : "" }}
+        ({{ v.yearFrom }}-{{ v.yearTo }})
+      </custom-option>
     </custom-select>
-
+  </div>
 </div>

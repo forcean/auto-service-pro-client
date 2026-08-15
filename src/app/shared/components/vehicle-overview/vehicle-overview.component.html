@@ -1,0 +1,362 @@
+<div class="space-y-5">
+  <!-- 1. KPI Cards Summary -->
+  <div class="grid grid-cols-2 xl:grid-cols-4 gap-3.5">
+    <!-- Total Visits -->
+    <div
+      class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center gap-3 min-w-0"
+    >
+      <div
+        class="w-10 h-10 bg-slate-100 text-slate-700 rounded-lg flex items-center justify-center flex-shrink-0 border border-slate-200/50"
+      >
+        <i-lucide name="wrench" class="h-4.5 w-4.5"></i-lucide>
+      </div>
+      <div class="min-w-0 flex-1">
+        <span
+          class="text-[12px] font-bold text-slate-400 uppercase tracking-wider block truncate"
+        >Total Visits</span>
+        <h4 class="text-sm sm:text-base font-black text-slate-900 truncate">
+          {{ formatNumber(overviewData?.kpi?.totalVisits || 0) }} 
+          <span class="text-xs font-semibold text-slate-400">ครั้ง</span>
+        </h4>
+      </div>
+    </div>
+
+    <!-- Total Spend (ซ่อน/แสดง ตามสิทธิ์การเงิน) -->
+    <div
+      class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center gap-3 min-w-0"
+      *ngIf="canViewFinancials"
+    >
+      <div
+        class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center flex-shrink-0 border border-emerald-100"
+      >
+        <i-lucide name="wallet" class="h-4.5 w-4.5"></i-lucide>
+      </div>
+      <div class="min-w-0 flex-1">
+        <span
+          class="text-[12px] font-bold text-slate-400 uppercase tracking-wider block truncate"
+        >Total Spend</span>
+        <h4 class="text-sm sm:text-base font-black text-slate-900 truncate">
+          ฿{{ formatNumber(overviewData?.kpi?.totalSpend || 0) }}
+        </h4>
+      </div>
+    </div>
+
+    <!-- Last Visit -->
+    <div
+      class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center gap-3 min-w-0"
+    >
+      <div
+        class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center flex-shrink-0 border border-blue-100"
+      >
+        <i-lucide name="calendar-check" class="h-4.5 w-4.5"></i-lucide>
+      </div>
+      <div class="min-w-0 flex-1">
+        <span
+          class="text-[12px] font-bold text-slate-400 uppercase tracking-wider block truncate"
+        >Last Visit</span>
+        <h4 class="text-xs sm:text-sm font-extrabold text-slate-900 truncate">
+          {{ overviewData?.kpi?.lastVisitDate || '-' }}
+        </h4>
+      </div>
+    </div>
+
+    <!-- Open WO -->
+    <div
+      class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center gap-3 min-w-0"
+    >
+      <div
+        class="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center flex-shrink-0 border border-amber-100"
+      >
+        <i-lucide name="folder-open" class="h-4.5 w-4.5"></i-lucide>
+      </div>
+      <div class="min-w-0 flex-1">
+        <span
+          class="text-[12px] font-bold text-slate-400 uppercase tracking-wider block truncate"
+        >Open WO</span>
+        <h4 class="text-sm sm:text-base font-black text-slate-900 truncate">
+          {{ overviewData?.kpi?.openWorkOrdersCount || 0 }} 
+          <span class="text-xs font-semibold text-slate-400">รายการ</span>
+        </h4>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Main Diagnostic & Activity Section -->
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 items-start">
+    <!-- [LEFT SIDE] Vehicle Health & Plan Banner -->
+    <div class="space-y-4 min-w-0">
+      <!-- Card: Diagnostic Status -->
+      <div
+        class="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden"
+      >
+        <div
+          class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 gap-2"
+        >
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span
+              class="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-50 text-rose-600 border border-rose-100 flex-shrink-0"
+            >
+              <i-lucide name="activity" class="h-4 w-4"></i-lucide>
+            </span>
+            <div class="min-w-0">
+              <h3
+                class="text-xs font-bold text-slate-900 uppercase tracking-wider truncate"
+              >
+                Vehicle Health Diagnostic
+              </h3>
+              <p class="text-[12px] font-medium text-slate-400 truncate">
+                การวิเคราะห์สถานะอะไหล่ล่าสุด
+              </p>
+            </div>
+          </div>
+          <div class="text-right flex-shrink-0">
+            <span
+              class="text-[12px] font-bold text-slate-400 block uppercase tracking-wider"
+            >Current Mileage</span>
+            <span class="text-xs font-black text-slate-900">
+              {{ 73048 }}
+              <span class="text-[12px] font-bold text-slate-500">KM</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Render Dynamic Diagnostic Items -->
+        <div class="divide-y divide-slate-100 text-xs sm:text-sm">
+          <ng-container *ngIf="overviewData?.healthDiagnostics?.length; else noDiagnostics">
+            <div
+              *ngFor="let item of overviewData.healthDiagnostics"
+              class="p-3.5 flex items-center justify-between hover:bg-slate-50/60 transition-colors gap-2"
+            >
+              <div class="flex items-center gap-2 min-w-0">
+                <span
+                  class="w-2 h-2 rounded-full flex-shrink-0"
+                  [ngClass]="{
+                    'bg-rose-500 animate-pulse': item.status === 'OVERDUE',
+                    'bg-rose-500': item.status === 'REPLACE',
+                    'bg-amber-500': item.status === 'DUE_SOON' || item.status === 'FAIR',
+                    'bg-emerald-500': item.status === 'GOOD'
+                  }"
+                ></span>
+                <span class="font-bold text-slate-800 truncate">{{ item.name }}</span>
+              </div>
+
+              <!-- Badge Status Dynamic -->
+              <span
+                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold flex-shrink-0"
+                [ngClass]="{
+                  'bg-rose-50 border border-rose-200/60 text-rose-700 font-extrabold uppercase': item.status === 'OVERDUE' || item.status === 'REPLACE',
+                  'bg-amber-50 border border-amber-200/60 text-amber-700': item.status === 'DUE_SOON' || item.status === 'FAIR',
+                  'bg-emerald-50 border border-emerald-200/60 text-emerald-700 font-extrabold uppercase': item.status === 'GOOD'
+                }"
+              >
+                <i-lucide [name]="getHealthIcon(item.status)" class="h-3.5 w-3.5"></i-lucide>
+                {{ item.note || item.status }}
+              </span>
+            </div>
+          </ng-container>
+
+          <ng-template #noDiagnostics>
+            <div class="p-4 text-center text-slate-400 text-xs">
+              ไม่พบข้อมูลการวิเคราะห์อะไหล่
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+      <!-- Banner: Service Plan -->
+      <div
+        *ngIf="overviewData?.servicePlan"
+        class="relative overflow-hidden rounded-xl border border-slate-800 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 p-4 sm:p-5 text-white shadow-md"
+      >
+        <div
+          class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+        >
+          <div class="min-w-0">
+            <div
+              class="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[12px] font-extrabold uppercase tracking-wider text-emerald-400 border border-emerald-500/20 mb-1.5"
+            >
+              <i-lucide name="calendar" class="h-3 w-3"></i-lucide>
+              Upcoming Service Plan
+            </div>
+            <h3 class="text-sm sm:text-base font-extrabold text-white truncate">
+              รอบเช็คระยะถัดไป: {{ formatNumber(overviewData.servicePlan?.nextMileage) }} KM
+            </h3>
+            <p class="text-[11px] text-slate-400 mt-0.5">
+              {{ overviewData.servicePlan?.description || 'คำนวณจากประวัติและอัตราการใช้งานเฉลี่ยล่าสุด' }}
+            </p>
+          </div>
+
+          <div
+            class="rounded-lg border border-slate-700/60 bg-slate-800/60 backdrop-blur-md px-3 py-2 text-left sm:text-right flex-shrink-0 w-full sm:w-auto"
+          >
+            <span class="text-[12px] font-bold text-slate-400 uppercase block"
+              >ระยะทางที่เหลือ</span
+            >
+            <span class="text-base font-black text-emerald-400">
+              {{ formatNumber(overviewData.servicePlan?.remainingKm) }}
+              <span class="text-[12px] font-bold text-slate-300">KM</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- [RIGHT SIDE] Work Orders, Activity, Invoice, Note -->
+    <div class="space-y-4 min-w-0">
+      <!-- Card 1: Active Work Order -->
+      <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm">
+        <div
+          class="flex items-center gap-2 border-b border-slate-100 pb-2.5 mb-3"
+        >
+          <i-lucide
+            name="settings-2"
+            class="h-4 w-4 text-blue-600 flex-shrink-0"
+          ></i-lucide>
+          <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">
+            Active Work Order
+          </h3>
+        </div>
+
+        <div
+          *ngIf="overviewData?.activeWorkOrder; else noActiveWorkOrder"
+          class="p-3 bg-blue-50/40 rounded-lg border border-blue-100/80 flex items-center justify-between gap-3"
+        >
+          <div class="min-w-0 flex-1">
+            <span class="text-[11px] font-bold text-blue-600 block">
+              {{ overviewData.activeWorkOrder?.workOrderNo }}
+            </span>
+            <p class="text-xs sm:text-sm font-bold text-slate-800 truncate">
+              {{ overviewData.activeWorkOrder?.title }}
+            </p>
+          </div>
+          <span
+            class="px-2.5 py-1 bg-blue-600 text-white text-[12px] font-extrabold rounded-md shadow-xs whitespace-nowrap flex-shrink-0"
+          >
+            {{ overviewData.activeWorkOrder?.status }}
+          </span>
+        </div>
+
+        <ng-template #noActiveWorkOrder>
+          <div class="text-center py-3 text-slate-400 text-xs">
+            ไม่มี Work Order ที่กำลังดำเนินการ
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- Card 2: Recent Activity -->
+      <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm">
+        <div
+          class="flex items-center gap-2 border-b border-slate-100 pb-2.5 mb-3"
+        >
+          <i-lucide
+            name="history"
+            class="h-4 w-4 text-slate-500 flex-shrink-0"
+          ></i-lucide>
+          <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">
+            Recent Activity
+          </h3>
+        </div>
+        
+        <div class="space-y-2">
+          <div
+            *ngIf="overviewData?.recentActivities?.length"
+            class="text-[12px] font-extrabold text-slate-400 uppercase tracking-wider"
+          >
+            {{ overviewData.recentActivities[0]?.date || 'LATEST' }}
+          </div>
+
+          <div
+            *ngIf="overviewData?.recentActivities?.length; else noActivities"
+            class="space-y-1.5 text-xs sm:text-sm text-slate-700 font-medium"
+          >
+            <div 
+              *ngFor="let activity of overviewData.recentActivities"
+              class="flex items-center gap-2 min-w-0"
+            >
+              <i-lucide
+                name="check-circle-2"
+                class="h-4 w-4 text-emerald-500 flex-shrink-0"
+              ></i-lucide>
+              <span class="truncate">{{ activity.description }}</span>
+            </div>
+          </div>
+
+          <ng-template #noActivities>
+            <div class="text-center py-2 text-slate-400 text-xs">
+              ยังไม่มีประวัติกิจกรรมล่าสุด
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+      <!-- Card 3: Recent Invoice (ซ่อน/แสดง ตามสิทธิ์การเงิน) -->
+      <div 
+        class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm"
+        *ngIf="canViewFinancials && overviewData?.recentInvoice"
+      >
+        <div
+          class="flex items-center justify-between border-b border-slate-100 pb-2.5 mb-2.5"
+        >
+          <div class="flex items-center gap-2">
+            <i-lucide
+              name="receipt"
+              class="h-4 w-4 text-slate-500 flex-shrink-0"
+            ></i-lucide>
+            <h3
+              class="text-xs font-bold text-slate-900 uppercase tracking-wider"
+            >
+              Recent Invoice
+            </h3>
+          </div>
+          <span class="text-xs font-bold text-slate-400">
+            {{ overviewData.recentInvoice?.invoiceNo }}
+          </span>
+        </div>
+
+        <div class="flex justify-between items-center">
+          <div>
+            <span class="text-[12px] font-bold text-slate-400 uppercase block"
+              >Total Amount</span
+            >
+            <span class="text-base sm:text-lg font-black text-slate-900">
+              ฿{{ formatNumber(overviewData.recentInvoice?.amount) }}
+            </span>
+          </div>
+
+          <span
+            class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-md border"
+            [ngClass]="{
+              'bg-emerald-50 text-emerald-700 border-emerald-100': overviewData.recentInvoice?.status === 'PAID',
+              'bg-amber-50 text-amber-700 border-amber-100': overviewData.recentInvoice?.status === 'UNPAID',
+              'bg-rose-50 text-rose-700 border-rose-100': overviewData.recentInvoice?.status === 'OVERDUE'
+            }"
+          >
+            <i-lucide [name]="overviewData.recentInvoice?.status === 'PAID' ? 'check' : 'alert-circle'" class="h-3.5 w-3.5"></i-lucide>
+            {{ overviewData.recentInvoice?.status }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Card 4: Internal Note (ซ่อน/แสดง ตามสิทธิ์) -->
+      <div
+        class="bg-amber-50/60 p-4 rounded-xl border border-amber-200/80 space-y-1"
+        *ngIf="canViewInternalNoteExplicit && overviewData?.internalNote"
+      >
+        <div
+          class="flex items-center gap-2 text-amber-800 font-extrabold text-xs uppercase tracking-wider"
+        >
+          <i-lucide
+            name="sticky-note"
+            class="h-4 w-4 text-amber-600 flex-shrink-0"
+          ></i-lucide>
+          <span>Internal Note / บันทึกช่าง</span>
+        </div>
+        <p
+          class="text-xs sm:text-sm text-amber-950 font-semibold leading-relaxed pt-1"
+        >
+          "{{ overviewData.internalNote }}"
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
