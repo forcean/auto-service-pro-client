@@ -1,0 +1,288 @@
+<div class="min-h-screen bg-[#F8FAFC] text-slate-800 p-4 md:p-8 font-sans">
+  <!-- Top Navigation / Header -->
+  <div
+    class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8"
+  >
+    <div class="flex items-center gap-3">
+      <div
+        class="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 rounded-2xl flex items-center justify-center shadow-sm"
+      >
+        <lucide-icon
+          [name]="ClipboardListIcon"
+          class="w-6 h-6"
+        ></lucide-icon>
+      </div>
+      <div>
+        <h1 class="text-2xl font-bold tracking-tight text-slate-900">
+          Work Orders
+        </h1>
+        <p class="text-xs font-medium text-slate-400">
+          จัดการและติดตามสถานะใบสั่งงานซ่อมบำรุงทั้งหมด
+        </p>
+      </div>
+    </div>
+
+    <!-- Actions & Filter Control Bar -->
+    <div class="flex flex-wrap items-center gap-3">
+      <!-- Search Box -->
+      <div class="relative min-w-[260px] flex-1 sm:flex-none">
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          (input)="applyLocalFilter()"
+          placeholder="ค้นหา Work Order, ทะเบียน, ลูกค้า..."
+          class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 shadow-sm transition-all"
+        />
+        <lucide-icon
+          [name]="SearchIcon"
+          class="w-4 h-4 absolute left-3.5 top-3 text-slate-400"
+        ></lucide-icon>
+      </div>
+
+      <!-- Filter Status Dropdown -->
+      <select
+        [(ngModel)]="selectedStatus"
+        (change)="fetchWorkOrders()"
+        class="bg-white border border-slate-200 text-slate-700 px-3.5 py-2.5 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 shadow-sm transition-all"
+      >
+        <option value="ALL">สถานะ: ทั้งหมด</option>
+        <option value="PENDING">รอดำเนินการ (Pending)</option>
+        <option value="IN_PROGRESS">กำลังซ่อม (In Progress)</option>
+        <option value="QUALITY_CHECK">ตรวจสอบคุณภาพ (Quality Check)</option>
+        <option value="WAITING_PARTS">รออะไหล่ (Waiting Parts)</option>
+        <option value="READY_FOR_PICKUP">รอส่งมอบ (Ready For Pickup)</option>
+        <option value="COMPLETED">เสร็จสิ้น (Completed)</option>
+      </select>
+
+      <!-- Date Filter -->
+      <input
+        type="date"
+        [(ngModel)]="selectedDate"
+        class="bg-white border border-slate-200 text-slate-600 px-3.5 py-2.5 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 shadow-sm"
+      />
+
+      <!-- Action Button: Create Work Order -->
+      <button
+        (click)="openCreateModal()"
+        class="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2"
+      >
+        <lucide-icon [name]="PlusIcon" class="w-4 h-4"></lucide-icon>
+        <span>สร้างใบสั่งงาน</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Metric Overview Cards -->
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+    <div
+      class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex items-center justify-between"
+    >
+      <div>
+        <p
+          class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider"
+        >
+          ทั้งหมด
+        </p>
+        <p class="text-2xl font-bold text-slate-800 mt-1">
+          {{ statusCounts.all }}
+        </p>
+      </div>
+      <div
+        class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center"
+      >
+        <lucide-icon [name]="FileTextIcon" class="w-5 h-5"></lucide-icon>
+      </div>
+    </div>
+
+    <div
+      class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex items-center justify-between"
+    >
+      <div>
+        <p
+          class="text-[11px] font-semibold text-amber-500 uppercase tracking-wider"
+        >
+          รอดำเนินการ
+        </p>
+        <p class="text-2xl font-bold text-slate-800 mt-1">
+          {{ statusCounts.pending }}
+        </p>
+      </div>
+      <div
+        class="w-10 h-10 bg-amber-50 text-amber-500 rounded-xl flex items-center justify-center"
+      >
+        <lucide-icon [name]="ClockIcon" class="w-5 h-5"></lucide-icon>
+      </div>
+    </div>
+
+    <div
+      class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex items-center justify-between"
+    >
+      <div>
+        <p
+          class="text-[11px] font-semibold text-blue-500 uppercase tracking-wider"
+        >
+          กำลังซ่อม
+        </p>
+        <p class="text-2xl font-bold text-slate-800 mt-1">
+          {{ statusCounts.inProgress }}
+        </p>
+      </div>
+      <div
+        class="w-10 h-10 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center"
+      >
+        <lucide-icon [name]="WrenchIcon" class="w-5 h-5"></lucide-icon>
+      </div>
+    </div>
+
+    <div
+      class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex items-center justify-between"
+    >
+      <div>
+        <p
+          class="text-[11px] font-semibold text-purple-500 uppercase tracking-wider"
+        >
+          ตรวจคุณภาพ
+        </p>
+        <p class="text-2xl font-bold text-slate-800 mt-1">
+          {{ statusCounts.qualityCheck }}
+        </p>
+      </div>
+      <div
+        class="w-10 h-10 bg-purple-50 text-purple-500 rounded-xl flex items-center justify-center"
+      >
+        <lucide-icon [name]="ShieldCheckIcon" class="w-5 h-5"></lucide-icon>
+      </div>
+    </div>
+
+    <div
+      class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex items-center justify-between"
+    >
+      <div>
+        <p
+          class="text-[11px] font-semibold text-emerald-500 uppercase tracking-wider"
+        >
+          รอส่งมอบ
+        </p>
+        <p class="text-2xl font-bold text-slate-800 mt-1">
+          {{ statusCounts.readyForPickup }}
+        </p>
+      </div>
+      <div
+        class="w-10 h-10 bg-emerald-50 text-emerald-500 rounded-xl flex items-center justify-center"
+      >
+        <lucide-icon [name]="CarIcon" class="w-5 h-5"></lucide-icon>
+      </div>
+    </div>
+
+    <div
+      class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex items-center justify-between"
+    >
+      <div>
+        <p
+          class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider"
+        >
+          เสร็จสิ้น
+        </p>
+        <p class="text-2xl font-bold text-slate-800 mt-1">
+          {{ statusCounts.completed }}
+        </p>
+      </div>
+      <div
+        class="w-10 h-10 bg-slate-100 text-slate-600 rounded-xl flex items-center justify-center"
+      >
+        <lucide-icon
+          [name]="CheckCircleIcon"
+          class="w-5 h-5"
+        ></lucide-icon>
+      </div>
+    </div>
+  </div>
+
+  <!-- Work Order Cards Grid ( Component แยก ) -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <app-work-order-card
+      *ngFor="let item of filteredWorkOrders"
+      [item]="item"
+      (viewDetail)="handleViewDetail($event)"
+      (printOrder)="handlePrintOrder($event)"
+      (notifyCustomer)="handleNotifyCustomer($event)"
+    >
+    </app-work-order-card>
+  </div>
+
+  <!-- Create Work Order Modal ( Component แยก อ้างอิงผ่าน @ViewChild ) -->
+  <app-create-work-order-modal
+    (submitForm)="handleCreateWorkOrder($event)"
+    [isOpen]="isCreateModalOpen"
+    (close)="closeCreateModal()"
+  >
+  </app-create-work-order-modal>
+</div>
+
+<div id="print-section" *ngIf="selectedOrderForPrint">
+  <div class="p-4 bg-white text-slate-900 font-sans">
+    
+    <!-- Header เอกสาร -->
+    <div class="print-flex-between border-b-2 border-slate-900 pb-3 mb-4">
+      <div>
+        <h1 class="text-xl font-bold uppercase tracking-wide text-slate-900">ใบสั่งซ่อม / WORK ORDER</h1>
+        <p class="text-xs text-slate-600 mt-0.5">เลขที่ใบสั่งซ่อม: <strong class="text-slate-900">{{ selectedOrderForPrint.workOrderNo }}</strong></p>
+      </div>
+      <div class="text-right text-xs text-slate-600">
+        <p>วันที่พิมพ์: {{ currentDate | date:'dd/MM/yyyy HH:mm' }}</p>
+        <p>สถานะ: <strong class="text-slate-900">{{ selectedOrderForPrint.status }}</strong></p>
+      </div>
+    </div>
+
+    <!-- รายละเอียดลูกค้า & รถยนต์ (Grid 2 คอลัมน์) -->
+    <div class="print-grid-2 mb-4 bg-slate-50 p-3.5 rounded-lg border border-slate-200">
+      <div>
+        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">ข้อมูลลูกค้า</span>
+        <p class="text-xs font-bold text-slate-800">{{ selectedOrderForPrint.customer.name }}</p>
+        <p class="text-xs text-slate-600 mt-0.5">เบอร์โทรศัพท์: {{ selectedOrderForPrint.customer.phone }}</p>
+      </div>
+      <div>
+        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">ข้อมูลรถยนต์</span>
+        <p class="text-xs font-bold text-slate-800">รุ่น: {{ selectedOrderForPrint.vehicle.model }}</p>
+        <p class="text-xs text-slate-600 mt-0.5">ทะเบียน: <strong class="text-slate-900">{{ selectedOrderForPrint.vehicle.plateNumber }}</strong></p>
+        <p class="text-xs text-slate-500 font-mono mt-0.5">VIN: {{ selectedOrderForPrint.vehicle.vin }}</p>
+      </div>
+    </div>
+
+    <!-- รายการแจ้งซ่อม / Tasks (Table ขนาดพอดี) -->
+    <div class="mb-6">
+      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">รายการงานที่ต้องทำ (TASK LIST)</span>
+      <table class="print-table text-xs text-left">
+        <thead>
+          <tr class="border-b-2 border-slate-300 bg-slate-100">
+            <th style="width: 10%" class="font-bold text-slate-700">#</th>
+            <th style="width: 65%" class="font-bold text-slate-700">รายการ</th>
+            <th style="width: 25%" class="font-bold text-slate-700 text-center">สถานะ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let task of selectedOrderForPrint.tasks; let i = index" class="border-b border-slate-200">
+            <td class="font-mono text-slate-500">{{ i + 1 }}</td>
+            <td class="text-slate-800">{{ task.title }}</td>
+            <td class="text-center font-bold" [class.text-emerald-600]="task.completed" [class.text-slate-500]="!task.completed">
+              {{ task.completed ? 'เสร็จสิ้น' : 'กำลังดำเนินการ' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ลายเซ็นต์ท้ายเอกสาร -->
+    <div class="print-grid-2 mt-12 pt-4 border-t border-slate-200 text-center text-xs">
+      <div>
+        <div class="border-b border-dashed border-slate-400 h-10 mb-2 w-3/4 mx-auto"></div>
+        <p class="font-semibold text-slate-700">ลงชื่อช่างผู้รับผิดชอบ</p>
+      </div>
+      <div>
+        <div class="border-b border-dashed border-slate-400 h-10 mb-2 w-3/4 mx-auto"></div>
+        <p class="font-semibold text-slate-700">ลงชื่อลูกค้าผู้รับรถ</p>
+      </div>
+    </div>
+
+  </div>
+</div>
