@@ -7,9 +7,10 @@ import { QuotationComponent } from './quotation/quotation.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { SharedModule } from "../../shared/shared.module";
+import { WorkOrderDetailComponent } from './work-order-detail/work-order-detail.component';
 
 @NgModule({
-  declarations: [WorkOrderComponent, QuotationComponent],
+  declarations: [WorkOrderComponent, QuotationComponent, WorkOrderDetailComponent],
   imports: [
     CommonModule,
     RepairManagementRoutingModule,

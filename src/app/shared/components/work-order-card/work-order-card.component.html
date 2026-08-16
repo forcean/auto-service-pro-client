@@ -1,6 +1,6 @@
 <div
   class="bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between overflow-hidden border-t-4"
-  [ngClass]="statusConfig[item.status]?.border || 'border-t-slate-300'"
+  [ngClass]="getStatusConfig()?.border || 'border-t-slate-300'"
 >
   <div class="p-6">
     <!-- Card Header & Status Badge -->
@@ -16,10 +16,10 @@
         }}</span>
       </div>
       <span
-        [class]="statusConfig[item.status]?.badge"
+        [class]="getStatusConfig()?.badge"
         class="px-2.5 py-1 border rounded-lg text-[10px] font-bold tracking-wide uppercase"
       >
-        {{ statusConfig[item.status]?.label || item.status }}
+        {{ getStatusConfig()?.label || item.status }}
       </span>
     </div>
 
@@ -86,23 +86,23 @@
         >TASKS</span
       >
       <ul class="space-y-2 text-xs text-slate-600">
-        <li *ngFor="let task of item.tasks" class="flex items-start gap-2">
+        <li *ngFor="let complaint of item.complaints" class="flex items-start gap-2">
           <span
-            [class.text-emerald-500]="task.completed"
-            [class.text-slate-300]="!task.completed"
+            [class.text-emerald-500]="complaint.completed"
+            [class.text-slate-300]="!complaint.completed"
             class="mt-0.5"
           >
             <lucide-angular
-              [img]="task.completed ? CheckIcon : CircleIcon"
+              [img]="complaint.completed ? CheckIcon : CircleIcon"
               class="w-3.5 h-3.5"
             ></lucide-angular>
           </span>
           <span
-            [class.line-through]="task.completed"
-            [class.text-slate-400]="task.completed"
+            [class.line-through]="complaint.completed"
+            [class.text-slate-400]="complaint.completed"
             class="leading-tight"
           >
-            {{ task.title }}
+            {{ complaint.title }}
           </span>
         </li>
       </ul>

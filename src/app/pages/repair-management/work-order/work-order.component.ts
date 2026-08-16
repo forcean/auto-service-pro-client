@@ -1,4 +1,11 @@
-import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormArray,
@@ -20,52 +27,37 @@ import {
   ShieldCheck,
   Car,
   CheckCircle,
+  X,
 } from 'lucide-angular';
-export enum EWorkOrderStatus {
-  ALL = 'ALL',
-  PENDING = 'PENDING',
-  IN_PROGRESS = 'IN_PROGRESS',
-  QUALITY_CHECK = 'QUALITY_CHECK',
-  WAITING_PARTS = 'WAITING_PARTS',
-  READY_FOR_PICKUP = 'READY_FOR_PICKUP',
-  COMPLETED = 'COMPLETED',
-}
-
-export interface WorkOrder {
-  _id: string;
-  workOrderNo: string;
-  status: EWorkOrderStatus;
-  progress: number;
-  expectedFinishDate?: string;
-  vehicle: {
-    model: string;
-    plateNumber: string;
-    vin: string;
-  };
-  customer: {
-    name: string;
-    phone: string;
-    isVip?: boolean;
-  };
-  tasks: Array<{
-    title: string;
-    completed: boolean;
-  }>;
-}
+import { ActivatedRoute, Router } from '@angular/router';
+import {
+  IWorkOrder,
+  IWorkOrderResult,
+} from '../../../shared/interface/work-order.interface';
+import { WorkOrderService } from '../../../shared/services/work-order.service';
+import { EWorkOrderStatus } from '../../../shared/enum/work-order.enum';
+import { WORK_ORDER_STATUS_CONFIG } from '../../../shared/constant/work-order-status.constant';
+import { LoadingBarService } from '@ngx-loading-bar/core';
+import { RESPONSE } from '../../../shared/enum/response.enum';
+import { ModalCommonService } from '../../../shared/components/modal-common/modal-common.service';
+import { debounceTime, distinctUntilChanged, Subject, takeUntil } from 'rxjs';
 @Component({
   selector: 'app-work-order',
   standalone: false,
   templateUrl: './work-order.component.html',
   styleUrl: './work-order.component.scss',
 })
-export class WorkOrderComponent implements OnInit {
-  @ViewChild(CreateWorkOrderModalComponent)
-  createModal!: CreateWorkOrderModalComponent;
-  private apiUrl = '/api/work-order'; // NestJS Base Endpoint
+export class WorkOrderComponent implements OnInit, OnDestroy {
+  // @ViewChild(CreateWorkOrderModalComponent)
+  paginationOption: number[] = [10, 15, 20, 30, 40, 50];
 
-  workOrders: WorkOrder[] = [];
-  filteredWorkOrders: WorkOrder[] = [];
+  page: number = 1;
+  limit: number = 10;
+  sortList: string = '';
+  createModal?: CreateWorkOrderModalComponent;
+  workOrders!: IWorkOrderResult;
 
+  // Lucide Icons
   readonly ClipboardListIcon = ClipboardList;
   readonly SearchIcon = Search;
   readonly PlusIcon = Plus;
@@ -75,198 +67,208 @@ export class WorkOrderComponent implements OnInit {
   readonly ShieldCheckIcon = ShieldCheck;
   readonly CarIcon = Car;
   readonly CheckCircleIcon = CheckCircle;
+  readonly XIcon = X;
+  readonly EWorkOrderStatus = EWorkOrderStatus;
 
   // Filter States
-  searchQuery: string = '';
-  selectedStatus: string = 'ALL';
-  selectedDate: string = '';
+  searchQuery = '';
+  selectedStatus: EWorkOrderStatus = EWorkOrderStatus.ALL;
+  selectedDate = '';
 
   // Modal State
-  isCreateModalOpen: boolean = false;
-  createForm!: FormGroup;
-
-  // Status Styling Dictionary
-  statusConfig: Record<
-    string,
-    { label: string; badge: string; border: string; bar: string }
-  > = {
-    PENDING: {
-      label: 'PENDING',
-      badge: 'bg-amber-500/10 text-amber-600 border-amber-200',
-      border: 'border-t-amber-500',
-      bar: 'bg-gradient-to-r from-amber-500 to-amber-400',
-    },
-    IN_PROGRESS: {
-      label: 'IN PROGRESS',
-      badge: 'bg-blue-500/10 text-blue-600 border-blue-200',
-      border: 'border-t-blue-500',
-      bar: 'bg-gradient-to-r from-blue-600 to-cyan-500',
-    },
-    QUALITY_CHECK: {
-      label: 'QUALITY CHECK',
-      badge: 'bg-purple-500/10 text-purple-600 border-purple-200',
-      border: 'border-t-purple-500',
-      bar: 'bg-gradient-to-r from-purple-600 to-indigo-500',
-    },
-    WAITING_PARTS: {
-      label: 'WAITING PARTS',
-      badge: 'bg-orange-500/10 text-orange-600 border-orange-200',
-      border: 'border-t-orange-500',
-      bar: 'bg-gradient-to-r from-orange-500 to-amber-500',
-    },
-    READY_FOR_PICKUP: {
-      label: 'READY FOR PICKUP',
-      badge: 'bg-emerald-500/10 text-emerald-600 border-emerald-200',
-      border: 'border-t-emerald-500',
-      bar: 'bg-gradient-to-r from-emerald-500 to-teal-400',
-    },
-    COMPLETED: {
-      label: 'COMPLETED',
-      badge: 'bg-slate-500/10 text-slate-600 border-slate-200',
-      border: 'border-t-slate-400',
-      bar: 'bg-gradient-to-r from-slate-400 to-slate-500',
-    },
-  };
 
   statusCounts = {
     all: 0,
     pending: 0,
     inProgress: 0,
     qualityCheck: 0,
+    waitingParts: 0,
     readyForPickup: 0,
     completed: 0,
   };
 
+  selectedOrderForPrint: IWorkOrder | null = null;
+  currentDate = new Date();
+
+  private readonly searchSubject = new Subject<string>();
+  private readonly destroy$ = new Subject<void>();
+
+  isLoading: boolean = false;
+  isCreateModalOpen: boolean = false;
+
   constructor(
-    private http: HttpClient,
-    private fb: FormBuilder,
-    private cdr: ChangeDetectorRef,
+    private readonly workOrderService: WorkOrderService,
+    private readonly cdr: ChangeDetectorRef,
+    private readonly router: Router,
+    private route: ActivatedRoute,
+    private loadingBarService: LoadingBarService,
+    private modalCommonService: ModalCommonService,
   ) {}
 
-  ngOnInit(): void {
-    this.initCreateForm();
-    this.fetchWorkOrders();
-  }
-
-  // สร้าง Reactive Form ตรงตาม CreateWorkOrderDto
-  initCreateForm(): void {
-    this.createForm = this.fb.group({
-      vehicleId: ['', Validators.required],
-      customerId: ['', Validators.required],
-      mileage: [0, [Validators.required, Validators.min(0)]],
-      fuelLevel: ['HALF'],
-      complaints: this.fb.array([
-        this.fb.group({ title: ['', Validators.required], description: [''] }),
-      ]),
-      expectedFinishDate: [''],
-      customerRemark: [''],
-    });
-  }
-
-  get complaintsArray(): FormArray {
-    return this.createForm.get('complaints') as FormArray;
-  }
-
-  addComplaint(): void {
-    this.complaintsArray.push(
-      this.fb.group({ title: ['', Validators.required], description: [''] }),
-    );
-  }
-
-  removeComplaint(index: number): void {
-    if (this.complaintsArray.length > 1) {
-      this.complaintsArray.removeAt(index);
-    }
-  }
-
-  // เรียก API POST /work-order
-  submitCreateWorkOrder(): void {
-    if (this.createForm.invalid) {
-      this.createForm.markAllAsTouched();
-      return;
-    }
-
-    this.http.post(this.apiUrl, this.createForm.value).subscribe({
-      next: () => {
-        this.closeCreateModal();
-        this.fetchWorkOrders();
-      },
-      error: (err) => console.error('Error creating work order:', err),
-    });
-  }
-
-  // เรียก API GET /work-order (Pagination/Search/Filter)
-  fetchWorkOrders(): void {
-    let params = new HttpParams();
-    if (this.selectedStatus !== 'ALL') {
-      params = params.set('status', this.selectedStatus);
-    }
-    if (this.searchQuery) {
-      params = params.set('search', this.searchQuery);
-    }
-
-    this.http
-      .get<{ data: WorkOrder[]; total: number }>(this.apiUrl, { params })
-      .subscribe({
-        next: (res) => {
-          this.workOrders = res.data || [];
-          this.calculateMetrics();
-          this.applyLocalFilter();
-        },
-        error: (err) => console.error('Error fetching work orders:', err),
+  async ngOnInit(): Promise<void> {
+    await this.initializePermissions();
+    this.searchSubject
+      .pipe(debounceTime(500), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.page = 1;
+        this.updateQueryParams();
       });
+  }
+
+  private async initializePermissions() {
+    try {
+      // this.permissions = await this.permissionService.permissions();
+      // this.isViewUserList = this.permissionService.isViewUserList;
+      // this.isResetPassword = this.permissionService.isResetPassword;
+      // if (!this.isViewUserList) {
+      //   this.router.navigate(['/not-found']);
+      // } else {
+      this.route.queryParams.subscribe((params) => {
+        (this.updateStateFromQueryParams(params), this.fetchWorkOrders());
+      });
+      // }
+    } catch (error) {
+      // const errorObject = error as { message: string };
+      // if (errorObject.message !== '504') {
+      //   this.handleCommonError();
+      // }
+    }
+  }
+
+  private updateStateFromQueryParams(params: {
+    [key: string]: string | null;
+  }): void {
+    this.page = Number(params['page'] || 1);
+    this.limit = Number(params['limit'] || 10);
+
+    this.sortList = params['sort'] || '';
+    this.searchQuery = params['search'] || '';
+    this.selectedDate = params['date'] || '';
+
+    this.selectedStatus =
+      (params['status'] as EWorkOrderStatus) || EWorkOrderStatus.ALL;
+  }
+
+  private updateQueryParams(): void {
+    const queryParams: Record<string, string | number | null> = {
+      page: this.page,
+      limit: this.limit,
+      search: this.searchQuery.trim() || null,
+      status:
+        this.selectedStatus !== EWorkOrderStatus.ALL
+          ? this.selectedStatus
+          : null,
+      date: this.selectedDate || null,
+      sort: this.sortList || null,
+    };
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams,
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  onSearchInput(value: string): void {
+    this.searchSubject.next(value.trim());
+  }
+
+  onSearch(): void {
+    this.page = 1;
+    this.updateQueryParams();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  /**
+   * Status
+   */
+  onStatusChange(): void {
+    this.page = 1;
+    this.updateQueryParams();
+  }
+
+  /**
+   * Date
+   */
+  onDateChange(): void {
+    this.page = 1;
+    this.updateQueryParams();
+  }
+
+  onPageChange(e: any): void {
+    console.log(e);
+    
+    this.page = e.page;
+    this.limit = e.pageSize;
+    this.updateQueryParams();
+  }
+
+  async fetchWorkOrders(): Promise<void> {
+    this.isLoading = true;
+    const loader = this.loadingBarService.useRef();
+    loader.start();
+    try {
+      const params = {
+        page: this.page,
+        limit: this.limit,
+        search: this.searchQuery.trim() || undefined,
+        status:
+          this.selectedStatus !== EWorkOrderStatus.ALL
+            ? this.selectedStatus
+            : undefined,
+        date: this.selectedDate || undefined,
+        sort: this.sortList || undefined,
+      };
+
+      const response = await this.workOrderService.getListWorkOrder(params);
+
+      if (response.resultCode === RESPONSE.SUCCESS) {
+        this.workOrders = response.resultData;
+        console.log(this.workOrders);
+        this.calculateMetrics();
+      } else {
+        this.handleFailResponse();
+      }
+    } catch (error) {
+      console.error('Error fetching work orders:', error);
+    } finally {
+      this.isLoading = false;
+      loader.complete();
+    }
   }
 
   calculateMetrics(): void {
     this.statusCounts = {
-      all: this.workOrders.length,
-      pending: this.workOrders.filter(
-        (w) => w.status === EWorkOrderStatus.PENDING,
+      all: this.workOrders.data.length,
+
+      pending: this.workOrders.data.filter(
+        (workOrder) => workOrder.status === EWorkOrderStatus.PENDING,
       ).length,
-      inProgress: this.workOrders.filter(
-        (w) => w.status === EWorkOrderStatus.IN_PROGRESS,
+
+      inProgress: this.workOrders.data.filter(
+        (workOrder) => workOrder.status === EWorkOrderStatus.IN_PROGRESS,
       ).length,
-      qualityCheck: this.workOrders.filter(
-        (w) => w.status === EWorkOrderStatus.QUALITY_CHECK,
+
+      qualityCheck: this.workOrders.data.filter(
+        (workOrder) => workOrder.status === EWorkOrderStatus.QUALITY_CHECK,
       ).length,
-      readyForPickup: this.workOrders.filter(
-        (w) => w.status === EWorkOrderStatus.READY_FOR_PICKUP,
+
+      waitingParts: this.workOrders.data.filter(
+        (workOrder) => workOrder.status === EWorkOrderStatus.WAITING_PARTS,
       ).length,
-      completed: this.workOrders.filter(
-        (w) => w.status === EWorkOrderStatus.COMPLETED,
+
+      readyForPickup: this.workOrders.data.filter(
+        (workOrder) => workOrder.status === EWorkOrderStatus.READY_FOR_PICKUP,
+      ).length,
+
+      completed: this.workOrders.data.filter(
+        (workOrder) => workOrder.status === EWorkOrderStatus.COMPLETED,
       ).length,
     };
-  }
-
-  applyLocalFilter(): void {
-    this.filteredWorkOrders = this.workOrders.filter((item) => {
-      const matchSearch =
-        !this.searchQuery ||
-        item.workOrderNo
-          .toLowerCase()
-          .includes(this.searchQuery.toLowerCase()) ||
-        item.vehicle.plateNumber
-          .toLowerCase()
-          .includes(this.searchQuery.toLowerCase()) ||
-        item.customer.name
-          .toLowerCase()
-          .includes(this.searchQuery.toLowerCase());
-
-      const matchStatus =
-        this.selectedStatus === 'ALL' || item.status === this.selectedStatus;
-
-      return matchSearch && matchStatus;
-    });
-  }
-
-  // เรียก API PATCH /work-order/:id/status
-  updateStatus(workOrderId: string, status: EWorkOrderStatus): void {
-    this.http
-      .patch(`${this.apiUrl}/${workOrderId}/status`, { status })
-      .subscribe({
-        next: () => this.fetchWorkOrders(),
-        error: (err) => console.error('Error updating status:', err),
-      });
   }
 
   openCreateModal(): void {
@@ -277,27 +279,69 @@ export class WorkOrderComponent implements OnInit {
     this.isCreateModalOpen = false;
   }
 
-  handleCreateWorkOrder(formData: any): void {
-    console.log('created: ', formData);
+  async handleCreateWorkOrder(formData: any): Promise<void> {
+    try {
+      const response = await this.workOrderService.createWorkOrder(formData);
+
+      if (response.resultCode === RESPONSE.SUCCESS) {
+        this.closeCreateModal();
+        this.handleCommonSuccess();
+        await this.fetchWorkOrders();
+      }
+    } catch (error) {
+      console.error('Error creating work order:', error);
+    }
   }
 
-  handleViewDetail(order: WorkOrder): void {
-    console.log('View detail:', order);
+  handleViewDetail(order: IWorkOrder): void {
+    const workOrderNo = order.workOrderNo;
+    this.router.navigate(['/portal/repair/work-orders', workOrderNo]);
   }
 
-  selectedOrderForPrint: WorkOrder | null = null;
-  currentDate = new Date();
+  handleNotifyCustomer(order: IWorkOrder): void {
+    console.log('Notify customer:', order);
+  }
 
-  handlePrintOrder(order: WorkOrder): void {
+  trackByWorkOrderId(index: number, item: IWorkOrder): string {
+    return item._id;
+  }
+
+  resetFilters(): void {
+    this.searchQuery = '';
+    this.selectedStatus = EWorkOrderStatus.ALL;
+    this.selectedDate = '';
+    this.page = 1;
+
+    this.updateQueryParams();
+  }
+
+  private handleCommonSuccess() {
+    this.modalCommonService.open({
+      type: 'success',
+      title: 'สร้างใบแจ้งซ่อมสำเร็จ',
+      subtitle: 'คุณได้สร้างใบแจ้งซ่อมของลูกค้าเรียบร้อยแล้ว',
+      buttonText: 'ยืนยัน',
+    });
+  }
+
+  private handleFailResponse() {
+    this.modalCommonService.open({
+      type: 'alert',
+      title: 'ขออภัย ระบบขัดข้องในขณะนี้',
+      subtitle:
+        'กรุณาทำรายการใหม่อีกครั้ง หรือ ติดต่อผู้ดูแลระบบในองค์กรของคุณ',
+      buttonText: 'เข้าใจแล้ว',
+    });
+  }
+
+  handlePrintOrder(order: IWorkOrder): void {
     this.selectedOrderForPrint = order;
     this.currentDate = new Date();
 
-    // อัปเดต DOM
     this.cdr.detectChanges();
 
-    // ดักจับ Event เมื่อผู้ใช้ปิดหน้าต่างพิมพ์ (ทั้งกด Print หรือ Cancel)
-    const afterPrintHandler = () => {
-      this.selectedOrderForPrint = null; // ล้างข้อมูลออก
+    const afterPrintHandler = (): void => {
+      this.selectedOrderForPrint = null;
       this.cdr.detectChanges();
       window.removeEventListener('afterprint', afterPrintHandler);
     };
@@ -307,9 +351,5 @@ export class WorkOrderComponent implements OnInit {
     requestAnimationFrame(() => {
       window.print();
     });
-  }
-
-  handleNotifyCustomer(order: WorkOrder): void {
-    console.log('Notify customer:', order);
   }
 }

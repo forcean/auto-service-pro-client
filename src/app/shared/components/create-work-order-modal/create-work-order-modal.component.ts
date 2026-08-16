@@ -1,4 +1,12 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  OnChanges,
+  SimpleChanges,
+  Output,
+} from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import {
   X,
@@ -19,16 +27,18 @@ export enum EFuelLevel {
   QUARTER = 'QUARTER',
   HALF = 'HALF',
   THREE_QUARTER = 'THREE_QUARTER',
-  FULL = 'FULL'
-
-}@Component({
+  FULL = 'FULL',
+}
+@Component({
   selector: 'app-create-work-order-modal',
   standalone: false,
   templateUrl: './create-work-order-modal.component.html',
   styleUrl: './create-work-order-modal.component.scss',
 })
-export class CreateWorkOrderModalComponent implements OnInit {
+export class CreateWorkOrderModalComponent implements OnInit, OnChanges {
   @Input() isOpen: boolean = false;
+  // 1. เพิ่ม Input รับข้อมูลเดิมเพื่อรองรับโหมด Edit
+  @Input() initialData: any = null;
 
   @Output() close = new EventEmitter<void>();
   @Output() submitForm = new EventEmitter<any>();
@@ -62,18 +72,24 @@ export class CreateWorkOrderModalComponent implements OnInit {
     this.initForm();
   }
 
+  // 2. ดักจับเมื่อมีการส่ง initialData เข้ามาในโหมด Edit
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['initialData'] && this.createForm) {
+      if (this.initialData) {
+        this.patchFormData(this.initialData);
+      } else {
+        this.resetToDefaultForm();
+      }
+    }
+  }
+
   initForm(): void {
     this.createForm = this.fb.group({
       vehicleId: ['', Validators.required],
       customerId: ['', Validators.required],
       mileage: [0, [Validators.required, Validators.min(0)]],
-      fuelLevel: ['HALF'],
-      complaints: this.fb.array([
-        this.fb.group({
-          title: ['', Validators.required],
-          description: [''],
-        }),
-      ]),
+      fuelLevel: [EFuelLevel.HALF],
+      complaints: this.fb.array([]),
       inspectionRequired: [true],
       inspections: this.fb.array([]),
       diagnosis: [''],
@@ -83,7 +99,11 @@ export class CreateWorkOrderModalComponent implements OnInit {
       advisorId: [''],
     });
 
-    this.initDefaultInspections();
+    if (this.initialData) {
+      this.patchFormData(this.initialData);
+    } else {
+      this.resetToDefaultForm();
+    }
   }
 
   get complaintsArray(): FormArray {
@@ -92,6 +112,64 @@ export class CreateWorkOrderModalComponent implements OnInit {
 
   get inspectionsArray(): FormArray {
     return this.createForm.get('inspections') as FormArray;
+  }
+
+  // 3. ฟังก์ชันเติมข้อมูลเก่าเข้าฟอร์ม (โหมดแก้ไข)
+  private patchFormData(data: any): void {
+    this.complaintsArray.clear();
+    this.inspectionsArray.clear();
+
+    this.createForm.patchValue({
+      vehicleId: data.vehicleId || '',
+      customerId: data.customerId || '',
+      mileage: data.mileage || 0,
+      fuelLevel: data.fuelLevel || EFuelLevel.HALF,
+      inspectionRequired: data.inspectionRequired ?? true,
+      diagnosis: data.diagnosis || '',
+      customerRemark: data.customerRemark || '',
+      internalRemark: data.internalRemark || '',
+      expectedFinishDate: data.expectedFinishDate || '',
+      advisorId: data.advisorId || '',
+    });
+
+    if (data.complaints && data.complaints.length > 0) {
+      data.complaints.forEach((c: any) => {
+        this.complaintsArray.push(
+          this.fb.group({
+            title: [c.title || '', Validators.required],
+            description: [c.description || ''],
+          }),
+        );
+      });
+    } else {
+      this.addComplaint();
+    }
+
+    if (data.inspections && data.inspections.length > 0) {
+      data.inspections.forEach((ins: any) => {
+        this.inspectionsArray.push(
+          this.fb.group({
+            item: [ins.item || '', Validators.required],
+            status: [ins.status || 'GOOD', Validators.required],
+            remark: [ins.remark || ''],
+          }),
+        );
+      });
+    }
+  }
+
+  // รีเซ็ตกลับไปเป็นค่า Default สำหรับการสร้างใหม่ (Create Mode)
+  private resetToDefaultForm(): void {
+    this.createForm.reset({
+      mileage: 0,
+      fuelLevel: EFuelLevel.HALF,
+      inspectionRequired: true,
+    });
+    this.complaintsArray.clear();
+    this.inspectionsArray.clear();
+
+    this.addComplaint();
+    this.initDefaultInspections();
   }
 
   addComplaint(): void {
@@ -154,7 +232,7 @@ export class CreateWorkOrderModalComponent implements OnInit {
     if (!payload.advisorId) delete payload.advisorId;
     if (!payload.expectedFinishDate) delete payload.expectedFinishDate;
 
+    // ส่งข้อมูลออกไป (รองรับทั้ง Create และ Edit)
     this.submitForm.emit(payload);
-    this.initForm();
   }
 }
