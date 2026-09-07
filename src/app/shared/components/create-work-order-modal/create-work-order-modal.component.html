@@ -1,0 +1,412 @@
+<div
+  *ngIf="isOpen"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 overflow-hidden"
+>
+  <!-- Modal Card Structure (Flex Col) -->
+  <div
+    class="bg-white rounded-3xl border border-slate-100 shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 text-slate-800"
+  >
+    <!-- Modal Header (Fixed Top) -->
+    <div
+      class="px-6 py-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between flex-shrink-0"
+    >
+      <div class="flex items-center gap-3">
+        <div
+          class="p-2.5 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center"
+        >
+          <lucide-angular [img]="IconFileText" class="w-5 h-5"></lucide-angular>
+        </div>
+        <div>
+          <h3 class="font-bold text-slate-900 text-lg">
+            สร้างใบสั่งงานซ่อมใหม่ (New Work Order)
+          </h3>
+          <p class="text-sm text-slate-500">
+            กรอกข้อมูลรถ อาการแจ้งซ่อม และผลการตรวจเช็คสภาพรถ
+          </p>
+        </div>
+      </div>
+      <button
+        (click)="onClose()"
+        class="text-slate-400 hover:text-slate-600 p-2 rounded-xl hover:bg-slate-200/60 transition-colors"
+      >
+        <lucide-angular [img]="IconX" class="w-5 h-5"></lucide-angular>
+      </button>
+    </div>
+
+    <!-- Modal Form Content (Scrollable Area) -->
+    <form
+      [formGroup]="createForm"
+      (ngSubmit)="onSubmit()"
+      class="flex-1 overflow-y-auto p-6 space-y-6 modal-scroll"
+    >
+      <!-- Section 1: ข้อมูลทั่วไป -->
+      <div
+        class="bg-slate-50/70 p-4 rounded-2xl border border-slate-100 space-y-4"
+      >
+        <h4
+          class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5"
+        >
+          <lucide-angular
+            [img]="IconWrench"
+            class="w-3.5 h-3.5 text-slate-400"
+          ></lucide-angular>
+          ข้อมูลทั่วไป
+        </h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1"
+              >Vehicle ID / รถยนต์ *</label
+            >
+            <div class="relative">
+              <input
+                formControlName="vehicleId"
+                type="text"
+                placeholder="ระบุ Mongo ID รถยนต์"
+                class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none"
+              />
+            </div>
+            <p
+              *ngIf="
+                createForm.get('vehicleId')?.touched &&
+                createForm.get('vehicleId')?.invalid
+              "
+              class="text-xs text-red-500 mt-1"
+            >
+              กรุณาระบุข้อมูลรถ
+            </p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1"
+              >Customer ID / ลูกค้า *</label
+            >
+            <input
+              formControlName="customerId"
+              type="text"
+              placeholder="ระบุ Mongo ID ลูกค้า"
+              class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none"
+            />
+            <p
+              *ngIf="
+                createForm.get('customerId')?.touched &&
+                createForm.get('customerId')?.invalid
+              "
+              class="text-xs text-red-500 mt-1"
+            >
+              กรุณาระบุข้อมูลลูกค้า
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label
+              class="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-1"
+            >
+              <lucide-angular
+                [img]="IconGauge"
+                class="w-3.5 h-3.5 text-slate-400"
+              ></lucide-angular>
+              เลขไมล์ปัจจุบัน (Mileage) *
+            </label>
+            <input
+              formControlName="mileage"
+              type="number"
+              placeholder="0"
+              class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none"
+            />
+          </div>
+
+          <div>
+            <label
+              class="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-1"
+            >
+              <lucide-angular
+                [img]="IconFuel"
+                class="w-3.5 h-3.5 text-slate-400"
+              ></lucide-angular>
+              ระดับน้ำมัน (Fuel Level)
+            </label>
+            <select
+              formControlName="fuelLevel"
+              class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none bg-white"
+            >
+              <option value="EMPTY">EMPTY (เกือบหมดถัง)</option>
+              <option value="QUARTER">1/4 ถัง</option>
+              <option value="HALF">1/2 ถัง</option>
+              <option value="THREE_QUARTER">3/4 ถัง</option>
+              <option value="FULL">FULL (เต็มถัง)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: อาการแจ้งซ่อม -->
+      <div
+        class="bg-slate-50/70 p-4 rounded-2xl border border-slate-100 space-y-3"
+      >
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+            รายการแจ้งซ่อม / อาการเสีย (Complaints) *
+          </h4>
+          <button
+            type="button"
+            (click)="addComplaint()"
+            class="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 transition-colors"
+          >
+            <lucide-angular
+              [img]="IconPlus"
+              class="w-3.5 h-3.5"
+            ></lucide-angular>
+            เพิ่มรายการ
+          </button>
+        </div>
+
+        <div formArrayName="complaints" class="space-y-3">
+          <div
+            *ngFor="let c of complaintsArray.controls; let i = index"
+            [formGroupName]="i"
+            class="p-3 bg-white border border-slate-200 rounded-xl space-y-2"
+          >
+            <div class="flex items-center gap-2">
+              <input
+                formControlName="title"
+                placeholder="หัวข้ออาการเสีย เช่น มีเสียงดังล้อหลังขวา *"
+                class="flex-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:border-emerald-500"
+              />
+              <button
+                *ngIf="complaintsArray.length > 1"
+                type="button"
+                (click)="removeComplaint(i)"
+                class="text-slate-400 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 transition-colors"
+              >
+                <lucide-angular
+                  [img]="IconTrash"
+                  class="w-4 h-4"
+                ></lucide-angular>
+              </button>
+            </div>
+            <textarea
+              formControlName="description"
+              rows="1"
+              placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"
+              class="w-full px-3 py-1.5 border rounded-lg text-sm focus:outline-none focus:border-emerald-500 text-slate-600"
+            ></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: VEHICLE HEALTH DIAGNOSTIC -->
+      <div
+        class="p-4 rounded-2xl border border-slate-200/80 bg-white space-y-4 shadow-sm"
+      >
+        <div
+          class="flex items-center justify-between pb-3 border-b border-slate-100"
+        >
+          <div class="flex items-center gap-2.5">
+            <div class="p-1.5 bg-rose-50 text-rose-500 rounded-lg">
+              <lucide-angular
+                [img]="IconActivity"
+                class="w-4 h-4"
+              ></lucide-angular>
+            </div>
+            <div>
+              <h4
+                class="text-xs font-bold text-slate-900 uppercase tracking-wider"
+              >
+                VEHICLE HEALTH DIAGNOSTIC
+              </h4>
+              <p class="text-xs text-slate-400">
+                ผลการวิเคราะห์สภาพอะไหล่ล่าสุด
+              </p>
+            </div>
+          </div>
+
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              formControlName="inspectionRequired"
+              class="rounded text-emerald-600 focus:ring-emerald-500 h-4 w-4"
+            />
+            <span class="text-xs font-semibold text-slate-600"
+              >เปิดบันทึกตรวจเช็ค</span
+            >
+          </label>
+        </div>
+
+        <div
+          *ngIf="createForm.get('inspectionRequired')?.value"
+          formArrayName="inspections"
+          class="space-y-3"
+        >
+          <div
+            *ngFor="let item of inspectionsArray.controls; let i = index"
+            [formGroupName]="i"
+            class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-slate-50/80 rounded-xl border border-slate-100"
+          >
+            <div class="flex-1 space-y-1">
+              <input
+                type="text"
+                formControlName="item"
+                placeholder="ชื่อรายการตรวจเช็ค"
+                class="font-bold text-slate-800 text-sm bg-transparent border-none outline-none w-full"
+              />
+              <input
+                type="text"
+                formControlName="remark"
+                placeholder="หมายเหตุ (เช่น Due in 1,000 KM หรือ สภาพ 60%)"
+                class="text-xs text-slate-500 bg-transparent border-none outline-none w-full"
+              />
+            </div>
+
+            <div class="flex items-center gap-2">
+              <select
+                formControlName="status"
+                class="text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200 outline-none transition-all cursor-pointer"
+                [ngClass]="{
+                  'bg-emerald-50 text-emerald-600 border-emerald-200':
+                    inspectionsArray.at(i).get('status')?.value === 'GOOD',
+                  'bg-amber-50 text-amber-600 border-amber-200':
+                    inspectionsArray.at(i).get('status')?.value === 'WARNING',
+                  'bg-rose-50 text-rose-600 border-rose-200':
+                    inspectionsArray.at(i).get('status')?.value === 'BAD',
+                }"
+              >
+                <option value="GOOD">🟢 GOOD CONDITION</option>
+                <option value="WARNING">🟡 WARNING / DUE SOON</option>
+                <option value="BAD">🔴 OVERDUE / REPLACE</option>
+              </select>
+
+              <button
+                type="button"
+                (click)="removeInspection(i)"
+                class="text-slate-400 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 transition-colors"
+              >
+                <lucide-angular
+                  [img]="IconTrash"
+                  class="w-4 h-4"
+                ></lucide-angular>
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            (click)="addCustomInspection()"
+            class="w-full py-2 border border-dashed border-slate-300 rounded-xl text-xs text-slate-500 hover:bg-slate-50 font-medium flex items-center justify-center gap-1 transition-colors"
+          >
+            <lucide-angular
+              [img]="IconPlus"
+              class="w-3.5 h-3.5"
+            ></lucide-angular>
+            เพิ่มรายการตรวจเช็ค custom
+          </button>
+        </div>
+      </div>
+
+      <!-- Section 4: Schedule, Advisor & Remarks -->
+      <div class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label
+              class="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-1"
+            >
+              <lucide-angular
+                [img]="IconUser"
+                class="w-3.5 h-3.5 text-slate-400"
+              ></lucide-angular>
+              ผู้รับผิดชอบดูแล (Advisor ID)
+            </label>
+            <input
+              formControlName="advisorId"
+              type="text"
+              placeholder="ระบุ Mongo ID Advisor"
+              class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
+            />
+          </div>
+
+          <div>
+            <label
+              class="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-1"
+            >
+              <lucide-angular
+                [img]="IconCalendar"
+                class="w-3.5 h-3.5 text-slate-400"
+              ></lucide-angular>
+              วันที่คาดว่าจะเสร็จ (Expected Finish Date)
+            </label>
+            <input
+              formControlName="expectedFinishDate"
+              type="datetime-local"
+              class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1"
+            >ผลการวิเคราะห์เบื้องต้น (Diagnosis)</label
+          >
+          <textarea
+            formControlName="diagnosis"
+            rows="2"
+            placeholder="ผลวินิจฉัยช่างเบื้องต้น..."
+            class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
+          ></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1"
+              >หมายเหตุจากลูกค้า (Customer Remark)</label
+            >
+            <textarea
+              formControlName="customerRemark"
+              rows="2"
+              placeholder="เช่น ขอรับรถก่อน 5 โมง"
+              class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
+            ></textarea>
+          </div>
+
+          <div>
+            <label
+              class="block text-sm font-semibold text-amber-800 mb-1 flex items-center gap-1"
+            >
+              <lucide-angular
+                [img]="IconShieldAlert"
+                class="w-3.5 h-3.5 text-amber-600"
+              ></lucide-angular>
+              บันทึกภายในช่าง (Internal Remark)
+            </label>
+            <textarea
+              formControlName="internalRemark"
+              rows="2"
+              placeholder="เช่น ลูกค้าขอใช้อะไหล่แท้ศูนย์เท่านั้น..."
+              class="w-full px-3.5 py-2.5 border border-amber-200 bg-amber-50/40 text-amber-900 rounded-xl text-sm focus:ring-2 focus:ring-amber-500/20 outline-none"
+            ></textarea>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <!-- Modal Footer (Fixed Bottom - flex-shrink-0) -->
+    <div
+      class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3 flex-shrink-0"
+    >
+      <button
+        type="button"
+        (click)="onClose()"
+        class="px-5 py-2.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-sm font-semibold transition-colors"
+      >
+        ยกเลิก
+      </button>
+      <button
+        type="button"
+        (click)="onSubmit()"
+        class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-sm font-semibold transition-all shadow-sm"
+      >
+        บันทึกข้อมูล
+      </button>
+    </div>
+  </div>
+</div>

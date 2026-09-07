@@ -1,0 +1,161 @@
+<div class="table-container">
+  <div class="table-wrapper">
+    <table *ngIf="!isLoading" class="table">
+      <thead>
+        <tr>
+          <th>ลำดับ</th>
+
+          <ng-container *ngFor="let h of headers">
+            <th
+              [ngClass]="{ sortable: h.isSort }"
+              (click)="h.isSort ? onSort(h.headerName) : null"
+            >
+              {{ h.i18nKey || h.headerName }}
+
+              <span *ngIf="h.isSort" class="inline-block ml-1">
+                <img
+                  *ngIf="sortField !== h.headerName"
+                  src="assets/img/icons/icon.sort.svg"
+                  class="sort-icon"
+                  alt="sort"
+                />
+
+                <img
+                  *ngIf="sortField === h.headerName && sortDirection === 'asc'"
+                  src="assets/img/icons/icon.sort.up.svg"
+                  class="sort-icon"
+                  alt="sort asc"
+                />
+
+                <img
+                  *ngIf="sortField === h.headerName && sortDirection === 'desc'"
+                  src="assets/img/icons/icon.sort.down.svg"
+                  class="sort-icon"
+                  alt="sort desc"
+                />
+              </span>
+            </th>
+          </ng-container>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let row of config?.data; let i = index">
+          <td>
+            {{ i + 1 + (pageIndex - 1) * pageSize }}
+          </td>
+
+          <td>
+            <div class="quotation-no-wrapper">
+              <span class="font-semibold text-slate-800">{{
+                row.quotationNo
+              }}</span>
+              <span *ngIf="row.isLatest" class="tag-latest">ล่าสุด</span>
+            </div>
+          </td>
+
+          <td>
+            <span class="font-mono text-slate-600">
+              {{ row.workOrderNo }}
+            </span>
+          </td>
+
+          <td>
+            <span class="version-badge">v{{ row.version }}</span>
+          </td>
+
+          <td>
+            <span class="amount-text">
+              ฿{{ row.grandTotal | number: "1.2-2" }}
+            </span>
+          </td>
+
+          <td>
+            <span
+              class="badge"
+              [style.background]="getStatusInfo(row.status).bg"
+              [style.color]="getStatusInfo(row.status).color"
+            >
+              <span
+                class="badge-dot"
+                [style.background]="getStatusInfo(row.status).color"
+              ></span>
+              {{ getStatusInfo(row.status).label }}
+            </span>
+          </td>
+
+          <td>
+            <span class="text-slate-600">{{ formatDate(row.createdAt) }}</span>
+          </td>
+
+          <td>
+            <div class="action-group">
+              <button
+                class="action-btn view-btn"
+                title="ดูรายละเอียด"
+                (click)="onView.emit(row._id)"
+              >
+                <img
+                  src="assets/img/icons/icon.viewdetail.svg"
+                  class="action-icon"
+                  alt="view"
+                />
+              </button>
+
+              <button
+                class="action-btn edit-btn"
+                title="แก้ไข"
+                (click)="onEdit.emit(row._id)"
+              >
+                <img
+                  src="assets/img/icons/icon.edit.svg"
+                  class="action-icon"
+                  alt="edit"
+                />
+              </button>
+
+              <button
+                class="action-btn delete-btn"
+                title="ลบ"
+                (click)="onDelete.emit(row._id)"
+              >
+                <img
+                  src="assets/img/icons/icon.bin.svg"
+                  class="action-icon"
+                  alt="delete"
+                />
+              </button>
+            </div>
+          </td>
+        </tr>
+
+        <tr *ngIf="!config?.data || config.data.length === 0">
+          <td
+            class="text-center py-6 text-slate-500"
+            [attr.colspan]="headers.length + 1"
+          >
+            - ไม่พบข้อมูลใบเสนอราคา -
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <app-lazy-load-table
+      *ngIf="isLoading"
+      [recordPerPage]="10"
+      tableClass="table table-custom"
+    >
+    </app-lazy-load-table>
+  </div>
+</div>
+
+<app-pagination
+  *ngIf="config && config.total > 0"
+  aligns="end"
+  [paginationOption]="paginationOption"
+  [currentPage]="pageIndex"
+  [recordPerPage]="pageSize"
+  [totalRecord]="config.total"
+  (changePage)="onPageChange($event)"
+>
+</app-pagination>

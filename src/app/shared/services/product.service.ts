@@ -20,7 +20,7 @@ export class ProductService {
     private httpService: HttpService,
   ) { }
 
-  async getListProduct(params: IQueryListProduct): Promise<IBaseResponse<IProductList>> {
+  async getListProduct(params: unknown): Promise<IBaseResponse<IProductList>> {
     try {
       const uri = this.PREFIX_USER + `/products/listProducts`;
       const response = await this.httpService.get<IProductList>(uri, params);
