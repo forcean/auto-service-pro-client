@@ -8,9 +8,10 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { SharedModule } from "../../shared/shared.module";
 import { WorkOrderDetailComponent } from './work-order-detail/work-order-detail.component';
+import { QuotationCreateComponent } from './quotation-create/quotation-create.component';
 
 @NgModule({
-  declarations: [WorkOrderComponent, QuotationComponent, WorkOrderDetailComponent],
+  declarations: [WorkOrderComponent, QuotationComponent, WorkOrderDetailComponent, QuotationCreateComponent],
   imports: [
     CommonModule,
     RepairManagementRoutingModule,

@@ -1,21 +1,13 @@
 import { EFuelLevel } from '../components/create-work-order-modal/create-work-order-modal.component';
 import { EWorkOrderStatus } from '../enum/work-order.enum';
 
-export interface IWorkOrderVehicle {
-  _id?: string;
-  model: string;
-  plateNumber: string;
-  province: string;
-  vin: string;
-}
-
 export interface IWorkOrderVehicle2 {
   _id?: string;
   licensePlate: string;
   province: string;
   vehicle: {
-    model:string;
-    brand:string;
+    model: string;
+    brand: string;
     generation: string;
   };
   vin: string;
@@ -48,8 +40,8 @@ export interface IWorkOrder {
   expectedFinishDate?: string;
   mileage?: number;
   fuelLevel?: EFuelLevel;
-  vehicle: IWorkOrderVehicle;
-  vehicleId: IWorkOrderVehicle2;
+  vehicle: IWorkOrderVehicle2;
+  vehicleId: string;
   customer: IWorkOrderCustomer;
   complaints: IComplaint[];
   inspections: IInspection[];

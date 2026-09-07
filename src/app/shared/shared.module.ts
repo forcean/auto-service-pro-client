@@ -74,7 +74,8 @@ import {
   FileType2,
   Sheet,
   Inbox,
-  ArrowUpRight
+  ArrowUpRight,
+  FileText
 } from 'lucide-angular';
 import { TableStockManagementComponent } from './components/table-stock-management/table-stock-management.component';
 import { CustomSearchSelectComponent } from './components/custom-search-select/custom-search-select.component';
@@ -91,6 +92,8 @@ import { ProvincePipe } from './pipes/province.pipe';
 import { TimeAgoPipe } from './pipes/time-ago.pipe';
 import { CreateWorkOrderModalComponent } from './components/create-work-order-modal/create-work-order-modal.component';
 import { WorkOrderCardComponent } from './components/work-order-card/work-order-card.component';
+
+import { TableQuotationListComponent } from './components/table-quotation-list/table-quotation-list.component';
 
 const components = [
   ModalCommonComponent,
@@ -129,7 +132,8 @@ const components = [
   ImageGalleryComponent,
   ServiceHistoryPanelComponent,
   CreateWorkOrderModalComponent,
-  WorkOrderCardComponent
+  WorkOrderCardComponent,
+  TableQuotationListComponent
 ];
 
 const directives = [
@@ -188,7 +192,8 @@ const directives = [
       FileType2,
       Sheet,
       Inbox,
-      ArrowUpRight
+      ArrowUpRight,
+      FileText
     }),
     ProvincePipe,
     TimeAgoPipe,
