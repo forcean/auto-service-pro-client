@@ -214,18 +214,15 @@ export class WorkOrderComponent implements OnInit, OnDestroy {
       const params = {
         page: this.page,
         limit: this.limit,
-        search: this.searchQuery.trim() || undefined,
-        status:
-          this.selectedStatus !== EWorkOrderStatus.ALL
-            ? this.selectedStatus
-            : undefined,
-        date: this.selectedDate || undefined,
         sort: this.sortList || undefined,
       };
 
       const response = await this.workOrderService.getListWorkOrder(params);
 
-      if (response.resultCode === RESPONSE.SUCCESS) {
+      if (
+        response.resultCode === RESPONSE.SUCCESS ||
+        response.resultCode === RESPONSE.CREATED
+      ) {
         this.workOrders = response.resultData;
         console.log(this.workOrders);
         this.calculateMetrics();

@@ -26,7 +26,13 @@ export class QuotationService {
         params,
       );
 
-      return response;
+      return {
+        ...response,
+        resultData: {
+          ...response.resultData,
+          data: response.resultData.data.map((item) => this.mapQuotation(item)),
+        },
+      };
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
         return error.error as IBaseResponse<IQuotationResultData>;
@@ -43,7 +49,7 @@ export class QuotationService {
         body,
       );
 
-      return response;
+      return { ...response, resultData: this.mapQuotation(response.resultData) };
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
         return error.error as IBaseResponse<IQuotationListItem>;
@@ -55,16 +61,16 @@ export class QuotationService {
 
   async updateQuotation(
     body: unknown,
-    workOrderNo: string,
+    quotationNo: string,
   ): Promise<IBaseResponse<IQuotationListItem>> {
     try {
-      const uri = this.apiPath + `/${workOrderNo}`;
+      const uri = this.apiPath + `/${quotationNo}`;
       const response = await this.httpService.patch<IQuotationListItem>(
         uri,
         body,
       );
 
-      return response;
+      return { ...response, resultData: this.mapQuotation(response.resultData) };
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
         return error.error as IBaseResponse<IQuotationListItem>;
@@ -96,12 +102,12 @@ export class QuotationService {
   // }
 
   async getQuotationDetail(
-    workOrderNo: string,
+    quotationNo: string,
   ): Promise<IBaseResponse<IQuotationListItem>> {
     try {
-      const uri = this.apiPath + `/${workOrderNo}`;
+      const uri = this.apiPath + `/${quotationNo}`;
       const response = await this.httpService.get<IQuotationListItem>(uri);
-      return response;
+      return { ...response, resultData: this.mapQuotation(response.resultData) };
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
         return error.error as IBaseResponse<IQuotationListItem>;
@@ -159,5 +165,40 @@ export class QuotationService {
       }
       throw error;
     }
+  }
+
+  private mapQuotation(raw: any): IQuotationListItem {
+    const workOrder = raw.workOrder ?? raw.workOrderId;
+    const workOrderId = this.toId(raw.workOrderId) ?? this.toId(workOrder?.id) ?? '';
+    const workOrderNo = raw.workOrderNo ?? workOrder?.workOrderNo ?? '';
+
+    return {
+      ...raw,
+      _id: this.toId(raw._id ?? raw.id) ?? '',
+      id: this.toId(raw.id ?? raw._id) ?? '',
+      workOrderId,
+      workOrderNo,
+      workOrder: workOrder && typeof workOrder === 'object'
+        ? {
+            id: this.toId(workOrder.id ?? workOrder._id) ?? workOrderId,
+            workOrderNo,
+            vehicleId: this.toId(workOrder.vehicleId) ?? '',
+            customerId: this.toId(workOrder.customerId) ?? '',
+            advisorId: this.toId(workOrder.advisorId),
+            status: workOrder.status ?? '',
+          }
+        : undefined,
+      approvalHistory: Array.isArray(raw.approvalHistory) ? raw.approvalHistory : [],
+      items: Array.isArray(raw.items) ? raw.items : [],
+    };
+  }
+
+  private toId(value: unknown): string | undefined {
+    if (!value) return undefined;
+    if (typeof value === 'string') return value;
+    if (typeof value === 'object' && value !== null && '_id' in value) {
+      return String((value as { _id: unknown })._id);
+    }
+    return String(value);
   }
 }

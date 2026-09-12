@@ -208,12 +208,12 @@
 
               <div class="min-w-0">
                 <p class="truncate text-xs font-bold text-slate-800">
-                  {{ wo.vehicle.licensePlate }}
-                  {{ wo.vehicle.province }}
+                  {{ wo.vehicle?.licensePlate || '-' }}
+                  {{ wo.vehicle?.province || '' }}
                 </p>
 
                 <p class="truncate text-[11px] text-slate-500">
-                  {{ wo.vehicle.vehicle.model }}
+                  {{ wo.vehicle?.vehicle?.model || '-' }}
                 </p>
               </div>
             </div>
@@ -225,7 +225,7 @@
               <i class="fa-solid fa-user text-[10px] text-slate-400"></i>
 
               <span class="truncate">
-                {{ wo.customer.name }}
+                {{ wo.customer?.name || '-' }}
               </span>
             </div>
           </div>

@@ -86,7 +86,6 @@ export class CreateWorkOrderModalComponent implements OnInit, OnChanges {
   initForm(): void {
     this.createForm = this.fb.group({
       vehicleId: ['', Validators.required],
-      customerId: ['', Validators.required],
       mileage: [0, [Validators.required, Validators.min(0)]],
       fuelLevel: [EFuelLevel.HALF],
       complaints: this.fb.array([]),
@@ -96,7 +95,7 @@ export class CreateWorkOrderModalComponent implements OnInit, OnChanges {
       customerRemark: [''],
       internalRemark: [''],
       expectedFinishDate: [''],
-      advisorId: [''],
+      advisor: [''],
     });
 
     if (this.initialData) {
@@ -121,7 +120,6 @@ export class CreateWorkOrderModalComponent implements OnInit, OnChanges {
 
     this.createForm.patchValue({
       vehicleId: data.vehicleId || '',
-      customerId: data.customerId || '',
       mileage: data.mileage || 0,
       fuelLevel: data.fuelLevel || EFuelLevel.HALF,
       inspectionRequired: data.inspectionRequired ?? true,
@@ -129,7 +127,7 @@ export class CreateWorkOrderModalComponent implements OnInit, OnChanges {
       customerRemark: data.customerRemark || '',
       internalRemark: data.internalRemark || '',
       expectedFinishDate: data.expectedFinishDate || '',
-      advisorId: data.advisorId || '',
+      advisor: data.advisorId || data.advisor || '',
     });
 
     if (data.complaints && data.complaints.length > 0) {
@@ -229,7 +227,7 @@ export class CreateWorkOrderModalComponent implements OnInit, OnChanges {
       delete payload.inspections;
     }
 
-    if (!payload.advisorId) delete payload.advisorId;
+    if (!payload.advisor) delete payload.advisor;
     if (!payload.expectedFinishDate) delete payload.expectedFinishDate;
 
     // ส่งข้อมูลออกไป (รองรับทั้ง Create และ Edit)

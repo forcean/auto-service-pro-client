@@ -348,12 +348,12 @@
         </span>
 
         <p class="text-xs font-bold text-slate-800">
-          {{ selectedOrderForPrint.customer.name }}
+          {{ selectedOrderForPrint.customer?.name || '-' }}
         </p>
 
         <p class="text-xs text-slate-600 mt-0.5">
           เบอร์โทรศัพท์:
-          {{ selectedOrderForPrint.customer.phone }}
+          {{ selectedOrderForPrint.customer?.phone || '-' }}
         </p>
       </div>
 
@@ -366,19 +366,19 @@
 
         <p class="text-xs font-bold text-slate-800">
           รุ่น:
-          {{ selectedOrderForPrint.vehicle.vehicle.model }}
+          {{ selectedOrderForPrint.vehicle?.vehicle?.model || '-' }}
         </p>
 
         <p class="text-xs text-slate-600 mt-0.5">
           ทะเบียน:
           <strong class="text-slate-900">
-            {{ selectedOrderForPrint.vehicle.licensePlate }}
+            {{ selectedOrderForPrint.vehicle?.licensePlate || '-' }}
           </strong>
         </p>
 
         <p class="text-xs text-slate-500 font-mono mt-0.5">
           VIN:
-          {{ selectedOrderForPrint.vehicle.vin }}
+          {{ selectedOrderForPrint.vehicle?.vin || '-' }}
         </p>
       </div>
     </div>
@@ -417,12 +417,8 @@
               {{ task.title }}
             </td>
 
-            <td
-              class="text-center font-bold"
-              [class.text-emerald-600]="task.completed"
-              [class.text-slate-500]="!task.completed"
-            >
-              {{ task.completed ? "เสร็จสิ้น" : "กำลังดำเนินการ" }}
+            <td class="text-center font-bold text-slate-500">
+              รับเรื่องแล้ว
             </td>
           </tr>
         </tbody>

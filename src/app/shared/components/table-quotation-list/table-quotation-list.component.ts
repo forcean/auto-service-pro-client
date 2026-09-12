@@ -56,6 +56,11 @@ export class TableQuotationListComponent implements OnChanges {
       color: '#d97706',
       bg: '#fef3c7',
     },
+    [EQuotationStatus.WAITING_APPROVAL]: {
+      label: 'รออนุมัติ',
+      color: '#d97706',
+      bg: '#fef3c7',
+    },
     [EQuotationStatus.APPROVED]: {
       label: 'อนุมัติแล้ว',
       color: '#16a34a',
