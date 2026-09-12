@@ -20,11 +20,19 @@ export class ProductService {
     private httpService: HttpService,
   ) { }
 
-  async getListProduct(params: unknown): Promise<IBaseResponse<IProductList>> {
+  async getListProduct(params: IQueryListProduct): Promise<IBaseResponse<IProductList>> {
     try {
       const uri = this.PREFIX_USER + `/products/listProducts`;
       const response = await this.httpService.get<IProductList>(uri, params);
-      return response;
+      return {
+        ...response,
+        resultData: {
+          ...response.resultData,
+          products: (response.resultData.products ?? []).map((product) =>
+            this.mapProduct(product),
+          ),
+        },
+      };
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
         return error.error as IBaseResponse<IProductList>;
@@ -32,6 +40,21 @@ export class ProductService {
         throw error;
       }
     }
+  }
+
+  private mapProduct(raw: any): IProducts {
+    const sku = raw.sku ?? raw.code ?? '';
+    const price = raw.price ?? raw.prices;
+    const media = raw.media ?? raw.images ?? [];
+
+    return {
+      ...raw,
+      id: String(raw.id ?? raw._id ?? ''),
+      sku,
+      code: sku,
+      images: media,
+      prices: price,
+    } as IProducts;
   }
 
   async getProductDetail(productId: string | null): Promise<IBaseResponse<IResponseProductDetail>> {

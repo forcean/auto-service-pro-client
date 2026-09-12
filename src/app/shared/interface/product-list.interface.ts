@@ -10,7 +10,10 @@ export interface IProductList {
 }
 export interface IProducts {
   id: string;
+  /** Field returned by ProductsEntity. */
+  sku: string;
   name: string;
+  /** Legacy client alias, normalized from sku by ProductService. */
   code: string;
   description: string;
   categoryId: string;
@@ -62,4 +65,3 @@ export interface ISearchProducts {
   engine?: string
   inStock?: string
 }
-

@@ -4,9 +4,13 @@ import { Injectable } from '@angular/core';
 import { HttpService } from '../../core/services/http-service/http.service';
 import { ApiPrefix } from '../enum/api-prefix.enum';
 import { IBaseResponse } from '../interface/base-http.interface';
-import { EWorkOrderStatus } from '../enum/work-order.enum';
 import { IQueryListQuotation, IQuotationResultData } from '../interface/table-quotation.interface';
-import { IQuotationListItem } from '../interface/quotation.interface';
+import {
+  IApproveQuotationRequest,
+  ICreateQuotationRequest,
+  IQuotationListItem,
+  IUpdateQuotationRequest,
+} from '../interface/quotation.interface';
 
 @Injectable({
   providedIn: 'root',
@@ -42,7 +46,9 @@ export class QuotationService {
     }
   }
 
-  async createQuotation(body: unknown): Promise<IBaseResponse<IQuotationListItem>> {
+  async createQuotation(
+    body: ICreateQuotationRequest,
+  ): Promise<IBaseResponse<IQuotationListItem>> {
     try {
       const response = await this.httpService.post<IQuotationListItem>(
         this.apiPath,
@@ -60,7 +66,7 @@ export class QuotationService {
   }
 
   async updateQuotation(
-    body: unknown,
+    body: IUpdateQuotationRequest,
     quotationNo: string,
   ): Promise<IBaseResponse<IQuotationListItem>> {
     try {
@@ -117,10 +123,13 @@ export class QuotationService {
     }
   }
 
-  async deleteQuotation(id: string) {
+  /**
+   * The current repository implementation resolves this route by Mongo id,
+   * despite the controller parameter being named quotationNo.
+   */
+  async deleteQuotation(quotationId: string) {
     try {
-      const uri = this.apiPath + `/${id}/delete`;
-      // const uri = this.PREFIX_USER + `/corps/users/${userId}/delete`;
+      const uri = this.apiPath + `/${quotationId}/delete`;
       const response = await this.httpService.post<unknown>(uri, {});
       return response;
     } catch (error) {
@@ -134,7 +143,7 @@ export class QuotationService {
 
   async approveQuotation(
     quotationNo: string,
-    body: { method: 'PHONE' | 'LINE' | 'FACEBOOK' | 'IN_PERSON'; customerName: string; note?: string },
+    body: IApproveQuotationRequest,
   ): Promise<IBaseResponse<IQuotationListItem>> {
     return this.request(() =>
       this.httpService.patch<IQuotationListItem>(`${this.apiPath}/${quotationNo}/approve`, body),

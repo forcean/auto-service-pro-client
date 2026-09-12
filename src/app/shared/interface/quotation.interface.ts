@@ -101,24 +101,40 @@ export interface IQuotationItemFormValue {
   remark?: string;
 }
 
+/** Exact DTO accepted by CreateQuotationDto / UpdateQuotationDto. */
+export type IQuotationItemRequest =
+  | {
+      itemType: EQuotationItemType.PART;
+      productId: string;
+      sku: string;
+      quantity: number;
+      discountAmount?: number;
+      remark?: string;
+    }
+  | {
+      itemType: EQuotationItemType.LABOR | EQuotationItemType.SERVICE;
+      description: string;
+      quantity: number;
+      unitPrice: number;
+      discountAmount?: number;
+      remark?: string;
+    };
+
 export interface ICreateQuotationRequest {
   workOrderId: string;
   validUntil?: string;
-  includeVat: boolean;
-  taxPercent: number;
-  discountAmount: number;
+  includeVat?: boolean;
+  taxPercent?: number;
+  discountAmount?: number;
   customerRemark?: string;
   internalRemark?: string;
-  items: IQuotationItemFormValue[];
+  items: IQuotationItemRequest[];
 }
 
-export interface IUpdateQuotationRequest {
-  workOrderId: string;
-  validUntil?: string;
-  includeVat: boolean;
-  taxPercent: number;
-  discountAmount: number;
-  customerRemark?: string;
-  internalRemark?: string;
-  items: IQuotationItemFormValue[];
+export type IUpdateQuotationRequest = ICreateQuotationRequest;
+
+export interface IApproveQuotationRequest {
+  method: 'PHONE' | 'LINE' | 'FACEBOOK' | 'IN_PERSON';
+  customerName: string;
+  note?: string;
 }

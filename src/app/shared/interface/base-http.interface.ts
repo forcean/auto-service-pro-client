@@ -11,7 +11,9 @@ export interface IBaseResponse<T> {
   developerMessage: string;
   resultCode: string;
   resultData: T;
-  status?: 'success' | 'error';
+  /** Backend currently returns this misspelled property for successful calls. */
+  resultSatatus?: 'Success';
+  resultStatus?: 'Error';
   error?: IDataError;
   hasMore?: boolean;
   total?: number;

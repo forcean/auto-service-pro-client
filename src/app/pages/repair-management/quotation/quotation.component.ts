@@ -7,7 +7,6 @@ import {
 import {
   ITableHeaderQuotation,
   IQuotationResultData,
-  ISearchQuotationCriteria,
   IQueryListQuotation,
 } from '../../../shared/interface/table-quotation.interface';
 import { PaginationModel } from '../../../shared/interface/pagination.model';
@@ -55,13 +54,10 @@ export class QuotationComponent implements OnInit {
   };
 
   unquotedWorkOrders: IWorkOrder[] = [];
-  // Pagination & Filter Parameters
+  // Pagination and API-supported sort parameters
   page: number = 1;
   limit: number = 10;
-  searchKeyword = '';
   sortList: string = '';
-  selectedStatus!: EQuotationStatus;
-  EQuotationStatus = EQuotationStatus;
   isUnquotedPanelOpen = true;
   isLoading = false;
   isLoadingDelete: boolean = false;
@@ -85,7 +81,9 @@ export class QuotationComponent implements OnInit {
     {
       headerName: 'workOrderNo',
       valueType: 'string',
-      isSort: true,
+      // workOrderNo is derived after the database query, so it is not sortable
+      // by the current quotation API.
+      isSort: false,
       i18nKey: 'Work Order',
     },
     {
@@ -162,8 +160,6 @@ export class QuotationComponent implements OnInit {
         page: this.page,
         limit: this.limit,
         sort: this.sortList || undefined,
-        status: this.selectedStatus || undefined,
-        keyword: this.searchKeyword || undefined,
       };
       const res = await this.quotationService.getListQuotation(params);
       if (res.resultCode === RESPONSE.SUCCESS) {
@@ -184,15 +180,17 @@ export class QuotationComponent implements OnInit {
     try {
       const params: IWorkOrderQuery = {
         page: 1,
-        limit: 20,
-        // status: EWorkOrderStatus.OPEN,
+        limit: 100,
+        sort: 'createdAt.desc',
       };
       const res = await this.workOrderService.getListWorkOrder(params);
       if (res.resultCode === RESPONSE.SUCCESS) {
-        this.unquotedWorkOrders = res.resultData.data;
+        this.unquotedWorkOrders = res.resultData.data.filter(
+          (workOrder) => workOrder.status === EWorkOrderStatus.WAITING_QUOTATION,
+        );
         this.calculateSummary();
       } else {
-        this.unquotedWorkOrders = res.resultData.data;
+        this.unquotedWorkOrders = [];
         this.calculateSummary();
       }
     } catch (error) {
@@ -226,16 +224,17 @@ export class QuotationComponent implements OnInit {
     this.page = Number(params['page'] || this.page);
     this.limit = Number(params['limit'] || this.limit);
     this.sortList = params['sort'] || '';
-    this.selectedStatus = params['status'] || '';
     this.fetchQuotations();
     this.fetchUnquotedWorkOrders();
   }
 
   private calculateSummary(): void {
     const list = this.quotationResultData.data;
-    const totalCount = list.length;
+    const totalCount = this.quotationResultData.total;
     const pendingCount = list.filter(
-      (q) => q.status === EQuotationStatus.PENDING_APPROVAL,
+      (q) =>
+        q.status === EQuotationStatus.PENDING_APPROVAL ||
+        q.status === EQuotationStatus.WAITING_APPROVAL,
     ).length;
     const approvedQuotations = list.filter(
       (q) => q.status === EQuotationStatus.APPROVED,
@@ -259,28 +258,6 @@ export class QuotationComponent implements OnInit {
     this.isUnquotedPanelOpen = !this.isUnquotedPanelOpen;
   }
 
-  onSearch(): void {
-    this.page = 1;
-    this.updateUrlParams();
-  }
-
-  onStatusFilterChange(status: EQuotationStatus): void {
-    this.selectedStatus = status;
-    this.page = 1;
-    this.limit = 10;
-    this.updateUrlParams();
-  }
-
-  onResetCriteria(): void {
-    this.searchKeyword = '';
-    // this.selectedStatus = EQuotationStatus.ALL;
-    this.page = 1;
-    this.limit = 10;
-    this.sortList = '';
-
-    this.updateUrlParams();
-  }
-
   onSort(event: string[]) {
     this.sortList = event.join(',');
     this.updateUrlParams();
@@ -297,8 +274,8 @@ export class QuotationComponent implements OnInit {
       page: this.page.toString(),
       limit: this.limit.toString(),
       sort: this.sortList || undefined,
-      status: this.selectedStatus || undefined,
-      search: this.searchKeyword || undefined,
+      status: null,
+      search: null,
     };
 
     this.router.navigate([], {
@@ -318,13 +295,15 @@ export class QuotationComponent implements OnInit {
     }
   }
 
-  viewDetail(id: string): void {
-    this.router.navigate(['portal/repair/quotation', id]);
+  viewDetail(quotationNo: string): void {
+    this.router.navigate(['portal/repair/quotation/create'], {
+      queryParams: { quotationNo },
+    });
   }
 
-  onEditQuotation(id: string): void {
+  onEditQuotation(quotationNo: string): void {
     this.router.navigate(['portal/repair/quotation/create'], {
-      queryParams: { id },
+      queryParams: { quotationNo },
     });
   }
 

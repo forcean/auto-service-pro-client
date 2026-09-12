@@ -258,11 +258,11 @@ export class WorkOrderFlowComponent implements OnChanges {
     await this.runAction(async () => {
       const response = await this.partIssueService.create({
         workOrderNo: this.workOrder.workOrderNo,
-        taskNo: form.taskNo,
+        taskNo: form.taskNo.trim().toUpperCase(),
         remark: form.remark || undefined,
         items: [{
           productId: form.productId,
-          sku: form.sku,
+          sku: form.sku.trim().toUpperCase(),
           productName: form.productName,
           requestedQty: Number(form.requestedQty),
           reason: form.isAdditionalCharge ? 'ADDITIONAL' : 'NORMAL',
@@ -281,7 +281,9 @@ export class WorkOrderFlowComponent implements OnChanges {
       return;
     }
     await this.runAction(async () => {
-      const response = await this.partIssueService.getByIssueNo(this.issueSearchNo.trim());
+      const response = await this.partIssueService.getByIssueNo(
+        this.issueSearchNo.trim().toUpperCase(),
+      );
       if (response.resultCode === RESPONSE.SUCCESS) this.loadedIssue = response.resultData;
       return response;
     }, 'โหลดข้อมูลใบเบิกอะไหล่แล้ว', false);
@@ -306,7 +308,7 @@ export class WorkOrderFlowComponent implements OnChanges {
       return;
     }
     await this.runAction(async () => {
-      const response = await this.partIssueService.issue(this.loadedIssue!.issueNo, items);
+      const response = await this.partIssueService.issue(this.loadedIssue!.issueNo, { items });
       if (response.resultCode === RESPONSE.SUCCESS) this.loadedIssue = response.resultData;
       return response;
     }, 'ตัดสต็อกและจ่ายอะไหล่แล้ว');

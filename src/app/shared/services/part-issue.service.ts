@@ -4,7 +4,11 @@ import { Injectable } from '@angular/core';
 import { HttpService } from '../../core/services/http-service/http.service';
 import { ApiPrefix } from '../enum/api-prefix.enum';
 import { IBaseResponse } from '../interface/base-http.interface';
-import { ICreatePartIssueRequest, IPartIssue } from '../interface/repair-flow.interface';
+import {
+  ICreatePartIssueRequest,
+  IIssuePartIssueRequest,
+  IPartIssue,
+} from '../interface/repair-flow.interface';
 
 @Injectable({ providedIn: 'root' })
 export class PartIssueService {
@@ -26,11 +30,10 @@ export class PartIssueService {
 
   issue(
     issueNo: string,
-    items: Array<{ productId: string; issuedQty: number; remark?: string }>,
-    remark?: string,
+    body: IIssuePartIssueRequest,
   ): Promise<IBaseResponse<IPartIssue>> {
     return this.request(() =>
-      this.httpService.post<IPartIssue>(`${this.apiPath}/${issueNo}/issue`, { items, remark }),
+      this.httpService.post<IPartIssue>(`${this.apiPath}/${issueNo}/issue`, body),
     );
   }
 

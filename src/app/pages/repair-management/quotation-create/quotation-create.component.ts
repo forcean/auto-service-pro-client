@@ -14,6 +14,7 @@ import {
   ICreateQuotationRequest,
   IQuotationItem,
   IQuotationItemFormValue,
+  IQuotationItemRequest,
   IQuotationListItem,
   IUpdateQuotationRequest,
 } from '../../../shared/interface/quotation.interface';
@@ -33,7 +34,7 @@ import { WorkOrderService } from '../../../shared/services/work-order.service';
 })
 export class QuotationCreateComponent implements OnInit, OnDestroy {
   quotationForm!: FormGroup;
-  quotationId: string | null = null;
+  quotationNo: string | null = null;
   workOrderNo: string | null = null;
   workOrderId: string | null = null;
 
@@ -68,12 +69,14 @@ export class QuotationCreateComponent implements OnInit, OnDestroy {
     this.setupProductSearch();
 
     try {
-      this.quotationId = this.route.snapshot.queryParamMap.get('id');
+      this.quotationNo =
+        this.route.snapshot.queryParamMap.get('quotationNo') ??
+        this.route.snapshot.queryParamMap.get('id');
       this.workOrderNo = this.route.snapshot.queryParamMap.get('workOrderNo');
 
-      if (this.quotationId) {
+      if (this.quotationNo) {
         this.isEditMode = true;
-        await this.loadQuotation(this.quotationId);
+        await this.loadQuotation(this.quotationNo);
         return;
       }
 
@@ -224,12 +227,12 @@ export class QuotationCreateComponent implements OnInit, OnDestroy {
     }
   }
 
-  private async loadQuotation(quotationId: string): Promise<void> {
+  private async loadQuotation(quotationNo: string): Promise<void> {
     this.isLoading = true;
 
     try {
       const response =
-        await this.quotationService.getQuotationDetail(quotationId);
+        await this.quotationService.getQuotationDetail(quotationNo);
 
       if (response.resultCode !== RESPONSE.SUCCESS) {
         throw new Error('Failed to get quotation');
@@ -361,7 +364,7 @@ export class QuotationCreateComponent implements OnInit, OnDestroy {
 
       itemGroup.patchValue({
         productId: product.id,
-        sku: product.code,
+        sku: product.sku,
         description: product.name,
         unitPrice,
       });
@@ -419,8 +422,8 @@ export class QuotationCreateComponent implements OnInit, OnDestroy {
 
       const payload = this.buildPayload();
 
-      if (this.isEditMode && this.quotationId) {
-        await this.updateQuotation(this.quotationId, payload);
+      if (this.isEditMode && this.quotationNo) {
+        await this.updateQuotation(this.quotationNo, payload);
 
         return;
       }
@@ -452,13 +455,13 @@ export class QuotationCreateComponent implements OnInit, OnDestroy {
   }
 
   private async updateQuotation(
-    quotationId: string,
+    quotationNo: string,
     payload: IUpdateQuotationRequest,
   ): Promise<void> {
     try {
       const response = await this.quotationService.updateQuotation(
         payload,
-        quotationId,
+        quotationNo,
       );
 
       if (response.resultCode !== RESPONSE.SUCCESS) {
@@ -476,24 +479,27 @@ export class QuotationCreateComponent implements OnInit, OnDestroy {
   private buildPayload(): ICreateQuotationRequest {
     const formValue = this.quotationForm.getRawValue();
 
-    const items: IQuotationItemFormValue[] = formValue.items.map(
+    const items: IQuotationItemRequest[] = formValue.items.map(
       (item: IQuotationItemFormValue) => {
-        const payloadItem: IQuotationItemFormValue = {
+        if (item.itemType === EQuotationItemType.PART) {
+          return {
+            itemType: EQuotationItemType.PART,
+            productId: item.productId ?? '',
+            sku: item.sku ?? '',
+            quantity: Number(item.quantity) || 0,
+            discountAmount: Number(item.discountAmount) || 0,
+            remark: item.remark || undefined,
+          };
+        }
+
+        return {
           itemType: item.itemType,
           description: item.description ?? '',
           quantity: Number(item.quantity) || 0,
           unitPrice: Number(item.unitPrice) || 0,
           discountAmount: Number(item.discountAmount) || 0,
-          remark: item.remark ?? '',
+          remark: item.remark || undefined,
         };
-
-        if (item.itemType === EQuotationItemType.PART) {
-          payloadItem.productId = item.productId;
-
-          payloadItem.sku = item.sku;
-        }
-
-        return payloadItem;
       },
     );
 

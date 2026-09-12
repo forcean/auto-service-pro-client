@@ -6,6 +6,7 @@ import { ApiPrefix } from '../enum/api-prefix.enum';
 import { IBaseResponse } from '../interface/base-http.interface';
 import {
   ICreateTaskRequest,
+  IApproveAdditionalProblemRequest,
   ITaskListResult,
   IWorkOrderTask,
   ETaskStatus,
@@ -46,7 +47,7 @@ export class TaskService {
   approveAdditionalProblem(
     taskNo: string,
     problemId: string,
-    body: { quotationId: string; title?: string; estimateMinute?: number },
+    body: IApproveAdditionalProblemRequest,
   ): Promise<IBaseResponse<IWorkOrderTask>> {
     return this.request(() =>
       this.httpService.post<IWorkOrderTask>(

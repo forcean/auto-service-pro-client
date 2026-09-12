@@ -44,9 +44,18 @@ export interface IWorkOrderTask {
   mechanics: IAssignedMechanic[];
   additionalProblems: IAdditionalProblem[];
   remark?: string;
-  createdAt?: string;
+  plannedStartDate?: string;
+  plannedFinishDate?: string;
   startedAt?: string;
   finishedAt?: string;
+  isDeleted?: boolean;
+  createdBy?: string;
+  createdDt?: string;
+  updatedBy?: string;
+  deletedBy?: string;
+  deletedDt?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ITaskListResult {
@@ -62,7 +71,11 @@ export interface ICreateTaskRequest {
   title: string;
   description?: string;
   priority?: ETaskPriority;
+  status?: ETaskStatus;
   estimateMinute?: number;
+  actualMinute?: number;
+  plannedStartDate?: string;
+  plannedFinishDate?: string;
   mechanics?: IAssignedMechanic[];
   remark?: string;
   isRework?: boolean;
@@ -89,7 +102,7 @@ export interface IPartIssue {
   issueNo: string;
   workOrderNo: string;
   taskNo: string;
-  status: string;
+  status: 'REQUESTED' | 'RESERVED' | 'PARTIAL' | 'ISSUED' | 'CANCELLED';
   items: Array<{
     productId: string;
     sku: string;
@@ -98,5 +111,29 @@ export interface IPartIssue {
     reservedQty: number;
     issuedQty: number;
   }>;
+  requestedBy?: string;
+  requestedByName?: string;
+  requestedAt?: string;
+  issuedBy?: string;
+  issuedByName?: string;
+  issuedAt?: string;
   remark?: string;
+  isDeleted?: boolean;
+  createdBy?: string;
+  updatedBy?: string;
+  deletedBy?: string;
+  deletedDt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface IIssuePartIssueRequest {
+  items: Array<{ productId: string; issuedQty: number; remark?: string }>;
+  remark?: string;
+}
+
+export interface IApproveAdditionalProblemRequest {
+  quotationId: string;
+  title?: string;
+  estimateMinute?: number;
 }
