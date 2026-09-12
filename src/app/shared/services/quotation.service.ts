@@ -125,4 +125,39 @@ export class QuotationService {
       }
     }
   }
+
+  async approveQuotation(
+    quotationNo: string,
+    body: { method: 'PHONE' | 'LINE' | 'FACEBOOK' | 'IN_PERSON'; customerName: string; note?: string },
+  ): Promise<IBaseResponse<IQuotationListItem>> {
+    return this.request(() =>
+      this.httpService.patch<IQuotationListItem>(`${this.apiPath}/${quotationNo}/approve`, body),
+    );
+  }
+
+  async rejectQuotation(
+    quotationNo: string,
+    reason: string,
+  ): Promise<IBaseResponse<IQuotationListItem>> {
+    return this.request(() =>
+      this.httpService.patch<IQuotationListItem>(`${this.apiPath}/${quotationNo}/reject`, { reason }),
+    );
+  }
+
+  async createRevision(quotationNo: string): Promise<IBaseResponse<IQuotationListItem>> {
+    return this.request(() =>
+      this.httpService.post<IQuotationListItem>(`${this.apiPath}/${quotationNo}/revision`, {}),
+    );
+  }
+
+  private async request<T>(action: () => Promise<IBaseResponse<T>>): Promise<IBaseResponse<T>> {
+    try {
+      return await action();
+    } catch (error) {
+      if (error instanceof HttpErrorResponse && error.error) {
+        return error.error as IBaseResponse<T>;
+      }
+      throw error;
+    }
+  }
 }

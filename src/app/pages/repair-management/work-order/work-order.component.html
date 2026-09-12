@@ -42,20 +42,20 @@
         <custom-option [value]="EWorkOrderStatus.ALL"
           >สถานะ: ทั้งหมด</custom-option
         >
-        <custom-option [value]="EWorkOrderStatus.PENDING"
-          >รอดำเนินการ (Pending)</custom-option
+        <custom-option [value]="EWorkOrderStatus.WAITING_APPROVAL"
+          >รอลูกค้าอนุมัติ</custom-option
         >
         <custom-option [value]="EWorkOrderStatus.IN_PROGRESS"
           >กำลังซ่อม (In Progress)</custom-option
         >
-        <custom-option [value]="EWorkOrderStatus.QUALITY_CHECK">
-          ตรวจสอบคุณภาพ (Quality Check)
+        <custom-option [value]="EWorkOrderStatus.WAITING_ASSIGNMENT">
+          รอมอบหมายงาน
         </custom-option>
-        <custom-option [value]="EWorkOrderStatus.WAITING_PARTS">
-          รออะไหล่ (Waiting Parts)
+        <custom-option [value]="EWorkOrderStatus.WAITING_QC">
+          รอตรวจ QC
         </custom-option>
-        <custom-option [value]="EWorkOrderStatus.READY_FOR_PICKUP">
-          รอส่งมอบ (Ready For Pickup)
+        <custom-option [value]="EWorkOrderStatus.QC_APPROVED">
+          QC ผ่าน
         </custom-option>
         <custom-option [value]="EWorkOrderStatus.COMPLETED">
           เสร็จสิ้น (Completed)
@@ -126,11 +126,11 @@
         <p
           class="text-[11px] font-semibold text-amber-500 uppercase tracking-wider"
         >
-          รอดำเนินการ
+          รอลูกค้าอนุมัติ
         </p>
 
         <p class="text-2xl font-bold text-slate-800 mt-1">
-          {{ statusCounts.pending }}
+          {{ statusCounts.awaitingApproval }}
         </p>
       </div>
 
@@ -141,13 +141,36 @@
       </div>
     </div>
 
-    <!-- In Progress -->
+    <!-- Waiting assignment -->
     <div
       class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex items-center justify-between"
     >
       <div>
         <p
           class="text-[11px] font-semibold text-blue-500 uppercase tracking-wider"
+        >
+          รอมอบหมายงาน
+        </p>
+
+        <p class="text-2xl font-bold text-slate-800 mt-1">
+          {{ statusCounts.awaitingAssignment }}
+        </p>
+      </div>
+
+      <div
+        class="w-10 h-10 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center"
+      >
+        <lucide-icon [name]="ClockIcon" class="w-5 h-5"></lucide-icon>
+      </div>
+    </div>
+
+    <!-- In progress -->
+    <div
+      class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex items-center justify-between"
+    >
+      <div>
+        <p
+          class="text-[11px] font-semibold text-purple-500 uppercase tracking-wider"
         >
           กำลังซ่อม
         </p>
@@ -158,36 +181,13 @@
       </div>
 
       <div
-        class="w-10 h-10 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center"
+        class="w-10 h-10 bg-purple-50 text-purple-500 rounded-xl flex items-center justify-center"
       >
         <lucide-icon [name]="WrenchIcon" class="w-5 h-5"></lucide-icon>
       </div>
     </div>
 
-    <!-- Quality Check -->
-    <div
-      class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex items-center justify-between"
-    >
-      <div>
-        <p
-          class="text-[11px] font-semibold text-purple-500 uppercase tracking-wider"
-        >
-          ตรวจคุณภาพ
-        </p>
-
-        <p class="text-2xl font-bold text-slate-800 mt-1">
-          {{ statusCounts.qualityCheck }}
-        </p>
-      </div>
-
-      <div
-        class="w-10 h-10 bg-purple-50 text-purple-500 rounded-xl flex items-center justify-center"
-      >
-        <lucide-icon [name]="ShieldCheckIcon" class="w-5 h-5"></lucide-icon>
-      </div>
-    </div>
-
-    <!-- Ready For Pickup -->
+    <!-- QC waiting -->
     <div
       class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex items-center justify-between"
     >
@@ -195,22 +195,22 @@
         <p
           class="text-[11px] font-semibold text-emerald-500 uppercase tracking-wider"
         >
-          รอส่งมอบ
+          รอตรวจ QC
         </p>
 
         <p class="text-2xl font-bold text-slate-800 mt-1">
-          {{ statusCounts.readyForPickup }}
+          {{ statusCounts.waitingQc }}
         </p>
       </div>
 
       <div
         class="w-10 h-10 bg-emerald-50 text-emerald-500 rounded-xl flex items-center justify-center"
       >
-        <lucide-icon [name]="CarIcon" class="w-5 h-5"></lucide-icon>
+        <lucide-icon [name]="ShieldCheckIcon" class="w-5 h-5"></lucide-icon>
       </div>
     </div>
 
-    <!-- Completed -->
+    <!-- QC approved -->
     <div
       class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex items-center justify-between"
     >
@@ -218,11 +218,11 @@
         <p
           class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider"
         >
-          เสร็จสิ้น
+          QC ผ่าน
         </p>
 
         <p class="text-2xl font-bold text-slate-800 mt-1">
-          {{ statusCounts.completed }}
+          {{ statusCounts.qcApproved }}
         </p>
       </div>
 

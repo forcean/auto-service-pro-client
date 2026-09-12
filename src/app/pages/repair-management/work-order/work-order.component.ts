@@ -79,12 +79,11 @@ export class WorkOrderComponent implements OnInit, OnDestroy {
 
   statusCounts = {
     all: 0,
-    pending: 0,
+    awaitingApproval: 0,
+    awaitingAssignment: 0,
     inProgress: 0,
-    qualityCheck: 0,
-    waitingParts: 0,
-    readyForPickup: 0,
-    completed: 0,
+    waitingQc: 0,
+    qcApproved: 0,
   };
 
   selectedOrderForPrint: IWorkOrder | null = null;
@@ -245,28 +244,24 @@ export class WorkOrderComponent implements OnInit, OnDestroy {
     this.statusCounts = {
       all: this.workOrders.data.length,
 
-      pending: this.workOrders.data.filter(
-        (workOrder) => workOrder.status === EWorkOrderStatus.PENDING,
+      awaitingApproval: this.workOrders.data.filter(
+        (workOrder) => workOrder.status === EWorkOrderStatus.WAITING_APPROVAL,
+      ).length,
+
+      awaitingAssignment: this.workOrders.data.filter(
+        (workOrder) => workOrder.status === EWorkOrderStatus.WAITING_ASSIGNMENT,
       ).length,
 
       inProgress: this.workOrders.data.filter(
         (workOrder) => workOrder.status === EWorkOrderStatus.IN_PROGRESS,
       ).length,
 
-      qualityCheck: this.workOrders.data.filter(
-        (workOrder) => workOrder.status === EWorkOrderStatus.QUALITY_CHECK,
+      waitingQc: this.workOrders.data.filter(
+        (workOrder) => workOrder.status === EWorkOrderStatus.WAITING_QC,
       ).length,
 
-      waitingParts: this.workOrders.data.filter(
-        (workOrder) => workOrder.status === EWorkOrderStatus.WAITING_PARTS,
-      ).length,
-
-      readyForPickup: this.workOrders.data.filter(
-        (workOrder) => workOrder.status === EWorkOrderStatus.READY_FOR_PICKUP,
-      ).length,
-
-      completed: this.workOrders.data.filter(
-        (workOrder) => workOrder.status === EWorkOrderStatus.COMPLETED,
+      qcApproved: this.workOrders.data.filter(
+        (workOrder) => workOrder.status === EWorkOrderStatus.QC_APPROVED,
       ).length,
     };
   }
