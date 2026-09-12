@@ -3,17 +3,20 @@ import { Router } from '@angular/router';
 
 import { RESPONSE } from '../../../shared/enum/response.enum';
 import { EWorkOrderStatus } from '../../../shared/enum/work-order.enum';
+import { IProducts } from '../../../shared/interface/product-list.interface';
+import { ETaskPriority, ETaskStatus, IPartIssue, IWorkOrderTask } from '../../../shared/interface/repair-flow.interface';
+import { UserList } from '../../../shared/interface/table-user-management.interface';
 import { IWorkOrder } from '../../../shared/interface/work-order.interface';
-import {
-  ETaskPriority,
-  ETaskStatus,
-  IPartIssue,
-  IWorkOrderTask,
-} from '../../../shared/interface/repair-flow.interface';
 import { PartIssueService } from '../../../shared/services/part-issue.service';
-import { QuotationService } from '../../../shared/services/quotation.service';
+import { ProductService } from '../../../shared/services/product.service';
 import { TaskService } from '../../../shared/services/task.service';
+import { UserManagementService } from '../../../shared/services/user-management.service';
 import { WorkOrderService } from '../../../shared/services/work-order.service';
+
+interface IWorkflowStep {
+  label: string;
+  shortLabel: string;
+}
 
 @Component({
   selector: 'app-work-order-flow',
@@ -28,14 +31,30 @@ export class WorkOrderFlowComponent implements OnChanges {
   readonly statuses = EWorkOrderStatus;
   readonly taskStatuses = ETaskStatus;
   readonly priorities = Object.values(ETaskPriority);
+  readonly workflowSteps: IWorkflowStep[] = [
+    { label: 'รับรถและตรวจเช็ค', shortLabel: 'ตรวจเช็ค' },
+    { label: 'เสนอราคา', shortLabel: 'เสนอราคา' },
+    { label: 'มอบหมายทีม', shortLabel: 'มอบหมาย' },
+    { label: 'ดำเนินการซ่อม', shortLabel: 'ซ่อม' },
+    { label: 'ตรวจสอบคุณภาพ', shortLabel: 'QC' },
+    { label: 'QC ผ่าน', shortLabel: 'ผ่าน' },
+  ];
 
   tasks: IWorkOrderTask[] = [];
+  mechanics: UserList[] = [];
+  productResults: IProducts[] = [];
+  selectedPartTask: IWorkOrderTask | null = null;
+  selectedProduct: IProducts | null = null;
   loadedIssue: IPartIssue | null = null;
-  issueSearchNo = '';
-  partIssueCancelRemark = '';
   isLoadingTasks = false;
+  isLoadingMechanics = false;
+  isSearchingProducts = false;
   isSubmitting = false;
   feedback = '';
+  productSearch = '';
+  reworkTitle = '';
+  partIssueCancelRemark = '';
+  additionalProblemText: Record<string, string> = {};
 
   taskForm = {
     title: '',
@@ -43,39 +62,62 @@ export class WorkOrderFlowComponent implements OnChanges {
     priority: ETaskPriority.NORMAL,
     estimateMinute: 0,
     mechanicId: '',
-    mechanicName: '',
   };
-  reworkTitle = '';
-  quotationNo = '';
-  quotationCustomerName = '';
-  quotationMethod: 'PHONE' | 'LINE' | 'FACEBOOK' | 'IN_PERSON' = 'PHONE';
-  quotationRejectReason = '';
-  additionalQuotationIds: Record<string, string> = {};
-  additionalTaskTitles: Record<string, string> = {};
-  additionalProblemText: Record<string, string> = {};
-  partForm = {
-    taskNo: '',
-    productId: '',
-    sku: '',
-    productName: '',
-    requestedQty: 1,
-    unitPrice: 0,
-    isAdditionalCharge: false,
-    remark: '',
-  };
+  partForm = { requestedQty: 1, isAdditionalCharge: false, remark: '' };
 
   constructor(
     private readonly workOrderService: WorkOrderService,
     private readonly taskService: TaskService,
-    private readonly quotationService: QuotationService,
     private readonly partIssueService: PartIssueService,
+    private readonly productService: ProductService,
+    private readonly userManagementService: UserManagementService,
     private readonly router: Router,
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['workOrder']?.currentValue?.workOrderNo) {
-      void this.loadTasks();
+      void this.refreshWorkspace();
     }
+  }
+
+  get currentStageIndex(): number {
+    switch (this.workOrder.status) {
+      case EWorkOrderStatus.OPEN:
+      case EWorkOrderStatus.INSPECTING:
+        return 0;
+      case EWorkOrderStatus.WAITING_QUOTATION:
+      case EWorkOrderStatus.WAITING_APPROVAL:
+        return 1;
+      case EWorkOrderStatus.WAITING_ASSIGNMENT:
+        return 2;
+      case EWorkOrderStatus.IN_PROGRESS:
+      case EWorkOrderStatus.WAITING_ADDITIONAL_APPROVAL:
+      case EWorkOrderStatus.REWORK:
+        return 3;
+      case EWorkOrderStatus.WAITING_QC:
+        return 4;
+      case EWorkOrderStatus.QC_APPROVED:
+        return 5;
+      default:
+        return 0;
+    }
+  }
+
+  get selectedMechanic(): UserList | undefined {
+    return this.mechanics.find((mechanic) => mechanic.id === this.taskForm.mechanicId);
+  }
+
+  get taskSummary(): string {
+    const finished = this.tasks.filter((task) => task.status === ETaskStatus.FINISHED).length;
+    return `${finished}/${this.tasks.length} งานเสร็จแล้ว`;
+  }
+
+  isStepActive(index: number): boolean {
+    return index <= this.currentStageIndex;
+  }
+
+  async refreshWorkspace(): Promise<void> {
+    await Promise.all([this.loadTasks(), this.loadMechanics()]);
   }
 
   async loadTasks(): Promise<void> {
@@ -94,104 +136,75 @@ export class WorkOrderFlowComponent implements OnChanges {
     }
   }
 
+  async loadMechanics(): Promise<void> {
+    if (![EWorkOrderStatus.WAITING_ASSIGNMENT, EWorkOrderStatus.REWORK].includes(this.workOrder.status)) return;
+    this.isLoadingMechanics = true;
+    try {
+      const response = await this.userManagementService.getListUser({ page: 1, limit: 100, role: 'MEC' });
+      this.mechanics = response.resultCode === RESPONSE.SUCCESS
+        ? response.resultData.users.filter((user) => user.activeFlag)
+        : [];
+    } catch {
+      this.mechanics = [];
+    } finally {
+      this.isLoadingMechanics = false;
+    }
+  }
+
   async moveWorkOrder(status: EWorkOrderStatus): Promise<boolean> {
     if (this.isSubmitting) return false;
     this.isSubmitting = true;
     try {
-      const response = await this.workOrderService.updateWorkOrderStatus(
-        this.workOrder.workOrderNo,
-        status,
-      );
+      const response = await this.workOrderService.updateWorkOrderStatus(this.workOrder.workOrderNo, status);
       if (response.resultCode !== RESPONSE.SUCCESS) {
         this.setFeedback(this.errorMessage(response));
         return false;
       }
-      this.setFeedback('อัปเดตสถานะใบสั่งงานแล้ว', false);
+      this.setFeedback('อัปเดตขั้นตอนงานแล้ว', false);
       this.flowChanged.emit();
       return true;
     } catch {
-      this.setFeedback('ไม่สามารถอัปเดตสถานะใบสั่งงานได้');
+      this.setFeedback('ไม่สามารถอัปเดตขั้นตอนงานได้');
       return false;
     } finally {
       this.isSubmitting = false;
     }
   }
 
-  goToQuotation(): void {
-    void this.router.navigate(['/portal/repair/quotation/create'], {
-      queryParams: { workOrderNo: this.workOrder.workOrderNo },
-    });
-  }
-
-  async approveQuotation(): Promise<void> {
-    if (!this.quotationNo || !this.quotationCustomerName) {
-      this.setFeedback('กรุณาระบุเลขที่ใบเสนอราคาและชื่อลูกค้าที่อนุมัติ');
-      return;
-    }
-    await this.runAction(async () => {
-      const response = await this.quotationService.approveQuotation(this.quotationNo, {
-        method: this.quotationMethod,
-        customerName: this.quotationCustomerName,
-      });
-      return response;
-    }, 'บันทึกการอนุมัติใบเสนอราคาแล้ว');
-  }
-
-  async rejectQuotation(): Promise<void> {
-    if (!this.quotationNo || !this.quotationRejectReason) {
-      this.setFeedback('กรุณาระบุเลขที่ใบเสนอราคาและเหตุผลที่ปฏิเสธ');
-      return;
-    }
-    await this.runAction(
-      () => this.quotationService.rejectQuotation(this.quotationNo, this.quotationRejectReason),
-      'บันทึกการปฏิเสธใบเสนอราคาแล้ว',
+  openQuotation(create = false): void {
+    void this.router.navigate(
+      [create ? '/portal/repair/quotation/create' : '/portal/repair/quotation'],
+      create ? { queryParams: { workOrderNo: this.workOrder.workOrderNo } } : undefined,
     );
   }
 
-  async createQuotationRevision(): Promise<void> {
-    if (!this.quotationNo) {
-      this.setFeedback('กรุณาระบุเลขที่ใบเสนอราคาที่ต้องการสร้างฉบับแก้ไข');
-      return;
-    }
-    await this.runAction(
-      () => this.quotationService.createRevision(this.quotationNo),
-      'สร้างใบเสนอราคาฉบับแก้ไขแล้ว',
-    );
-  }
-
-  async createTask(isRework = false): Promise<void> {
-    const form = this.taskForm;
-    if (!form.title || !form.mechanicId) {
-      this.setFeedback('กรุณาระบุชื่องานและรหัสช่างที่ได้รับมอบหมาย');
+  async createTask(): Promise<void> {
+    const mechanic = this.selectedMechanic;
+    if (!this.taskForm.title.trim() || !mechanic) {
+      this.setFeedback('กรุณาระบุชื่องานและเลือกช่างผู้รับผิดชอบ');
       return;
     }
     await this.runAction(async () => {
       const response = await this.taskService.createTask({
         workOrderNo: this.workOrder.workOrderNo,
-        title: form.title,
-        description: form.description || undefined,
-        priority: form.priority,
-        estimateMinute: Number(form.estimateMinute) || undefined,
-        mechanics: [{ mechanicId: form.mechanicId, mechanicName: form.mechanicName || undefined }],
-        isRework: isRework || this.workOrder.status === EWorkOrderStatus.REWORK,
+        title: this.taskForm.title.trim(),
+        description: this.taskForm.description.trim() || undefined,
+        priority: this.taskForm.priority,
+        estimateMinute: Number(this.taskForm.estimateMinute) || undefined,
+        mechanics: [{
+          mechanicId: mechanic.id,
+          mechanicName: [mechanic.firstname, mechanic.lastname].filter(Boolean).join(' ') || mechanic.publicId,
+        }],
+        isRework: this.workOrder.status === EWorkOrderStatus.REWORK,
       });
       if (response.resultCode !== RESPONSE.SUCCESS) return response;
-      const assignment = await this.taskService.updateStatus(
-        response.resultData.taskNo,
-        ETaskStatus.ASSIGNED,
-      );
-      return assignment.resultCode === RESPONSE.SUCCESS ? response : assignment;
-    }, isRework ? 'สร้างงานแก้ไขและมอบหมายช่างแล้ว' : 'สร้างงานและมอบหมายช่างแล้ว');
-    this.taskForm = {
-      title: '', description: '', priority: ETaskPriority.NORMAL, estimateMinute: 0, mechanicId: '', mechanicName: '',
-    };
+      return this.taskService.updateStatus(response.resultData.taskNo, ETaskStatus.ASSIGNED);
+    }, 'สร้างและมอบหมายงานให้ช่างแล้ว');
+    this.taskForm = { title: '', description: '', priority: ETaskPriority.NORMAL, estimateMinute: 0, mechanicId: '' };
   }
 
   async updateTaskStatus(task: IWorkOrderTask, nextStatus: ETaskStatus): Promise<void> {
-    await this.runAction(
-      () => this.taskService.updateStatus(task.taskNo, nextStatus),
-      'อัปเดตสถานะงานแล้ว',
-    );
+    await this.runAction(() => this.taskService.updateStatus(task.taskNo, nextStatus), 'อัปเดตสถานะงานแล้ว');
   }
 
   nextTaskStatus(task: IWorkOrderTask): ETaskStatus | null {
@@ -219,83 +232,79 @@ export class WorkOrderFlowComponent implements OnChanges {
   async reportAdditionalProblem(task: IWorkOrderTask): Promise<void> {
     const description = this.additionalProblemText[task.taskNo]?.trim();
     if (!description) {
-      this.setFeedback('กรุณาระบุรายละเอียดปัญหาเพิ่มเติม');
+      this.setFeedback('กรุณาระบุรายละเอียดปัญหาที่พบเพิ่ม');
       return;
     }
-    await this.runAction(
-      () => this.taskService.reportAdditionalProblem(task.taskNo, description),
-      'ส่งเรื่องขออนุมัติซ่อมเพิ่มแล้ว',
-    );
+    await this.runAction(() => this.taskService.reportAdditionalProblem(task.taskNo, description), 'ส่งเรื่องขออนุมัติงานเพิ่มแล้ว');
     this.additionalProblemText[task.taskNo] = '';
   }
 
-  async approveAdditionalProblem(task: IWorkOrderTask, problemId: string): Promise<void> {
-    const quotationId = this.additionalQuotationIds[problemId]?.trim();
-    if (!quotationId) {
-      this.setFeedback('กรุณาระบุ Quotation ID ที่ลูกค้าอนุมัติสำหรับงานเพิ่ม');
-      return;
-    }
-    await this.runAction(
-      () => this.taskService.approveAdditionalProblem(task.taskNo, problemId, {
-        quotationId,
-        title: this.additionalTaskTitles[problemId]?.trim() || undefined,
-      }),
-      'อนุมัติงานเพิ่มและสร้างงานแก้ไขแล้ว',
-    );
+  openParts(task: IWorkOrderTask): void {
+    this.selectedPartTask = task;
+    this.selectedProduct = null;
+    this.productSearch = '';
+    this.productResults = [];
+    this.loadedIssue = null;
   }
 
-  selectTaskForPartIssue(taskNo: string): void {
-    this.partForm.taskNo = taskNo;
-    this.setFeedback(`กำลังสร้างใบเบิกอะไหล่สำหรับ ${taskNo}`, false);
+  closeParts(): void {
+    this.selectedPartTask = null;
+    this.selectedProduct = null;
+    this.productResults = [];
+  }
+
+  async searchProducts(): Promise<void> {
+    const keyword = this.productSearch.trim();
+    if (!keyword) {
+      this.productResults = [];
+      return;
+    }
+    this.isSearchingProducts = true;
+    try {
+      const response = await this.productService.getListProduct({ page: 1, limit: 10, sku: keyword });
+      this.productResults = response.resultCode === RESPONSE.SUCCESS ? response.resultData.products : [];
+    } catch {
+      this.productResults = [];
+    } finally {
+      this.isSearchingProducts = false;
+    }
+  }
+
+  selectProduct(product: IProducts): void {
+    this.selectedProduct = product;
+    this.productResults = [];
+    this.productSearch = product.sku;
   }
 
   async createPartIssue(): Promise<void> {
-    const form = this.partForm;
-    if (!form.taskNo || !form.productId || !form.sku || !form.productName) {
-      this.setFeedback('กรุณาระบุงาน รหัสสินค้า SKU และชื่ออะไหล่ให้ครบ');
+    if (!this.selectedPartTask || !this.selectedProduct) {
+      this.setFeedback('เลือกงานและอะไหล่ก่อนสร้างใบเบิก');
       return;
     }
+    const product = this.selectedProduct;
     await this.runAction(async () => {
       const response = await this.partIssueService.create({
         workOrderNo: this.workOrder.workOrderNo,
-        taskNo: form.taskNo.trim().toUpperCase(),
-        remark: form.remark || undefined,
+        taskNo: this.selectedPartTask!.taskNo,
+        remark: this.partForm.remark.trim() || undefined,
         items: [{
-          productId: form.productId,
-          sku: form.sku.trim().toUpperCase(),
-          productName: form.productName,
-          requestedQty: Number(form.requestedQty),
-          reason: form.isAdditionalCharge ? 'ADDITIONAL' : 'NORMAL',
-          isAdditionalCharge: form.isAdditionalCharge,
-          unitPrice: Number(form.unitPrice) || 0,
+          productId: product.id,
+          sku: product.sku,
+          productName: product.name,
+          requestedQty: Number(this.partForm.requestedQty),
+          reason: this.partForm.isAdditionalCharge ? 'ADDITIONAL' : 'NORMAL',
+          isAdditionalCharge: this.partForm.isAdditionalCharge,
+          unitPrice: product.prices?.retail ?? 0,
         }],
       });
       if (response.resultCode === RESPONSE.SUCCESS) this.loadedIssue = response.resultData;
       return response;
-    }, 'สร้างใบเบิกอะไหล่แล้ว');
-  }
-
-  async findPartIssue(): Promise<void> {
-    if (!this.issueSearchNo.trim()) {
-      this.setFeedback('กรุณาระบุเลขที่ใบเบิกอะไหล่');
-      return;
-    }
-    await this.runAction(async () => {
-      const response = await this.partIssueService.getByIssueNo(
-        this.issueSearchNo.trim().toUpperCase(),
-      );
-      if (response.resultCode === RESPONSE.SUCCESS) this.loadedIssue = response.resultData;
-      return response;
-    }, 'โหลดข้อมูลใบเบิกอะไหล่แล้ว', false);
+    }, 'สร้างใบเบิกอะไหล่แล้ว', false);
   }
 
   async reservePartIssue(): Promise<void> {
     if (!this.loadedIssue) return;
-    await this.runAction(async () => {
-      const response = await this.partIssueService.reserve(this.loadedIssue!.issueNo);
-      if (response.resultCode === RESPONSE.SUCCESS) this.loadedIssue = response.resultData;
-      return response;
-    }, 'จองอะไหล่แล้ว');
+    await this.runPartIssueAction(() => this.partIssueService.reserve(this.loadedIssue!.issueNo), 'จองอะไหล่แล้ว');
   }
 
   async issueReservedParts(): Promise<void> {
@@ -307,27 +316,18 @@ export class WorkOrderFlowComponent implements OnChanges {
       this.setFeedback('ไม่มีอะไหล่ที่จองไว้เพื่อจ่ายออก');
       return;
     }
-    await this.runAction(async () => {
-      const response = await this.partIssueService.issue(this.loadedIssue!.issueNo, { items });
-      if (response.resultCode === RESPONSE.SUCCESS) this.loadedIssue = response.resultData;
-      return response;
-    }, 'ตัดสต็อกและจ่ายอะไหล่แล้ว');
+    await this.runPartIssueAction(() => this.partIssueService.issue(this.loadedIssue!.issueNo, { items }), 'ตัดสต็อกและจ่ายอะไหล่แล้ว');
   }
 
   async cancelPartIssue(): Promise<void> {
-    if (!this.loadedIssue) return;
-    if (!this.partIssueCancelRemark.trim()) {
-      this.setFeedback('กรุณาระบุเหตุผลที่ยกเลิกใบเบิกอะไหล่');
+    if (!this.loadedIssue || !this.partIssueCancelRemark.trim()) {
+      this.setFeedback('กรุณาระบุเหตุผลก่อนยกเลิกใบเบิก');
       return;
     }
-    await this.runAction(async () => {
-      const response = await this.partIssueService.cancel(
-        this.loadedIssue!.issueNo,
-        this.partIssueCancelRemark.trim(),
-      );
-      if (response.resultCode === RESPONSE.SUCCESS) this.loadedIssue = response.resultData;
-      return response;
-    }, 'ยกเลิกใบเบิกอะไหล่และคืนยอดจองแล้ว');
+    await this.runPartIssueAction(
+      () => this.partIssueService.cancel(this.loadedIssue!.issueNo, this.partIssueCancelRemark.trim()),
+      'ยกเลิกใบเบิกอะไหล่แล้ว',
+    );
     this.partIssueCancelRemark = '';
   }
 
@@ -340,10 +340,21 @@ export class WorkOrderFlowComponent implements OnChanges {
     if (!moved) return;
     this.taskForm.title = this.reworkTitle.trim();
     this.reworkTitle = '';
-    this.setFeedback('เปลี่ยนสถานะเป็น REWORK แล้ว กรุณาระบุช่างและมอบหมายงานแก้ไข', false);
+    this.setFeedback('ส่งกลับแก้ไขแล้ว เลือกช่างและมอบหมายงานแก้ไขต่อได้', false);
   }
 
-  private async runAction<T extends { resultCode: string; resultData: unknown; error?: { message: string } }>(
+  private async runPartIssueAction(
+    action: () => Promise<{ resultCode: string; resultData: IPartIssue; developerMessage?: string }>,
+    successMessage: string,
+  ): Promise<void> {
+    await this.runAction(async () => {
+      const response = await action();
+      if (response.resultCode === RESPONSE.SUCCESS) this.loadedIssue = response.resultData;
+      return response;
+    }, successMessage, false);
+  }
+
+  private async runAction<T extends { resultCode: string; resultData: unknown; developerMessage?: string; error?: { message: string } }>(
     action: () => Promise<T>,
     successMessage: string,
     reloadTasks = true,
