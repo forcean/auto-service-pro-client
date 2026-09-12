@@ -9,9 +9,10 @@ import { HttpClientModule } from '@angular/common/http';
 import { SharedModule } from "../../shared/shared.module";
 import { WorkOrderDetailComponent } from './work-order-detail/work-order-detail.component';
 import { QuotationCreateComponent } from './quotation-create/quotation-create.component';
+import { WorkOrderFlowComponent } from './work-order-flow/work-order-flow.component';
 
 @NgModule({
-  declarations: [WorkOrderComponent, QuotationComponent, WorkOrderDetailComponent, QuotationCreateComponent],
+  declarations: [WorkOrderComponent, QuotationComponent, WorkOrderDetailComponent, QuotationCreateComponent, WorkOrderFlowComponent],
   imports: [
     CommonModule,
     RepairManagementRoutingModule,

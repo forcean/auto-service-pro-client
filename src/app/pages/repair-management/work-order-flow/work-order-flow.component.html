@@ -1,0 +1,117 @@
+<section class="mt-6 rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+  <div class="flex flex-col gap-3 border-b border-slate-100 bg-slate-50/70 px-5 py-4 md:flex-row md:items-center md:justify-between">
+    <div>
+      <p class="text-xs font-bold uppercase tracking-wider text-emerald-600">Repair workflow</p>
+      <h2 class="mt-1 text-lg font-bold text-slate-900">ดำเนินงานซ่อมจนผ่าน QC</h2>
+      <p class="mt-1 text-xs text-slate-500">สิ้นสุดที่ QC Approved — ไม่มีขั้นตอนออก Invoice หรือ Payment ในหน้านี้</p>
+    </div>
+    <button type="button" (click)="loadTasks()" [disabled]="isLoadingTasks" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-50">
+      {{ isLoadingTasks ? 'กำลังโหลด…' : 'รีเฟรชงาน' }}
+    </button>
+  </div>
+
+  <p *ngIf="feedback" class="mx-5 mt-4 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700">{{ feedback }}</p>
+
+  <div class="p-5 space-y-5">
+    <div class="grid grid-cols-2 gap-2 text-center text-[11px] font-semibold sm:grid-cols-4 lg:grid-cols-8">
+      <div class="rounded-lg px-2 py-2" [ngClass]="workOrder.status === statuses.OPEN ? 'bg-sky-600 text-white' : 'bg-slate-100 text-slate-500'">เปิดงาน</div>
+      <div class="rounded-lg px-2 py-2" [ngClass]="workOrder.status === statuses.WAITING_QUOTATION || workOrder.status === statuses.WAITING_APPROVAL ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-500'">เสนอราคา</div>
+      <div class="rounded-lg px-2 py-2" [ngClass]="workOrder.status === statuses.WAITING_ASSIGNMENT ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500'">มอบหมาย</div>
+      <div class="rounded-lg px-2 py-2" [ngClass]="workOrder.status === statuses.IN_PROGRESS || workOrder.status === statuses.REWORK ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'">ซ่อม</div>
+      <div class="rounded-lg px-2 py-2" [ngClass]="workOrder.status === statuses.WAITING_ADDITIONAL_APPROVAL ? 'bg-orange-500 text-white' : 'bg-slate-100 text-slate-500'">งานเพิ่ม</div>
+      <div class="rounded-lg px-2 py-2" [ngClass]="workOrder.status === statuses.WAITING_QC ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-500'">QC</div>
+      <div class="rounded-lg px-2 py-2" [ngClass]="workOrder.status === statuses.QC_APPROVED ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-500'">QC ผ่าน</div>
+      <div class="rounded-lg bg-slate-100 px-2 py-2 text-slate-400">Payment (แยก branch)</div>
+    </div>
+
+    <div *ngIf="workOrder.status === statuses.OPEN" class="rounded-2xl border border-sky-100 bg-sky-50 p-4">
+      <p class="text-sm font-bold text-sky-900">รับรถและเริ่มตรวจเช็ค</p>
+      <p class="mt-1 text-xs text-sky-700">เมื่อตรวจข้อมูลรถและอาการเรียบร้อย ให้เปลี่ยนสถานะเพื่อเริ่มประเมินงาน</p>
+      <button type="button" (click)="moveWorkOrder(statuses.INSPECTING)" [disabled]="isSubmitting" class="mt-3 rounded-xl bg-sky-600 px-4 py-2 text-xs font-bold text-white hover:bg-sky-700 disabled:opacity-50">เริ่มตรวจเช็ค</button>
+    </div>
+
+    <div *ngIf="workOrder.status === statuses.INSPECTING" class="rounded-2xl border border-amber-100 bg-amber-50 p-4">
+      <p class="text-sm font-bold text-amber-900">พร้อมจัดทำใบเสนอราคา</p>
+      <button type="button" (click)="moveWorkOrder(statuses.WAITING_QUOTATION)" [disabled]="isSubmitting" class="mt-3 rounded-xl bg-amber-600 px-4 py-2 text-xs font-bold text-white hover:bg-amber-700 disabled:opacity-50">ส่งต่อจัดทำใบเสนอราคา</button>
+    </div>
+
+    <div *ngIf="workOrder.status === statuses.WAITING_QUOTATION" class="rounded-2xl border border-amber-100 bg-amber-50 p-4">
+      <p class="text-sm font-bold text-amber-900">รอจัดทำใบเสนอราคา</p>
+      <p class="mt-1 text-xs text-amber-700">สร้างใบเสนอราคาจาก Work Order นี้ แล้ว backend จะอัปเดตเป็นรอลูกค้าอนุมัติ</p>
+      <button type="button" (click)="goToQuotation()" class="mt-3 rounded-xl bg-amber-600 px-4 py-2 text-xs font-bold text-white hover:bg-amber-700">สร้างใบเสนอราคา</button>
+    </div>
+
+    <div *ngIf="workOrder.status === statuses.WAITING_APPROVAL" class="rounded-2xl border border-amber-100 bg-amber-50 p-4">
+      <p class="text-sm font-bold text-amber-900">รอการตัดสินใจของลูกค้า</p>
+      <div class="mt-3 grid gap-2 md:grid-cols-3">
+        <input [(ngModel)]="quotationNo" placeholder="เลขที่ใบเสนอราคา" class="rounded-xl border border-amber-200 bg-white px-3 py-2 text-xs" />
+        <input [(ngModel)]="quotationCustomerName" placeholder="ชื่อลูกค้าที่อนุมัติ" class="rounded-xl border border-amber-200 bg-white px-3 py-2 text-xs" />
+        <select [(ngModel)]="quotationMethod" class="rounded-xl border border-amber-200 bg-white px-3 py-2 text-xs"><option value="PHONE">โทรศัพท์</option><option value="LINE">LINE</option><option value="FACEBOOK">Facebook</option><option value="IN_PERSON">ลงนามต่อหน้า</option></select>
+      </div>
+      <div class="mt-2 flex flex-wrap gap-2">
+        <button type="button" (click)="approveQuotation()" [disabled]="isSubmitting" class="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-50">ลูกค้าอนุมัติ</button>
+        <input [(ngModel)]="quotationRejectReason" placeholder="เหตุผลหากไม่อนุมัติ" class="min-w-52 flex-1 rounded-xl border border-amber-200 bg-white px-3 py-2 text-xs" />
+        <button type="button" (click)="rejectQuotation()" [disabled]="isSubmitting" class="rounded-xl border border-rose-200 bg-white px-4 py-2 text-xs font-bold text-rose-700 hover:bg-rose-50 disabled:opacity-50">ปฏิเสธ</button>
+        <button type="button" (click)="createQuotationRevision()" [disabled]="isSubmitting" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-50">สร้างฉบับแก้ไข</button>
+      </div>
+    </div>
+
+    <div *ngIf="workOrder.status === statuses.WAITING_ASSIGNMENT || workOrder.status === statuses.REWORK" class="rounded-2xl border border-indigo-100 bg-indigo-50 p-4">
+      <p class="text-sm font-bold text-indigo-900">มอบหมายงานให้ช่าง</p>
+      <p class="mt-1 text-xs text-indigo-700">ใช้ User ID ของช่างตามข้อมูลในระบบ เพราะ backend ยังไม่มี endpoint รายชื่อช่างเฉพาะสำหรับหน้าจอนี้</p>
+      <ng-container *ngTemplateOutlet="taskFormTemplate"></ng-container>
+    </div>
+
+    <div *ngIf="workOrder.status === statuses.IN_PROGRESS || workOrder.status === statuses.WAITING_ADDITIONAL_APPROVAL" class="space-y-4">
+      <div class="rounded-2xl border border-blue-100 bg-blue-50 p-4">
+        <p class="text-sm font-bold text-blue-900">กำลังดำเนินการซ่อม</p>
+        <p class="mt-1 text-xs text-blue-700">ติดตามสถานะงาน แจ้งปัญหาเพิ่มเติม และทำรายการอะไหล่จากงานที่ได้รับมอบหมาย</p>
+      </div>
+
+      <div class="grid gap-3 lg:grid-cols-2">
+        <article *ngFor="let task of tasks" class="rounded-2xl border border-slate-200 bg-white p-4">
+          <div class="flex items-start justify-between gap-3"><div><p class="font-mono text-[11px] text-slate-400">{{ task.taskNo }}</p><h3 class="text-sm font-bold text-slate-900">{{ task.title }}</h3><p class="mt-1 text-xs text-slate-500">{{ task.mechanics?.[0]?.mechanicName || task.mechanics?.[0]?.mechanicId || 'ยังไม่มีข้อมูลช่าง' }}</p></div><span class="rounded-lg bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-600">{{ task.status }}</span></div>
+          <p *ngIf="task.description" class="mt-3 text-xs text-slate-600">{{ task.description }}</p>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <button *ngIf="nextTaskStatus(task)" type="button" (click)="updateTaskStatus(task, nextTaskStatus(task)!)" [disabled]="isSubmitting || workOrder.status === statuses.WAITING_ADDITIONAL_APPROVAL" class="rounded-lg bg-blue-600 px-3 py-1.5 text-[11px] font-bold text-white hover:bg-blue-700 disabled:opacity-50">{{ taskActionLabel(task) }}</button>
+            <button *ngIf="task.status !== taskStatuses.FINISHED && task.status !== taskStatuses.CANCELLED" type="button" (click)="selectTaskForPartIssue(task.taskNo)" class="rounded-lg border border-slate-200 px-3 py-1.5 text-[11px] font-bold text-slate-600 hover:bg-slate-50">เบิกอะไหล่</button>
+          </div>
+          <div *ngIf="task.status !== taskStatuses.FINISHED" class="mt-3 border-t border-slate-100 pt-3">
+            <div class="flex gap-2"><input [(ngModel)]="additionalProblemText[task.taskNo]" placeholder="พบปัญหาเพิ่มเติม" class="min-w-0 flex-1 rounded-lg border border-slate-200 px-2 py-1.5 text-xs" /><button type="button" (click)="reportAdditionalProblem(task)" [disabled]="isSubmitting || workOrder.status === statuses.WAITING_ADDITIONAL_APPROVAL" class="rounded-lg border border-orange-200 px-2 py-1.5 text-[11px] font-bold text-orange-700 disabled:opacity-50">แจ้งงานเพิ่ม</button></div>
+          </div>
+          <div *ngFor="let problem of task.additionalProblems" class="mt-2 rounded-lg bg-orange-50 p-2 text-xs text-orange-900">
+            <p>{{ problem.description }} <span class="font-bold">({{ problem.status }})</span></p>
+            <div *ngIf="problem.status === 'PENDING' && workOrder.status === statuses.WAITING_ADDITIONAL_APPROVAL" class="mt-2 grid gap-2 sm:grid-cols-2"><input [(ngModel)]="additionalQuotationIds[problem._id]" placeholder="Quotation ID ที่อนุมัติ" class="rounded-lg border border-orange-200 bg-white px-2 py-1.5 text-xs" /><input [(ngModel)]="additionalTaskTitles[problem._id]" placeholder="ชื่องานซ่อมเพิ่ม (ไม่บังคับ)" class="rounded-lg border border-orange-200 bg-white px-2 py-1.5 text-xs" /><button type="button" (click)="approveAdditionalProblem(task, problem._id)" [disabled]="isSubmitting" class="rounded-lg bg-orange-600 px-2 py-1.5 text-[11px] font-bold text-white disabled:opacity-50">อนุมัติและสร้างงาน</button></div>
+          </div>
+        </article>
+      </div>
+
+      <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+        <p class="text-sm font-bold text-slate-900">Part Issue และสต็อก</p>
+        <p class="mt-1 text-xs text-slate-500">backend ไม่มีรายการใบเบิกตาม Work Order จึงค้นหาได้ด้วยเลข Part Issue จริงเท่านั้น</p>
+        <div class="mt-3 grid gap-2 md:grid-cols-4"><input [(ngModel)]="partForm.taskNo" placeholder="Task No" class="rounded-xl border border-slate-200 px-3 py-2 text-xs" /><input [(ngModel)]="partForm.productId" placeholder="Product ID" class="rounded-xl border border-slate-200 px-3 py-2 text-xs" /><input [(ngModel)]="partForm.sku" placeholder="SKU" class="rounded-xl border border-slate-200 px-3 py-2 text-xs" /><input [(ngModel)]="partForm.productName" placeholder="ชื่ออะไหล่" class="rounded-xl border border-slate-200 px-3 py-2 text-xs" /><input [(ngModel)]="partForm.requestedQty" type="number" min="1" placeholder="จำนวน" class="rounded-xl border border-slate-200 px-3 py-2 text-xs" /><input [(ngModel)]="partForm.unitPrice" type="number" min="0" placeholder="ราคาต่อหน่วย" class="rounded-xl border border-slate-200 px-3 py-2 text-xs" /><label class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs"><input [(ngModel)]="partForm.isAdditionalCharge" type="checkbox" />คิดเงินเพิ่ม</label><button type="button" (click)="createPartIssue()" [disabled]="isSubmitting" class="rounded-xl bg-slate-800 px-3 py-2 text-xs font-bold text-white disabled:opacity-50">สร้างใบเบิก</button></div>
+        <div class="mt-3 flex gap-2"><input [(ngModel)]="issueSearchNo" placeholder="ค้นหาเลขที่ Part Issue" class="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs" /><button type="button" (click)="findPartIssue()" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700">ค้นหา</button></div>
+        <div *ngIf="loadedIssue" class="mt-3 rounded-xl border border-slate-200 bg-white p-3 text-xs"><div class="flex flex-wrap items-center justify-between gap-2"><div><span class="font-mono text-slate-500">{{ loadedIssue.issueNo }}</span><span class="ml-2 font-bold text-slate-800">{{ loadedIssue.status }}</span></div><div class="flex gap-2"><button type="button" (click)="reservePartIssue()" [disabled]="isSubmitting" class="rounded-lg bg-amber-500 px-3 py-1.5 font-bold text-white disabled:opacity-50">จอง</button><button type="button" (click)="issueReservedParts()" [disabled]="isSubmitting" class="rounded-lg bg-emerald-600 px-3 py-1.5 font-bold text-white disabled:opacity-50">จ่าย/ตัดสต็อก</button></div></div><p *ngFor="let item of loadedIssue.items" class="mt-2 text-slate-600">{{ item.sku }} — ขอ {{ item.requestedQty }}, จอง {{ item.reservedQty }}, จ่าย {{ item.issuedQty }}</p><div *ngIf="loadedIssue.status !== 'ISSUED' && loadedIssue.status !== 'CANCELLED'" class="mt-3 flex gap-2"><input [(ngModel)]="partIssueCancelRemark" placeholder="เหตุผลที่ยกเลิกใบเบิก" class="min-w-0 flex-1 rounded-lg border border-rose-200 px-2 py-1.5 text-xs" /><button type="button" (click)="cancelPartIssue()" [disabled]="isSubmitting" class="rounded-lg border border-rose-200 px-3 py-1.5 font-bold text-rose-700 disabled:opacity-50">ยกเลิกใบเบิก</button></div></div>
+      </div>
+    </div>
+
+    <div *ngIf="workOrder.status === statuses.WAITING_QC" class="rounded-2xl border border-violet-100 bg-violet-50 p-4">
+      <p class="text-sm font-bold text-violet-900">ตรวจสอบคุณภาพ (QC)</p>
+      <p class="mt-1 text-xs text-violet-700">เมื่อผ่าน ระบบจะหยุดที่ QC Approved ตามขอบเขต branch นี้</p>
+      <div class="mt-3 flex flex-wrap gap-2"><button type="button" (click)="moveWorkOrder(statuses.QC_APPROVED)" [disabled]="isSubmitting" class="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-50">QC ผ่าน</button><input [(ngModel)]="reworkTitle" placeholder="รายการที่ QC ไม่ผ่าน / ต้องแก้ไข" class="min-w-60 flex-1 rounded-xl border border-violet-200 bg-white px-3 py-2 text-xs" /><button type="button" (click)="failQcAndCreateRework()" [disabled]="isSubmitting" class="rounded-xl border border-rose-200 bg-white px-4 py-2 text-xs font-bold text-rose-700 disabled:opacity-50">ไม่ผ่าน: สร้างงานแก้ไข</button></div>
+    </div>
+
+    <div *ngIf="workOrder.status === statuses.QC_APPROVED" class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4"><p class="text-sm font-bold text-emerald-900">QC ผ่านแล้ว</p><p class="mt-1 text-xs text-emerald-700">ขั้นตอน Payment, Invoice และการปิดงานไม่ได้อยู่ใน branch นี้</p></div>
+  </div>
+</section>
+
+<ng-template #taskFormTemplate>
+  <div class="mt-3 grid gap-2 md:grid-cols-3">
+    <input [(ngModel)]="taskForm.title" placeholder="ชื่องานซ่อม *" class="rounded-xl border border-indigo-200 bg-white px-3 py-2 text-xs" />
+    <input [(ngModel)]="taskForm.mechanicId" placeholder="Mechanic User ID *" class="rounded-xl border border-indigo-200 bg-white px-3 py-2 text-xs" />
+    <input [(ngModel)]="taskForm.mechanicName" placeholder="ชื่อช่าง (ไม่บังคับ)" class="rounded-xl border border-indigo-200 bg-white px-3 py-2 text-xs" />
+    <input [(ngModel)]="taskForm.description" placeholder="รายละเอียดงาน" class="rounded-xl border border-indigo-200 bg-white px-3 py-2 text-xs" />
+    <select [(ngModel)]="taskForm.priority" class="rounded-xl border border-indigo-200 bg-white px-3 py-2 text-xs"><option *ngFor="let priority of priorities" [value]="priority">{{ priority }}</option></select>
+    <div class="flex gap-2"><input [(ngModel)]="taskForm.estimateMinute" type="number" min="0" placeholder="นาทีโดยประมาณ" class="min-w-0 flex-1 rounded-xl border border-indigo-200 bg-white px-3 py-2 text-xs" /><button type="button" (click)="createTask()" [disabled]="isSubmitting" class="rounded-xl bg-indigo-600 px-3 py-2 text-xs font-bold text-white hover:bg-indigo-700 disabled:opacity-50">มอบหมายงาน</button></div>
+  </div>
+</ng-template>

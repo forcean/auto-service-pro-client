@@ -86,9 +86,12 @@ export class WorkOrderDetailComponent implements OnInit {
       // this.route.queryParams.subscribe((params) => {
       //   this.loadWorkOrder(this.workOrderId);
       // });
-      this.workOrderId =
-        this.route.snapshot.paramMap.get('id') || 'WO-2026-0816';
-      this.loadWorkOrder(this.workOrderId);
+      this.workOrderId = this.route.snapshot.paramMap.get('id') || '';
+      if (this.workOrderId) {
+        this.loadWorkOrder(this.workOrderId);
+      } else {
+        this.router.navigate(['/portal/repair/work-orders']);
+      }
       // }
     } catch (error) {
       // const errorObject = error as { message: string };
@@ -173,6 +176,10 @@ export class WorkOrderDetailComponent implements OnInit {
     } catch (error) {
       console.error('Error creating work order:', error);
     }
+  }
+
+  onWorkflowChanged(): void {
+    void this.loadWorkOrder(this.workOrderId);
   }
 
   getStatusConfig() {

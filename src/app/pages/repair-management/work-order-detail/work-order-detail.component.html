@@ -310,6 +310,12 @@
   </div>
 </div>
 
+<app-work-order-flow
+  *ngIf="workOrder"
+  [workOrder]="workOrder"
+  (flowChanged)="onWorkflowChanged()"
+></app-work-order-flow>
+
 <!-- Re-use Modal สำหรับแก้ไขข้อมูล -->
 <app-create-work-order-modal
   *ngIf="isEditModalOpen"
