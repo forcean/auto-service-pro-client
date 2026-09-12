@@ -7,7 +7,11 @@ import { IBaseResponse } from '../interface/base-http.interface';
 import { IReqCreateUser, IReqUpdateUser, IResponseUserDetail } from '../interface/user-management.interface';
 import { IQueryListUser, IUserResultData } from '../interface/table-user-management.interface';
 import { IReqCreateProduct, IReqUpdateProduct, IResponseProductDetail } from '../interface/product-management.interface';
-import { IProductList, IQueryListProduct } from '../interface/product-list.interface';
+import {
+  IProductList,
+  IProducts,
+  IQueryListProduct,
+} from '../interface/product-list.interface';
 
 @Injectable({
   providedIn: 'root'
