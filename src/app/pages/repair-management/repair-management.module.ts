@@ -10,9 +10,10 @@ import { SharedModule } from "../../shared/shared.module";
 import { WorkOrderDetailComponent } from './work-order-detail/work-order-detail.component';
 import { QuotationCreateComponent } from './quotation-create/quotation-create.component';
 import { WorkOrderFlowComponent } from './work-order-flow/work-order-flow.component';
+import { QuotationApprovalComponent } from './quotation-approval/quotation-approval.component';
 
 @NgModule({
-  declarations: [WorkOrderComponent, QuotationComponent, WorkOrderDetailComponent, QuotationCreateComponent, WorkOrderFlowComponent],
+  declarations: [WorkOrderComponent, QuotationComponent, WorkOrderDetailComponent, QuotationCreateComponent, WorkOrderFlowComponent, QuotationApprovalComponent],
   imports: [
     CommonModule,
     RepairManagementRoutingModule,

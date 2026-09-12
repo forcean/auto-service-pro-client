@@ -296,9 +296,7 @@ export class QuotationComponent implements OnInit {
   }
 
   viewDetail(quotationNo: string): void {
-    this.router.navigate(['portal/repair/quotation/create'], {
-      queryParams: { quotationNo },
-    });
+    this.router.navigate(['/portal/repair/quotation', quotationNo, 'approval']);
   }
 
   onEditQuotation(quotationNo: string): void {

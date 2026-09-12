@@ -446,7 +446,11 @@ export class QuotationCreateComponent implements OnInit, OnDestroy {
         throw new Error('Failed to create quotation');
       }
 
-      await this.navigateBack();
+      await this.router.navigate([
+        '/portal/repair/quotation',
+        response.resultData.quotationNo,
+        'approval',
+      ]);
     } catch (error) {
       console.error('Failed to create quotation:', error);
 

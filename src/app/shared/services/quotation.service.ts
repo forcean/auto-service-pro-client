@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 
 import { HttpService } from '../../core/services/http-service/http.service';
 import { ApiPrefix } from '../enum/api-prefix.enum';
+import { RESPONSE } from '../enum/response.enum';
 import { IBaseResponse } from '../interface/base-http.interface';
 import { IQueryListQuotation, IQuotationResultData } from '../interface/table-quotation.interface';
 import {
@@ -145,9 +146,13 @@ export class QuotationService {
     quotationNo: string,
     body: IApproveQuotationRequest,
   ): Promise<IBaseResponse<IQuotationListItem>> {
-    return this.request(() =>
+    const response = await this.request(() =>
       this.httpService.patch<IQuotationListItem>(`${this.apiPath}/${quotationNo}/approve`, body),
     );
+
+    return response.resultCode === RESPONSE.SUCCESS
+      ? { ...response, resultData: this.mapQuotation(response.resultData) }
+      : response;
   }
 
   async rejectQuotation(
