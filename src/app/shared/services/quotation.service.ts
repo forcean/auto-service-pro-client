@@ -176,9 +176,13 @@ export class QuotationService {
   }
 
   async createRevision(quotationNo: string): Promise<IBaseResponse<IQuotationListItem>> {
-    return this.request(() =>
+    const response = await this.request(() =>
       this.httpService.post<IQuotationListItem>(`${this.apiPath}/${quotationNo}/revision`, {}),
     );
+
+    return response.resultCode === RESPONSE.SUCCESS
+      ? { ...response, resultData: this.mapQuotation(response.resultData) }
+      : response;
   }
 
   private async request<T>(action: () => Promise<IBaseResponse<T>>): Promise<IBaseResponse<T>> {

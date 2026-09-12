@@ -32,6 +32,7 @@ export class QuotationApprovalComponent implements OnInit {
   isSubmitting = false;
   errorMessage = '';
   successMessage = '';
+  rejectReason = '';
   approvalForm: IApproveQuotationRequest = {
     customerName: '',
     method: 'PHONE',
@@ -65,6 +66,14 @@ export class QuotationApprovalComponent implements OnInit {
 
   get isApproved(): boolean {
     return this.quotation?.status === EQuotationStatus.APPROVED;
+  }
+
+  get isRejected(): boolean {
+    return this.quotation?.status === EQuotationStatus.REJECTED;
+  }
+
+  get canCreateRevision(): boolean {
+    return this.isRejected && this.quotation?.isLatest === true;
   }
 
   async loadQuotation(): Promise<void> {
@@ -145,6 +154,62 @@ export class QuotationApprovalComponent implements OnInit {
     } catch (error) {
       console.error('Failed to submit quotation for approval:', error);
       this.errorMessage = 'ไม่สามารถส่งใบเสนอราคาให้ลูกค้าพิจารณาได้ โปรดลองใหม่อีกครั้ง';
+    } finally {
+      this.isSubmitting = false;
+    }
+  }
+
+  async reject(): Promise<void> {
+    if (!this.canApprove || this.isSubmitting) return;
+
+    const reason = this.rejectReason.trim();
+    if (!reason) {
+      this.errorMessage = 'กรุณาระบุเหตุผลที่ลูกค้าไม่อนุมัติ';
+      return;
+    }
+
+    this.isSubmitting = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    try {
+      const response = await this.quotationService.rejectQuotation(this.quotationNo, reason);
+
+      if (response.resultCode !== RESPONSE.SUCCESS) {
+        this.errorMessage = response.developerMessage || 'ไม่สามารถบันทึกการปฏิเสธได้';
+        return;
+      }
+
+      await this.loadQuotation();
+      this.successMessage = 'บันทึกว่าลูกค้าไม่อนุมัติแล้ว สามารถสร้างฉบับแก้ไขได้';
+    } catch (error) {
+      console.error('Failed to reject quotation:', error);
+      this.errorMessage = 'ไม่สามารถบันทึกการปฏิเสธได้ โปรดลองใหม่อีกครั้ง';
+    } finally {
+      this.isSubmitting = false;
+    }
+  }
+
+  async createRevision(): Promise<void> {
+    if (!this.canCreateRevision || this.isSubmitting) return;
+
+    this.isSubmitting = true;
+    this.errorMessage = '';
+
+    try {
+      const response = await this.quotationService.createRevision(this.quotationNo);
+
+      if (response.resultCode !== RESPONSE.SUCCESS) {
+        this.errorMessage = response.developerMessage || 'ไม่สามารถสร้างใบเสนอราคาฉบับแก้ไขได้';
+        return;
+      }
+
+      await this.router.navigate(['/portal/repair/quotation/create'], {
+        queryParams: { quotationNo: response.resultData.quotationNo },
+      });
+    } catch (error) {
+      console.error('Failed to create quotation revision:', error);
+      this.errorMessage = 'ไม่สามารถสร้างใบเสนอราคาฉบับแก้ไขได้ โปรดลองใหม่อีกครั้ง';
     } finally {
       this.isSubmitting = false;
     }
