@@ -59,6 +59,10 @@ export class QuotationApprovalComponent implements OnInit {
     return this.quotation?.status === EQuotationStatus.PENDING_APPROVAL;
   }
 
+  get isDraft(): boolean {
+    return this.quotation?.status === EQuotationStatus.DRAFT;
+  }
+
   get isApproved(): boolean {
     return this.quotation?.status === EQuotationStatus.APPROVED;
   }
@@ -111,11 +115,36 @@ export class QuotationApprovalComponent implements OnInit {
         return;
       }
 
-      this.quotation = response.resultData;
+      await this.loadQuotation();
       this.successMessage = 'บันทึกการอนุมัติแล้ว สามารถดำเนินการจัดทีมซ่อมต่อได้';
     } catch (error) {
       console.error('Failed to approve quotation:', error);
       this.errorMessage = 'ไม่สามารถบันทึกการอนุมัติได้ โปรดลองใหม่อีกครั้ง';
+    } finally {
+      this.isSubmitting = false;
+    }
+  }
+
+  async submitForApproval(): Promise<void> {
+    if (!this.isDraft || this.isSubmitting) return;
+
+    this.isSubmitting = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    try {
+      const response = await this.quotationService.submitForApproval(this.quotationNo);
+
+      if (response.resultCode !== RESPONSE.SUCCESS) {
+        this.errorMessage = response.developerMessage || 'ไม่สามารถส่งใบเสนอราคาให้ลูกค้าพิจารณาได้';
+        return;
+      }
+
+      await this.loadQuotation();
+      this.successMessage = 'ส่งใบเสนอราคาให้ลูกค้าพิจารณาแล้ว กรุณาบันทึกผลการตัดสินใจเมื่อลูกค้าตอบกลับ';
+    } catch (error) {
+      console.error('Failed to submit quotation for approval:', error);
+      this.errorMessage = 'ไม่สามารถส่งใบเสนอราคาให้ลูกค้าพิจารณาได้ โปรดลองใหม่อีกครั้ง';
     } finally {
       this.isSubmitting = false;
     }

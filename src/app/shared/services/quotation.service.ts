@@ -155,6 +155,17 @@ export class QuotationService {
       : response;
   }
 
+  async submitForApproval(
+    quotationNo: string,
+  ): Promise<IBaseResponse<IQuotationListItem>> {
+    return this.request(() =>
+      this.httpService.patch<IQuotationListItem>(
+        `${this.apiPath}/${quotationNo}/submit-for-approval`,
+        {},
+      ),
+    );
+  }
+
   async rejectQuotation(
     quotationNo: string,
     reason: string,

@@ -85,17 +85,33 @@
         </div>
 
         <ng-container *ngIf="!isApproved">
-          <h2 class="text-lg font-bold text-slate-900">ลูกค้าอนุมัติใบเสนอราคา</h2>
-          <p class="mt-1 text-sm leading-6 text-slate-600">บันทึกหลักฐานการยืนยันจากลูกค้าก่อนส่งงานต่อไปยังขั้นตอนจัดทีมซ่อม</p>
+          <h2 class="text-lg font-bold text-slate-900">{{ isDraft ? 'ส่งใบเสนอราคาให้ลูกค้าพิจารณา' : 'ลูกค้าอนุมัติใบเสนอราคา' }}</h2>
+          <p class="mt-1 text-sm leading-6 text-slate-600">
+            {{ isDraft ? 'ตรวจสอบรายละเอียดและส่งใบเสนอราคานี้ให้ลูกค้าพิจารณาก่อนบันทึกผลการตัดสินใจ' : 'บันทึกหลักฐานการยืนยันจากลูกค้าก่อนส่งงานต่อไปยังขั้นตอนจัดทีมซ่อม' }}
+          </p>
 
-          <div *ngIf="!canApprove" class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-            ใบเสนอราคาอยู่สถานะ <strong>{{ statusLabel(quotation.status) }}</strong> จึงยังส่งคำขออนุมัติไม่ได้ API หลังบ้านรับเฉพาะสถานะ <strong>PENDING_APPROVAL</strong> เท่านั้น
+          <div *ngIf="isDraft" class="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">
+            ฉบับร่างยังแก้ไขได้ เมื่อส่งแล้วสถานะจะเปลี่ยนเป็น <strong>รอลูกค้าพิจารณา</strong> และจึงบันทึกผลอนุมัติได้
           </div>
 
           <div *ngIf="errorMessage" class="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{{ errorMessage }}</div>
           <div *ngIf="successMessage" class="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">{{ successMessage }}</div>
 
-          <div class="mt-5 space-y-4">
+          <div *ngIf="isDraft" class="mt-5">
+            <button
+              type="button"
+              class="inline-flex w-full items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+              [disabled]="isSubmitting"
+              (click)="submitForApproval()"
+            >
+              {{ isSubmitting ? 'กำลังส่ง…' : 'ส่งให้ลูกค้าพิจารณา' }}
+            </button>
+          </div>
+
+          <div *ngIf="!isDraft" class="mt-5 space-y-4">
+            <div *ngIf="!canApprove" class="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+              ใบเสนอราคาอยู่สถานะ <strong>{{ statusLabel(quotation.status) }}</strong> จึงไม่สามารถบันทึกการอนุมัติได้
+            </div>
             <label class="block text-sm font-semibold text-slate-700">
               ชื่อผู้ที่ยืนยันแทนลูกค้า <span class="text-red-500">*</span>
               <input
