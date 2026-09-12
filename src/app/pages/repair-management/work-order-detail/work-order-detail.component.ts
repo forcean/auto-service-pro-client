@@ -54,6 +54,14 @@ export class WorkOrderDetailComponent implements OnInit {
   readonly IconCheck = CheckCircle;
   readonly IconClock = Clock;
   readonly WORK_ORDER_STATUS_CONFIG = WORK_ORDER_STATUS_CONFIG;
+  readonly overviewSteps = [
+    'รับรถและตรวจเช็ค',
+    'ใบเสนอราคา',
+    'รอลูกค้าอนุมัติ',
+    'จัดทีมและซ่อม',
+    'ตรวจ QC',
+    'QC ผ่าน',
+  ];
 
   workOrderId: string = '';
   isLoading: boolean = false;
@@ -180,6 +188,33 @@ export class WorkOrderDetailComponent implements OnInit {
 
   onWorkflowChanged(): void {
     void this.loadWorkOrder(this.workOrderId);
+  }
+
+  get currentProcessIndex(): number {
+    switch (this.workOrder?.status) {
+      case EWorkOrderStatus.OPEN:
+      case EWorkOrderStatus.INSPECTING:
+        return 0;
+      case EWorkOrderStatus.WAITING_QUOTATION:
+        return 1;
+      case EWorkOrderStatus.WAITING_APPROVAL:
+        return 2;
+      case EWorkOrderStatus.WAITING_ASSIGNMENT:
+      case EWorkOrderStatus.IN_PROGRESS:
+      case EWorkOrderStatus.WAITING_ADDITIONAL_APPROVAL:
+      case EWorkOrderStatus.REWORK:
+        return 3;
+      case EWorkOrderStatus.WAITING_QC:
+        return 4;
+      case EWorkOrderStatus.QC_APPROVED:
+        return 5;
+      default:
+        return 0;
+    }
+  }
+
+  openTeamAssignment(): void {
+    void this.router.navigate(['/portal/repair/team-assignment', this.workOrderId]);
   }
 
   getStatusConfig() {

@@ -106,18 +106,26 @@
         <p *ngIf="!isLoadingMechanics && !mechanics.length" class="mt-3 text-xs text-indigo-700">ไม่พบรายชื่อช่างที่เลือกได้จาก API ผู้ใช้งาน</p>
       </section>
 
-      <section *ngIf="tasks.length || isLoadingTasks" class="rounded-2xl border border-slate-200 bg-white">
-        <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4"><div><h3 class="font-bold text-slate-900">งานที่เกี่ยวข้อง</h3><p class="mt-1 text-xs text-slate-500">{{ taskSummary }}</p></div><span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">{{ tasks.length }} งาน</span></div>
+      <section *ngIf="tasks.length || isLoadingTasks" class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+        <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4"><div><p class="text-xs font-bold uppercase tracking-wider text-indigo-600">Task board</p><h3 class="mt-1 font-bold text-slate-900">กระดานงานช่าง</h3><p class="mt-1 text-xs text-slate-500">{{ taskSummary }} · อัปเดตงานจาก card โดยตรง</p></div><span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">{{ tasks.length }} งาน</span></div>
         <div *ngIf="isLoadingTasks" class="p-5 text-sm text-slate-500">กำลังโหลดงาน…</div>
-        <div *ngIf="!isLoadingTasks" class="divide-y divide-slate-100">
-          <article *ngFor="let task of tasks" class="p-5">
-            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><p class="font-mono text-xs text-slate-400">{{ task.taskNo }}</p><h4 class="mt-1 font-bold text-slate-900">{{ task.title }}</h4><p class="mt-1 text-sm text-slate-500">{{ task.mechanics?.[0]?.mechanicName || 'ยังไม่ได้ระบุช่าง' }}<span *ngIf="task.description"> · {{ task.description }}</span></p></div><span class="w-fit rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">{{ task.status }}</span></div>
-            <div class="mt-4 flex flex-wrap gap-2">
-              <button *ngIf="nextTaskStatus(task)" type="button" (click)="updateTaskStatus(task, nextTaskStatus(task)!)" [disabled]="isSubmitting || workOrder.status === statuses.WAITING_ADDITIONAL_APPROVAL" class="rounded-lg bg-slate-800 px-3 py-2 text-xs font-bold text-white hover:bg-slate-700 disabled:opacity-50">{{ taskActionLabel(task) }}</button>
-              <button *ngIf="workOrder.status === statuses.IN_PROGRESS && task.status !== taskStatuses.FINISHED && task.status !== taskStatuses.CANCELLED" type="button" (click)="openParts(task)" class="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">เบิกอะไหล่</button>
+        <div *ngIf="!isLoadingTasks" class="grid gap-4 overflow-x-auto p-4 xl:grid-cols-4">
+          <section *ngFor="let column of taskBoardColumns" class="min-w-[250px] rounded-2xl border p-3" [ngClass]="column.accentClass">
+            <div class="mb-3 flex items-center justify-between gap-2"><div><h4 class="text-sm font-bold text-slate-800">{{ column.label }}</h4><p class="mt-0.5 text-[11px] text-slate-500">{{ column.hint }}</p></div><span class="rounded-full bg-white/80 px-2 py-1 text-xs font-bold text-slate-600">{{ tasksForColumn(column).length }}</span></div>
+            <p *ngIf="!tasksForColumn(column).length" class="rounded-xl border border-dashed border-slate-300 bg-white/60 p-3 text-center text-xs text-slate-400">ยังไม่มีงาน</p>
+            <div class="space-y-3">
+              <article *ngFor="let task of tasksForColumn(column)" class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+                <div class="flex items-start justify-between gap-2"><div class="min-w-0"><p class="font-mono text-[11px] text-slate-400">{{ task.taskNo }}</p><h5 class="mt-1 break-words text-sm font-bold text-slate-900">{{ task.title }}</h5></div><span class="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-600">{{ task.priority }}</span></div>
+                <p class="mt-2 text-xs text-slate-600">{{ task.mechanics?.[0]?.mechanicName || 'ยังไม่ได้ระบุช่าง' }}</p>
+                <p *ngIf="task.description" class="mt-1 line-clamp-2 text-xs text-slate-500">{{ task.description }}</p>
+                <div class="mt-3 flex flex-wrap gap-2">
+                  <button *ngIf="nextTaskStatus(task)" type="button" (click)="updateTaskStatus(task, nextTaskStatus(task)!)" [disabled]="isSubmitting || workOrder.status === statuses.WAITING_ADDITIONAL_APPROVAL" class="rounded-lg bg-slate-800 px-2.5 py-2 text-xs font-bold text-white hover:bg-slate-700 disabled:opacity-50">{{ taskActionLabel(task) }}</button>
+                  <button *ngIf="workOrder.status === statuses.IN_PROGRESS && task.status !== taskStatuses.FINISHED && task.status !== taskStatuses.CANCELLED" type="button" (click)="openParts(task)" class="rounded-lg border border-slate-200 px-2.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">เบิกอะไหล่</button>
+                </div>
+                <div *ngIf="workOrder.status === statuses.IN_PROGRESS && task.status !== taskStatuses.FINISHED && task.status !== taskStatuses.CANCELLED" class="mt-3 border-t border-slate-100 pt-3"><input [(ngModel)]="additionalProblemText[task.taskNo]" placeholder="แจ้งปัญหางานเพิ่ม" class="w-full rounded-lg border border-slate-200 px-2.5 py-2 text-xs" /><button type="button" (click)="reportAdditionalProblem(task)" [disabled]="isSubmitting" class="mt-2 w-full rounded-lg border border-amber-200 px-2.5 py-2 text-xs font-bold text-amber-700 hover:bg-amber-50 disabled:opacity-50">ส่งขออนุมัติ</button></div>
+              </article>
             </div>
-            <div *ngIf="workOrder.status === statuses.IN_PROGRESS && task.status !== taskStatuses.FINISHED" class="mt-4 flex gap-2 border-t border-slate-100 pt-4"><input [(ngModel)]="additionalProblemText[task.taskNo]" placeholder="แจ้งปัญหาหรืองานเพิ่ม" class="min-w-0 flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm" /><button type="button" (click)="reportAdditionalProblem(task)" [disabled]="isSubmitting" class="rounded-lg border border-amber-200 px-3 py-2 text-xs font-bold text-amber-700 hover:bg-amber-50 disabled:opacity-50">ส่งขออนุมัติ</button></div>
-          </article>
+          </section>
         </div>
       </section>
 

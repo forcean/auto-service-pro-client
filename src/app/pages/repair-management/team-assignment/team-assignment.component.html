@@ -1,0 +1,36 @@
+<section class="min-h-screen bg-slate-50/70 px-4 py-6 sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-[1440px]">
+    <button type="button" (click)="backToWorkOrders()" class="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-slate-600 transition hover:text-slate-900">← กลับรายการใบงาน</button>
+
+    <div *ngIf="isLoading" class="rounded-2xl border border-slate-200 bg-white p-10 text-center text-slate-500">กำลังโหลดพื้นที่จัดทีม…</div>
+    <div *ngIf="!isLoading && errorMessage" class="rounded-2xl border border-rose-200 bg-rose-50 p-5 text-rose-700">{{ errorMessage }}</div>
+
+    <ng-container *ngIf="!isLoading && workOrder">
+      <header class="mb-5 flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-widest text-indigo-600">Team assignment · Kanban workspace</p>
+          <h1 class="mt-1 text-2xl font-bold text-slate-900">{{ workOrder.workOrderNo }}</h1>
+          <p class="mt-1 text-sm text-slate-500">จัดทีม อัปเดตงานช่าง เบิกอะไหล่ และส่งงานเข้าตรวจ QC จากพื้นที่เดียว</p>
+        </div>
+        <button type="button" (click)="openWorkspace(workOrder.workOrderNo)" class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">รีเฟรชใบงาน</button>
+      </header>
+      <app-work-order-flow [workOrder]="workOrder" (flowChanged)="onFlowChanged()"></app-work-order-flow>
+    </ng-container>
+
+    <ng-container *ngIf="!isLoading && !workOrder && !errorMessage">
+      <header class="mb-5">
+        <p class="text-xs font-bold uppercase tracking-widest text-indigo-600">Team assignment</p>
+        <h1 class="mt-1 text-2xl font-bold text-slate-900">เลือกใบงานเพื่อจัดทีม</h1>
+        <p class="mt-1 text-sm text-slate-500">เปิด board ของใบงานที่ต้องการเพื่อดูและอัปเดตงานของช่าง</p>
+      </header>
+      <div *ngIf="!workOrders.length" class="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-500">ไม่พบใบงานในระบบ</div>
+      <div *ngIf="workOrders.length" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <button *ngFor="let item of workOrders" type="button" (click)="openWorkspace(item.workOrderNo)" class="rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md">
+          <p class="font-mono text-xs text-slate-400">{{ item.workOrderNo }}</p>
+          <p class="mt-2 font-semibold text-slate-900">{{ item.vehicle?.licensePlate || '-' }} {{ item.vehicle?.province || '' }}</p>
+          <div class="mt-4 flex items-center justify-between text-sm"><span class="rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-600">{{ item.status }}</span><span class="font-semibold text-indigo-600">เปิด board →</span></div>
+        </button>
+      </div>
+    </ng-container>
+  </div>
+</section>

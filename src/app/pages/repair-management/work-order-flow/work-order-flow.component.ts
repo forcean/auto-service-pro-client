@@ -18,6 +18,13 @@ interface IWorkflowStep {
   shortLabel: string;
 }
 
+interface ITaskBoardColumn {
+  label: string;
+  hint: string;
+  statuses: ETaskStatus[];
+  accentClass: string;
+}
+
 @Component({
   selector: 'app-work-order-flow',
   standalone: false,
@@ -38,6 +45,32 @@ export class WorkOrderFlowComponent implements OnChanges {
     { label: 'ดำเนินการซ่อม', shortLabel: 'ซ่อม' },
     { label: 'ตรวจสอบคุณภาพ', shortLabel: 'QC' },
     { label: 'QC ผ่าน', shortLabel: 'ผ่าน' },
+  ];
+  readonly taskBoardColumns: ITaskBoardColumn[] = [
+    {
+      label: 'รอมอบหมาย',
+      hint: 'Waiting',
+      statuses: [ETaskStatus.WAITING],
+      accentClass: 'border-slate-200 bg-slate-50',
+    },
+    {
+      label: 'พร้อมเริ่มงาน',
+      hint: 'Assigned / paused',
+      statuses: [ETaskStatus.ASSIGNED, ETaskStatus.PAUSED],
+      accentClass: 'border-indigo-200 bg-indigo-50/60',
+    },
+    {
+      label: 'กำลังดำเนินการ',
+      hint: 'In progress',
+      statuses: [ETaskStatus.IN_PROGRESS],
+      accentClass: 'border-amber-200 bg-amber-50/60',
+    },
+    {
+      label: 'ตรวจและเสร็จงาน',
+      hint: 'QC / done',
+      statuses: [ETaskStatus.QUALITY_CHECK, ETaskStatus.FINISHED, ETaskStatus.CANCELLED],
+      accentClass: 'border-emerald-200 bg-emerald-50/60',
+    },
   ];
 
   tasks: IWorkOrderTask[] = [];
@@ -110,6 +143,24 @@ export class WorkOrderFlowComponent implements OnChanges {
   get taskSummary(): string {
     const finished = this.tasks.filter((task) => task.status === ETaskStatus.FINISHED).length;
     return `${finished}/${this.tasks.length} งานเสร็จแล้ว`;
+  }
+
+  tasksForColumn(column: ITaskBoardColumn): IWorkOrderTask[] {
+    return this.tasks.filter((task) => column.statuses.includes(task.status));
+  }
+
+  taskStatusLabel(status: ETaskStatus): string {
+    const labels: Record<ETaskStatus, string> = {
+      [ETaskStatus.WAITING]: 'รอมอบหมาย',
+      [ETaskStatus.ASSIGNED]: 'พร้อมเริ่ม',
+      [ETaskStatus.IN_PROGRESS]: 'กำลังทำ',
+      [ETaskStatus.QUALITY_CHECK]: 'รอตรวจ',
+      [ETaskStatus.PAUSED]: 'พักงาน',
+      [ETaskStatus.FINISHED]: 'เสร็จแล้ว',
+      [ETaskStatus.CANCELLED]: 'ยกเลิก',
+    };
+
+    return labels[status];
   }
 
   isStepActive(index: number): boolean {
