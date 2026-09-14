@@ -20,7 +20,11 @@ import {
   User,
   Fuel,
   Gauge,
+  Search,
+  Car,
 } from 'lucide-angular';
+import { ICustomerVehicle } from '../../interface/table-vehicle.interface';
+import { UserList } from '../../interface/table-user-management.interface';
 
 export enum EFuelLevel {
   EMPTY = 'EMPTY',
@@ -39,11 +43,18 @@ export class CreateWorkOrderModalComponent implements OnInit, OnChanges {
   @Input() isOpen: boolean = false;
   // 1. เพิ่ม Input รับข้อมูลเดิมเพื่อรองรับโหมด Edit
   @Input() initialData: any = null;
+  @Input() vehicles: ICustomerVehicle[] = [];
+  @Input() isLoadingVehicles = false;
+  @Input() vehicleIdToSelect: string | null = null;
+  @Input() users: UserList[] = [];
+  @Input() isLoadingUsers = false;
 
   @Output() close = new EventEmitter<void>();
   @Output() submitForm = new EventEmitter<any>();
+  @Output() createVehicle = new EventEmitter<void>();
 
   createForm!: FormGroup;
+  vehicleSearch = '';
 
   // Icons
   readonly IconX = X;
@@ -57,6 +68,8 @@ export class CreateWorkOrderModalComponent implements OnInit, OnChanges {
   readonly IconUser = User;
   readonly IconFuel = Fuel;
   readonly IconGauge = Gauge;
+  readonly IconSearch = Search;
+  readonly IconCar = Car;
 
   defaultInspectionItems = [
     { item: 'Engine Oil (น้ำมันเครื่อง)', status: 'WARNING', remark: '' },
@@ -74,6 +87,16 @@ export class CreateWorkOrderModalComponent implements OnInit, OnChanges {
 
   // 2. ดักจับเมื่อมีการส่ง initialData เข้ามาในโหมด Edit
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['isOpen']?.currentValue === true) {
+      this.vehicleSearch = '';
+    }
+
+    if (changes['vehicleIdToSelect']?.currentValue && this.createForm) {
+      this.createForm.patchValue({
+        vehicleId: changes['vehicleIdToSelect'].currentValue,
+      });
+    }
+
     if (changes['initialData'] && this.createForm) {
       if (this.initialData) {
         this.patchFormData(this.initialData);
@@ -86,7 +109,6 @@ export class CreateWorkOrderModalComponent implements OnInit, OnChanges {
   initForm(): void {
     this.createForm = this.fb.group({
       vehicleId: ['', Validators.required],
-      customerId: ['', Validators.required],
       mileage: [0, [Validators.required, Validators.min(0)]],
       fuelLevel: [EFuelLevel.HALF],
       complaints: this.fb.array([]),
@@ -96,7 +118,7 @@ export class CreateWorkOrderModalComponent implements OnInit, OnChanges {
       customerRemark: [''],
       internalRemark: [''],
       expectedFinishDate: [''],
-      advisorId: [''],
+      advisor: [''],
     });
 
     if (this.initialData) {
@@ -114,6 +136,54 @@ export class CreateWorkOrderModalComponent implements OnInit, OnChanges {
     return this.createForm.get('inspections') as FormArray;
   }
 
+  get filteredVehicles(): ICustomerVehicle[] {
+    const keyword = this.vehicleSearch.trim().toLowerCase();
+    if (!keyword) return this.vehicles;
+
+    return this.vehicles.filter((vehicle) =>
+      [
+        vehicle.licensePlate,
+        vehicle.province,
+        vehicle.firstname,
+        vehicle.lastname,
+        vehicle.phoneNumber,
+        vehicle.vin,
+        vehicle.vehicle?.brand,
+        vehicle.vehicle?.model,
+      ]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(keyword)),
+    );
+  }
+
+  get selectedVehicle(): ICustomerVehicle | undefined {
+    const vehicleId = this.createForm?.get('vehicleId')?.value;
+    return this.vehicles.find((vehicle) => vehicle._id === vehicleId);
+  }
+
+  get selectedAdvisor(): UserList | undefined {
+    const advisorId = this.createForm?.get('advisor')?.value;
+    return this.users.find((user) => user.id === advisorId);
+  }
+
+  getUserLabel(user: UserList): string {
+    return [user.firstname, user.lastname].filter(Boolean).join(' ') || user.publicId;
+  }
+
+  formatVehicleLabel(vehicle: ICustomerVehicle): string {
+    const owner = [vehicle.firstname, vehicle.lastname].filter(Boolean).join(' ');
+    const model = [vehicle.vehicle?.brand, vehicle.vehicle?.model]
+      .filter(Boolean)
+      .join(' ');
+    return [
+      `${vehicle.licensePlate || '-'} ${vehicle.province || ''}`.trim(),
+      owner,
+      model,
+    ]
+      .filter(Boolean)
+      .join(' · ');
+  }
+
   // 3. ฟังก์ชันเติมข้อมูลเก่าเข้าฟอร์ม (โหมดแก้ไข)
   private patchFormData(data: any): void {
     this.complaintsArray.clear();
@@ -121,7 +191,6 @@ export class CreateWorkOrderModalComponent implements OnInit, OnChanges {
 
     this.createForm.patchValue({
       vehicleId: data.vehicleId || '',
-      customerId: data.customerId || '',
       mileage: data.mileage || 0,
       fuelLevel: data.fuelLevel || EFuelLevel.HALF,
       inspectionRequired: data.inspectionRequired ?? true,
@@ -129,7 +198,7 @@ export class CreateWorkOrderModalComponent implements OnInit, OnChanges {
       customerRemark: data.customerRemark || '',
       internalRemark: data.internalRemark || '',
       expectedFinishDate: data.expectedFinishDate || '',
-      advisorId: data.advisorId || '',
+      advisor: data.advisorId || data.advisor || '',
     });
 
     if (data.complaints && data.complaints.length > 0) {
@@ -217,6 +286,14 @@ export class CreateWorkOrderModalComponent implements OnInit, OnChanges {
     this.close.emit();
   }
 
+  onCreateVehicle(): void {
+    this.createVehicle.emit();
+  }
+
+  clearVehicleSearch(): void {
+    this.vehicleSearch = '';
+  }
+
   onSubmit(): void {
     if (this.createForm.invalid) {
       this.createForm.markAllAsTouched();
@@ -229,7 +306,7 @@ export class CreateWorkOrderModalComponent implements OnInit, OnChanges {
       delete payload.inspections;
     }
 
-    if (!payload.advisorId) delete payload.advisorId;
+    if (!payload.advisor) delete payload.advisor;
     if (!payload.expectedFinishDate) delete payload.expectedFinishDate;
 
     // ส่งข้อมูลออกไป (รองรับทั้ง Create และ Edit)

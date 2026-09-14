@@ -22,6 +22,8 @@ import {
 import { ModalCommonService } from '../../../shared/components/modal-common/modal-common.service';
 import { RESPONSE } from '../../../shared/enum/response.enum';
 import { WorkOrderService } from '../../../shared/services/work-order.service';
+import { UserManagementService } from '../../../shared/services/user-management.service';
+import { IResponseUserDetail } from '../../../shared/interface/user-management.interface';
 import { IWorkOrder } from '../../../shared/interface/work-order.interface';
 import { EWorkOrderStatus } from '../../../shared/enum/work-order.enum';
 import { WORK_ORDER_STATUS_CONFIG } from '../../../shared/constant/work-order-status.constant';
@@ -54,6 +56,14 @@ export class WorkOrderDetailComponent implements OnInit {
   readonly IconCheck = CheckCircle;
   readonly IconClock = Clock;
   readonly WORK_ORDER_STATUS_CONFIG = WORK_ORDER_STATUS_CONFIG;
+  readonly overviewSteps = [
+    'รับรถและตรวจเช็ค',
+    'ใบเสนอราคา',
+    'รอลูกค้าอนุมัติ',
+    'จัดทีมและซ่อม',
+    'ตรวจ QC',
+    'QC ผ่าน',
+  ];
 
   workOrderId: string = '';
   isLoading: boolean = false;
@@ -61,6 +71,7 @@ export class WorkOrderDetailComponent implements OnInit {
   isEditModalOpen: boolean = false;
   isLoadingDelete: boolean = false;
   workOrder!: IWorkOrder;
+  advisorUser: IResponseUserDetail | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -69,6 +80,7 @@ export class WorkOrderDetailComponent implements OnInit {
     private modalCommonService: ModalCommonService,
     private readonly workOrderService: WorkOrderService,
     private modalConditionService: ModalConditionService,
+    private readonly userManagementService: UserManagementService,
   ) {}
 
   ngOnInit(): void {
@@ -86,9 +98,12 @@ export class WorkOrderDetailComponent implements OnInit {
       // this.route.queryParams.subscribe((params) => {
       //   this.loadWorkOrder(this.workOrderId);
       // });
-      this.workOrderId =
-        this.route.snapshot.paramMap.get('id') || 'WO-2026-0816';
-      this.loadWorkOrder(this.workOrderId);
+      this.workOrderId = this.route.snapshot.paramMap.get('id') || '';
+      if (this.workOrderId) {
+        this.loadWorkOrder(this.workOrderId);
+      } else {
+        this.router.navigate(['/portal/repair/work-orders']);
+      }
       // }
     } catch (error) {
       // const errorObject = error as { message: string };
@@ -107,6 +122,11 @@ export class WorkOrderDetailComponent implements OnInit {
 
       if (response.resultCode === RESPONSE.SUCCESS) {
         this.workOrder = response.resultData;
+        this.advisorUser = null;
+
+        if (this.workOrder.advisorId) {
+          await this.loadAdvisor(this.workOrder.advisorId);
+        }
       } else {
         this.handleFailResponse();
       }
@@ -116,6 +136,26 @@ export class WorkOrderDetailComponent implements OnInit {
       this.isLoading = false;
       loader.complete();
     }
+  }
+
+  private async loadAdvisor(advisorId: string): Promise<void> {
+    try {
+      const response = await this.userManagementService.getUserDetail(advisorId);
+      if (response.resultCode === RESPONSE.SUCCESS) {
+        this.advisorUser = response.resultData;
+      }
+    } catch (error) {
+      console.error('Error fetching work order advisor:', error);
+    }
+  }
+
+  get advisorDisplayName(): string {
+    const advisor = this.advisorUser ?? this.workOrder?.advisor;
+    if (!advisor) return '-';
+
+    return [advisor.firstname, advisor.lastname]
+      .filter(Boolean)
+      .join(' ') || advisor.publicId || '-';
   }
 
   async deleteUser(id: string) {
@@ -173,6 +213,37 @@ export class WorkOrderDetailComponent implements OnInit {
     } catch (error) {
       console.error('Error creating work order:', error);
     }
+  }
+
+  onWorkflowChanged(): void {
+    void this.loadWorkOrder(this.workOrderId);
+  }
+
+  get currentProcessIndex(): number {
+    switch (this.workOrder?.status) {
+      case EWorkOrderStatus.OPEN:
+      case EWorkOrderStatus.INSPECTING:
+        return 0;
+      case EWorkOrderStatus.WAITING_QUOTATION:
+        return 1;
+      case EWorkOrderStatus.WAITING_APPROVAL:
+        return 2;
+      case EWorkOrderStatus.WAITING_ASSIGNMENT:
+      case EWorkOrderStatus.IN_PROGRESS:
+      case EWorkOrderStatus.WAITING_ADDITIONAL_APPROVAL:
+      case EWorkOrderStatus.REWORK:
+        return 3;
+      case EWorkOrderStatus.WAITING_QC:
+        return 4;
+      case EWorkOrderStatus.QC_APPROVED:
+        return 5;
+      default:
+        return 0;
+    }
+  }
+
+  openTeamAssignment(): void {
+    void this.router.navigate(['/portal/repair/team-assignment', this.workOrderId]);
   }
 
   getStatusConfig() {

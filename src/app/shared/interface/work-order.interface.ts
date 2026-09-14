@@ -3,14 +3,14 @@ import { EWorkOrderStatus } from '../enum/work-order.enum';
 
 export interface IWorkOrderVehicle2 {
   _id?: string;
-  licensePlate: string;
-  province: string;
-  vehicle: {
-    model: string;
-    brand: string;
-    generation: string;
+  licensePlate?: string;
+  province?: string;
+  vehicle?: {
+    model?: string;
+    brand?: string;
+    generation?: string;
   };
-  vin: string;
+  vin?: string;
 }
 
 export interface IWorkOrderCustomer {
@@ -20,42 +20,79 @@ export interface IWorkOrderCustomer {
   isVip?: boolean;
 }
 
+export interface IWorkOrderAdvisor {
+  _id?: string;
+  publicId?: string;
+  firstname?: string;
+  lastname?: string;
+  role?: string;
+}
+
 export interface IComplaint {
   title: string;
-  description: string;
-  completed: boolean;
+  description?: string;
 }
 
 export interface IInspection {
   item: string;
-  status: string;
-  remark: boolean;
+  status: 'GOOD' | 'WARNING' | 'BAD';
+  remark?: string;
 }
+
+export interface IWorkOrderTaskSummary {
+  totalTasks: number;
+  completedTasks: number;
+  cancelledTasks: number;
+}
+
+export interface ICreateWorkOrderRequest {
+  vehicleId: string;
+  mileage: number;
+  fuelLevel?: EFuelLevel;
+  complaints: IComplaint[];
+  inspectionRequired?: boolean;
+  inspections?: IInspection[];
+  diagnosis?: string;
+  customerRemark?: string;
+  internalRemark?: string;
+  images?: string[];
+  expectedFinishDate?: string;
+  advisor?: string;
+}
+
+export type IUpdateWorkOrderRequest = Partial<ICreateWorkOrderRequest>;
 
 export interface IWorkOrder {
   _id: string;
   workOrderNo: string;
   status: EWorkOrderStatus;
   progress: number;
+  taskSummary?: IWorkOrderTaskSummary;
+  checkInDate?: string;
   expectedFinishDate?: string;
-  mileage?: number;
+  mileage: number;
   fuelLevel?: EFuelLevel;
-  vehicle: IWorkOrderVehicle2;
+  vehicle?: IWorkOrderVehicle2;
   vehicleId: string;
-  customer: IWorkOrderCustomer;
+  customerId?: string;
+  advisorId?: string;
+  advisor?: IWorkOrderAdvisor;
+  currentQuotationId?: string;
+  customer?: IWorkOrderCustomer;
   complaints: IComplaint[];
+  inspectionRequired: boolean;
   inspections: IInspection[];
-  createdAt: string;
-  customerRemark: string;
-  internalRemark: string;
+  diagnosis?: string;
+  images: string[];
+  createdAt?: string;
+  customerRemark?: string;
+  internalRemark?: string;
 }
 
 export interface IWorkOrderQuery {
   page?: number;
   limit?: number;
-  search?: string;
-  status?: EWorkOrderStatus;
-  date?: string;
+  sort?: string;
 }
 
 export interface IWorkOrderResult {

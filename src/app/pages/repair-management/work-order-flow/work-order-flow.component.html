@@ -1,0 +1,217 @@
+<section class="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-slate-50/70 shadow-sm">
+  <header class="flex flex-col gap-4 border-b border-slate-200 bg-white px-5 py-5 lg:flex-row lg:items-start lg:justify-between">
+    <div>
+      <p class="text-xs font-bold uppercase tracking-widest text-emerald-600">Work management · Team assignment</p>
+      <h2 class="mt-1 text-xl font-bold text-slate-900">พื้นที่ทำงานของใบแจ้งซ่อม</h2>
+      <p class="mt-1 text-sm text-slate-500">{{ workOrder.workOrderNo }} · เลือกทำเฉพาะขั้นตอนถัดไปของงานนี้</p>
+    </div>
+    <button type="button" (click)="refreshWorkspace()" [disabled]="isLoadingTasks" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50">
+      {{ isLoadingTasks ? 'กำลังรีเฟรช…' : 'รีเฟรชข้อมูล' }}
+    </button>
+  </header>
+
+  <div class="border-b border-slate-200 bg-white px-5 py-5">
+    <ol class="grid grid-cols-3 gap-x-2 gap-y-4 sm:grid-cols-6">
+      <li *ngFor="let step of workflowSteps; let i = index" class="relative text-center">
+        <div class="mx-auto flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold" [ngClass]="isStepActive(i) ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-400'">
+          {{ i + 1 }}
+        </div>
+        <p class="mt-2 text-[11px] font-semibold" [ngClass]="isStepActive(i) ? 'text-emerald-700' : 'text-slate-400'">{{ step.shortLabel }}</p>
+      </li>
+    </ol>
+  </div>
+
+  <p *ngIf="feedback" class="mx-5 mt-5 rounded-xl border px-3 py-2 text-sm" [ngClass]="feedback.startsWith('สำเร็จ') ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-rose-200 bg-rose-50 text-rose-800'">{{ feedback }}</p>
+
+  <div class="grid gap-5 p-5 xl:grid-cols-[minmax(0,1fr)_340px]">
+    <main class="space-y-5">
+      <section class="rounded-2xl border border-slate-200 bg-white p-5">
+        <div class="flex items-start gap-3">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-lg font-bold text-emerald-700">{{ currentStageIndex + 1 }}</div>
+          <div class="min-w-0">
+            <p class="text-xs font-bold uppercase tracking-wider text-emerald-600">Next action</p>
+
+            <ng-container [ngSwitch]="workOrder.status">
+              <div *ngSwitchCase="statuses.OPEN">
+                <h3 class="mt-1 text-lg font-bold text-slate-900">เริ่มตรวจเช็คสภาพรถ</h3>
+                <p class="mt-1 text-sm text-slate-500">ยืนยันว่าได้รับรถและข้อมูลอาการครบก่อนเริ่มประเมินงาน</p>
+                <button type="button" (click)="moveWorkOrder(statuses.INSPECTING)" [disabled]="isSubmitting" class="mt-4 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-50">เริ่มตรวจเช็ค</button>
+              </div>
+
+              <div *ngSwitchCase="statuses.INSPECTING">
+                <h3 class="mt-1 text-lg font-bold text-slate-900">ส่งต่อจัดทำใบเสนอราคา</h3>
+                <p class="mt-1 text-sm text-slate-500">เมื่อประเมินงานเรียบร้อย ให้ส่งงานเข้าสู่คิวเสนอราคา</p>
+                <button type="button" (click)="moveWorkOrder(statuses.WAITING_QUOTATION)" [disabled]="isSubmitting" class="mt-4 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-50">พร้อมจัดทำใบเสนอราคา</button>
+              </div>
+
+              <div *ngSwitchCase="statuses.WAITING_QUOTATION">
+                <h3 class="mt-1 text-lg font-bold text-slate-900">จัดทำใบเสนอราคา</h3>
+                <p class="mt-1 text-sm text-slate-500">สร้างใบเสนอราคาที่ผูกกับใบแจ้งซ่อมนี้โดยตรง</p>
+                <button type="button" (click)="openQuotation(true)" class="mt-4 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-700">สร้างใบเสนอราคา</button>
+              </div>
+
+              <div *ngSwitchCase="statuses.WAITING_APPROVAL">
+                <h3 class="mt-1 text-lg font-bold text-slate-900">รอผลการตัดสินใจของลูกค้า</h3>
+                <p class="mt-1 text-sm text-slate-500">ตรวจสอบใบเสนอราคาในเมนูใบเสนอราคา ไม่ต้องกรอกเลขเอกสารหรือ ID ในหน้านี้</p>
+                <button type="button" (click)="openQuotation()" class="mt-4 rounded-xl border border-emerald-200 bg-white px-4 py-2.5 text-sm font-bold text-emerald-700 hover:bg-emerald-50">ไปที่ใบเสนอราคา</button>
+              </div>
+
+              <div *ngSwitchCase="statuses.WAITING_ASSIGNMENT">
+                <h3 class="mt-1 text-lg font-bold text-slate-900">มอบหมายงานให้ทีมช่าง</h3>
+                <p class="mt-1 text-sm text-slate-500">สร้างงานและเลือกช่างจากรายชื่อผู้ใช้งานในระบบ</p>
+              </div>
+
+              <div *ngSwitchCase="statuses.IN_PROGRESS">
+                <h3 class="mt-1 text-lg font-bold text-slate-900">ติดตามงานซ่อม</h3>
+                <p class="mt-1 text-sm text-slate-500">ช่างอัปเดตงานที่ได้รับมอบหมาย เบิกอะไหล่จากงาน และแจ้งปัญหาเพิ่มได้</p>
+              </div>
+
+              <div *ngSwitchCase="statuses.WAITING_ADDITIONAL_APPROVAL">
+                <h3 class="mt-1 text-lg font-bold text-slate-900">รออนุมัติงานซ่อมเพิ่ม</h3>
+                <p class="mt-1 text-sm text-slate-500">จัดทำและอนุมัติใบเสนอราคางานเพิ่มจากเมนูใบเสนอราคา ก่อนกลับมาดำเนินงาน</p>
+                <button type="button" (click)="openQuotation()" class="mt-4 rounded-xl border border-amber-200 bg-white px-4 py-2.5 text-sm font-bold text-amber-700 hover:bg-amber-50">จัดการใบเสนอราคา</button>
+              </div>
+
+              <div *ngSwitchCase="statuses.REWORK">
+                <h3 class="mt-1 text-lg font-bold text-slate-900">มอบหมายงานแก้ไขจาก QC</h3>
+                <p class="mt-1 text-sm text-slate-500">สร้างงานแก้ไขใหม่และเลือกช่างผู้รับผิดชอบ</p>
+              </div>
+
+              <div *ngSwitchCase="statuses.WAITING_QC">
+                <h3 class="mt-1 text-lg font-bold text-slate-900">ตรวจสอบคุณภาพงาน</h3>
+                <p class="mt-1 text-sm text-slate-500">ตรวจงานทั้งหมดก่อนตัดสินใจผ่าน QC หรือส่งกลับแก้ไข</p>
+              </div>
+
+              <div *ngSwitchCase="statuses.QC_APPROVED">
+                <h3 class="mt-1 text-lg font-bold text-slate-900">QC ผ่านแล้ว</h3>
+                <p class="mt-1 text-sm text-slate-500">จบขอบเขต Work Management ของ branch นี้ ขั้นตอนส่งมอบและ Payment อยู่ในโมดูลถัดไป</p>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </section>
+
+      <section *ngIf="workOrder.status === statuses.WAITING_ASSIGNMENT || workOrder.status === statuses.REWORK" class="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-5">
+        <div class="flex items-center justify-between gap-3"><div><h3 class="font-bold text-indigo-950">สร้างและมอบหมายงาน</h3><p class="mt-1 text-xs text-indigo-700">ใช้รายชื่อช่างจาก User Management</p></div><span *ngIf="isLoadingMechanics" class="text-xs text-indigo-600">กำลังโหลดช่าง…</span></div>
+        <div class="mt-4 grid gap-3 md:grid-cols-2">
+          <input [(ngModel)]="taskForm.title" placeholder="ชื่องานซ่อม *" class="rounded-xl border border-indigo-200 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-200" />
+          <select multiple [(ngModel)]="taskForm.mechanicIds" size="4" class="rounded-xl border border-indigo-200 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-200">
+            <option *ngIf="!mechanics.length" value="">ไม่พบช่างที่เลือกได้</option>
+            <option *ngFor="let mechanic of mechanics" [value]="mechanic.id">{{ mechanic.firstname || mechanic.publicId }} {{ mechanic.lastname || '' }} · {{ mechanic.publicId }}</option>
+          </select>
+          <input [(ngModel)]="taskForm.description" placeholder="รายละเอียดงาน (ไม่บังคับ)" class="rounded-xl border border-indigo-200 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-200" />
+          <div class="grid grid-cols-2 gap-3"><select [(ngModel)]="taskForm.priority" class="rounded-xl border border-indigo-200 bg-white px-3 py-2.5 text-sm"><option *ngFor="let priority of priorities" [value]="priority">{{ priority }}</option></select><input [(ngModel)]="taskForm.estimateMinute" type="number" min="0" placeholder="เวลาประเมิน (นาที)" class="rounded-xl border border-indigo-200 bg-white px-3 py-2.5 text-sm" /></div>
+          <input [(ngModel)]="taskForm.plannedStartDate" type="datetime-local" title="กำหนดเริ่มงาน" class="rounded-xl border border-indigo-200 bg-white px-3 py-2.5 text-sm" />
+          <input [(ngModel)]="taskForm.plannedFinishDate" type="datetime-local" title="กำหนดเสร็จงาน" class="rounded-xl border border-indigo-200 bg-white px-3 py-2.5 text-sm" />
+          <input [(ngModel)]="taskForm.actualMinute" type="number" min="0" placeholder="เวลาที่ใช้จริง (นาที, ไม่บังคับ)" class="rounded-xl border border-indigo-200 bg-white px-3 py-2.5 text-sm" />
+          <input [(ngModel)]="taskForm.remark" placeholder="หมายเหตุภายใน (ไม่บังคับ)" class="rounded-xl border border-indigo-200 bg-white px-3 py-2.5 text-sm" />
+        </div>
+        <button type="button" (click)="createTask()" [disabled]="isSubmitting || !mechanics.length" class="mt-4 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-indigo-700 disabled:opacity-50">มอบหมายงาน</button>
+        <p *ngIf="!isLoadingMechanics && !mechanics.length" class="mt-3 text-xs text-indigo-700">ไม่พบรายชื่อช่างที่เลือกได้จาก API ผู้ใช้งาน</p>
+      </section>
+
+      <section *ngIf="tasks.length || isLoadingTasks" class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+        <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4"><div><p class="text-xs font-bold uppercase tracking-wider text-indigo-600">Task board</p><h3 class="mt-1 font-bold text-slate-900">กระดานงานช่าง</h3><p class="mt-1 text-xs text-slate-500">{{ taskSummary }} · อัปเดตงานจาก card โดยตรง</p></div><span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">{{ tasks.length }} งาน</span></div>
+        <div *ngIf="isLoadingTasks" class="p-5 text-sm text-slate-500">กำลังโหลดงาน…</div>
+        <div *ngIf="!isLoadingTasks" class="grid gap-4 overflow-x-auto p-4 xl:grid-cols-4">
+          <section *ngFor="let column of taskBoardColumns" class="min-w-[250px] rounded-2xl border p-3" [ngClass]="column.accentClass">
+            <div class="mb-3 flex items-center justify-between gap-2"><div><h4 class="text-sm font-bold text-slate-800">{{ column.label }}</h4><p class="mt-0.5 text-[11px] text-slate-500">{{ column.hint }}</p></div><span class="rounded-full bg-white/80 px-2 py-1 text-xs font-bold text-slate-600">{{ tasksForColumn(column).length }}</span></div>
+            <p *ngIf="!tasksForColumn(column).length" class="rounded-xl border border-dashed border-slate-300 bg-white/60 p-3 text-center text-xs text-slate-400">ยังไม่มีงาน</p>
+            <div class="space-y-3">
+              <article *ngFor="let task of tasksForColumn(column)" class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+                <div class="flex items-start justify-between gap-2"><div class="min-w-0"><p class="font-mono text-[11px] text-slate-400">{{ task.taskNo }}</p><h5 class="mt-1 break-words text-sm font-bold text-slate-900">{{ task.title }}</h5></div><span class="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-600">{{ task.priority }}</span></div>
+                <p class="mt-2 text-xs text-slate-600">{{ task.mechanics?.[0]?.mechanicName || 'ยังไม่ได้ระบุช่าง' }}</p>
+                <p *ngIf="task.description" class="mt-1 line-clamp-2 text-xs text-slate-500">{{ task.description }}</p>
+                <div class="mt-2 grid grid-cols-2 gap-x-2 gap-y-1 text-[11px] text-slate-500"><span>ประเมิน {{ task.estimateMinute || 0 }} นาที</span><span>ใช้จริง {{ task.actualMinute || 0 }} นาที</span><span *ngIf="task.plannedStartDate">เริ่ม {{ task.plannedStartDate | date: 'dd/MM HH:mm' }}</span><span *ngIf="task.plannedFinishDate">ครบกำหนด {{ task.plannedFinishDate | date: 'dd/MM HH:mm' }}</span></div>
+                <div class="mt-2"><div class="flex justify-between text-[11px] text-slate-500"><span>ความคืบหน้า</span><strong>{{ task.progress || 0 }}%</strong></div><div class="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full bg-indigo-500" [style.width.%]="task.progress || 0"></div></div></div>
+                <p *ngIf="task.remark" class="mt-2 rounded-md bg-slate-50 px-2 py-1 text-[11px] text-slate-500">บันทึก: {{ task.remark }}</p>
+                <button *ngIf="task.status !== taskStatuses.FINISHED && task.status !== taskStatuses.CANCELLED" type="button" (click)="startEditTask(task); $event.stopPropagation()" class="mt-3 inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 hover:text-indigo-800">✎ แก้ไขใน card</button>
+                <div class="mt-3 flex flex-wrap gap-2">
+                  <button *ngIf="nextTaskStatus(task)" type="button" (click)="updateTaskStatus(task, nextTaskStatus(task)!)" [disabled]="isSubmitting || workOrder.status === statuses.WAITING_ADDITIONAL_APPROVAL" class="rounded-lg bg-slate-800 px-2.5 py-2 text-xs font-bold text-white hover:bg-slate-700 disabled:opacity-50">{{ taskActionLabel(task) }}</button>
+                  <button *ngIf="workOrder.status === statuses.IN_PROGRESS && task.status !== taskStatuses.FINISHED && task.status !== taskStatuses.CANCELLED" type="button" (click)="openParts(task)" class="rounded-lg border border-slate-200 px-2.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">เบิกอะไหล่</button>
+                </div>
+                <div *ngIf="workOrder.status === statuses.IN_PROGRESS && task.status !== taskStatuses.FINISHED && task.status !== taskStatuses.CANCELLED" class="mt-3 border-t border-slate-100 pt-3"><input [(ngModel)]="additionalProblemText[task.taskNo]" placeholder="แจ้งปัญหางานเพิ่ม" class="w-full rounded-lg border border-slate-200 px-2.5 py-2 text-xs" /><button type="button" (click)="reportAdditionalProblem(task)" [disabled]="isSubmitting" class="mt-2 w-full rounded-lg border border-amber-200 px-2.5 py-2 text-xs font-bold text-amber-700 hover:bg-amber-50 disabled:opacity-50">ส่งขออนุมัติ</button></div>
+                <div *ngIf="workOrder.status === statuses.WAITING_ADDITIONAL_APPROVAL && task.additionalProblems?.length" class="mt-3 space-y-2 border-t border-amber-100 pt-3">
+                  <div *ngFor="let problem of task.additionalProblems" class="rounded-lg bg-amber-50 p-2.5 text-xs text-amber-900"><p>{{ problem.description }}</p><button *ngIf="problem.status === 'PENDING'" type="button" (click)="approveAdditionalProblem(task, problem._id)" [disabled]="isSubmitting" class="mt-2 rounded-md border border-amber-300 bg-white px-2 py-1.5 font-bold text-amber-800 hover:bg-amber-100 disabled:opacity-50">ยืนยันหลังใบเสนอราคาอนุมัติ</button><p *ngIf="problem.status !== 'PENDING'" class="mt-1 font-semibold">{{ problem.status }}</p></div>
+                </div>
+              </article>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <app-task-edit-modal
+        [isOpen]="!!editingTaskNo"
+        [task]="editingTask"
+        [mechanics]="mechanics"
+        [isSubmitting]="isSubmitting"
+        (close)="cancelEditTask()"
+        (save)="saveTaskEdit($event)"
+      ></app-task-edit-modal>
+
+      <app-part-issue-modal
+        [isOpen]="!!selectedPartTask"
+        [task]="selectedPartTask"
+        [mode]="partRequestMode"
+        [quotationParts]="quotationParts"
+        [selectedQuotationPart]="selectedQuotationPart"
+        [productResults]="productResults"
+        [selectedProduct]="selectedProduct"
+        [productSearch]="productSearch"
+        [isLoadingQuotationParts]="isLoadingQuotationParts"
+        [isSearchingProducts]="isSearchingProducts"
+        [isSubmitting]="isSubmitting"
+        [loadedIssue]="loadedIssue"
+        [partForm]="partForm"
+        (close)="closeParts()"
+        (modeChange)="setPartRequestMode($event)"
+        (search)="searchProducts($event)"
+        (productSelected)="selectProduct($event)"
+        (quotationPartSelected)="selectQuotationPart($event)"
+        (submitQuoted)="createPartIssue()"
+        (submitComplimentary)="createComplimentaryAdditionalIssue()"
+        (submitCharged)="beginChargedAdditionalFlow()"
+      ></app-part-issue-modal>
+
+      <!-- Legacy inline markup retained temporarily while the shared modal owns this flow.
+      <section *ngIf="selectedPartTask" class="rounded-2xl border border-slate-200 bg-white p-5">
+        <div class="flex items-start justify-between gap-3"><div><p class="text-xs font-bold uppercase tracking-wider text-slate-500">Parts request</p><h3 class="mt-1 font-bold text-slate-900">เบิกอะไหล่สำหรับ {{ selectedPartTask.title }}</h3><p class="mt-1 font-mono text-xs text-slate-400">{{ selectedPartTask.taskNo }}</p></div><button type="button" (click)="closeParts()" class="text-sm font-semibold text-slate-500 hover:text-slate-900">ปิด</button></div>
+
+        <div class="mt-4 grid gap-2 sm:grid-cols-3">
+          <button type="button" (click)="setPartRequestMode('QUOTED')" [ngClass]="partRequestMode === 'QUOTED' ? 'border-emerald-500 bg-emerald-50 text-emerald-800' : 'border-slate-200 bg-white text-slate-600'" class="rounded-xl border p-3 text-left text-xs font-semibold">ตามใบเสนอราคา<p class="mt-1 font-normal text-slate-500">เบิกได้ตามยอดที่ลูกค้าอนุมัติ</p></button>
+          <button type="button" (click)="setPartRequestMode('COMPLIMENTARY')" [ngClass]="partRequestMode === 'COMPLIMENTARY' ? 'border-sky-500 bg-sky-50 text-sky-800' : 'border-slate-200 bg-white text-slate-600'" class="rounded-xl border p-3 text-left text-xs font-semibold">อะไหล่เพิ่ม · ไม่คิดเงิน<p class="mt-1 font-normal text-slate-500">ส่ง Store ได้ทันที พร้อมบันทึกเหตุผล</p></button>
+          <button type="button" (click)="setPartRequestMode('CHARGED')" [ngClass]="partRequestMode === 'CHARGED' ? 'border-amber-500 bg-amber-50 text-amber-800' : 'border-slate-200 bg-white text-slate-600'" class="rounded-xl border p-3 text-left text-xs font-semibold">อะไหล่เพิ่ม · คิดเงิน<p class="mt-1 font-normal text-slate-500">ต้องออกและอนุมัติใบเสนอราคาใหม่ก่อน</p></button>
+        </div>
+
+        <ng-container *ngIf="partRequestMode === 'QUOTED'">
+          <div class="mt-4 rounded-xl border border-slate-200"><div class="border-b border-slate-100 px-3 py-2 text-xs font-semibold text-slate-600">รายการอะไหล่จาก quotation ที่อนุมัติแล้ว</div><div *ngIf="isLoadingQuotationParts" class="p-4 text-sm text-slate-500">กำลังโหลดรายการ…</div><p *ngIf="!isLoadingQuotationParts && !quotationParts.length" class="p-4 text-sm text-slate-500">ไม่มีอะไหล่ที่ขอเบิกได้จากใบเสนอราคา</p><button *ngFor="let part of quotationParts" type="button" (click)="selectQuotationPart(part)" [disabled]="part.availableQty === 0" class="flex w-full items-center justify-between gap-3 border-b border-slate-100 px-3 py-3 text-left last:border-0 hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:opacity-60"><span><strong class="block text-sm text-slate-800">{{ part.productName }}</strong><span class="font-mono text-xs text-slate-500">{{ part.sku }} · ประเมิน {{ part.quotationQty }} · ขอแล้ว {{ part.requestedQty }} · จ่ายแล้ว {{ part.issuedQty }}</span></span><strong class="text-sm text-emerald-700">เหลือ {{ part.availableQty }}</strong></button></div>
+          <div *ngIf="selectedQuotationPart" class="mt-3 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-900">เลือก: <strong>{{ selectedQuotationPart.productName }}</strong> · ขอเพิ่มได้อีก {{ selectedQuotationPart.availableQty }} ชิ้น</div>
+          <div class="mt-4 grid gap-3 sm:grid-cols-2"><input [(ngModel)]="partForm.requestedQty" type="number" min="1" [max]="selectedQuotationPart?.availableQty || 1" placeholder="จำนวนที่ขอ" class="rounded-xl border border-slate-200 px-3 py-2.5 text-sm" /><input [(ngModel)]="partForm.remark" placeholder="หมายเหตุ (ไม่บังคับ)" class="rounded-xl border border-slate-200 px-3 py-2.5 text-sm" /></div>
+          <button type="button" (click)="createPartIssue()" [disabled]="isSubmitting || !selectedQuotationPart || selectedQuotationPart.availableQty === 0" class="mt-4 rounded-xl bg-slate-800 px-4 py-2.5 text-sm font-bold text-white hover:bg-slate-700 disabled:opacity-50">ส่งคำขอเบิกให้ Store</button>
+          <p class="mt-2 text-xs leading-5 text-slate-500">ขอได้ครั้งละ 1–N ชิ้นตามยอดคงเหลือใน quotation; Store เป็นผู้จองและยืนยันจ่าย</p>
+          <p *ngIf="isChargedAdditionalTask(selectedPartTask)" class="mt-2 text-xs font-semibold text-amber-700">ใบเบิกนี้จะถูกบันทึกเป็นอะไหล่เพิ่มเติมที่คิดค่าใช้จ่าย (ADDITIONAL) ตามใบเสนอราคาใหม่</p>
+        </ng-container>
+
+        <ng-container *ngIf="partRequestMode !== 'QUOTED'">
+          <div class="mt-4 rounded-xl border border-slate-200 p-3"><label class="text-xs font-semibold text-slate-600">ค้นหาอะไหล่ในสต็อก</label><div class="mt-2 flex gap-2"><input [(ngModel)]="productSearch" (keyup.enter)="searchProducts()" placeholder="SKU ของอะไหล่" class="min-w-0 flex-1 rounded-xl border border-slate-200 px-3 py-2.5 text-sm" /><button type="button" (click)="searchProducts()" [disabled]="isSearchingProducts" class="rounded-xl border border-slate-200 px-3 text-xs font-bold text-slate-700">ค้นหา</button></div><div *ngIf="productResults.length" class="mt-2 divide-y divide-slate-100 rounded-lg border border-slate-100"><button *ngFor="let product of productResults" type="button" (click)="selectProduct(product)" class="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-slate-50"><span><strong>{{ product.name }}</strong><small class="ml-2 font-mono text-slate-500">{{ product.sku }}</small></span><span>฿{{ productUnitPrice(product) | number: '1.2-2' }}</span></button></div><p *ngIf="selectedProduct" class="mt-3 rounded-lg bg-slate-50 p-2.5 text-sm text-slate-700">เลือก: <strong>{{ selectedProduct.name }}</strong> · {{ selectedProduct.sku }}</p></div>
+          <div class="mt-3 grid gap-3 sm:grid-cols-2"><input [(ngModel)]="partForm.requestedQty" type="number" min="1" placeholder="จำนวนที่ขอ" class="rounded-xl border border-slate-200 px-3 py-2.5 text-sm" /><input [(ngModel)]="partForm.remark" [placeholder]="partRequestMode === 'CHARGED' ? 'รายละเอียดสำหรับใบเสนอราคาใหม่' : 'เหตุผล/หมายเหตุ (แนะนำให้ระบุ)'" class="rounded-xl border border-slate-200 px-3 py-2.5 text-sm" /></div>
+          <div *ngIf="partRequestMode === 'COMPLIMENTARY'" class="mt-3 rounded-xl bg-sky-50 p-3 text-xs leading-5 text-sky-900">ระบบจะสร้าง Part Issue เป็น <strong>ADDITIONAL / ไม่คิดค่าใช้จ่าย</strong> อ้างอิงใบเสนอราคาที่ APPROVED โดยไม่หักโควตาอะไหล่จากใบเสนอราคา</div>
+          <button *ngIf="partRequestMode === 'COMPLIMENTARY'" type="button" (click)="createComplimentaryAdditionalIssue()" [disabled]="isSubmitting || !selectedProduct" class="mt-4 rounded-xl bg-sky-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-sky-800 disabled:opacity-50">ส่งคำขอเบิกเพิ่มให้ Store</button>
+          <div *ngIf="partRequestMode === 'CHARGED'" class="mt-3 rounded-xl bg-amber-50 p-3 text-xs leading-5 text-amber-900">ระบบจะหยุดงานไว้ที่ <strong>WAITING_ADDITIONAL_APPROVAL</strong> แล้วเปิดใบเสนอราคาใหม่พร้อมรายการนี้ เมื่ออนุมัติแล้วให้กลับมายืนยันงานเพิ่ม จากนั้นจึงเบิกตามใบเสนอราคาใหม่ได้</div>
+          <button *ngIf="partRequestMode === 'CHARGED'" type="button" (click)="beginChargedAdditionalFlow()" [disabled]="isSubmitting || !selectedProduct" class="mt-4 rounded-xl bg-amber-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-amber-800 disabled:opacity-50">สร้างเรื่องและไปออกใบเสนอราคาใหม่</button>
+        </ng-container>
+
+        <div *ngIf="loadedIssue" class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4"><p class="font-mono text-sm font-bold text-amber-900">{{ loadedIssue.issueNo }}</p><p class="mt-1 text-xs text-amber-800">ส่งคำขอแล้ว · สถานะ {{ loadedIssue.status }} · รอ Store ดำเนินการ</p></div>
+      </section>
+      -->
+
+      <section *ngIf="workOrder.status === statuses.WAITING_QC" class="rounded-2xl border border-violet-200 bg-violet-50 p-5"><p class="text-xs font-bold uppercase tracking-wider text-violet-600">Quality control</p><h3 class="mt-1 text-lg font-bold text-violet-950">ตัดสินผลการตรวจคุณภาพ</h3><p class="mt-1 text-sm text-violet-800">ตรวจสอบว่า {{ taskSummary }} ก่อนยืนยันผล QC</p><div class="mt-4 flex flex-col gap-3 sm:flex-row"><button type="button" (click)="moveWorkOrder(statuses.QC_APPROVED)" [disabled]="isSubmitting" class="rounded-xl bg-violet-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-violet-800 disabled:opacity-50">QC ผ่าน</button><input [(ngModel)]="reworkTitle" placeholder="รายการที่ต้องแก้ไข หาก QC ไม่ผ่าน" class="min-w-0 flex-1 rounded-xl border border-violet-200 bg-white px-3 py-2.5 text-sm" /><button type="button" (click)="failQcAndCreateRework()" [disabled]="isSubmitting" class="rounded-xl border border-violet-200 bg-white px-4 py-2.5 text-sm font-bold text-violet-800 hover:bg-violet-100 disabled:opacity-50">ส่งกลับแก้ไข</button></div></section>
+    </main>
+
+    <aside class="space-y-4">
+      <section class="rounded-2xl border border-slate-200 bg-white p-5"><p class="text-xs font-bold uppercase tracking-wider text-slate-500">Work order</p><p class="mt-2 font-mono text-base font-bold text-slate-900">{{ workOrder.workOrderNo }}</p><dl class="mt-4 space-y-3 text-sm"><div class="flex justify-between gap-3"><dt class="text-slate-500">ทะเบียน</dt><dd class="text-right font-medium text-slate-800">{{ workOrder.vehicle?.licensePlate || '-' }} {{ workOrder.vehicle?.province || '' }}</dd></div><div class="flex justify-between gap-3"><dt class="text-slate-500">ระยะทาง</dt><dd class="font-medium text-slate-800">{{ workOrder.mileage | number }} กม.</dd></div><div class="flex justify-between gap-3"><dt class="text-slate-500">สถานะ</dt><dd class="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700">{{ workOrder.status }}</dd></div></dl></section>
+      <section class="rounded-2xl border border-slate-200 bg-white p-5"><p class="text-xs font-bold uppercase tracking-wider text-slate-500">Repair summary</p><p class="mt-2 text-2xl font-bold text-slate-900">{{ workOrder.progress || 0 }}%</p><p class="mt-1 text-sm text-slate-500">{{ taskSummary }}</p><div class="mt-4 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full bg-emerald-500" [style.width.%]="workOrder.progress || 0"></div></div></section>
+      <section class="rounded-2xl border border-amber-200 bg-amber-50 p-5"><p class="text-sm font-bold text-amber-900">ขอบเขตเมนู</p><p class="mt-1 text-xs leading-5 text-amber-800">ใบแจ้งซ่อมและใบเสนอราคาอยู่ใน Repair Management ส่วนมอบหมายงานและ QC อยู่ใน Work Management หน้านี้ไม่สร้างข้อมูลแทน API ที่ backend ยังไม่มี</p></section>
+    </aside>
+  </div>
+</section>

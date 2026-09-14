@@ -30,19 +30,19 @@
         >VEHICLE</span
       >
       <p class="font-bold text-slate-800 text-sm mt-0.5">
-        {{ item.vehicle.vehicle.model }}
+        {{ item.vehicle?.vehicle?.model || '-' }}
       </p>
       <div class="flex items-center gap-4 text-xs text-slate-500 mt-1">
         <span
           >Plate:
           <strong class="text-emerald-600 font-bold">{{
-            item.vehicle.licensePlate
+            item.vehicle?.licensePlate || '-'
           }}</strong></span
         >
         <span
           >VIN:
           <span class="font-mono text-slate-400">{{
-            item.vehicle.vin
+            item.vehicle?.vin || '-'
           }}</span></span
         >
       </div>
@@ -60,9 +60,9 @@
             [img]="UserIcon"
             class="w-3.5 h-3.5 text-slate-400"
           ></lucide-angular>
-          {{ item.customer.name }}
+          {{ item.customer?.name || '-' }}
           <span
-            *ngIf="item.customer.isVip"
+            *ngIf="item.customer?.isVip"
             class="bg-amber-100 text-amber-700 text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider flex items-center gap-0.5"
           >
             <lucide-angular [img]="CrownIcon" class="w-3 h-3"></lucide-angular>
@@ -74,36 +74,31 @@
             [img]="PhoneIcon"
             class="w-3 h-3 text-slate-400"
           ></lucide-angular>
-          {{ item.customer.phone }}
+          {{ item.customer?.phone || '-' }}
         </span>
       </div>
     </div>
 
-    <!-- Task Checklist -->
+    <!-- Customer-reported complaints (the Work Order API field is `complaints`) -->
     <div class="mt-4 bg-slate-50/80 p-3.5 rounded-xl border border-slate-100">
       <span
         class="text-[10px] font-bold tracking-wider text-slate-400 uppercase block mb-2"
-        >TASKS</span
+        >COMPLAINTS / อาการแจ้งซ่อม</span
       >
       <ul class="space-y-2 text-xs text-slate-600">
         <li *ngFor="let complaint of item.complaints" class="flex items-start gap-2">
-          <span
-            [class.text-emerald-500]="complaint.completed"
-            [class.text-slate-300]="!complaint.completed"
-            class="mt-0.5"
-          >
-            <lucide-angular
-              [img]="complaint.completed ? CheckIcon : CircleIcon"
-              class="w-3.5 h-3.5"
-            ></lucide-angular>
+          <span class="mt-0.5 text-slate-300">
+            <lucide-angular [img]="CircleIcon" class="w-3.5 h-3.5"></lucide-angular>
           </span>
-          <span
-            [class.line-through]="complaint.completed"
-            [class.text-slate-400]="complaint.completed"
-            class="leading-tight"
-          >
+          <span class="leading-tight">
             {{ complaint.title }}
           </span>
+        </li>
+        <li
+          *ngIf="!item.complaints?.length"
+          class="text-slate-400"
+        >
+          ไม่มีรายการอาการแจ้งซ่อม
         </li>
       </ul>
     </div>

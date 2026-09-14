@@ -93,7 +93,7 @@
               <button
                 class="action-btn view-btn"
                 title="ดูรายละเอียด"
-                (click)="onView.emit(row._id)"
+                (click)="onView.emit(row.quotationNo)"
               >
                 <img
                   src="assets/img/icons/icon.viewdetail.svg"
@@ -105,7 +105,7 @@
               <button
                 class="action-btn edit-btn"
                 title="แก้ไข"
-                (click)="onEdit.emit(row._id)"
+                (click)="onEdit.emit(row.quotationNo)"
               >
                 <img
                   src="assets/img/icons/icon.edit.svg"

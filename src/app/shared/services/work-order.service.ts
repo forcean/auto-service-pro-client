@@ -8,6 +8,8 @@ import {
   IWorkOrder,
   IWorkOrderQuery,
   IWorkOrderResult,
+  ICreateWorkOrderRequest,
+  IUpdateWorkOrderRequest,
 } from '../interface/work-order.interface';
 import { EWorkOrderStatus } from '../enum/work-order.enum';
 
@@ -29,7 +31,13 @@ export class WorkOrderService {
         params,
       );
 
-      return response;
+      return {
+        ...response,
+        resultData: {
+          ...response.resultData,
+          data: response.resultData.data.map((item) => this.mapWorkOrder(item)),
+        },
+      };
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
         return error.error as IBaseResponse<IWorkOrderResult>;
@@ -39,14 +47,16 @@ export class WorkOrderService {
     }
   }
 
-  async createWorkOrder(body: unknown): Promise<IBaseResponse<IWorkOrder>> {
+  async createWorkOrder(
+    body: ICreateWorkOrderRequest,
+  ): Promise<IBaseResponse<IWorkOrder>> {
     try {
       const response = await this.httpService.post<IWorkOrder>(
         this.apiPath,
         body,
       );
 
-      return response;
+      return { ...response, resultData: this.mapWorkOrder(response.resultData) };
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
         return error.error as IBaseResponse<IWorkOrder>;
@@ -57,7 +67,7 @@ export class WorkOrderService {
   }
 
   async updateWorkOrder(
-    body: unknown,
+    body: IUpdateWorkOrderRequest,
     workOrderNo: string,
   ): Promise<IBaseResponse<IWorkOrder>> {
     try {
@@ -67,7 +77,7 @@ export class WorkOrderService {
         body,
       );
 
-      return response;
+      return { ...response, resultData: this.mapWorkOrder(response.resultData) };
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
         return error.error as IBaseResponse<IWorkOrder>;
@@ -78,17 +88,17 @@ export class WorkOrderService {
   }
 
   async updateWorkOrderStatus(
-    workOrderId: string,
+    workOrderNo: string,
     status: EWorkOrderStatus,
   ): Promise<IBaseResponse<IWorkOrder>> {
     try {
-      const uri = `${this.apiPath}/${workOrderId}/status`;
+      const uri = `${this.apiPath}/${workOrderNo}/status`;
 
       const response = await this.httpService.patch<IWorkOrder>(uri, {
         status,
       });
 
-      return response;
+      return { ...response, resultData: this.mapWorkOrder(response.resultData) };
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
         return error.error as IBaseResponse<IWorkOrder>;
@@ -104,7 +114,7 @@ export class WorkOrderService {
     try {
       const uri = this.apiPath + `/${workOrderNo}`;
       const response = await this.httpService.get<IWorkOrder>(uri);
-      return response;
+      return { ...response, resultData: this.mapWorkOrder(response.resultData) };
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
         return error.error as IBaseResponse<IWorkOrder>;
@@ -127,5 +137,86 @@ export class WorkOrderService {
         throw error;
       }
     }
+  }
+
+  private mapWorkOrder(raw: any): IWorkOrder {
+    const rawVehicle = raw.vehicle ?? raw.vehicleId;
+    const vehicle = rawVehicle && typeof rawVehicle === 'object'
+      ? {
+          _id: this.toId(rawVehicle._id),
+          licensePlate: rawVehicle.licensePlate,
+          province: rawVehicle.province,
+          vin: rawVehicle.vin,
+          vehicle: rawVehicle.vehicle,
+        }
+      : undefined;
+
+    // The Work Order API does not populate a separate `customer` relation.
+    // Customer identity is stored on the populated customer-vehicle document.
+    const customerSource =
+      raw.customer && typeof raw.customer === 'object'
+        ? raw.customer
+        : rawVehicle && typeof rawVehicle === 'object'
+          ? rawVehicle
+          : undefined;
+    const customer = customerSource
+      ? {
+          _id: this.toId(customerSource._id),
+          name:
+            customerSource.name ??
+            [customerSource.firstname, customerSource.lastname]
+              .filter(Boolean)
+              .join(' '),
+          phone: customerSource.phone ?? customerSource.phoneNumber ?? '',
+          isVip: customerSource.isVip,
+        }
+      : undefined;
+
+    const rawAdvisor = raw.advisor ?? raw.advisorId;
+    const advisor = rawAdvisor && typeof rawAdvisor === 'object'
+      ? {
+          _id: this.toId(rawAdvisor._id),
+          publicId: rawAdvisor.publicId,
+          firstname: rawAdvisor.firstname,
+          lastname: rawAdvisor.lastname,
+          role: rawAdvisor.role,
+        }
+      : undefined;
+
+    return {
+      _id: this.toId(raw._id ?? raw.id) ?? '',
+      workOrderNo: raw.workOrderNo ?? '',
+      status: raw.status as EWorkOrderStatus,
+      progress: Number(raw.progress ?? 0),
+      taskSummary: raw.taskSummary,
+      checkInDate: raw.checkInDate,
+      expectedFinishDate: raw.expectedFinishDate,
+      mileage: Number(raw.mileage ?? 0),
+      fuelLevel: raw.fuelLevel,
+      vehicle,
+      vehicleId: this.toId(raw.vehicleId) || vehicle?._id || '',
+      customerId: this.toId(raw.customerId),
+      advisorId: this.toId(raw.advisorId ?? raw.advisor),
+      advisor,
+      currentQuotationId: this.toId(raw.currentQuotationId),
+      customer,
+      complaints: Array.isArray(raw.complaints) ? raw.complaints : [],
+      inspectionRequired: Boolean(raw.inspectionRequired),
+      inspections: Array.isArray(raw.inspections) ? raw.inspections : [],
+      diagnosis: raw.diagnosis,
+      images: Array.isArray(raw.images) ? raw.images : [],
+      createdAt: raw.createdAt,
+      customerRemark: raw.customerRemark,
+      internalRemark: raw.internalRemark,
+    };
+  }
+
+  private toId(value: unknown): string | undefined {
+    if (!value) return undefined;
+    if (typeof value === 'string') return value;
+    if (typeof value === 'object' && value !== null && '_id' in value) {
+      return String((value as { _id: unknown })._id);
+    }
+    return String(value);
   }
 }

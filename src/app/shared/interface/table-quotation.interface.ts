@@ -1,7 +1,4 @@
-import {
-  EQuotationStatus,
-  IQuotationListItem,
-} from './quotation.interface';
+import { IQuotationListItem } from './quotation.interface';
 
 export interface ITableHeaderQuotation {
   headerName: string;
@@ -18,13 +15,8 @@ export interface IQuotationResultData {
   data: IQuotationListItem[];
 }
 
-export interface ISearchQuotationCriteria {
-  keyword?: string;
-  status?: EQuotationStatus | '';
-}
-
-export interface IQueryListQuotation
-  extends ISearchQuotationCriteria {
+/** Matches getQuotationWithPaginationDto on the service API. */
+export interface IQueryListQuotation {
   page: number;
   limit: number;
   sort?: string;

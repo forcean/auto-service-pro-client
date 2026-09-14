@@ -3,10 +3,15 @@ import { Injectable } from '@angular/core';
 
 import { HttpService } from '../../core/services/http-service/http.service';
 import { ApiPrefix } from '../enum/api-prefix.enum';
+import { RESPONSE } from '../enum/response.enum';
 import { IBaseResponse } from '../interface/base-http.interface';
-import { EWorkOrderStatus } from '../enum/work-order.enum';
 import { IQueryListQuotation, IQuotationResultData } from '../interface/table-quotation.interface';
-import { IQuotationListItem } from '../interface/quotation.interface';
+import {
+  IApproveQuotationRequest,
+  ICreateQuotationRequest,
+  IQuotationListItem,
+  IUpdateQuotationRequest,
+} from '../interface/quotation.interface';
 
 @Injectable({
   providedIn: 'root',
@@ -26,7 +31,13 @@ export class QuotationService {
         params,
       );
 
-      return response;
+      return {
+        ...response,
+        resultData: {
+          ...response.resultData,
+          data: response.resultData.data.map((item) => this.mapQuotation(item)),
+        },
+      };
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
         return error.error as IBaseResponse<IQuotationResultData>;
@@ -36,14 +47,16 @@ export class QuotationService {
     }
   }
 
-  async createQuotation(body: unknown): Promise<IBaseResponse<IQuotationListItem>> {
+  async createQuotation(
+    body: ICreateQuotationRequest,
+  ): Promise<IBaseResponse<IQuotationListItem>> {
     try {
       const response = await this.httpService.post<IQuotationListItem>(
         this.apiPath,
         body,
       );
 
-      return response;
+      return { ...response, resultData: this.mapQuotation(response.resultData) };
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
         return error.error as IBaseResponse<IQuotationListItem>;
@@ -54,17 +67,17 @@ export class QuotationService {
   }
 
   async updateQuotation(
-    body: unknown,
-    workOrderNo: string,
+    body: IUpdateQuotationRequest,
+    quotationNo: string,
   ): Promise<IBaseResponse<IQuotationListItem>> {
     try {
-      const uri = this.apiPath + `/${workOrderNo}`;
+      const uri = this.apiPath + `/${quotationNo}`;
       const response = await this.httpService.patch<IQuotationListItem>(
         uri,
         body,
       );
 
-      return response;
+      return { ...response, resultData: this.mapQuotation(response.resultData) };
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
         return error.error as IBaseResponse<IQuotationListItem>;
@@ -96,12 +109,12 @@ export class QuotationService {
   // }
 
   async getQuotationDetail(
-    workOrderNo: string,
+    quotationNo: string,
   ): Promise<IBaseResponse<IQuotationListItem>> {
     try {
-      const uri = this.apiPath + `/${workOrderNo}`;
+      const uri = this.apiPath + `/${quotationNo}`;
       const response = await this.httpService.get<IQuotationListItem>(uri);
-      return response;
+      return { ...response, resultData: this.mapQuotation(response.resultData) };
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
         return error.error as IBaseResponse<IQuotationListItem>;
@@ -111,10 +124,13 @@ export class QuotationService {
     }
   }
 
-  async deleteQuotation(id: string) {
+  /**
+   * The current repository implementation resolves this route by Mongo id,
+   * despite the controller parameter being named quotationNo.
+   */
+  async deleteQuotation(quotationId: string) {
     try {
-      const uri = this.apiPath + `/${id}/delete`;
-      // const uri = this.PREFIX_USER + `/corps/users/${userId}/delete`;
+      const uri = this.apiPath + `/${quotationId}/delete`;
       const response = await this.httpService.post<unknown>(uri, {});
       return response;
     } catch (error) {
@@ -124,5 +140,94 @@ export class QuotationService {
         throw error;
       }
     }
+  }
+
+  async approveQuotation(
+    quotationNo: string,
+    body: IApproveQuotationRequest,
+  ): Promise<IBaseResponse<IQuotationListItem>> {
+    const response = await this.request(() =>
+      this.httpService.patch<IQuotationListItem>(`${this.apiPath}/${quotationNo}/approve`, body),
+    );
+
+    return response.resultCode === RESPONSE.SUCCESS
+      ? { ...response, resultData: this.mapQuotation(response.resultData) }
+      : response;
+  }
+
+  async submitForApproval(
+    quotationNo: string,
+  ): Promise<IBaseResponse<IQuotationListItem>> {
+    return this.request(() =>
+      this.httpService.patch<IQuotationListItem>(
+        `${this.apiPath}/${quotationNo}/submit-for-approval`,
+        {},
+      ),
+    );
+  }
+
+  async rejectQuotation(
+    quotationNo: string,
+    reason: string,
+  ): Promise<IBaseResponse<IQuotationListItem>> {
+    return this.request(() =>
+      this.httpService.patch<IQuotationListItem>(`${this.apiPath}/${quotationNo}/reject`, { reason }),
+    );
+  }
+
+  async createRevision(quotationNo: string): Promise<IBaseResponse<IQuotationListItem>> {
+    const response = await this.request(() =>
+      this.httpService.post<IQuotationListItem>(`${this.apiPath}/${quotationNo}/revision`, {}),
+    );
+
+    return response.resultCode === RESPONSE.SUCCESS
+      ? { ...response, resultData: this.mapQuotation(response.resultData) }
+      : response;
+  }
+
+  private async request<T>(action: () => Promise<IBaseResponse<T>>): Promise<IBaseResponse<T>> {
+    try {
+      return await action();
+    } catch (error) {
+      if (error instanceof HttpErrorResponse && error.error) {
+        return error.error as IBaseResponse<T>;
+      }
+      throw error;
+    }
+  }
+
+  private mapQuotation(raw: any): IQuotationListItem {
+    const workOrder = raw.workOrder ?? raw.workOrderId;
+    const workOrderId = this.toId(raw.workOrderId) ?? this.toId(workOrder?.id) ?? '';
+    const workOrderNo = raw.workOrderNo ?? workOrder?.workOrderNo ?? '';
+
+    return {
+      ...raw,
+      _id: this.toId(raw._id ?? raw.id) ?? '',
+      id: this.toId(raw.id ?? raw._id) ?? '',
+      workOrderId,
+      workOrderNo,
+      workOrder: workOrder && typeof workOrder === 'object'
+        ? {
+            id: this.toId(workOrder.id ?? workOrder._id) ?? workOrderId,
+            workOrderNo,
+            vehicleId: this.toId(workOrder.vehicleId) ?? '',
+            customerId: this.toId(workOrder.customerId) ?? '',
+            advisorId: this.toId(workOrder.advisorId),
+            status: workOrder.status ?? '',
+          }
+        : undefined,
+      approvalHistory: Array.isArray(raw.approvalHistory) ? raw.approvalHistory : [],
+      items: Array.isArray(raw.items) ? raw.items : [],
+    };
+  }
+
+  private toId(value: unknown): string | undefined {
+    if (!value) return undefined;
+    if (typeof value === 'string') return value;
+    if (typeof value === 'object' && value !== null && '_id' in value) {
+      return String((value as { _id: unknown })._id);
+    }
+    return String(value);
   }
 }

@@ -49,6 +49,26 @@
       </div>
     </div>
 
+    <section *ngIf="workOrder" class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+      <div class="flex flex-col gap-4 border-b border-slate-100 px-5 py-5 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-widest text-emerald-600">Work order progress</p>
+          <h2 class="mt-1 text-lg font-bold text-slate-900">ภาพรวมขั้นตอนของใบงาน</h2>
+          <p class="mt-1 text-sm text-slate-500">ติดตามว่าใบงานอยู่ขั้นตอนใด โดยไม่จัดการ Task จากหน้านี้</p>
+        </div>
+        <button type="button" (click)="openTeamAssignment()" class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700">
+          จัดทีมและติดตามงานช่าง
+        </button>
+      </div>
+      <ol class="grid gap-3 px-5 py-5 sm:grid-cols-3 xl:grid-cols-6">
+        <li *ngFor="let step of overviewSteps; let index = index" class="relative rounded-2xl border p-3" [ngClass]="index <= currentProcessIndex ? 'border-emerald-200 bg-emerald-50/70' : 'border-slate-200 bg-slate-50'">
+          <span class="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold" [ngClass]="index <= currentProcessIndex ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-500'">{{ index + 1 }}</span>
+          <p class="mt-3 text-xs font-semibold" [ngClass]="index === currentProcessIndex ? 'text-emerald-800' : 'text-slate-600'">{{ step }}</p>
+          <p *ngIf="index === currentProcessIndex" class="mt-1 text-[11px] font-medium text-emerald-700">อยู่ขั้นตอนนี้</p>
+        </li>
+      </ol>
+    </section>
+
     <!-- Main Content Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Left 2 Columns (Main Details) -->
@@ -206,13 +226,13 @@
             <div>
               <p class="text-xs font-semibold text-slate-400">ข้อมูลรถยนต์</p>
               <h4 class="font-bold text-slate-900 text-base">
-                {{ workOrder.vehicle.licensePlate }}
-                {{ workOrder.vehicle.province }}
+                {{ workOrder.vehicle?.licensePlate || '-' }}
+                {{ workOrder.vehicle?.province || '' }}
               </h4>
               <p class="text-xs text-slate-500">
-                {{ workOrder.vehicle.vehicle.brand }}
-                {{ workOrder.vehicle.vehicle.model }} |
-                {{ workOrder.vehicle.vehicle.generation }}
+                {{ workOrder.vehicle?.vehicle?.brand || '-' }}
+                {{ workOrder.vehicle?.vehicle?.model || '' }}
+                {{ workOrder.vehicle?.vehicle?.generation || '' }}
               </p>
             </div>
           </div>
@@ -225,10 +245,10 @@
             <div>
               <p class="text-xs font-semibold text-slate-400">ลูกค้า</p>
               <h4 class="font-bold text-slate-900 text-sm">
-                <!-- {{ workOrder.customer.name }} -->
+                {{ workOrder.customer?.name || '-' }}
               </h4>
               <p class="text-xs text-slate-500">
-                <!-- {{ workOrder.customer.phone }} -->
+                {{ workOrder.customer?.phone || '-' }}
               </p>
             </div>
           </div>
@@ -246,8 +266,11 @@
                 ผู้ดูแล (Advisor)
               </p>
               <h4 class="font-bold text-slate-900 text-sm">
-                <!-- {{ workOrder. }} -->
+                {{ advisorDisplayName }}
               </h4>
+              <p *ngIf="advisorUser?.publicId" class="text-xs text-slate-500">
+                {{ advisorUser?.publicId }}
+              </p>
             </div>
           </div>
         </div>

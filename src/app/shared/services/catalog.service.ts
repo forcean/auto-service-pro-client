@@ -9,6 +9,7 @@ import {
   IResBrands,
   IResCategories,
   IResVehicles,
+  IVehicle,
 } from '../interface/catalog.interface';
 
 @Injectable({
@@ -90,14 +91,26 @@ export class CatalogService {
     try {
       const uri = `${this.PREFIX_USER}/vehicles/details`;
 
-      const response = await this.httpService.get<IResVehicles>(uri, {
+      // The backend details endpoint returns one vehicle document directly,
+      // unlike the brands/models endpoints which return wrapper objects.
+      const response = await this.httpService.get<IVehicle>(uri, {
         brandCode: params.brandCode,
         modelCode: params.modelCode,
         generation: params.generation,
         isActive: true,
       });
 
-      return response;
+      const result = response.resultData as unknown as IVehicle | IResVehicles;
+      const vehicles = Array.isArray((result as IResVehicles)?.vehicles)
+        ? (result as IResVehicles).vehicles ?? []
+        : result
+          ? [result as IVehicle]
+          : [];
+
+      return {
+        ...response,
+        resultData: { vehicles },
+      };
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
         return error.error as IBaseResponse<IResVehicles>;

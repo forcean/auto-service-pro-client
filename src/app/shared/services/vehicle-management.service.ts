@@ -2,6 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { HttpService } from './../../core/services/http-service/http.service';
 import { Injectable } from '@angular/core';
 import { ApiPrefix } from '../enum/api-prefix.enum';
+import { RESPONSE } from '../enum/response.enum';
 import { IResponseMenu } from '../interface/sidebar.interface';
 import { IBaseResponse } from '../interface/base-http.interface';
 import {
@@ -46,7 +47,8 @@ export class VehicleManagementService {
     province: string,
   ): Promise<IBaseResponse<ICustomerVehicle>> {
     try {
-      const uri = this.apiPath + `/${licensePlate}/${province}/detail`;
+      // Backend route is /customer/:province/:licensePlate/detail.
+      const uri = this.apiPath + `/${province}/${licensePlate}/detail`;
       const response = await this.httpService.get<ICustomerVehicle>(uri);
       return response;
     } catch (error) {
@@ -123,13 +125,47 @@ export class VehicleManagementService {
     }
   }
 
+  /**
+   * Loads every customer vehicle page for selectors that need a real vehicle
+   * id. The backend response is `resultData.data`.
+   */
+  async getAllCustomerVehicles(): Promise<ICustomerVehicle[]> {
+    const pageSize = 1000;
+    const vehicles: ICustomerVehicle[] = [];
+    let page = 1;
+    let totalPages = 1;
+
+    do {
+      const response = await this.getListVehicle({
+        page,
+        limit: pageSize,
+        sort: 'registrationDt.desc',
+      });
+
+      if (
+        response.resultCode !== RESPONSE.SUCCESS &&
+        response.resultCode !== RESPONSE.CREATED
+      ) {
+        throw new Error(response.developerMessage || 'Unable to load vehicles');
+      }
+
+      const result = response.resultData;
+      vehicles.push(...(result?.data ?? result?.vehicles ?? []));
+      totalPages = result?.totalPages ?? 1;
+      page += 1;
+    } while (page <= totalPages);
+
+    return vehicles;
+  }
+
   async updateCustomerVehicleDetail(
     body: any,
     licensePlate: string,
     province: string,
   ) {
     try {
-      const url = this.apiPath + `/${licensePlate}/${province}`;
+      // Backend route is /customer/:province/:licensePlate.
+      const url = this.apiPath + `/${province}/${licensePlate}`;
       const response = await this.httpService.patch<any>(url, body);
       return response;
     } catch (error) {
@@ -143,8 +179,8 @@ export class VehicleManagementService {
 
   async deleteCustomerVehicle(licensePlate: string, province: string) {
     try {
-      const uri = this.apiPath + `/${licensePlate}/${province}/delete`;
-      // const uri = this.PREFIX_USER + `/corps/users/${userId}/delete`;
+      // Backend uses POST /customer/:province/:licensePlate for deletion.
+      const uri = this.apiPath + `/${province}/${licensePlate}`;
       const response = await this.httpService.post<unknown>(uri, {});
       return response;
     } catch (error) {

@@ -34,7 +34,11 @@ import {
   IWorkOrder,
   IWorkOrderResult,
 } from '../../../shared/interface/work-order.interface';
+import { ICustomerVehicle } from '../../../shared/interface/table-vehicle.interface';
+import { UserList } from '../../../shared/interface/table-user-management.interface';
 import { WorkOrderService } from '../../../shared/services/work-order.service';
+import { VehicleManagementService } from '../../../shared/services/vehicle-management.service';
+import { UserManagementService } from '../../../shared/services/user-management.service';
 import { EWorkOrderStatus } from '../../../shared/enum/work-order.enum';
 import { WORK_ORDER_STATUS_CONFIG } from '../../../shared/constant/work-order-status.constant';
 import { LoadingBarService } from '@ngx-loading-bar/core';
@@ -79,12 +83,11 @@ export class WorkOrderComponent implements OnInit, OnDestroy {
 
   statusCounts = {
     all: 0,
-    pending: 0,
+    awaitingApproval: 0,
+    awaitingAssignment: 0,
     inProgress: 0,
-    qualityCheck: 0,
-    waitingParts: 0,
-    readyForPickup: 0,
-    completed: 0,
+    waitingQc: 0,
+    qcApproved: 0,
   };
 
   selectedOrderForPrint: IWorkOrder | null = null;
@@ -95,6 +98,28 @@ export class WorkOrderComponent implements OnInit, OnDestroy {
 
   isLoading: boolean = false;
   isCreateModalOpen: boolean = false;
+  customerVehicles: ICustomerVehicle[] = [];
+  isLoadingVehicles = false;
+  vehicleIdToSelect: string | null = null;
+  users: UserList[] = [];
+  isLoadingUsers = false;
+
+  private vehicleCreateWindow: Window | null = null;
+  private readonly vehicleCreatedMessageHandler = (event: MessageEvent) => {
+    if (
+      event.origin !== window.location.origin ||
+      event.data?.type !== 'customer-vehicle-created'
+    ) {
+      return;
+    }
+
+    void this.refreshVehiclesAndSelect(event.data);
+  };
+  private readonly windowFocusHandler = () => {
+    if (this.isCreateModalOpen && this.vehicleCreateWindow) {
+      void this.loadCustomerVehicles();
+    }
+  };
 
   constructor(
     private readonly workOrderService: WorkOrderService,
@@ -103,9 +128,15 @@ export class WorkOrderComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private loadingBarService: LoadingBarService,
     private modalCommonService: ModalCommonService,
+    private vehicleManagementService: VehicleManagementService,
+    private userManagementService: UserManagementService,
   ) {}
 
   async ngOnInit(): Promise<void> {
+    window.addEventListener('message', this.vehicleCreatedMessageHandler);
+    window.addEventListener('focus', this.windowFocusHandler);
+    void this.loadCustomerVehicles();
+    void this.loadAdvisorUsers();
     await this.initializePermissions();
     this.searchSubject
       .pipe(debounceTime(500), distinctUntilChanged(), takeUntil(this.destroy$))
@@ -179,6 +210,8 @@ export class WorkOrderComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    window.removeEventListener('message', this.vehicleCreatedMessageHandler);
+    window.removeEventListener('focus', this.windowFocusHandler);
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -215,18 +248,15 @@ export class WorkOrderComponent implements OnInit, OnDestroy {
       const params = {
         page: this.page,
         limit: this.limit,
-        search: this.searchQuery.trim() || undefined,
-        status:
-          this.selectedStatus !== EWorkOrderStatus.ALL
-            ? this.selectedStatus
-            : undefined,
-        date: this.selectedDate || undefined,
         sort: this.sortList || undefined,
       };
 
       const response = await this.workOrderService.getListWorkOrder(params);
 
-      if (response.resultCode === RESPONSE.SUCCESS) {
+      if (
+        response.resultCode === RESPONSE.SUCCESS ||
+        response.resultCode === RESPONSE.CREATED
+      ) {
         this.workOrders = response.resultData;
         console.log(this.workOrders);
         this.calculateMetrics();
@@ -245,38 +275,118 @@ export class WorkOrderComponent implements OnInit, OnDestroy {
     this.statusCounts = {
       all: this.workOrders.data.length,
 
-      pending: this.workOrders.data.filter(
-        (workOrder) => workOrder.status === EWorkOrderStatus.PENDING,
+      awaitingApproval: this.workOrders.data.filter(
+        (workOrder) => workOrder.status === EWorkOrderStatus.WAITING_APPROVAL,
+      ).length,
+
+      awaitingAssignment: this.workOrders.data.filter(
+        (workOrder) => workOrder.status === EWorkOrderStatus.WAITING_ASSIGNMENT,
       ).length,
 
       inProgress: this.workOrders.data.filter(
         (workOrder) => workOrder.status === EWorkOrderStatus.IN_PROGRESS,
       ).length,
 
-      qualityCheck: this.workOrders.data.filter(
-        (workOrder) => workOrder.status === EWorkOrderStatus.QUALITY_CHECK,
+      waitingQc: this.workOrders.data.filter(
+        (workOrder) => workOrder.status === EWorkOrderStatus.WAITING_QC,
       ).length,
 
-      waitingParts: this.workOrders.data.filter(
-        (workOrder) => workOrder.status === EWorkOrderStatus.WAITING_PARTS,
-      ).length,
-
-      readyForPickup: this.workOrders.data.filter(
-        (workOrder) => workOrder.status === EWorkOrderStatus.READY_FOR_PICKUP,
-      ).length,
-
-      completed: this.workOrders.data.filter(
-        (workOrder) => workOrder.status === EWorkOrderStatus.COMPLETED,
+      qcApproved: this.workOrders.data.filter(
+        (workOrder) => workOrder.status === EWorkOrderStatus.QC_APPROVED,
       ).length,
     };
   }
 
   openCreateModal(): void {
+    this.vehicleIdToSelect = null;
     this.isCreateModalOpen = true;
   }
 
   closeCreateModal(): void {
     this.isCreateModalOpen = false;
+  }
+
+  async loadCustomerVehicles(): Promise<void> {
+    if (this.isLoadingVehicles) return;
+
+    this.isLoadingVehicles = true;
+    try {
+      this.customerVehicles =
+        await this.vehicleManagementService.getAllCustomerVehicles();
+    } catch (error) {
+      console.error('Error fetching customer vehicles:', error);
+      this.customerVehicles = [];
+    } finally {
+      this.isLoadingVehicles = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  async loadAdvisorUsers(): Promise<void> {
+    this.isLoadingUsers = true;
+    try {
+      const response = await this.userManagementService.getListUser({
+        page: 1,
+        limit: 100,
+      });
+
+      if (
+        response.resultCode === RESPONSE.SUCCESS ||
+        response.resultCode === RESPONSE.CREATED
+      ) {
+        this.users = (response.resultData?.users ?? []).filter(
+          (user) => user.activeFlag !== false,
+        );
+      } else {
+        this.users = [];
+      }
+    } catch (error) {
+      console.error('Error fetching advisor users:', error);
+      this.users = [];
+    } finally {
+      this.isLoadingUsers = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  openCustomerVehicleCreate(): void {
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree(['/portal/vehicle/create']),
+    );
+
+    this.vehicleCreateWindow = window.open(
+      url,
+      'create-customer-vehicle',
+      'popup,width=1280,height=900,resizable=yes,scrollbars=yes',
+    );
+
+    if (!this.vehicleCreateWindow) {
+      this.modalCommonService.open({
+        type: 'alert',
+        title: 'เปิดหน้าสร้างรถไม่สำเร็จ',
+        subtitle: 'กรุณาอนุญาต popup ของเว็บไซต์ แล้วลองใหม่อีกครั้ง',
+        buttonText: 'เข้าใจแล้ว',
+      });
+      return;
+    }
+
+    this.vehicleCreateWindow.focus();
+  }
+
+  private async refreshVehiclesAndSelect(createdVehicle: {
+    licensePlate?: string;
+    province?: string;
+  }): Promise<void> {
+    await this.loadCustomerVehicles();
+
+    const created = this.customerVehicles.find(
+      (vehicle) =>
+        vehicle.licensePlate === createdVehicle.licensePlate &&
+        vehicle.province === createdVehicle.province,
+    );
+
+    this.vehicleIdToSelect = created?._id ?? null;
+    this.cdr.detectChanges();
   }
 
   async handleCreateWorkOrder(formData: any): Promise<void> {
