@@ -10,3 +10,84 @@
     }
   }
 }
+
+.vehicle-picker-card {
+  @apply rounded-2xl border border-slate-200 bg-white p-4;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+}
+
+.vehicle-picker-icon {
+  @apply flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600;
+}
+
+.vehicle-count-badge {
+  @apply rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-500;
+}
+
+.vehicle-search-icon {
+  @apply pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400;
+}
+
+.vehicle-search-input {
+  @apply w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-9 text-sm text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-60;
+}
+
+.vehicle-search-clear {
+  @apply absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-600;
+}
+
+.vehicle-picker-message {
+  @apply mt-2 flex items-center gap-2 rounded-xl px-3 py-2.5 text-xs;
+}
+
+.vehicle-picker-message-loading {
+  @apply bg-slate-50 text-slate-500;
+}
+
+.vehicle-picker-message-empty {
+  @apply justify-between gap-3 bg-amber-50 text-amber-700;
+}
+
+.vehicle-loading-dot {
+  @apply h-3.5 w-3.5 animate-spin rounded-full border-2 border-slate-200 border-t-emerald-500;
+}
+
+.vehicle-picker-empty {
+  @apply mt-2 flex items-center justify-between gap-3 rounded-xl border border-dashed border-amber-200 bg-amber-50/70 px-3 py-3;
+}
+
+.vehicle-picker-add-button {
+  @apply inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20;
+}
+
+.vehicle-selected-card {
+  @apply mt-3 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50/60 px-3 py-3;
+}
+
+.vehicle-selected-check {
+  @apply flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white;
+}
+
+// custom-select owns the dropdown container, but vehicle options need room
+// for the secondary owner/model line used in this selector.
+:host ::ng-deep .vehicle-select-options .custom-options {
+  white-space: normal;
+  min-width: 100%;
+  max-width: min(34rem, calc(100vw - 3rem));
+}
+
+:host ::ng-deep .vehicle-select-options .custom-option > span {
+  white-space: normal;
+}
+
+.vehicle-option-content {
+  @apply min-w-0 py-0.5;
+}
+
+.vehicle-option-plate {
+  @apply block font-bold text-slate-800;
+}
+
+.vehicle-option-detail {
+  @apply mt-0.5 block truncate text-xs font-normal text-slate-500;
+}

@@ -52,30 +52,159 @@
           ></lucide-angular>
           ข้อมูลทั่วไป
         </h4>
-        <div>
-          <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-1"
-              >Vehicle ID / รถยนต์ *</label
-            >
-            <div class="relative">
-              <input
-                formControlName="vehicleId"
-                type="text"
-                placeholder="ระบุ Mongo ID รถยนต์"
-                class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none"
-              />
+        <div class="vehicle-picker-card">
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex items-start gap-2.5">
+              <div class="vehicle-picker-icon">
+                <lucide-angular [img]="IconCar" class="w-4 h-4"></lucide-angular>
+              </div>
+              <div>
+                <label class="block text-sm font-bold text-slate-800">
+                  รถลูกค้า / Customer vehicle <span class="text-rose-500">*</span>
+                </label>
+                <p class="text-xs text-slate-500 mt-0.5">
+                  เลือกรถจากทะเบียนเพื่อสร้างใบสั่งงานให้ถูกคัน
+                </p>
+              </div>
             </div>
-            <p
-              *ngIf="
-                createForm.get('vehicleId')?.touched &&
-                createForm.get('vehicleId')?.invalid
-              "
-              class="text-xs text-red-500 mt-1"
+
+            <span
+              *ngIf="!isLoadingVehicles && vehicles.length > 0"
+              class="vehicle-count-badge"
             >
-              กรุณาระบุข้อมูลรถ
-            </p>
+              {{ vehicles.length }} คัน
+            </span>
           </div>
 
+          <div class="relative mt-4">
+            <lucide-angular
+              [img]="IconSearch"
+              class="vehicle-search-icon"
+            ></lucide-angular>
+            <input
+              [(ngModel)]="vehicleSearch"
+              [ngModelOptions]="{ standalone: true }"
+              [disabled]="isLoadingVehicles || vehicles.length === 0"
+              type="search"
+              placeholder="ค้นหาทะเบียน ชื่อลูกค้า รุ่น หรือ VIN"
+              class="vehicle-search-input"
+            />
+            <button
+              *ngIf="vehicleSearch"
+              type="button"
+              (click)="clearVehicleSearch()"
+              aria-label="ล้างคำค้นหารถ"
+              class="vehicle-search-clear"
+            >
+              <lucide-angular [img]="IconX" class="w-3.5 h-3.5"></lucide-angular>
+            </button>
+          </div>
+
+          <div class="mt-2">
+            <custom-select
+              formControlName="vehicleId"
+              positionClass="vehicle-select-options"
+              [placeholder]="isLoadingVehicles ? 'กำลังโหลดรายการรถ...' : 'เลือกทะเบียนรถลูกค้า'"
+              [isDisabled]="isLoadingVehicles || vehicles.length === 0"
+            >
+              <custom-option value="">เลือกทะเบียนรถลูกค้า</custom-option>
+              <custom-option
+                *ngFor="let vehicle of filteredVehicles"
+                [value]="vehicle._id"
+              >
+                <div class="vehicle-option-content">
+                  <span class="vehicle-option-plate">
+                    {{ vehicle.licensePlate }} {{ vehicle.province }}
+                  </span>
+                  <span class="vehicle-option-detail">
+                    {{ [vehicle.firstname, vehicle.lastname].join(' ') }}
+                    <span *ngIf="vehicle.vehicle?.brand || vehicle.vehicle?.model">
+                      · {{ vehicle.vehicle?.brand }} {{ vehicle.vehicle?.model }}
+                    </span>
+                  </span>
+                </div>
+              </custom-option>
+            </custom-select>
+          </div>
+
+          <div
+            *ngIf="isLoadingVehicles"
+            class="vehicle-picker-message vehicle-picker-message-loading"
+          >
+            <span class="vehicle-loading-dot"></span>
+            กำลังโหลดรายการรถลูกค้า...
+          </div>
+
+          <div
+            *ngIf="!isLoadingVehicles && vehicles.length === 0"
+            class="vehicle-picker-empty"
+          >
+            <div>
+              <p class="font-semibold text-slate-700">ยังไม่มีรถลูกค้าในระบบ</p>
+              <p class="text-xs text-slate-500 mt-0.5">
+                เพิ่มข้อมูลรถก่อน แล้วกลับมาเลือกในใบสั่งงานได้ทันที
+              </p>
+            </div>
+            <button
+              type="button"
+              (click)="onCreateVehicle()"
+              class="vehicle-picker-add-button"
+            >
+              <lucide-angular [img]="IconPlus" class="w-3.5 h-3.5"></lucide-angular>
+              เพิ่มรถ
+            </button>
+          </div>
+
+          <div
+            *ngIf="!isLoadingVehicles && vehicles.length > 0 && filteredVehicles.length === 0"
+            class="vehicle-picker-message vehicle-picker-message-empty"
+          >
+            ไม่พบรถจากคำค้นนี้ ลองค้นหาด้วยทะเบียนหรือชื่อลูกค้าอื่น
+            <button
+              type="button"
+              (click)="clearVehicleSearch()"
+              class="font-bold text-emerald-600 hover:text-emerald-700"
+            >
+              แสดงทั้งหมด
+            </button>
+          </div>
+
+          <div
+            *ngIf="selectedVehicle"
+            class="vehicle-selected-card"
+          >
+            <div class="vehicle-selected-check">✓</div>
+            <div class="min-w-0 flex-1">
+              <p class="text-[11px] font-bold uppercase tracking-wider text-emerald-700">
+                รถที่เลือก
+              </p>
+              <p class="font-bold text-slate-800 truncate mt-0.5">
+                {{ selectedVehicle.licensePlate }} {{ selectedVehicle.province }}
+              </p>
+              <p class="text-xs text-slate-500 truncate mt-0.5">
+                {{ [selectedVehicle.firstname, selectedVehicle.lastname].join(' ') }}
+                <span *ngIf="selectedVehicle.phoneNumber">
+                  · {{ selectedVehicle.phoneNumber }}
+                </span>
+              </p>
+            </div>
+            <div class="hidden sm:block text-right text-xs text-slate-500">
+              <p>{{ selectedVehicle.vehicle?.brand }} {{ selectedVehicle.vehicle?.model }}</p>
+              <p *ngIf="selectedVehicle.vin" class="font-mono mt-0.5">
+                VIN {{ selectedVehicle.vin }}
+              </p>
+            </div>
+          </div>
+
+          <p
+            *ngIf="
+              createForm.get('vehicleId')?.touched &&
+              createForm.get('vehicleId')?.invalid
+            "
+            class="text-xs text-rose-600 mt-2 font-medium"
+          >
+            กรุณาเลือกรถลูกค้าก่อนดำเนินการต่อ
+          </p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -112,6 +112,48 @@
               </custom-option>
             </custom-select>
           </div>
+
+          <div>
+            <label>เลขตัวถัง (VIN) *</label>
+
+            <input
+              class="form-control"
+              formControlName="vin"
+              placeholder="เลขตัวถังรถยนต์"
+            />
+          </div>
+
+          <div>
+            <label>เลขไมล์ปัจจุบัน *</label>
+
+            <input
+              class="form-control"
+              formControlName="mileage"
+              type="number"
+              min="0"
+              placeholder="เช่น 45000"
+            />
+          </div>
+
+          <div>
+            <label>เลขเครื่องยนต์</label>
+
+            <input
+              class="form-control"
+              formControlName="engine_no"
+              placeholder="ถ้ามี"
+            />
+          </div>
+
+          <div>
+            <label>สีรถ</label>
+
+            <input
+              class="form-control"
+              formControlName="color"
+              placeholder="ถ้ามี"
+            />
+          </div>
         </div>
       </section>
 

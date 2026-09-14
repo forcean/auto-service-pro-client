@@ -79,11 +79,11 @@
       </div>
     </div>
 
-    <!-- Task Checklist -->
+    <!-- Customer-reported complaints (the Work Order API field is `complaints`) -->
     <div class="mt-4 bg-slate-50/80 p-3.5 rounded-xl border border-slate-100">
       <span
         class="text-[10px] font-bold tracking-wider text-slate-400 uppercase block mb-2"
-        >TASKS</span
+        >COMPLAINTS / อาการแจ้งซ่อม</span
       >
       <ul class="space-y-2 text-xs text-slate-600">
         <li *ngFor="let complaint of item.complaints" class="flex items-start gap-2">
@@ -93,6 +93,12 @@
           <span class="leading-tight">
             {{ complaint.title }}
           </span>
+        </li>
+        <li
+          *ngIf="!item.complaints?.length"
+          class="text-slate-400"
+        >
+          ไม่มีรายการอาการแจ้งซ่อม
         </li>
       </ul>
     </div>

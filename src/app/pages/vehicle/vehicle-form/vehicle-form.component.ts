@@ -66,6 +66,10 @@ export class VehicleFormComponent implements OnInit {
         licensePlate: ['', Validators.required],
         province: ['', Validators.required],
         status: [EVehicleStatus.PENDING, Validators.required],
+        vin: ['', Validators.required],
+        engine_no: [''],
+        color: [''],
+        mileage: ['', Validators.required],
       }),
       catalogVehicle: new FormControl<IVehicle[]>([], {
         nonNullable: true,
@@ -84,6 +88,10 @@ export class VehicleFormComponent implements OnInit {
         licensePlate: data.licensePlate ?? '',
         province: data.province ?? '',
         status: data.status ?? EVehicleStatus.PENDING,
+        vin: data.vin ?? '',
+        engine_no: data.engine_no ?? '',
+        color: data.color ?? '',
+        mileage: data.mileage ?? '',
       },
 
       catalogVehicle: [
@@ -140,8 +148,16 @@ export class VehicleFormComponent implements OnInit {
       const res =
         await this.vehicleManagementService.createCustomerVehicle(payload);
 
-      if (res.resultCode == RESPONSE.CREATED) {
-        console.log('created');
+      if (res.resultCode === RESPONSE.CREATED || res.resultCode === RESPONSE.SUCCESS) {
+        window.opener?.postMessage(
+          {
+            type: 'customer-vehicle-created',
+            licensePlate: payload.licensePlate,
+            province: payload.province,
+          },
+          window.location.origin,
+        );
+        this.router.navigate(['/portal/vehicle']);
       } else {
       }
     } catch (error) {}
@@ -218,6 +234,10 @@ export class VehicleFormComponent implements OnInit {
       licensePlate: form.customerVehicle.licensePlate,
       province: form.customerVehicle.province,
       status: form.customerVehicle.status,
+      vin: form.customerVehicle.vin,
+      engine_no: form.customerVehicle.engine_no || undefined,
+      color: form.customerVehicle.color || undefined,
+      mileage: String(form.customerVehicle.mileage),
 
       vehicle: {
         brand: selectedVehicle.brand,

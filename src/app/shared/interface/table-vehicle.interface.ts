@@ -6,7 +6,10 @@ export interface IVehicleResultData {
   limit: number;
   total: number;
   totalPages: number;
-  vehicles: ICustomerVehicle[];
+  /** The customer vehicle list returned by the backend. */
+  data: ICustomerVehicle[];
+  /** Kept optional for compatibility with older mock/legacy responses. */
+  vehicles?: ICustomerVehicle[];
 }
 
 export interface ICustomerVehicle {

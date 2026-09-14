@@ -283,6 +283,10 @@
   <app-create-work-order-modal
     (submitForm)="handleCreateWorkOrder($event)"
     [isOpen]="isCreateModalOpen"
+    [vehicles]="customerVehicles"
+    [isLoadingVehicles]="isLoadingVehicles"
+    [vehicleIdToSelect]="vehicleIdToSelect"
+    (createVehicle)="openCustomerVehicleCreate()"
     (close)="closeCreateModal()"
   >
   </app-create-work-order-modal>

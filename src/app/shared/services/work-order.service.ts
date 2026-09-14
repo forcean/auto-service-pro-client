@@ -151,6 +151,27 @@ export class WorkOrderService {
         }
       : undefined;
 
+    // The Work Order API does not populate a separate `customer` relation.
+    // Customer identity is stored on the populated customer-vehicle document.
+    const customerSource =
+      raw.customer && typeof raw.customer === 'object'
+        ? raw.customer
+        : rawVehicle && typeof rawVehicle === 'object'
+          ? rawVehicle
+          : undefined;
+    const customer = customerSource
+      ? {
+          _id: this.toId(customerSource._id),
+          name:
+            customerSource.name ??
+            [customerSource.firstname, customerSource.lastname]
+              .filter(Boolean)
+              .join(' '),
+          phone: customerSource.phone ?? customerSource.phoneNumber ?? '',
+          isVip: customerSource.isVip,
+        }
+      : undefined;
+
     return {
       _id: this.toId(raw._id ?? raw.id) ?? '',
       workOrderNo: raw.workOrderNo ?? '',
@@ -166,7 +187,7 @@ export class WorkOrderService {
       customerId: this.toId(raw.customerId),
       advisorId: this.toId(raw.advisorId),
       currentQuotationId: this.toId(raw.currentQuotationId),
-      customer: raw.customer ?? (raw.customerId && typeof raw.customerId === 'object' ? raw.customerId : undefined),
+      customer,
       complaints: Array.isArray(raw.complaints) ? raw.complaints : [],
       inspectionRequired: Boolean(raw.inspectionRequired),
       inspections: Array.isArray(raw.inspections) ? raw.inspections : [],

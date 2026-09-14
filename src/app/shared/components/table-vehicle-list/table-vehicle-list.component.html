@@ -37,7 +37,7 @@
       </thead>
 
       <tbody>
-        <tr *ngFor="let row of config?.vehicles; let i = index">
+        <tr *ngFor="let row of config?.data || config?.vehicles || []; let i = index">
           <td>
             {{ i + 1 + (pageIndex - 1) * pageSize }}
           </td>
@@ -98,7 +98,7 @@
           </td>
         </tr>
 
-        <tr *ngIf="config?.vehicles?.length === 0 || config == undefined">
+        <tr *ngIf="(config?.data || config?.vehicles || []).length === 0 || config == undefined">
           <td class="text-center py-5" [attr.colspan]="headers.length + 1">
             - ไม่พบข้อมูลรถ -
           </td>
