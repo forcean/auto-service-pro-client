@@ -149,14 +149,25 @@ export class VehicleFormComponent implements OnInit {
         await this.vehicleManagementService.createCustomerVehicle(payload);
 
       if (res.resultCode === RESPONSE.CREATED || res.resultCode === RESPONSE.SUCCESS) {
-        window.opener?.postMessage(
-          {
-            type: 'customer-vehicle-created',
-            licensePlate: payload.licensePlate,
-            province: payload.province,
-          },
-          window.location.origin,
-        );
+        const opener = window.opener;
+        const isWorkOrderPopup = window.name === 'create-customer-vehicle';
+        if (isWorkOrderPopup && opener && !opener.closed) {
+          opener.postMessage(
+            {
+              type: 'customer-vehicle-created',
+              licensePlate: payload.licensePlate,
+              province: payload.province,
+            },
+            window.location.origin,
+          );
+
+          // This child window is only for creating the vehicle. Keep the
+          // original Work Order page untouched and close this window.
+          window.close();
+          return;
+        }
+
+        // Direct navigation cannot be closed safely by the browser.
         this.router.navigate(['/portal/vehicle']);
       } else {
       }

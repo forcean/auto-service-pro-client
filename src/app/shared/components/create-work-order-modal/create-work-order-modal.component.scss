@@ -24,6 +24,10 @@
   @apply rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-500;
 }
 
+.vehicle-picker-header-action {
+  @apply inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-[11px] font-bold text-emerald-700 transition-colors hover:border-emerald-300 hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/20;
+}
+
 .vehicle-search-icon {
   @apply pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400;
 }

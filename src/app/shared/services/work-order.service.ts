@@ -172,6 +172,17 @@ export class WorkOrderService {
         }
       : undefined;
 
+    const rawAdvisor = raw.advisor ?? raw.advisorId;
+    const advisor = rawAdvisor && typeof rawAdvisor === 'object'
+      ? {
+          _id: this.toId(rawAdvisor._id),
+          publicId: rawAdvisor.publicId,
+          firstname: rawAdvisor.firstname,
+          lastname: rawAdvisor.lastname,
+          role: rawAdvisor.role,
+        }
+      : undefined;
+
     return {
       _id: this.toId(raw._id ?? raw.id) ?? '',
       workOrderNo: raw.workOrderNo ?? '',
@@ -185,7 +196,8 @@ export class WorkOrderService {
       vehicle,
       vehicleId: this.toId(raw.vehicleId) || vehicle?._id || '',
       customerId: this.toId(raw.customerId),
-      advisorId: this.toId(raw.advisorId),
+      advisorId: this.toId(raw.advisorId ?? raw.advisor),
+      advisor,
       currentQuotationId: this.toId(raw.currentQuotationId),
       customer,
       complaints: Array.isArray(raw.complaints) ? raw.complaints : [],

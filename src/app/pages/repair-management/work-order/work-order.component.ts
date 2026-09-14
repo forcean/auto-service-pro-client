@@ -35,8 +35,10 @@ import {
   IWorkOrderResult,
 } from '../../../shared/interface/work-order.interface';
 import { ICustomerVehicle } from '../../../shared/interface/table-vehicle.interface';
+import { UserList } from '../../../shared/interface/table-user-management.interface';
 import { WorkOrderService } from '../../../shared/services/work-order.service';
 import { VehicleManagementService } from '../../../shared/services/vehicle-management.service';
+import { UserManagementService } from '../../../shared/services/user-management.service';
 import { EWorkOrderStatus } from '../../../shared/enum/work-order.enum';
 import { WORK_ORDER_STATUS_CONFIG } from '../../../shared/constant/work-order-status.constant';
 import { LoadingBarService } from '@ngx-loading-bar/core';
@@ -99,6 +101,8 @@ export class WorkOrderComponent implements OnInit, OnDestroy {
   customerVehicles: ICustomerVehicle[] = [];
   isLoadingVehicles = false;
   vehicleIdToSelect: string | null = null;
+  users: UserList[] = [];
+  isLoadingUsers = false;
 
   private vehicleCreateWindow: Window | null = null;
   private readonly vehicleCreatedMessageHandler = (event: MessageEvent) => {
@@ -125,12 +129,14 @@ export class WorkOrderComponent implements OnInit, OnDestroy {
     private loadingBarService: LoadingBarService,
     private modalCommonService: ModalCommonService,
     private vehicleManagementService: VehicleManagementService,
+    private userManagementService: UserManagementService,
   ) {}
 
   async ngOnInit(): Promise<void> {
     window.addEventListener('message', this.vehicleCreatedMessageHandler);
     window.addEventListener('focus', this.windowFocusHandler);
     void this.loadCustomerVehicles();
+    void this.loadAdvisorUsers();
     await this.initializePermissions();
     this.searchSubject
       .pipe(debounceTime(500), distinctUntilChanged(), takeUntil(this.destroy$))
@@ -312,6 +318,33 @@ export class WorkOrderComponent implements OnInit, OnDestroy {
       this.customerVehicles = [];
     } finally {
       this.isLoadingVehicles = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  async loadAdvisorUsers(): Promise<void> {
+    this.isLoadingUsers = true;
+    try {
+      const response = await this.userManagementService.getListUser({
+        page: 1,
+        limit: 100,
+      });
+
+      if (
+        response.resultCode === RESPONSE.SUCCESS ||
+        response.resultCode === RESPONSE.CREATED
+      ) {
+        this.users = (response.resultData?.users ?? []).filter(
+          (user) => user.activeFlag !== false,
+        );
+      } else {
+        this.users = [];
+      }
+    } catch (error) {
+      console.error('Error fetching advisor users:', error);
+      this.users = [];
+    } finally {
+      this.isLoadingUsers = false;
       this.cdr.detectChanges();
     }
   }

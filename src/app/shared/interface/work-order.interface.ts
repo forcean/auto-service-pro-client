@@ -20,6 +20,14 @@ export interface IWorkOrderCustomer {
   isVip?: boolean;
 }
 
+export interface IWorkOrderAdvisor {
+  _id?: string;
+  publicId?: string;
+  firstname?: string;
+  lastname?: string;
+  role?: string;
+}
+
 export interface IComplaint {
   title: string;
   description?: string;
@@ -68,6 +76,7 @@ export interface IWorkOrder {
   vehicleId: string;
   customerId?: string;
   advisorId?: string;
+  advisor?: IWorkOrderAdvisor;
   currentQuotationId?: string;
   customer?: IWorkOrderCustomer;
   complaints: IComplaint[];

@@ -68,12 +68,22 @@
               </div>
             </div>
 
-            <span
-              *ngIf="!isLoadingVehicles && vehicles.length > 0"
-              class="vehicle-count-badge"
-            >
-              {{ vehicles.length }} คัน
-            </span>
+            <div class="flex items-center gap-2">
+              <span
+                *ngIf="!isLoadingVehicles && vehicles.length > 0"
+                class="vehicle-count-badge"
+              >
+                {{ vehicles.length }} คัน
+              </span>
+              <button
+                type="button"
+                (click)="onCreateVehicle()"
+                class="vehicle-picker-header-action"
+              >
+                <lucide-angular [img]="IconPlus" class="w-3.5 h-3.5"></lucide-angular>
+                <span>เพิ่มรถลูกค้า</span>
+              </button>
+            </div>
           </div>
 
           <div class="relative mt-4">
@@ -426,12 +436,36 @@
               ></lucide-angular>
               ผู้รับผิดชอบดูแล (Advisor)
             </label>
-            <input
+            <custom-select
               formControlName="advisor"
-              type="text"
-              placeholder="ระบุผู้รับผิดชอบตามข้อมูลหลังบ้าน"
-              class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
-            />
+              [placeholder]="isLoadingUsers ? 'กำลังโหลดรายชื่อผู้ใช้...' : 'เลือกผู้รับผิดชอบ'"
+              [isDisabled]="isLoadingUsers || users.length === 0"
+            >
+              <custom-option value="">ไม่ระบุผู้รับผิดชอบ</custom-option>
+              <custom-option *ngFor="let user of users" [value]="user.id">
+                {{ getUserLabel(user) }} · {{ user.publicId }} ({{ user.role }})
+              </custom-option>
+            </custom-select>
+            <p *ngIf="isLoadingUsers" class="mt-1.5 text-xs text-slate-400">
+              กำลังโหลดรายชื่อผู้ใช้...
+            </p>
+            <p
+              *ngIf="!isLoadingUsers && users.length === 0"
+              class="mt-1.5 text-xs text-amber-600"
+            >
+              ไม่พบ user ที่สามารถเลือกเป็นผู้รับผิดชอบได้
+            </p>
+            <div
+              *ngIf="selectedAdvisor"
+              class="mt-2 flex items-center gap-2 rounded-lg bg-slate-50 px-2.5 py-2 text-xs text-slate-500"
+            >
+              <span class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 font-bold text-emerald-700">
+                {{ getUserLabel(selectedAdvisor).charAt(0).toUpperCase() }}
+              </span>
+              <span class="truncate">
+                เลือก {{ getUserLabel(selectedAdvisor) }} · {{ selectedAdvisor.role }}
+              </span>
+            </div>
           </div>
 
           <div>

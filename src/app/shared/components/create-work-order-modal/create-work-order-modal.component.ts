@@ -24,6 +24,7 @@ import {
   Car,
 } from 'lucide-angular';
 import { ICustomerVehicle } from '../../interface/table-vehicle.interface';
+import { UserList } from '../../interface/table-user-management.interface';
 
 export enum EFuelLevel {
   EMPTY = 'EMPTY',
@@ -45,6 +46,8 @@ export class CreateWorkOrderModalComponent implements OnInit, OnChanges {
   @Input() vehicles: ICustomerVehicle[] = [];
   @Input() isLoadingVehicles = false;
   @Input() vehicleIdToSelect: string | null = null;
+  @Input() users: UserList[] = [];
+  @Input() isLoadingUsers = false;
 
   @Output() close = new EventEmitter<void>();
   @Output() submitForm = new EventEmitter<any>();
@@ -156,6 +159,15 @@ export class CreateWorkOrderModalComponent implements OnInit, OnChanges {
   get selectedVehicle(): ICustomerVehicle | undefined {
     const vehicleId = this.createForm?.get('vehicleId')?.value;
     return this.vehicles.find((vehicle) => vehicle._id === vehicleId);
+  }
+
+  get selectedAdvisor(): UserList | undefined {
+    const advisorId = this.createForm?.get('advisor')?.value;
+    return this.users.find((user) => user.id === advisorId);
+  }
+
+  getUserLabel(user: UserList): string {
+    return [user.firstname, user.lastname].filter(Boolean).join(' ') || user.publicId;
   }
 
   formatVehicleLabel(vehicle: ICustomerVehicle): string {

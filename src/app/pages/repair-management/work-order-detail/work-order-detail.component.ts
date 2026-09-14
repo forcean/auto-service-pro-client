@@ -22,6 +22,8 @@ import {
 import { ModalCommonService } from '../../../shared/components/modal-common/modal-common.service';
 import { RESPONSE } from '../../../shared/enum/response.enum';
 import { WorkOrderService } from '../../../shared/services/work-order.service';
+import { UserManagementService } from '../../../shared/services/user-management.service';
+import { IResponseUserDetail } from '../../../shared/interface/user-management.interface';
 import { IWorkOrder } from '../../../shared/interface/work-order.interface';
 import { EWorkOrderStatus } from '../../../shared/enum/work-order.enum';
 import { WORK_ORDER_STATUS_CONFIG } from '../../../shared/constant/work-order-status.constant';
@@ -69,6 +71,7 @@ export class WorkOrderDetailComponent implements OnInit {
   isEditModalOpen: boolean = false;
   isLoadingDelete: boolean = false;
   workOrder!: IWorkOrder;
+  advisorUser: IResponseUserDetail | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -77,6 +80,7 @@ export class WorkOrderDetailComponent implements OnInit {
     private modalCommonService: ModalCommonService,
     private readonly workOrderService: WorkOrderService,
     private modalConditionService: ModalConditionService,
+    private readonly userManagementService: UserManagementService,
   ) {}
 
   ngOnInit(): void {
@@ -118,6 +122,11 @@ export class WorkOrderDetailComponent implements OnInit {
 
       if (response.resultCode === RESPONSE.SUCCESS) {
         this.workOrder = response.resultData;
+        this.advisorUser = null;
+
+        if (this.workOrder.advisorId) {
+          await this.loadAdvisor(this.workOrder.advisorId);
+        }
       } else {
         this.handleFailResponse();
       }
@@ -127,6 +136,26 @@ export class WorkOrderDetailComponent implements OnInit {
       this.isLoading = false;
       loader.complete();
     }
+  }
+
+  private async loadAdvisor(advisorId: string): Promise<void> {
+    try {
+      const response = await this.userManagementService.getUserDetail(advisorId);
+      if (response.resultCode === RESPONSE.SUCCESS) {
+        this.advisorUser = response.resultData;
+      }
+    } catch (error) {
+      console.error('Error fetching work order advisor:', error);
+    }
+  }
+
+  get advisorDisplayName(): string {
+    const advisor = this.advisorUser ?? this.workOrder?.advisor;
+    if (!advisor) return '-';
+
+    return [advisor.firstname, advisor.lastname]
+      .filter(Boolean)
+      .join(' ') || advisor.publicId || '-';
   }
 
   async deleteUser(id: string) {
