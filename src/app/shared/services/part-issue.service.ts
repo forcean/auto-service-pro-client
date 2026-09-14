@@ -8,6 +8,8 @@ import {
   ICreatePartIssueRequest,
   IIssuePartIssueRequest,
   IPartIssue,
+  IPartIssueListResult,
+  IQuotationPartAvailabilityResult,
 } from '../interface/repair-flow.interface';
 
 @Injectable({ providedIn: 'root' })
@@ -22,6 +24,14 @@ export class PartIssueService {
 
   getByIssueNo(issueNo: string): Promise<IBaseResponse<IPartIssue>> {
     return this.request(() => this.httpService.get<IPartIssue>(`${this.apiPath}/${issueNo}`));
+  }
+
+  getList(params: { page: number; limit: number; status?: string; workOrderNo?: string }): Promise<IBaseResponse<IPartIssueListResult>> {
+    return this.request(() => this.httpService.get<IPartIssueListResult>(this.apiPath, params));
+  }
+
+  getQuotationPartAvailability(quotationId: string): Promise<IBaseResponse<IQuotationPartAvailabilityResult>> {
+    return this.request(() => this.httpService.get<IQuotationPartAvailabilityResult>(`${this.apiPath}/quotation/${quotationId}/availability`));
   }
 
   reserve(issueNo: string): Promise<IBaseResponse<IPartIssue>> {

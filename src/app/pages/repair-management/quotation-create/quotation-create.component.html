@@ -12,6 +12,12 @@
       </p>
     </div>
 
+    <div *ngIf="additionalPartSummary" class="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+      <p class="font-bold">ใบเสนอราคาอะไหล่เพิ่มเติม</p>
+      <p class="mt-1">{{ additionalPartSummary }}<span *ngIf="additionalTaskNo"> · อ้างอิง Task {{ additionalTaskNo }}</span></p>
+      <p class="mt-1 text-xs leading-5 text-amber-800">ตรวจราคาและรายการให้เรียบร้อย แล้วบันทึก → ส่งอนุมัติ → บันทึกลูกค้าอนุมัติ ก่อนกลับไปยืนยันงานเพิ่มและขอเบิกจากใบนี้</p>
+    </div>
+
     <form [formGroup]="quotationForm" (ngSubmit)="onSubmit()" class="space-y-8">
       <!-- Top Section: General Info -->
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">

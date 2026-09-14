@@ -10,6 +10,7 @@ import {
   ITaskListResult,
   IWorkOrderTask,
   ETaskStatus,
+  IUpdateTaskRequest,
 } from '../interface/repair-flow.interface';
 
 @Injectable({ providedIn: 'root' })
@@ -30,6 +31,10 @@ export class TaskService {
 
   createTask(body: ICreateTaskRequest): Promise<IBaseResponse<IWorkOrderTask>> {
     return this.request(() => this.httpService.post<IWorkOrderTask>(this.apiPath, body));
+  }
+
+  updateTask(taskNo: string, body: IUpdateTaskRequest): Promise<IBaseResponse<IWorkOrderTask>> {
+    return this.request(() => this.httpService.patch<IWorkOrderTask>(`${this.apiPath}/${taskNo}`, body));
   }
 
   updateStatus(taskNo: string, status: ETaskStatus): Promise<IBaseResponse<IWorkOrderTask>> {

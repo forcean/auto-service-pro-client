@@ -94,6 +94,8 @@ import { CreateWorkOrderModalComponent } from './components/create-work-order-mo
 import { WorkOrderCardComponent } from './components/work-order-card/work-order-card.component';
 
 import { TableQuotationListComponent } from './components/table-quotation-list/table-quotation-list.component';
+import { TaskEditModalComponent } from './components/task-edit-modal/task-edit-modal.component';
+import { PartIssueModalComponent } from './components/part-issue-modal/part-issue-modal.component';
 
 const components = [
   ModalCommonComponent,
@@ -133,7 +135,9 @@ const components = [
   ServiceHistoryPanelComponent,
   CreateWorkOrderModalComponent,
   WorkOrderCardComponent,
-  TableQuotationListComponent
+  TableQuotationListComponent,
+  TaskEditModalComponent,
+  PartIssueModalComponent
 ];
 
 const directives = [

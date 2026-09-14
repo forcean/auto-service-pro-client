@@ -1,0 +1,282 @@
+<div
+  *ngIf="isOpen && task"
+  class="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden bg-slate-900/50 p-4 backdrop-blur-sm"
+  role="presentation"
+  (click)="onBackdropClick()"
+>
+  <div
+    class="flex max-h-[85vh] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white text-slate-800 shadow-2xl"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="part-issue-modal-title"
+    (click)="$event.stopPropagation()"
+  >
+    <div
+      class="flex flex-shrink-0 items-center justify-between border-b border-slate-100 bg-slate-50 px-6 py-4"
+    >
+      <div>
+        <p class="text-xs font-bold uppercase tracking-wider text-emerald-600">
+          Parts request
+        </p>
+        <h3
+          id="part-issue-modal-title"
+          class="mt-1 text-lg font-bold text-slate-900"
+        >
+          ขอเบิกอะไหล่
+        </h3>
+        <p class="mt-1 text-sm text-slate-500">
+          {{ task.title }} ·
+          <span class="font-mono text-xs">{{ task.taskNo }}</span>
+        </p>
+      </div>
+      <button
+        type="button"
+        (click)="close.emit()"
+        [disabled]="isSubmitting"
+        class="rounded-xl p-2 text-xl leading-none text-slate-400 transition-colors hover:bg-slate-200/60 hover:text-slate-700 disabled:opacity-40"
+        aria-label="ปิดหน้าต่าง"
+      >
+        ×
+      </button>
+    </div>
+    <div class="modal-scroll flex-1 space-y-5 overflow-y-auto p-6">
+      <div class="grid gap-2 md:grid-cols-3">
+        <button
+          type="button"
+          (click)="modeChange.emit('QUOTED')"
+          [ngClass]="
+            mode === 'QUOTED'
+              ? 'border-emerald-500 bg-emerald-50 text-emerald-800'
+              : 'border-slate-200 bg-white text-slate-600'
+          "
+          class="rounded-2xl border p-3 text-left text-xs font-semibold transition-colors"
+        >
+          ตามใบเสนอราคา
+          <p class="mt-1 font-normal text-slate-500">เบิกตามจำนวนที่อนุมัติ</p>
+        </button>
+        <button
+          type="button"
+          (click)="modeChange.emit('COMPLIMENTARY')"
+          [ngClass]="
+            mode === 'COMPLIMENTARY'
+              ? 'border-sky-500 bg-sky-50 text-sky-800'
+              : 'border-slate-200 bg-white text-slate-600'
+          "
+          class="rounded-2xl border p-3 text-left text-xs font-semibold transition-colors"
+        >
+          อะไหล่เพิ่ม · ไม่คิดเงิน
+          <p class="mt-1 font-normal text-slate-500">ขอ Store ได้ทันที</p>
+        </button>
+        <button
+          type="button"
+          (click)="modeChange.emit('CHARGED')"
+          [ngClass]="
+            mode === 'CHARGED'
+              ? 'border-amber-500 bg-amber-50 text-amber-800'
+              : 'border-slate-200 bg-white text-slate-600'
+          "
+          class="rounded-2xl border p-3 text-left text-xs font-semibold transition-colors"
+        >
+          อะไหล่เพิ่ม · คิดเงิน
+          <p class="mt-1 font-normal text-slate-500">
+            ต้องอนุมัติ quotation ใหม่
+          </p>
+        </button>
+      </div>
+      <ng-container *ngIf="mode === 'QUOTED'">
+        <section class="rounded-2xl border border-slate-200 bg-white">
+          <div class="border-b border-slate-100 px-4 py-3">
+            <p class="text-sm font-bold text-slate-800">
+              รายการจาก quotation ที่อนุมัติแล้ว
+            </p>
+            <p class="mt-1 text-xs text-slate-500">
+              เลือกอะไหล่ แล้วระบุจำนวนที่ต้องการเบิกในรอบนี้
+            </p>
+          </div>
+          <div
+            *ngIf="isLoadingQuotationParts"
+            class="p-5 text-sm text-slate-500"
+          >
+            กำลังโหลดรายการ…
+          </div>
+          <p
+            *ngIf="!isLoadingQuotationParts && !quotationParts.length"
+            class="p-5 text-sm text-slate-500"
+          >
+            ไม่มีอะไหล่ที่ขอเบิกได้จากใบเสนอราคา
+          </p>
+          <button
+            *ngFor="let part of quotationParts"
+            type="button"
+            (click)="quotationPartSelected.emit(part)"
+            [disabled]="part.availableQty === 0"
+            [ngClass]="
+              selectedQuotationPart?.productId === part.productId
+                ? 'bg-emerald-50/70'
+                : ''
+            "
+            class="flex w-full items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 text-left transition-colors last:border-0 hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:opacity-60"
+          >
+            <span
+              ><strong class="block text-sm text-slate-800">{{
+                part.productName
+              }}</strong
+              ><span class="font-mono text-xs text-slate-500"
+                >{{ part.sku }} · ประเมิน {{ part.quotationQty }} · ขอแล้ว
+                {{ part.requestedQty }} · จ่ายแล้ว {{ part.issuedQty }}</span
+              ></span
+            ><strong class="text-sm text-emerald-700"
+              >เหลือ {{ part.availableQty }}</strong
+            >
+          </button>
+        </section>
+        <div
+          *ngIf="selectedQuotationPart"
+          class="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-900"
+        >
+          เลือก: <strong>{{ selectedQuotationPart.productName }}</strong> ·
+          ขอเพิ่มได้อีก {{ selectedQuotationPart.availableQty }} ชิ้น
+        </div>
+        <div class="grid gap-4 md:grid-cols-2">
+          <label class="text-sm font-semibold text-slate-700"
+            >จำนวนที่ขอเบิก<input
+              [(ngModel)]="partForm.requestedQty"
+              type="number"
+              min="1"
+              [max]="selectedQuotationPart?.availableQty || 1"
+              class="mt-1.5 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" /></label
+          ><label class="text-sm font-semibold text-slate-700"
+            >หมายเหตุ <span class="font-normal text-slate-400">(ไม่บังคับ)</span
+            ><input
+              [(ngModel)]="partForm.remark"
+              class="mt-1.5 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+          /></label>
+        </div>
+        <button
+          type="button"
+          (click)="submitQuoted.emit()"
+          [disabled]="
+            isSubmitting ||
+            !selectedQuotationPart ||
+            selectedQuotationPart.availableQty === 0
+          "
+          class="rounded-xl bg-[#374870] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#2d3b5e] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          ส่งคำขอเบิกให้ Store
+        </button>
+      </ng-container>
+      <ng-container *ngIf="mode !== 'QUOTED'">
+        <section class="rounded-2xl border border-slate-200 p-4">
+          <label class="text-sm font-semibold text-slate-700"
+            >ค้นหาอะไหล่ในสต็อก</label
+          >
+          <div class="mt-2 flex gap-2">
+            <input
+              [(ngModel)]="productSearch"
+              (keyup.enter)="onSearch()"
+              placeholder="SKU ของอะไหล่"
+              class="min-w-0 flex-1 rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+            /><button
+              type="button"
+              (click)="onSearch()"
+              [disabled]="isSearchingProducts"
+              class="rounded-xl border border-slate-200 px-4 text-xs font-bold text-slate-700 hover:bg-slate-50"
+            >
+              {{ isSearchingProducts ? "ค้นหา…" : "ค้นหา" }}
+            </button>
+          </div>
+          <div
+            *ngIf="productResults.length"
+            class="mt-3 divide-y divide-slate-100 rounded-xl border border-slate-100"
+          >
+            <button
+              *ngFor="let product of productResults"
+              type="button"
+              (click)="productSelected.emit(product)"
+              class="flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left text-sm transition-colors hover:bg-slate-50"
+            >
+              <span
+                ><strong>{{ product.name }}</strong
+                ><small class="ml-2 font-mono text-slate-500">{{
+                  product.sku
+                }}</small></span
+              ><span class="shrink-0 text-xs text-slate-500"
+                >฿{{ productUnitPrice(product) | number: "1.2-2" }}</span
+              >
+            </button>
+          </div>
+          <p
+            *ngIf="selectedProduct"
+            class="mt-3 rounded-xl bg-slate-50 p-3 text-sm text-slate-700"
+          >
+            เลือก: <strong>{{ selectedProduct.name }}</strong> ·
+            <span class="font-mono">{{ selectedProduct.sku }}</span>
+          </p>
+        </section>
+        <div class="grid gap-4 md:grid-cols-2">
+          <label class="text-sm font-semibold text-slate-700"
+            >จำนวนที่ขอเบิก<input
+              [(ngModel)]="partForm.requestedQty"
+              type="number"
+              min="1"
+              class="mt-1.5 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" /></label
+          ><label class="text-sm font-semibold text-slate-700"
+            >{{
+              mode === "CHARGED"
+                ? "รายละเอียดสำหรับ quotation ใหม่"
+                : "เหตุผล/หมายเหตุ"
+            }}<input
+              [(ngModel)]="partForm.remark"
+              class="mt-1.5 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+          /></label>
+        </div>
+        <div
+          *ngIf="mode === 'COMPLIMENTARY'"
+          class="rounded-2xl bg-sky-50 p-4 text-xs leading-5 text-sky-900"
+        >
+          ระบบจะส่งเป็น
+          <strong>ADDITIONAL / ไม่คิดค่าใช้จ่าย</strong> โดยอ้างอิง quotation
+          ที่ APPROVED และไม่หักโควตาอะไหล่ในใบเสนอราคา
+        </div>
+        <button
+          *ngIf="mode === 'COMPLIMENTARY'"
+          type="button"
+          (click)="submitComplimentary.emit()"
+          [disabled]="isSubmitting || !selectedProduct"
+          class="rounded-xl bg-sky-700 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-sky-800 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          ส่งคำขอเบิกเพิ่มให้ Store
+        </button>
+        <div
+          *ngIf="mode === 'CHARGED'"
+          class="rounded-2xl bg-amber-50 p-4 text-xs leading-5 text-amber-900"
+        >
+          ระบบจะหยุดงานไว้ที่
+          <strong>WAITING_ADDITIONAL_APPROVAL</strong> และเปิด quotation
+          ใหม่พร้อมรายการนี้
+          เมื่ออนุมัติแล้วจึงกลับมายืนยันงานเพิ่มและเบิกจากใบใหม่
+        </div>
+        <button
+          *ngIf="mode === 'CHARGED'"
+          type="button"
+          (click)="submitCharged.emit()"
+          [disabled]="isSubmitting || !selectedProduct"
+          class="rounded-xl bg-amber-700 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-amber-800 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          สร้างเรื่องและไปออก quotation ใหม่
+        </button>
+      </ng-container>
+      <div
+        *ngIf="loadedIssue"
+        class="rounded-2xl border border-amber-200 bg-amber-50 p-4"
+      >
+        <p class="font-mono text-sm font-bold text-amber-900">
+          {{ loadedIssue.issueNo }}
+        </p>
+        <p class="mt-1 text-xs text-amber-800">
+          ส่งคำขอแล้ว · สถานะ {{ loadedIssue.status }} · รอ Store ดำเนินการ
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

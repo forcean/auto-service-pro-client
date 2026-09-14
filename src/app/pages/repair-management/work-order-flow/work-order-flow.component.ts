@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { RESPONSE } from '../../../shared/enum/response.enum';
 import { EWorkOrderStatus } from '../../../shared/enum/work-order.enum';
 import { IProducts } from '../../../shared/interface/product-list.interface';
-import { ETaskPriority, ETaskStatus, IPartIssue, IWorkOrderTask } from '../../../shared/interface/repair-flow.interface';
+import { ETaskPriority, ETaskStatus, IPartIssue, IQuotationPartAvailability, IUpdateTaskRequest, IWorkOrderTask } from '../../../shared/interface/repair-flow.interface';
 import { UserList } from '../../../shared/interface/table-user-management.interface';
 import { IWorkOrder } from '../../../shared/interface/work-order.interface';
 import { PartIssueService } from '../../../shared/services/part-issue.service';
@@ -24,6 +24,8 @@ interface ITaskBoardColumn {
   statuses: ETaskStatus[];
   accentClass: string;
 }
+
+type PartRequestMode = 'QUOTED' | 'COMPLIMENTARY' | 'CHARGED';
 
 @Component({
   selector: 'app-work-order-flow',
@@ -76,25 +78,34 @@ export class WorkOrderFlowComponent implements OnChanges {
   tasks: IWorkOrderTask[] = [];
   mechanics: UserList[] = [];
   productResults: IProducts[] = [];
+  quotationParts: IQuotationPartAvailability[] = [];
   selectedPartTask: IWorkOrderTask | null = null;
   selectedProduct: IProducts | null = null;
+  selectedQuotationPart: IQuotationPartAvailability | null = null;
   loadedIssue: IPartIssue | null = null;
   isLoadingTasks = false;
   isLoadingMechanics = false;
   isSearchingProducts = false;
+  isLoadingQuotationParts = false;
   isSubmitting = false;
   feedback = '';
   productSearch = '';
+  partRequestMode: PartRequestMode = 'QUOTED';
   reworkTitle = '';
   partIssueCancelRemark = '';
   additionalProblemText: Record<string, string> = {};
+  editingTaskNo: string | null = null;
 
   taskForm = {
     title: '',
     description: '',
     priority: ETaskPriority.NORMAL,
     estimateMinute: 0,
-    mechanicId: '',
+    actualMinute: 0,
+    plannedStartDate: '',
+    plannedFinishDate: '',
+    remark: '',
+    mechanicIds: [] as string[],
   };
   partForm = { requestedQty: 1, isAdditionalCharge: false, remark: '' };
 
@@ -136,13 +147,17 @@ export class WorkOrderFlowComponent implements OnChanges {
     }
   }
 
-  get selectedMechanic(): UserList | undefined {
-    return this.mechanics.find((mechanic) => mechanic.id === this.taskForm.mechanicId);
+  get selectedMechanics(): UserList[] {
+    return this.mechanics.filter((mechanic) => this.taskForm.mechanicIds.includes(mechanic.id));
   }
 
   get taskSummary(): string {
     const finished = this.tasks.filter((task) => task.status === ETaskStatus.FINISHED).length;
     return `${finished}/${this.tasks.length} งานเสร็จแล้ว`;
+  }
+
+  get editingTask(): IWorkOrderTask | null {
+    return this.tasks.find((task) => task.taskNo === this.editingTaskNo) ?? null;
   }
 
   tasksForColumn(column: ITaskBoardColumn): IWorkOrderTask[] {
@@ -188,7 +203,6 @@ export class WorkOrderFlowComponent implements OnChanges {
   }
 
   async loadMechanics(): Promise<void> {
-    if (![EWorkOrderStatus.WAITING_ASSIGNMENT, EWorkOrderStatus.REWORK].includes(this.workOrder.status)) return;
     this.isLoadingMechanics = true;
     try {
       const response = await this.userManagementService.getListUser({ page: 1, limit: 100, role: 'MEC' });
@@ -230,9 +244,9 @@ export class WorkOrderFlowComponent implements OnChanges {
   }
 
   async createTask(): Promise<void> {
-    const mechanic = this.selectedMechanic;
-    if (!this.taskForm.title.trim() || !mechanic) {
-      this.setFeedback('กรุณาระบุชื่องานและเลือกช่างผู้รับผิดชอบ');
+    const mechanics = this.selectedMechanics;
+    if (!this.taskForm.title.trim() || !mechanics.length) {
+      this.setFeedback('กรุณาระบุชื่องานและเลือกช่างผู้รับผิดชอบอย่างน้อย 1 คน');
       return;
     }
     await this.runAction(async () => {
@@ -242,20 +256,82 @@ export class WorkOrderFlowComponent implements OnChanges {
         description: this.taskForm.description.trim() || undefined,
         priority: this.taskForm.priority,
         estimateMinute: Number(this.taskForm.estimateMinute) || undefined,
-        mechanics: [{
+        actualMinute: Number(this.taskForm.actualMinute) || undefined,
+        plannedStartDate: this.taskForm.plannedStartDate || undefined,
+        plannedFinishDate: this.taskForm.plannedFinishDate || undefined,
+        remark: this.taskForm.remark.trim() || undefined,
+        mechanics: mechanics.map((mechanic) => ({
           mechanicId: mechanic.id,
           mechanicName: [mechanic.firstname, mechanic.lastname].filter(Boolean).join(' ') || mechanic.publicId,
-        }],
+        })),
         isRework: this.workOrder.status === EWorkOrderStatus.REWORK,
       });
       if (response.resultCode !== RESPONSE.SUCCESS) return response;
       return this.taskService.updateStatus(response.resultData.taskNo, ETaskStatus.ASSIGNED);
     }, 'สร้างและมอบหมายงานให้ช่างแล้ว');
-    this.taskForm = { title: '', description: '', priority: ETaskPriority.NORMAL, estimateMinute: 0, mechanicId: '' };
+    this.taskForm = {
+      title: '',
+      description: '',
+      priority: ETaskPriority.NORMAL,
+      estimateMinute: 0,
+      actualMinute: 0,
+      plannedStartDate: '',
+      plannedFinishDate: '',
+      remark: '',
+      mechanicIds: [],
+    };
   }
 
   async updateTaskStatus(task: IWorkOrderTask, nextStatus: ETaskStatus): Promise<void> {
     await this.runAction(() => this.taskService.updateStatus(task.taskNo, nextStatus), 'อัปเดตสถานะงานแล้ว');
+  }
+
+  startEditTask(task: IWorkOrderTask): void {
+    this.editingTaskNo = task.taskNo;
+  }
+
+  cancelEditTask(): void {
+    this.editingTaskNo = null;
+  }
+
+  async saveTaskEdit(form: IUpdateTaskRequest): Promise<void> {
+    const task = this.editingTask;
+    const title = form.title?.trim();
+    if (!task) {
+      this.setFeedback('ไม่พบ Task ที่กำลังแก้ไข กรุณารีเฟรชข้อมูล');
+      return;
+    }
+    if (!title) {
+      this.setFeedback('กรุณาระบุชื่องาน');
+      return;
+    }
+    if (this.isSubmitting) return;
+    this.isSubmitting = true;
+    try {
+      const response = await this.taskService.updateTask(task.taskNo, {
+        ...form,
+        title,
+        description: form.description?.trim() || undefined,
+        estimateMinute: Number(form.estimateMinute) || 0,
+        actualMinute: Number(form.actualMinute) || 0,
+        progress: Math.min(100, Math.max(0, Number(form.progress) || 0)),
+        plannedStartDate: form.plannedStartDate || undefined,
+        plannedFinishDate: form.plannedFinishDate || undefined,
+        remark: form.remark?.trim() || undefined,
+      });
+      if (response.resultCode !== RESPONSE.SUCCESS) {
+        this.setFeedback(this.errorMessage(response));
+        return;
+      }
+      this.setFeedback('บันทึกการแก้ไขงานแล้ว', false);
+      this.cancelEditTask();
+      await this.loadTasks();
+      this.flowChanged.emit();
+    } catch {
+      this.setFeedback('ไม่สามารถบันทึกการแก้ไขงานได้ กรุณาลองใหม่อีกครั้ง');
+    } finally {
+      this.isSubmitting = false;
+    }
   }
 
   nextTaskStatus(task: IWorkOrderTask): ETaskStatus | null {
@@ -290,21 +366,72 @@ export class WorkOrderFlowComponent implements OnChanges {
     this.additionalProblemText[task.taskNo] = '';
   }
 
+  async approveAdditionalProblem(task: IWorkOrderTask, problemId: string): Promise<void> {
+    const quotationId = this.workOrder.currentQuotationId;
+    if (!quotationId) {
+      this.setFeedback('ไม่พบใบเสนอราคาใหม่สำหรับยืนยันงานเพิ่ม');
+      return;
+    }
+    await this.runAction(
+      () => this.taskService.approveAdditionalProblem(task.taskNo, problemId, { quotationId }),
+      'อนุมัติงานเพิ่มแล้ว สร้าง Task ใหม่ให้ทีมดำเนินการต่อได้',
+    );
+  }
+
   openParts(task: IWorkOrderTask): void {
     this.selectedPartTask = task;
     this.selectedProduct = null;
     this.productSearch = '';
     this.productResults = [];
     this.loadedIssue = null;
+    this.selectedQuotationPart = null;
+    this.partRequestMode = 'QUOTED';
+    this.partForm = { requestedQty: 1, isAdditionalCharge: false, remark: '' };
+    void this.loadQuotationParts();
   }
 
   closeParts(): void {
     this.selectedPartTask = null;
     this.selectedProduct = null;
     this.productResults = [];
+    this.quotationParts = [];
+    this.selectedQuotationPart = null;
   }
 
-  async searchProducts(): Promise<void> {
+  setPartRequestMode(mode: PartRequestMode): void {
+    this.partRequestMode = mode;
+    this.selectedQuotationPart = null;
+    this.selectedProduct = null;
+    this.productSearch = '';
+    this.productResults = [];
+    this.partForm.requestedQty = 1;
+  }
+
+  async loadQuotationParts(): Promise<void> {
+    const quotationId = this.workOrder.currentQuotationId;
+    if (!quotationId) {
+      this.setFeedback('ไม่พบใบเสนอราคาที่อ้างอิงได้สำหรับการขอเบิกอะไหล่');
+      return;
+    }
+    this.isLoadingQuotationParts = true;
+    try {
+      const response = await this.partIssueService.getQuotationPartAvailability(quotationId);
+      this.quotationParts = response.resultCode === RESPONSE.SUCCESS ? response.resultData.items : [];
+      if (response.resultCode !== RESPONSE.SUCCESS) this.setFeedback(this.errorMessage(response));
+    } catch {
+      this.setFeedback('ไม่สามารถโหลดรายการอะไหล่จากใบเสนอราคาได้');
+    } finally {
+      this.isLoadingQuotationParts = false;
+    }
+  }
+
+  selectQuotationPart(part: IQuotationPartAvailability): void {
+    this.selectedQuotationPart = part;
+    this.partForm.requestedQty = 1;
+  }
+
+  async searchProducts(keywordValue?: string): Promise<void> {
+    if (keywordValue !== undefined) this.productSearch = keywordValue;
     const keyword = this.productSearch.trim();
     if (!keyword) {
       this.productResults = [];
@@ -328,29 +455,132 @@ export class WorkOrderFlowComponent implements OnChanges {
   }
 
   async createPartIssue(): Promise<void> {
-    if (!this.selectedPartTask || !this.selectedProduct) {
+    if (!this.selectedPartTask || !this.selectedQuotationPart) {
       this.setFeedback('เลือกงานและอะไหล่ก่อนสร้างใบเบิก');
       return;
     }
+    if (!this.workOrder.currentQuotationId) {
+      this.setFeedback('ไม่พบใบเสนอราคาที่อ้างอิงได้สำหรับการขอเบิกอะไหล่');
+      return;
+    }
+    const quotationId = this.workOrder.currentQuotationId;
+    const part = this.selectedQuotationPart;
+    const isChargedAdditional = this.isChargedAdditionalTask(this.selectedPartTask);
+    const requestedQty = Number(this.partForm.requestedQty);
+    if (!Number.isInteger(requestedQty) || requestedQty < 1 || requestedQty > part.availableQty) {
+      this.setFeedback(`จำนวนที่ขอเบิกต้องอยู่ระหว่าง 1 ถึง ${part.availableQty}`);
+      return;
+    }
+    await this.runAction(async () => {
+      const response = await this.partIssueService.create({
+        workOrderNo: this.workOrder.workOrderNo,
+        taskNo: this.selectedPartTask!.taskNo,
+        quotationId,
+        remark: this.partForm.remark.trim() || undefined,
+        items: [{
+          productId: part.productId,
+          sku: part.sku,
+          productName: part.productName,
+          requestedQty,
+          reason: isChargedAdditional ? 'ADDITIONAL' : 'NORMAL',
+          isAdditionalCharge: isChargedAdditional,
+          unitPrice: part.unitPrice,
+        }],
+      });
+      if (response.resultCode === RESPONSE.SUCCESS) {
+        this.loadedIssue = response.resultData;
+        await this.loadQuotationParts();
+      }
+      return response;
+    }, 'สร้างใบเบิกอะไหล่แล้ว', false);
+  }
+
+  async createComplimentaryAdditionalIssue(): Promise<void> {
+    if (!this.selectedPartTask || !this.selectedProduct) {
+      this.setFeedback('ค้นหาและเลือกอะไหล่ที่ต้องการเบิกเพิ่มก่อน');
+      return;
+    }
+    const quotationId = this.workOrder.currentQuotationId;
+    if (!quotationId) {
+      this.setFeedback('ไม่พบใบเสนอราคาที่ APPROVED สำหรับอ้างอิงการเบิก');
+      return;
+    }
+    const requestedQty = this.validAdditionalQuantity();
+    if (!requestedQty) return;
     const product = this.selectedProduct;
     await this.runAction(async () => {
       const response = await this.partIssueService.create({
         workOrderNo: this.workOrder.workOrderNo,
         taskNo: this.selectedPartTask!.taskNo,
+        quotationId,
         remark: this.partForm.remark.trim() || undefined,
         items: [{
           productId: product.id,
           sku: product.sku,
           productName: product.name,
-          requestedQty: Number(this.partForm.requestedQty),
-          reason: this.partForm.isAdditionalCharge ? 'ADDITIONAL' : 'NORMAL',
-          isAdditionalCharge: this.partForm.isAdditionalCharge,
-          unitPrice: product.prices?.retail ?? 0,
+          requestedQty,
+          reason: 'ADDITIONAL',
+          isAdditionalCharge: false,
+          unitPrice: this.productUnitPrice(product),
+          remark: this.partForm.remark.trim() || undefined,
         }],
       });
       if (response.resultCode === RESPONSE.SUCCESS) this.loadedIssue = response.resultData;
       return response;
-    }, 'สร้างใบเบิกอะไหล่แล้ว', false);
+    }, 'ส่งคำขอเบิกอะไหล่เพิ่มแบบไม่คิดค่าใช้จ่ายให้ Store แล้ว', false);
+  }
+
+  async beginChargedAdditionalFlow(): Promise<void> {
+    if (!this.selectedPartTask || !this.selectedProduct) {
+      this.setFeedback('ค้นหาและเลือกอะไหล่ที่ต้องการเสนอราคาเพิ่มก่อน');
+      return;
+    }
+    const requestedQty = this.validAdditionalQuantity();
+    if (!requestedQty || this.isSubmitting) return;
+
+    const task = this.selectedPartTask;
+    const product = this.selectedProduct;
+    const detail = `ต้องใช้อะไหล่เพิ่มเติม (คิดค่าใช้จ่าย): ${product.sku} ${product.name} จำนวน ${requestedQty} ชิ้น${this.partForm.remark.trim() ? ` — ${this.partForm.remark.trim()}` : ''}`;
+    this.isSubmitting = true;
+    try {
+      const response = await this.taskService.reportAdditionalProblem(task.taskNo, detail);
+      if (response.resultCode !== RESPONSE.SUCCESS) {
+        this.setFeedback(this.errorMessage(response));
+        return;
+      }
+      await this.router.navigate(['/portal/repair/quotation/create'], {
+        queryParams: {
+          workOrderNo: this.workOrder.workOrderNo,
+          additionalTaskNo: task.taskNo,
+          additionalProductId: product.id,
+          additionalSku: product.sku,
+          additionalProductName: product.name,
+          additionalQuantity: requestedQty,
+          additionalRemark: this.partForm.remark.trim() || undefined,
+        },
+      });
+    } catch {
+      this.setFeedback('ไม่สามารถส่งเรื่องขออนุมัติอะไหล่เพิ่มได้');
+    } finally {
+      this.isSubmitting = false;
+    }
+  }
+
+  private validAdditionalQuantity(): number | null {
+    const requestedQty = Number(this.partForm.requestedQty);
+    if (!Number.isInteger(requestedQty) || requestedQty < 1) {
+      this.setFeedback('จำนวนที่ขอเบิกต้องเป็นจำนวนเต็มตั้งแต่ 1 ชิ้น');
+      return null;
+    }
+    return requestedQty;
+  }
+
+  productUnitPrice(product: IProducts): number {
+    return product.prices?.retail ?? product.prices?.wholesale ?? product.prices?.cost ?? 0;
+  }
+
+  isChargedAdditionalTask(task: IWorkOrderTask): boolean {
+    return task.isRework && task.remark === 'Created from approved additional problem';
   }
 
   async reservePartIssue(): Promise<void> {

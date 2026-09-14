@@ -81,9 +81,23 @@ export interface ICreateTaskRequest {
   isRework?: boolean;
 }
 
+export interface IUpdateTaskRequest {
+  title?: string;
+  description?: string;
+  priority?: ETaskPriority;
+  estimateMinute?: number;
+  actualMinute?: number;
+  plannedStartDate?: string;
+  plannedFinishDate?: string;
+  progress?: number;
+  mechanics?: IAssignedMechanic[];
+  remark?: string;
+}
+
 export interface ICreatePartIssueRequest {
   workOrderNo: string;
   taskNo: string;
+  quotationId: string;
   remark?: string;
   items: Array<{
     productId: string;
@@ -102,6 +116,8 @@ export interface IPartIssue {
   issueNo: string;
   workOrderNo: string;
   taskNo: string;
+  quotationId: string;
+  quotationNo: string;
   status: 'REQUESTED' | 'RESERVED' | 'PARTIAL' | 'ISSUED' | 'CANCELLED';
   items: Array<{
     productId: string;
@@ -110,6 +126,10 @@ export interface IPartIssue {
     requestedQty: number;
     reservedQty: number;
     issuedQty: number;
+    reason: 'NORMAL' | 'ADDITIONAL' | 'DAMAGED' | 'REPLACEMENT';
+    isAdditionalCharge: boolean;
+    unitPrice: number;
+    remark?: string;
   }>;
   requestedBy?: string;
   requestedByName?: string;
@@ -125,6 +145,32 @@ export interface IPartIssue {
   deletedDt?: string;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface IPartIssueListResult {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  data: IPartIssue[];
+}
+
+export interface IQuotationPartAvailability {
+  productId: string;
+  sku: string;
+  productName: string;
+  quotationQty: number;
+  requestedQty: number;
+  reservedQty: number;
+  issuedQty: number;
+  availableQty: number;
+  unitPrice: number;
+}
+
+export interface IQuotationPartAvailabilityResult {
+  quotationId: string;
+  quotationNo: string;
+  items: IQuotationPartAvailability[];
 }
 
 export interface IIssuePartIssueRequest {

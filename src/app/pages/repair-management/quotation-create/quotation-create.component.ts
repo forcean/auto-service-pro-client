@@ -43,6 +43,9 @@ export class QuotationCreateComponent implements OnInit, OnDestroy {
   isSubmitting = false;
   isSearching = false;
 
+  additionalTaskNo: string | null = null;
+  additionalPartSummary: string | null = null;
+
   itemTypes = Object.values(EQuotationItemType);
 
   productSearchResults: Record<number, IProducts[]> = {};
@@ -83,6 +86,7 @@ export class QuotationCreateComponent implements OnInit, OnDestroy {
       if (this.workOrderNo) {
         await this.loadWorkOrder(this.workOrderNo);
         this.addItem();
+        this.prefillAdditionalPartFromRoute();
         return;
       }
 
@@ -225,6 +229,38 @@ export class QuotationCreateComponent implements OnInit, OnDestroy {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  private prefillAdditionalPartFromRoute(): void {
+    const productId = this.route.snapshot.queryParamMap.get('additionalProductId');
+    const sku = this.route.snapshot.queryParamMap.get('additionalSku');
+    const productName = this.route.snapshot.queryParamMap.get('additionalProductName');
+    const quantity = Number(this.route.snapshot.queryParamMap.get('additionalQuantity'));
+
+    if (!productId || !sku || !productName || !Number.isInteger(quantity) || quantity < 1) {
+      return;
+    }
+
+    this.additionalTaskNo = this.route.snapshot.queryParamMap.get('additionalTaskNo');
+    const remark = this.route.snapshot.queryParamMap.get('additionalRemark')?.trim();
+    this.additionalPartSummary = `${sku} · ${productName} · ${quantity} ชิ้น`;
+
+    this.items.at(0).patchValue({
+      itemType: EQuotationItemType.PART,
+      productId,
+      sku,
+      description: productName,
+      quantity,
+      remark: remark || undefined,
+    });
+
+    this.quotationForm.patchValue({
+      internalRemark: [
+        'ใบเสนอราคาอะไหล่เพิ่มเติม',
+        this.additionalTaskNo ? `อ้างอิง Task ${this.additionalTaskNo}` : '',
+        remark ?? '',
+      ].filter(Boolean).join(' · '),
+    });
   }
 
   private async loadQuotation(quotationNo: string): Promise<void> {
