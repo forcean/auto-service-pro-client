@@ -20,6 +20,31 @@
 
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+}
+
+.part-issue-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .8rem 1.2rem;
+  border-radius: 14px;
+  border: 1px solid #bae6fd;
+  background: #f0f9ff;
+  color: #0369a1;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s ease;
+
+  &:hover {
+    background: #e0f2fe;
+    border-color: #7dd3fc;
+  }
+}
+
 /* ================= BUTTON ================= */
 
 .create-stock-btn {
@@ -97,6 +122,15 @@
     flex-direction: column;
     align-items: stretch;
 
+  }
+
+  .header-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .part-issue-btn {
+    justify-content: center;
   }
 
   .create-stock-btn {

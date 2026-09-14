@@ -1,114 +1,59 @@
 <section class="min-h-screen bg-slate-50/70 p-4 md:p-8">
-  <div class="mx-auto max-w-6xl">
-    <header
-      class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-    >
+  <div class="mx-auto max-w-7xl">
+    <header class="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
       <div>
-        <p class="text-xs font-bold uppercase tracking-widest text-amber-600">
-          Store workspace
-        </p>
-        <h1 class="mt-1 text-2xl font-bold text-slate-900">
-          คิวคำขอเบิกอะไหล่
-        </h1>
-        <p class="mt-1 text-sm text-slate-500">
-          ตรวจสอบ quotation reference, จอง และยืนยันจ่ายอะไหล่
-        </p>
+        <p class="text-xs font-bold uppercase tracking-[0.18em] text-amber-600">Stock control</p>
+        <h1 class="mt-1 text-2xl font-bold text-slate-900">คิวเบิกอะไหล่</h1>
+        <p class="mt-1 text-sm text-slate-500">ตรวจคำขอจากช่าง จองอะไหล่ และยืนยันการจ่ายออกจากคลัง</p>
       </div>
-      <button
-        type="button"
-        (click)="loadIssues()"
-        class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-      >
-        รีเฟรช
+      <button type="button" (click)="loadIssues()" [disabled]="isLoading" class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-50">
+        <span [class.animate-spin]="isLoading">↻</span>{{ isLoading ? 'กำลังโหลด…' : 'รีเฟรชคิว' }}
       </button>
     </header>
-    <div
-      *ngIf="errorMessage"
-      class="mb-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700"
-    >
-      {{ errorMessage }}
+
+    <div class="mb-6 grid gap-3 sm:grid-cols-3">
+      <div class="rounded-2xl border border-amber-100 bg-amber-50 p-4"><p class="text-xs font-semibold text-amber-700">รอ Store ดำเนินการ</p><p class="mt-2 text-2xl font-bold text-amber-900">{{ actionableCount }}</p><p class="mt-1 text-xs text-amber-700">คำขอที่ยังไม่จ่ายครบ</p></div>
+      <div class="rounded-2xl border border-slate-200 bg-white p-4"><p class="text-xs font-semibold text-slate-500">รอจองอะไหล่</p><p class="mt-2 text-2xl font-bold text-slate-900">{{ requestedCount }}</p><p class="mt-1 text-xs text-slate-500">ต้องตรวจสอบสต็อกและกดจอง</p></div>
+      <div class="rounded-2xl border border-sky-100 bg-sky-50 p-4"><p class="text-xs font-semibold text-sky-700">พร้อมจ่าย / เบิกบางส่วน</p><p class="mt-2 text-2xl font-bold text-sky-900">{{ readyToIssueCount }}</p><p class="mt-1 text-xs text-sky-700">มีจำนวนที่จองไว้สำหรับจ่าย</p></div>
     </div>
-    <div
-      *ngIf="isLoading"
-      class="rounded-2xl border border-slate-200 bg-white p-10 text-center text-slate-500"
-    >
-      กำลังโหลดคิว…
-    </div>
-    <div
-      *ngIf="!isLoading && !issues.length"
-      class="rounded-2xl border border-slate-200 bg-white p-10 text-center text-slate-500"
-    >
-      ไม่มีคำขอที่รอ Store ดำเนินการ
-    </div>
-    <div *ngIf="!isLoading && issues.length" class="space-y-4">
-      <article
-        *ngFor="let issue of issues"
-        class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-      >
-        <div
-          class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
-        >
-          <div>
-            <p class="font-mono text-sm font-bold text-slate-900">
-              {{ issue.issueNo }}
-            </p>
-            <p class="mt-1 text-sm text-slate-600">
-              {{ issue.workOrderNo }} · {{ issue.taskNo }}
-            </p>
-            <p class="mt-1 text-xs text-slate-500">
-              Quotation ref: {{ issue.quotationNo || issue.quotationId }}
-            </p>
-          </div>
-          <span
-            class="w-fit rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800"
-            >{{ issue.status }}</span
-          >
+
+    <div class="mb-4 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+      <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-400/20">
+          <span class="text-slate-400">⌕</span><input [(ngModel)]="searchTerm" type="search" placeholder="ค้นหาเลขที่เบิก, Work Order, Task, quotation หรือ SKU" class="min-w-0 flex-1 bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400" />
+          <button *ngIf="searchTerm" type="button" (click)="searchTerm = ''" class="text-xs font-semibold text-slate-400 hover:text-slate-700">ล้าง</button>
         </div>
-        <div
-          class="mt-4 divide-y divide-slate-100 rounded-xl border border-slate-100"
-        >
-          <div
-            *ngFor="let item of issue.items"
-            class="flex items-center justify-between gap-3 px-3 py-2.5 text-sm"
-          >
-            <div>
-              <p class="font-medium text-slate-800">{{ item.productName }}</p>
-              <p class="font-mono text-xs text-slate-500">
-                {{ item.sku }} · requested {{ item.requestedQty }} · reserved
-                {{ item.reservedQty }}
-              </p>
-            </div>
-            <span
-              *ngIf="item.isAdditionalCharge"
-              class="rounded bg-rose-50 px-2 py-1 text-xs font-semibold text-rose-700"
-              >เพิ่มเติม</span
-            >
-          </div>
-        </div>
-        <div class="mt-4 flex flex-wrap gap-2">
-          <button
-            *ngIf="issue.status === 'REQUESTED' || issue.status === 'PARTIAL'"
-            type="button"
-            (click)="reserve(issue)"
-            [disabled]="actionIssueNo === issue.issueNo"
-            class="rounded-xl border border-amber-300 px-4 py-2.5 text-sm font-semibold text-amber-800 hover:bg-amber-50 disabled:opacity-50"
-          >
-            จองอะไหล่</button
-          ><button
-            *ngIf="issue.status === 'RESERVED' || issue.status === 'PARTIAL'"
-            type="button"
-            (click)="confirmIssue(issue)"
-            [disabled]="actionIssueNo === issue.issueNo"
-            class="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 disabled:opacity-50"
-          >
-            {{
-              actionIssueNo === issue.issueNo
-                ? "กำลังยืนยัน…"
-                : "ยืนยันจ่ายอะไหล่"
-            }}
+        <div class="flex gap-1 overflow-x-auto pb-0.5">
+          <button *ngFor="let filter of filters" type="button" (click)="activeFilter = filter.value" [ngClass]="activeFilter === filter.value ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'" class="whitespace-nowrap rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold transition">
+            {{ filter.label }}<span class="ml-1 opacity-60">{{ filterCount(filter.value) }}</span>
           </button>
         </div>
+      </div>
+    </div>
+
+    <div *ngIf="errorMessage" class="mb-4 flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700"><span class="font-bold">!</span><p>{{ errorMessage }}</p></div>
+    <div *ngIf="isLoading" class="rounded-2xl border border-slate-200 bg-white p-14 text-center text-sm text-slate-500 shadow-sm">กำลังโหลดคิวคำขอเบิกจากระบบ…</div>
+    <div *ngIf="!isLoading && !visibleIssues.length" class="rounded-2xl border border-dashed border-slate-300 bg-white p-14 text-center shadow-sm"><p class="text-3xl">✓</p><p class="mt-3 font-semibold text-slate-800">ไม่พบรายการในมุมมองนี้</p><p class="mt-1 text-sm text-slate-500">ลองเปลี่ยนสถานะหรือล้างคำค้นหา</p></div>
+
+    <div *ngIf="!isLoading && visibleIssues.length" class="space-y-4">
+      <article *ngFor="let issue of visibleIssues" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:border-slate-300">
+        <div class="flex flex-col gap-4 border-b border-slate-100 p-5 lg:flex-row lg:items-start lg:justify-between">
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-2"><p class="font-mono text-sm font-bold text-slate-900">{{ issue.issueNo }}</p><span class="rounded-full px-2.5 py-1 text-[11px] font-bold ring-1 ring-inset" [ngClass]="statusClass(issue.status)">{{ statusLabel(issue.status) }}</span></div>
+            <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-600"><span><span class="text-slate-400">Work Order</span> <strong class="font-mono text-slate-800">{{ issue.workOrderNo }}</strong></span><span><span class="text-slate-400">Task</span> <strong class="font-mono text-slate-800">{{ issue.taskNo }}</strong></span><span><span class="text-slate-400">Quotation</span> <strong class="font-mono text-slate-800">{{ issue.quotationNo }}</strong></span></div>
+            <p class="mt-2 text-xs text-slate-500">ผู้ขอ: <strong class="text-slate-700">{{ issue.requestedByName || 'ไม่ระบุชื่อ' }}</strong><span *ngIf="issue.requestedAt"> · {{ issue.requestedAt | date:'dd/MM/yyyy HH:mm' }}</span></p>
+          </div>
+          <div class="grid grid-cols-3 gap-4 text-right text-xs"><div><p class="text-slate-400">ขอเบิก</p><p class="mt-1 text-base font-bold text-slate-800">{{ totalQuantity(issue, 'requestedQty') }}</p></div><div><p class="text-slate-400">จองแล้ว</p><p class="mt-1 text-base font-bold text-sky-700">{{ totalQuantity(issue, 'reservedQty') }}</p></div><div><p class="text-slate-400">จ่ายแล้ว</p><p class="mt-1 text-base font-bold text-emerald-700">{{ totalQuantity(issue, 'issuedQty') }}</p></div></div>
+        </div>
+
+        <div class="overflow-x-auto"><table class="w-full min-w-[720px] text-left text-sm"><thead class="bg-slate-50 text-[11px] font-bold uppercase tracking-wide text-slate-400"><tr><th class="px-5 py-3">อะไหล่</th><th class="px-3 py-3 text-center">ประเมิน/ขอ</th><th class="px-3 py-3 text-center">จองแล้ว</th><th class="px-5 py-3 text-center">จ่ายแล้ว</th></tr></thead><tbody class="divide-y divide-slate-100"><tr *ngFor="let item of issue.items"><td class="px-5 py-3"><p class="font-semibold text-slate-800">{{ item.productName }}</p><p class="mt-0.5 font-mono text-xs text-slate-500">{{ item.sku }} <span *ngIf="item.isAdditionalCharge" class="ml-2 rounded bg-rose-50 px-1.5 py-0.5 font-sans font-semibold text-rose-700">คิดเงินเพิ่ม</span><span *ngIf="item.reason === 'ADDITIONAL' && !item.isAdditionalCharge" class="ml-2 rounded bg-sky-50 px-1.5 py-0.5 font-sans font-semibold text-sky-700">เพิ่มเติม · ไม่คิดเงิน</span></p></td><td class="px-3 py-3 text-center text-slate-700">{{ item.requestedQty }}</td><td class="px-3 py-3 text-center font-semibold text-sky-700">{{ item.reservedQty }}</td><td class="px-5 py-3 text-center font-semibold text-emerald-700">{{ item.issuedQty }}</td></tr></tbody></table></div>
+
+        <div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/60 px-5 py-3"><p *ngIf="issue.remark" class="max-w-xl text-xs text-slate-500"><span class="font-semibold text-slate-700">หมายเหตุ:</span> {{ issue.remark }}</p><span *ngIf="!issue.remark"></span><div class="flex flex-wrap gap-2"><button *ngIf="canReserve(issue)" type="button" (click)="reserve(issue)" [disabled]="actionIssueNo === issue.issueNo" class="rounded-xl border border-amber-300 bg-white px-4 py-2.5 text-xs font-bold text-amber-800 transition hover:bg-amber-50 disabled:opacity-50">{{ actionIssueNo === issue.issueNo ? 'กำลังจอง…' : 'จองอะไหล่' }}</button><button *ngIf="hasReservedItems(issue)" type="button" (click)="openIssueModal(issue)" [disabled]="actionIssueNo === issue.issueNo" class="rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-slate-700 disabled:opacity-50">ยืนยันจ่ายอะไหล่</button><button *ngIf="issue.status !== 'ISSUED' && issue.status !== 'CANCELLED'" type="button" (click)="openCancelModal(issue)" [disabled]="actionIssueNo === issue.issueNo" class="rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-500 transition hover:bg-rose-50 hover:text-rose-700 disabled:opacity-50">ยกเลิกคำขอ</button></div></div>
       </article>
     </div>
   </div>
 </section>
+
+<div *ngIf="isIssueModalOpen && selectedIssue" class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm" (click)="closeIssueModal()"><div class="flex max-h-[88vh] w-full max-w-2xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl" role="dialog" aria-modal="true" (click)="$event.stopPropagation()"><div class="flex items-start justify-between border-b border-slate-100 bg-slate-50 px-6 py-5"><div><p class="text-xs font-bold uppercase tracking-widest text-sky-600">Issue stock</p><h2 class="mt-1 text-xl font-bold text-slate-900">ยืนยันจ่ายอะไหล่</h2><p class="mt-1 text-xs text-slate-500">{{ selectedIssue.issueNo }} · {{ selectedIssue.workOrderNo }}</p></div><button type="button" (click)="closeIssueModal()" [disabled]="!!actionIssueNo" class="rounded-xl px-3 py-1 text-2xl text-slate-400 hover:bg-slate-200 disabled:opacity-40">×</button></div><div class="space-y-4 overflow-y-auto p-6"><div class="rounded-2xl border border-sky-100 bg-sky-50 p-4 text-sm text-sky-900">ระบุจำนวนที่จ่ายจริงในรอบนี้ได้ไม่เกินจำนวนที่จองไว้ หากจ่ายไม่ครบ ระบบจะคงคำขอเป็น <strong>เบิกบางส่วน</strong> เพื่อให้ดำเนินการต่อได้</div><div class="overflow-hidden rounded-2xl border border-slate-200"><div *ngFor="let item of selectedIssue.items" class="flex items-center justify-between gap-4 border-b border-slate-100 p-4 last:border-0" [class.hidden]="item.reservedQty === 0"><div class="min-w-0"><p class="truncate text-sm font-semibold text-slate-800">{{ item.productName }}</p><p class="font-mono text-xs text-slate-500">{{ item.sku }} · จองไว้ {{ item.reservedQty }} ชิ้น</p></div><label class="shrink-0 text-right text-xs font-semibold text-slate-500">จ่ายรอบนี้<input type="number" min="0" [max]="item.reservedQty" [ngModel]="getIssueQuantity(selectedIssue, item.productId)" (ngModelChange)="setIssueQuantity(selectedIssue, item.productId, $any($event))" class="mt-1 block w-28 rounded-xl border border-slate-200 px-3 py-2 text-right text-sm font-bold text-slate-800 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20" /></label></div></div><label class="block text-sm font-semibold text-slate-700">หมายเหตุการจ่าย <span class="font-normal text-slate-400">(ไม่บังคับ)</span><textarea [(ngModel)]="processRemark" rows="2" placeholder="เช่น จ่ายให้ช่างช่อง 2 แล้ว" class="mt-1.5 block w-full resize-none rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-normal outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"></textarea></label></div><div class="flex justify-end gap-3 border-t border-slate-100 bg-slate-50/70 px-6 py-4"><button type="button" (click)="closeIssueModal()" [disabled]="!!actionIssueNo" class="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 disabled:opacity-50">ยกเลิก</button><button type="button" (click)="submitIssue()" [disabled]="!!actionIssueNo" class="rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-bold text-white hover:bg-slate-700 disabled:opacity-50">{{ actionIssueNo ? 'กำลังบันทึก…' : 'ยืนยันจ่ายอะไหล่' }}</button></div></div></div>
+
+<div *ngIf="isCancelModalOpen && cancelTarget" class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm" (click)="closeCancelModal()"><div class="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl" role="dialog" aria-modal="true" (click)="$event.stopPropagation()"><div class="flex items-start justify-between"><div><p class="text-xs font-bold uppercase tracking-widest text-rose-600">Cancel request</p><h2 class="mt-1 text-xl font-bold text-slate-900">ยกเลิกคำขอเบิก</h2><p class="mt-1 font-mono text-xs text-slate-500">{{ cancelTarget.issueNo }}</p></div><button type="button" (click)="closeCancelModal()" class="rounded-xl px-2 text-2xl text-slate-400 hover:bg-slate-100">×</button></div><p class="mt-5 text-sm leading-6 text-slate-600">การยกเลิกจะ release จำนวนที่จองไว้กลับเข้าสต็อก กรุณาระบุเหตุผลเพื่อให้ช่างตรวจสอบได้</p><textarea [(ngModel)]="cancelRemark" rows="3" placeholder="เหตุผลการยกเลิก *" class="mt-4 block w-full resize-none rounded-xl border border-slate-200 px-3.5 py-3 text-sm outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20"></textarea><div class="mt-5 flex justify-end gap-3"><button type="button" (click)="closeCancelModal()" class="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700">กลับ</button><button type="button" (click)="cancelIssue()" [disabled]="!cancelRemark.trim() || !!actionIssueNo" class="rounded-xl bg-rose-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-rose-700 disabled:opacity-50">{{ actionIssueNo ? 'กำลังยกเลิก…' : 'ยืนยันยกเลิก' }}</button></div></div></div>

@@ -159,6 +159,10 @@ export class PartTransactionComponent implements OnInit {
     });
   }
 
+  navigateToPartIssueQueue(): void {
+    void this.router.navigate(['/portal/stock/part-issues']);
+  }
+
   private updateQueryParams(params: any): void {
     this.keyword = params['keyword'] ?? '';
     this.page = Number(params['page'] ?? 1);

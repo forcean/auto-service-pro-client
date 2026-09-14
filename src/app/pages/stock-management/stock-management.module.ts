@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 import { StockManagementRoutingModule } from './stock-management-routing.module';
 import { PartTransactionComponent } from './part-transaction/part-transaction.component';
@@ -11,6 +12,7 @@ import { LucideAngularModule, PackagePlus } from 'lucide-angular';
   declarations: [PartTransactionComponent, PartIssueQueueComponent],
   imports: [
     CommonModule,
+    FormsModule,
     StockManagementRoutingModule,
     SharedModule,
     LucideAngularModule.pick({
