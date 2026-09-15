@@ -36,7 +36,17 @@ export class PartTransactionComponent implements OnInit {
   sort = '';
   search!: IQueryStockMovement;
   movementList!: IStockMovementList;
-  summary!: IStockMovementSummary;
+  summary: IStockMovementSummary = {
+    total: 0,
+    receive: 0,
+    issue: 0,
+    adjust: 0,
+    return: 0,
+    reserve: 0,
+    release: 0,
+    in: 0,
+    out: 0,
+  };
   isLoading = false;
   isLoadingSummary = false;
   headers: ITableHeaderStock[] = [
@@ -157,6 +167,10 @@ export class PartTransactionComponent implements OnInit {
       },
       queryParamsHandling: 'merge',
     });
+  }
+
+  navigateToPartIssueQueue(): void {
+    void this.router.navigate(['/portal/stock/part-issues']);
   }
 
   private updateQueryParams(params: any): void {
