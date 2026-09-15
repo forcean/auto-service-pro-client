@@ -6,7 +6,7 @@ import { IBaseResponse } from '../../../shared/interface/base-http.interface';
 import { IPartIssue } from '../../../shared/interface/repair-flow.interface';
 import { PartIssueService } from '../../../shared/services/part-issue.service';
 
-type IssueFilter = 'ALL' | IPartIssue['status'];
+type IssueFilter = 'OPEN' | 'ALL' | IPartIssue['status'];
 
 @Component({
   selector: 'app-part-issue-queue',
@@ -20,7 +20,7 @@ export class PartIssueQueueComponent implements OnInit {
   actionIssueNo = '';
   errorMessage = '';
   searchTerm = '';
-  activeFilter: IssueFilter = 'ALL';
+  activeFilter: IssueFilter = 'OPEN';
   selectedIssue: IPartIssue | null = null;
   isIssueModalOpen = false;
   processRemark = '';
@@ -30,6 +30,7 @@ export class PartIssueQueueComponent implements OnInit {
   issueQuantities: Record<string, Record<string, number>> = {};
 
   readonly filters: Array<{ value: IssueFilter; label: string }> = [
+    { value: 'OPEN', label: 'งานที่ต้องทำ' },
     { value: 'ALL', label: 'ทั้งหมด' },
     { value: 'REQUESTED', label: 'รอจอง' },
     { value: 'RESERVED', label: 'พร้อมจ่าย' },
@@ -69,7 +70,9 @@ export class PartIssueQueueComponent implements OnInit {
     const keyword = this.searchTerm.trim().toLowerCase();
 
     return this.issues.filter((issue) => {
-      const matchesFilter = this.activeFilter === 'ALL' || issue.status === this.activeFilter;
+      const matchesFilter = this.activeFilter === 'ALL'
+        || (this.activeFilter === 'OPEN' && issue.status !== 'ISSUED' && issue.status !== 'CANCELLED')
+        || issue.status === this.activeFilter;
       if (!matchesFilter) return false;
       if (!keyword) return true;
 
@@ -83,13 +86,17 @@ export class PartIssueQueueComponent implements OnInit {
       ]
         .filter(Boolean)
         .some((value) => value!.toLowerCase().includes(keyword));
-    });
+    }).sort((left, right) => this.statusPriority(left.status) - this.statusPriority(right.status));
   }
 
   filterCount(filter: IssueFilter): number {
-    return filter === 'ALL'
-      ? this.issues.length
-      : this.issues.filter((issue) => issue.status === filter).length;
+    if (filter === 'ALL') return this.issues.length;
+    if (filter === 'OPEN') return this.actionableCount;
+    return this.issues.filter((issue) => issue.status === filter).length;
+  }
+
+  private statusPriority(status: IPartIssue['status']): number {
+    return { REQUESTED: 1, RESERVED: 2, PARTIAL: 3, ISSUED: 4, CANCELLED: 5 }[status];
   }
 
   get actionableCount(): number {

@@ -8,6 +8,16 @@ import { IStockMovementSummary } from '../../interface/stock-management.interfac
   styleUrl: './stock-summary.component.scss',
 })
 export class StockSummaryComponent {
-  @Input() summary!: IStockMovementSummary;
+  @Input() summary: IStockMovementSummary = {
+    total: 0,
+    receive: 0,
+    issue: 0,
+    adjust: 0,
+    return: 0,
+    reserve: 0,
+    release: 0,
+    in: 0,
+    out: 0,
+  };
   @Input() loading = false;
 }
