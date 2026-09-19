@@ -13,6 +13,7 @@ export class TaskEditModalComponent implements OnChanges {
   @Input() isOpen = false;
   @Input() task: IWorkOrderTask | null = null;
   @Input() mechanics: UserList[] = [];
+  @Input() taskGroups: IWorkOrderTask[] = [];
   @Input() isSubmitting = false;
 
   @Output() close = new EventEmitter<void>();
@@ -35,6 +36,10 @@ export class TaskEditModalComponent implements OnChanges {
         progress: this.task.progress,
         mechanics: this.task.mechanics,
         remark: this.task.remark,
+        parentTaskNo: this.task.parentTaskNo ?? null,
+        isRequired: this.task.isRequired !== false,
+        dependsOn: this.task.dependsOn,
+        sortOrder: this.task.sortOrder,
       };
       this.mechanicIds = this.task.mechanics?.map((mechanic) => mechanic.mechanicId) ?? [];
     }
@@ -54,6 +59,10 @@ export class TaskEditModalComponent implements OnChanges {
       plannedStartDate: this.form.plannedStartDate || undefined,
       plannedFinishDate: this.form.plannedFinishDate || undefined,
       remark: this.form.remark?.trim() || undefined,
+      parentTaskNo: this.form.parentTaskNo || null,
+      isRequired: this.form.isRequired !== false,
+      dependsOn: this.form.dependsOn?.filter(Boolean) ?? [],
+      sortOrder: Math.max(0, Number(this.form.sortOrder) || 0),
       mechanics: this.mechanics
         .filter((mechanic) => this.mechanicIds.includes(mechanic.id))
         .map((mechanic) => ({

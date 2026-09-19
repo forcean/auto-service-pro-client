@@ -15,6 +15,20 @@ export enum ETaskPriority {
   URGENT = 'URGENT',
 }
 
+/** A GROUP is a planning container; EXECUTION/REWORK are work performed by a mechanic. */
+export enum ETaskType {
+  GROUP = 'GROUP',
+  EXECUTION = 'EXECUTION',
+  REWORK = 'REWORK',
+}
+
+export enum ETaskBlockedReason {
+  WAITING_PARTS = 'WAITING_PARTS',
+  WAITING_APPROVAL = 'WAITING_APPROVAL',
+  WAITING_CUSTOMER = 'WAITING_CUSTOMER',
+  OTHER = 'OTHER',
+}
+
 export interface IAssignedMechanic {
   mechanicId: string;
   mechanicName?: string;
@@ -37,6 +51,12 @@ export interface IWorkOrderTask {
   description?: string;
   priority: ETaskPriority;
   status: ETaskStatus;
+  taskType?: ETaskType;
+  parentTaskNo?: string | null;
+  isRequired?: boolean;
+  blockedReason?: ETaskBlockedReason;
+  dependsOn?: string[];
+  sortOrder?: number;
   estimateMinute: number;
   actualMinute: number;
   progress: number;
@@ -72,6 +92,11 @@ export interface ICreateTaskRequest {
   description?: string;
   priority?: ETaskPriority;
   status?: ETaskStatus;
+  taskType?: ETaskType;
+  parentTaskNo?: string;
+  isRequired?: boolean;
+  dependsOn?: string[];
+  sortOrder?: number;
   estimateMinute?: number;
   actualMinute?: number;
   plannedStartDate?: string;
@@ -92,6 +117,11 @@ export interface IUpdateTaskRequest {
   progress?: number;
   mechanics?: IAssignedMechanic[];
   remark?: string;
+  parentTaskNo?: string | null;
+  isRequired?: boolean;
+  blockedReason?: ETaskBlockedReason;
+  dependsOn?: string[];
+  sortOrder?: number;
 }
 
 export interface ICreatePartIssueRequest {

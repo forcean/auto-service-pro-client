@@ -1,10 +1,19 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { RESPONSE } from '../../../shared/enum/response.enum';
 import { EWorkOrderStatus } from '../../../shared/enum/work-order.enum';
 import { IProducts } from '../../../shared/interface/product-list.interface';
-import { ETaskPriority, ETaskStatus, IPartIssue, IQuotationPartAvailability, IUpdateTaskRequest, IWorkOrderTask } from '../../../shared/interface/repair-flow.interface';
+import {
+  ETaskBlockedReason,
+  ETaskPriority,
+  ETaskStatus,
+  ETaskType,
+  IPartIssue,
+  IQuotationPartAvailability,
+  IUpdateTaskRequest,
+  IWorkOrderTask,
+} from '../../../shared/interface/repair-flow.interface';
 import { UserList } from '../../../shared/interface/table-user-management.interface';
 import { IWorkOrder } from '../../../shared/interface/work-order.interface';
 import { PartIssueService } from '../../../shared/services/part-issue.service';
@@ -21,7 +30,7 @@ interface IWorkflowStep {
 interface ITaskBoardColumn {
   label: string;
   hint: string;
-  statuses: ETaskStatus[];
+  status: ETaskStatus;
   accentClass: string;
 }
 
@@ -36,9 +45,12 @@ type PartRequestMode = 'QUOTED' | 'COMPLIMENTARY' | 'CHARGED';
 export class WorkOrderFlowComponent implements OnChanges {
   @Input({ required: true }) workOrder!: IWorkOrder;
   @Output() flowChanged = new EventEmitter<void>();
+  @ViewChild('taskBoardScroller') private taskBoardScroller?: ElementRef<HTMLElement>;
 
   readonly statuses = EWorkOrderStatus;
   readonly taskStatuses = ETaskStatus;
+  readonly taskTypes = ETaskType;
+  readonly blockerOptions = Object.values(ETaskBlockedReason);
   readonly priorities = Object.values(ETaskPriority);
   readonly workflowSteps: IWorkflowStep[] = [
     { label: 'รับรถและตรวจเช็ค', shortLabel: 'ตรวจเช็ค' },
@@ -52,25 +64,37 @@ export class WorkOrderFlowComponent implements OnChanges {
     {
       label: 'รอมอบหมาย',
       hint: 'Waiting',
-      statuses: [ETaskStatus.WAITING],
+      status: ETaskStatus.WAITING,
       accentClass: 'border-slate-200 bg-slate-50',
     },
     {
       label: 'พร้อมเริ่มงาน',
-      hint: 'Assigned / paused',
-      statuses: [ETaskStatus.ASSIGNED, ETaskStatus.PAUSED],
+      hint: 'Assigned',
+      status: ETaskStatus.ASSIGNED,
       accentClass: 'border-indigo-200 bg-indigo-50/60',
     },
     {
       label: 'กำลังดำเนินการ',
       hint: 'In progress',
-      statuses: [ETaskStatus.IN_PROGRESS],
+      status: ETaskStatus.IN_PROGRESS,
       accentClass: 'border-amber-200 bg-amber-50/60',
     },
     {
-      label: 'ตรวจและเสร็จงาน',
-      hint: 'QC / done',
-      statuses: [ETaskStatus.QUALITY_CHECK, ETaskStatus.FINISHED, ETaskStatus.CANCELLED],
+      label: 'ติดปัญหา',
+      hint: 'Paused',
+      status: ETaskStatus.PAUSED,
+      accentClass: 'border-rose-200 bg-rose-50/60',
+    },
+    {
+      label: 'รอ QC',
+      hint: 'Quality check',
+      status: ETaskStatus.QUALITY_CHECK,
+      accentClass: 'border-violet-200 bg-violet-50/60',
+    },
+    {
+      label: 'เสร็จแล้ว',
+      hint: 'Finished',
+      status: ETaskStatus.FINISHED,
       accentClass: 'border-emerald-200 bg-emerald-50/60',
     },
   ];
@@ -95,11 +119,37 @@ export class WorkOrderFlowComponent implements OnChanges {
   partIssueCancelRemark = '';
   additionalProblemText: Record<string, string> = {};
   editingTaskNo: string | null = null;
+  draggedTask: IWorkOrderTask | null = null;
+  showBoardGuide = false;
+  isCreateTaskModalOpen = false;
+
+  openCreateTaskModal(): void {
+    this.isCreateTaskModalOpen = true;
+  }
+
+  closeCreateTaskModal(): void {
+    this.isCreateTaskModalOpen = false;
+  }
+
+  toggleBoardGuide(event: MouseEvent): void {
+    event.stopPropagation();
+    this.showBoardGuide = !this.showBoardGuide;
+  }
+
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    if (this.showBoardGuide) {
+      this.showBoardGuide = false;
+    }
+  }
 
   taskForm = {
     title: '',
     description: '',
     priority: ETaskPriority.NORMAL,
+    taskType: ETaskType.EXECUTION,
+    parentTaskNo: '',
+    isRequired: true,
     estimateMinute: 0,
     actualMinute: 0,
     plannedStartDate: '',
@@ -152,8 +202,27 @@ export class WorkOrderFlowComponent implements OnChanges {
   }
 
   get taskSummary(): string {
-    const finished = this.tasks.filter((task) => task.status === ETaskStatus.FINISHED).length;
-    return `${finished}/${this.tasks.length} งานเสร็จแล้ว`;
+    const executable = this.requiredExecutionTasks;
+    const finished = executable.filter((task) => task.status === ETaskStatus.FINISHED).length;
+    return `${finished}/${executable.length} งานหลักเสร็จแล้ว`;
+  }
+
+  get taskGroups(): IWorkOrderTask[] {
+    return this.tasks.filter((task) => this.isGroupTask(task));
+  }
+
+  get requiredExecutionTasks(): IWorkOrderTask[] {
+    return this.tasks.filter((task) => this.isExecutionTask(task) && task.isRequired !== false);
+  }
+
+  get calculatedProgress(): number {
+    const active = this.requiredExecutionTasks.filter((task) => task.status !== ETaskStatus.CANCELLED);
+    if (!active.length) return 0;
+    const hasEstimate = active.some((task) => Number(task.estimateMinute) > 0);
+    if (!hasEstimate) return Math.round(active.reduce((sum, task) => sum + this.taskProgress(task), 0) / active.length);
+    const estimated = active.reduce((sum, task) => sum + Math.max(0, Number(task.estimateMinute) || 0), 0);
+    if (!estimated) return 0;
+    return Math.round((active.reduce((sum, task) => sum + this.taskProgress(task) * Math.max(0, Number(task.estimateMinute) || 0), 0) / estimated) * 100) / 100;
   }
 
   get editingTask(): IWorkOrderTask | null {
@@ -161,7 +230,40 @@ export class WorkOrderFlowComponent implements OnChanges {
   }
 
   tasksForColumn(column: ITaskBoardColumn): IWorkOrderTask[] {
-    return this.tasks.filter((task) => column.statuses.includes(task.status));
+    return this.tasks
+      .filter((task) => this.isExecutionTask(task) && task.status === column.status)
+      .sort((left, right) => (left.sortOrder ?? 0) - (right.sortOrder ?? 0));
+  }
+
+  childTasks(group: IWorkOrderTask): IWorkOrderTask[] {
+    return this.tasks.filter((task) => task.parentTaskNo === group.taskNo && this.isExecutionTask(task));
+  }
+
+  parentTaskTitle(task: IWorkOrderTask): string | null {
+    if (!task.parentTaskNo) return null;
+    return this.taskGroups.find((group) => group.taskNo === task.parentTaskNo)?.title ?? task.parentTaskNo;
+  }
+
+  taskProgress(task: IWorkOrderTask): number {
+    if (!this.isGroupTask(task)) return Math.min(100, Math.max(0, Number(task.progress) || 0));
+    const children = this.childTasks(task).filter((child) => child.isRequired !== false && child.status !== ETaskStatus.CANCELLED);
+    if (!children.length) return 0;
+    const hasEstimate = children.some((child) => Number(child.estimateMinute) > 0);
+    if (!hasEstimate) return Math.round(children.reduce((sum, child) => sum + this.taskProgress(child), 0) / children.length);
+    const estimate = children.reduce((sum, child) => sum + Math.max(0, Number(child.estimateMinute) || 0), 0);
+    return estimate ? Math.round((children.reduce((sum, child) => sum + this.taskProgress(child) * Math.max(0, Number(child.estimateMinute) || 0), 0) / estimate) * 100) / 100 : 0;
+  }
+
+  isGroupTask(task: IWorkOrderTask): boolean {
+    return task.taskType === ETaskType.GROUP;
+  }
+
+  isExecutionTask(task: IWorkOrderTask): boolean {
+    return !this.isGroupTask(task);
+  }
+
+  isGroupForm(): boolean {
+    return this.taskForm.taskType === ETaskType.GROUP;
   }
 
   taskStatusLabel(status: ETaskStatus): string {
@@ -180,6 +282,14 @@ export class WorkOrderFlowComponent implements OnChanges {
 
   isStepActive(index: number): boolean {
     return index <= this.currentStageIndex;
+  }
+
+  isStepCompleted(index: number): boolean {
+    return index < this.currentStageIndex;
+  }
+
+  isStepCurrent(index: number): boolean {
+    return index === this.currentStageIndex;
   }
 
   async refreshWorkspace(): Promise<void> {
@@ -245,8 +355,8 @@ export class WorkOrderFlowComponent implements OnChanges {
 
   async createTask(): Promise<void> {
     const mechanics = this.selectedMechanics;
-    if (!this.taskForm.title.trim() || !mechanics.length) {
-      this.setFeedback('กรุณาระบุชื่องานและเลือกช่างผู้รับผิดชอบอย่างน้อย 1 คน');
+    if (!this.taskForm.title.trim() || (!this.isGroupForm() && !mechanics.length)) {
+      this.setFeedback(this.isGroupForm() ? 'กรุณาระบุชื่อกลุ่มงาน' : 'กรุณาระบุชื่องานและเลือกช่างผู้รับผิดชอบอย่างน้อย 1 คน');
       return;
     }
     await this.runAction(async () => {
@@ -255,24 +365,36 @@ export class WorkOrderFlowComponent implements OnChanges {
         title: this.taskForm.title.trim(),
         description: this.taskForm.description.trim() || undefined,
         priority: this.taskForm.priority,
+        taskType: this.isGroupForm()
+          ? ETaskType.GROUP
+          : this.workOrder.status === EWorkOrderStatus.REWORK
+            ? ETaskType.REWORK
+            : ETaskType.EXECUTION,
+        parentTaskNo: this.isGroupForm() ? undefined : this.taskForm.parentTaskNo || undefined,
+        isRequired: this.isGroupForm() ? false : this.taskForm.isRequired,
         estimateMinute: Number(this.taskForm.estimateMinute) || undefined,
         actualMinute: Number(this.taskForm.actualMinute) || undefined,
         plannedStartDate: this.taskForm.plannedStartDate || undefined,
         plannedFinishDate: this.taskForm.plannedFinishDate || undefined,
         remark: this.taskForm.remark.trim() || undefined,
-        mechanics: mechanics.map((mechanic) => ({
+        mechanics: this.isGroupForm() ? [] : mechanics.map((mechanic) => ({
           mechanicId: mechanic.id,
           mechanicName: [mechanic.firstname, mechanic.lastname].filter(Boolean).join(' ') || mechanic.publicId,
         })),
         isRework: this.workOrder.status === EWorkOrderStatus.REWORK,
       });
       if (response.resultCode !== RESPONSE.SUCCESS) return response;
+      if (this.isGroupForm() || !mechanics.length) return response;
       return this.taskService.updateStatus(response.resultData.taskNo, ETaskStatus.ASSIGNED);
-    }, 'สร้างและมอบหมายงานให้ช่างแล้ว');
+    }, this.isGroupForm() ? 'สร้างกลุ่มงานแล้ว' : 'สร้างและมอบหมายงานให้ช่างแล้ว');
+    this.isCreateTaskModalOpen = false;
     this.taskForm = {
       title: '',
       description: '',
       priority: ETaskPriority.NORMAL,
+      taskType: ETaskType.EXECUTION,
+      parentTaskNo: '',
+      isRequired: true,
       estimateMinute: 0,
       actualMinute: 0,
       plannedStartDate: '',
@@ -283,7 +405,20 @@ export class WorkOrderFlowComponent implements OnChanges {
   }
 
   async updateTaskStatus(task: IWorkOrderTask, nextStatus: ETaskStatus): Promise<void> {
-    await this.runAction(() => this.taskService.updateStatus(task.taskNo, nextStatus), 'อัปเดตสถานะงานแล้ว');
+    await this.runAction(
+      () => this.taskService.updateStatus(task.taskNo, nextStatus, {
+        blockedReason: nextStatus === ETaskStatus.PAUSED ? task.blockedReason || ETaskBlockedReason.OTHER : undefined,
+      }),
+      'อัปเดตสถานะงานแล้ว',
+    );
+  }
+
+  async updateTaskBlockedReason(task: IWorkOrderTask): Promise<void> {
+    if (task.status !== ETaskStatus.PAUSED) return;
+    await this.runAction(
+      () => this.taskService.updateTask(task.taskNo, { blockedReason: task.blockedReason || ETaskBlockedReason.OTHER }),
+      'บันทึกสาเหตุที่ติดปัญหาแล้ว',
+    );
   }
 
   startEditTask(task: IWorkOrderTask): void {
@@ -338,7 +473,7 @@ export class WorkOrderFlowComponent implements OnChanges {
     const transitions: Partial<Record<ETaskStatus, ETaskStatus>> = {
       [ETaskStatus.WAITING]: ETaskStatus.ASSIGNED,
       [ETaskStatus.ASSIGNED]: ETaskStatus.IN_PROGRESS,
-      [ETaskStatus.IN_PROGRESS]: ETaskStatus.FINISHED,
+      [ETaskStatus.IN_PROGRESS]: ETaskStatus.QUALITY_CHECK,
       [ETaskStatus.PAUSED]: ETaskStatus.IN_PROGRESS,
       [ETaskStatus.QUALITY_CHECK]: ETaskStatus.FINISHED,
     };
@@ -349,11 +484,60 @@ export class WorkOrderFlowComponent implements OnChanges {
     const labels: Partial<Record<ETaskStatus, string>> = {
       [ETaskStatus.WAITING]: 'ยืนยันมอบหมาย',
       [ETaskStatus.ASSIGNED]: 'เริ่มงาน',
-      [ETaskStatus.IN_PROGRESS]: 'ส่งงานเสร็จ',
+      [ETaskStatus.IN_PROGRESS]: 'ส่งตรวจ QC',
       [ETaskStatus.PAUSED]: 'ทำงานต่อ',
       [ETaskStatus.QUALITY_CHECK]: 'ยืนยันงานเสร็จ',
     };
     return labels[task.status] ?? '';
+  }
+
+  onTaskDragStart(task: IWorkOrderTask): void {
+    this.draggedTask = task;
+  }
+
+  onTaskDragEnd(): void {
+    this.draggedTask = null;
+  }
+
+  allowTaskDrop(event: DragEvent): void {
+    event.preventDefault();
+  }
+
+  scrollTaskBoard(direction: -1 | 1): void {
+    const scroller = this.taskBoardScroller?.nativeElement;
+    if (!scroller) return;
+
+    const distance = Math.max(320, Math.floor(scroller.clientWidth * 0.72));
+    scroller.scrollBy({ left: distance * direction, behavior: 'smooth' });
+  }
+
+  onTaskBoardWheel(event: WheelEvent, scroller: HTMLElement): void {
+    if (Math.abs(event.deltaY) <= Math.abs(event.deltaX) || scroller.scrollWidth <= scroller.clientWidth) {
+      return;
+    }
+
+    event.preventDefault();
+    scroller.scrollBy({ left: event.deltaY, behavior: 'auto' });
+  }
+
+  async onTaskDrop(event: DragEvent, column: ITaskBoardColumn): Promise<void> {
+    event.preventDefault();
+    const task = this.draggedTask;
+    this.draggedTask = null;
+    if (!task || this.isSubmitting || task.status === ETaskStatus.FINISHED || task.status === ETaskStatus.CANCELLED) return;
+
+    const sortOrder = this.tasksForColumn(column).length;
+    if (task.status === column.status) {
+      await this.runAction(() => this.taskService.updateTask(task.taskNo, { sortOrder }), 'จัดลำดับงานแล้ว');
+      return;
+    }
+
+    await this.runAction(
+      () => this.taskService.updateStatus(task.taskNo, column.status, {
+        blockedReason: column.status === ETaskStatus.PAUSED ? task.blockedReason || ETaskBlockedReason.OTHER : undefined,
+      }),
+      'ย้ายงานบนกระดานแล้ว',
+    );
   }
 
   async reportAdditionalProblem(task: IWorkOrderTask): Promise<void> {

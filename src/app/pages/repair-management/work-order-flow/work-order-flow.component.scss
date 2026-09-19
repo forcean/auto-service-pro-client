@@ -1,1 +1,42 @@
 :host { display: block; }
+
+/* ─── Task board scrollbar ───────────────────────────────────────────────── */
+.task-board-scroll {
+  scrollbar-color: #94a3b8 transparent;
+  scrollbar-width: thin;
+}
+
+.task-board-scroll::-webkit-scrollbar {
+  height: 10px;
+}
+
+.task-board-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.task-board-scroll::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border: 3px solid #fff;
+  border-radius: 9999px;
+}
+
+/* ─── Task board scroll fade hint (mobile) ────────────────────────────────
+   Shows a right-edge gradient on small screens so users know they can scroll.
+   The pseudo-element sits on the board's containing element via the wrapper.  */
+.task-board-wrapper {
+  position: relative;
+}
+
+@media (max-width: 767px) {
+  .task-board-wrapper::after {
+    content: '';
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 3rem;
+    background: linear-gradient(to right, transparent, rgba(248, 250, 252, 0.85));
+    border-radius: 0 1rem 1rem 0;
+  }
+}

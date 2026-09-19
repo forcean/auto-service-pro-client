@@ -32,8 +32,30 @@
           <textarea [(ngModel)]="form.description" rows="3" class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"></textarea>
         </div>
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <label class="text-sm font-semibold text-slate-700">Priority<select [(ngModel)]="form.priority" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"><option *ngFor="let priority of priorities" [value]="priority">{{ priority }}</option></select></label>
-          <label class="text-sm font-semibold text-slate-700">ช่างผู้รับผิดชอบ <span class="font-normal text-slate-400">(เลือกได้หลายคน)</span><select multiple [(ngModel)]="mechanicIds" size="4" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"><option *ngFor="let mechanic of mechanics" [value]="mechanic.id">{{ mechanic.firstname || mechanic.publicId }} {{ mechanic.lastname || '' }} · {{ mechanic.publicId }}</option></select></label>
+          <label class="text-sm font-semibold text-slate-700">
+            Priority
+            <custom-select [(ngModel)]="form.priority" class="mt-1.5 block w-full">
+              <custom-option *ngFor="let priority of priorities" [value]="priority">{{ priority }}</custom-option>
+            </custom-select>
+          </label>
+          <label class="text-sm font-semibold text-slate-700">
+            ช่างผู้รับผิดชอบ <span class="font-normal text-slate-400">(เลือกได้หลายคน)</span>
+            <select multiple [(ngModel)]="mechanicIds" size="4" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20">
+              <option *ngFor="let mechanic of mechanics" [value]="mechanic.id">{{ mechanic.firstname || mechanic.publicId }} {{ mechanic.lastname || '' }} · {{ mechanic.publicId }}</option>
+            </select>
+          </label>
+        </div>
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <label class="text-sm font-semibold text-slate-700">
+            กลุ่มงาน
+            <custom-select [(ngModel)]="form.parentTaskNo" placeholder="ไม่จัดกลุ่มงาน" class="mt-1.5 block w-full">
+              <custom-option value="">ไม่จัดกลุ่มงาน</custom-option>
+              <custom-option *ngFor="let group of taskGroups" [value]="group.taskNo" [disabled]="group.taskNo === task.taskNo">{{ group.title }} · {{ group.taskNo }}</custom-option>
+            </custom-select>
+          </label>
+          <label class="flex items-center gap-2 self-end rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm font-semibold text-slate-700">
+            <input [(ngModel)]="form.isRequired" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-indigo-600" /> ต้องเสร็จก่อนส่ง QC
+          </label>
         </div>
       </section>
 
