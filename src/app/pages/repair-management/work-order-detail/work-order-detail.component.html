@@ -89,19 +89,32 @@
           <div class="space-y-3">
             <div
               *ngFor="let c of workOrder.complaints; let i = index"
-              class="p-4 bg-slate-50/80 rounded-2xl border border-slate-100 flex items-start gap-3"
+              class="p-4 rounded-2xl border flex items-start justify-between gap-3 transition-colors"
+              [ngClass]="isComplaintCompleted(c) ? 'bg-emerald-50/50 border-emerald-200/80' : 'bg-slate-50/80 border-slate-100'"
             >
-              <span
-                class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5"
-              >
-                {{ i + 1 }}
-              </span>
-              <div>
-                <h4 class="font-bold text-slate-800 text-sm">{{ c.title }}</h4>
-                <p class="text-xs text-slate-500 mt-1" *ngIf="c.description">
-                  {{ c.description }}
-                </p>
+              <div class="flex items-start gap-3">
+                <span
+                  class="w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors"
+                  [ngClass]="isComplaintCompleted(c) ? 'bg-emerald-600 text-white shadow-xs' : 'bg-emerald-100 text-emerald-700'"
+                >
+                  <ng-container *ngIf="isComplaintCompleted(c); else numIndex">✓</ng-container>
+                  <ng-template #numIndex>{{ i + 1 }}</ng-template>
+                </span>
+                <div>
+                  <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                    <span [class.line-through]="isComplaintCompleted(c)" [class.text-slate-500]="isComplaintCompleted(c)">{{ c.title }}</span>
+                  </h4>
+                  <p class="text-xs text-slate-500 mt-1" *ngIf="c.description">
+                    {{ c.description }}
+                  </p>
+                </div>
               </div>
+              <span
+                *ngIf="isComplaintCompleted(c)"
+                class="px-2.5 py-1 text-[11px] font-bold text-emerald-700 bg-white border border-emerald-200 rounded-full shadow-2xs shrink-0"
+              >
+                ✓ เสร็จสิ้น
+              </span>
             </div>
           </div>
         </div>

@@ -246,6 +246,38 @@ export class WorkOrderDetailComponent implements OnInit {
     void this.router.navigate(['/portal/repair/team-assignment', this.workOrderId]);
   }
 
+  isComplaintCompleted(complaint: any): boolean {
+    if (!complaint) return false;
+
+    if (
+      complaint.isCompleted ||
+      complaint.completed ||
+      complaint.status === 'FINISHED' ||
+      complaint.status === 'COMPLETED' ||
+      complaint.status === 'QC_APPROVED'
+    ) {
+      return true;
+    }
+
+    if (
+      this.workOrder?.status === EWorkOrderStatus.COMPLETED ||
+      this.workOrder?.status === EWorkOrderStatus.QC_APPROVED ||
+      this.workOrder?.progress === 100
+    ) {
+      return true;
+    }
+
+    if (
+      this.workOrder?.taskSummary &&
+      this.workOrder.taskSummary.totalTasks > 0 &&
+      this.workOrder.taskSummary.completedTasks >= this.workOrder.taskSummary.totalTasks
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
   getStatusConfig() {
     if (this.workOrder.status === EWorkOrderStatus.ALL) {
       return null;

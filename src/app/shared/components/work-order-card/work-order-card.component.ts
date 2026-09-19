@@ -12,9 +12,10 @@ import {
   Bell,
   Check,
   Circle,
+  CheckCircle2,
 } from 'lucide-angular';
 import { WORK_ORDER_STATUS_CONFIG } from '../../constant/work-order-status.constant';
-import { IWorkOrder } from '../../interface/work-order.interface';
+import { IWorkOrder, IComplaint } from '../../interface/work-order.interface';
 import { EWorkOrderStatus } from '../../enum/work-order.enum';
 
 @Component({
@@ -40,8 +41,41 @@ export class WorkOrderCardComponent {
   readonly BellIcon = Bell;
   readonly CheckIcon = Check;
   readonly CircleIcon = Circle;
+  readonly CheckCircleIcon = CheckCircle2;
 
   readonly statusConfig = WORK_ORDER_STATUS_CONFIG;
+
+  isComplaintCompleted(complaint: IComplaint | any): boolean {
+    if (!complaint) return false;
+
+    if (
+      complaint.isCompleted ||
+      complaint.completed ||
+      complaint.status === 'FINISHED' ||
+      complaint.status === 'COMPLETED' ||
+      complaint.status === 'QC_APPROVED'
+    ) {
+      return true;
+    }
+
+    if (
+      this.item.status === EWorkOrderStatus.COMPLETED ||
+      this.item.status === EWorkOrderStatus.QC_APPROVED ||
+      this.item.progress === 100
+    ) {
+      return true;
+    }
+
+    if (
+      this.item.taskSummary &&
+      this.item.taskSummary.totalTasks > 0 &&
+      this.item.taskSummary.completedTasks >= this.item.taskSummary.totalTasks
+    ) {
+      return true;
+    }
+
+    return false;
+  }
 
   getProgressGradient(progress: number): string {
     if (progress <= 30) {

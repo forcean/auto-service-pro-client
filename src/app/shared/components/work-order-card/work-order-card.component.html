@@ -87,10 +87,20 @@
       >
       <ul class="space-y-2 text-xs text-slate-600">
         <li *ngFor="let complaint of item.complaints" class="flex items-start gap-2">
-          <span class="mt-0.5 text-slate-300">
-            <lucide-angular [img]="CircleIcon" class="w-3.5 h-3.5"></lucide-angular>
+          <span class="mt-0.5 shrink-0">
+            <lucide-angular
+              *ngIf="isComplaintCompleted(complaint); else uncompletedCircle"
+              [img]="CheckCircleIcon"
+              class="w-3.5 h-3.5 text-emerald-600 font-bold"
+            ></lucide-angular>
+            <ng-template #uncompletedCircle>
+              <lucide-angular [img]="CircleIcon" class="w-3.5 h-3.5 text-slate-300"></lucide-angular>
+            </ng-template>
           </span>
-          <span class="leading-tight">
+          <span
+            class="leading-tight transition-colors"
+            [ngClass]="isComplaintCompleted(complaint) ? 'text-slate-800 font-semibold line-through decoration-emerald-500/60' : 'text-slate-600'"
+          >
             {{ complaint.title }}
           </span>
         </li>
