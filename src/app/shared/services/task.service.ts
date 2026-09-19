@@ -10,6 +10,7 @@ import {
   ITaskListResult,
   IWorkOrderTask,
   ETaskStatus,
+  ETaskBlockedReason,
   IUpdateTaskRequest,
 } from '../interface/repair-flow.interface';
 
@@ -37,9 +38,13 @@ export class TaskService {
     return this.request(() => this.httpService.patch<IWorkOrderTask>(`${this.apiPath}/${taskNo}`, body));
   }
 
-  updateStatus(taskNo: string, status: ETaskStatus): Promise<IBaseResponse<IWorkOrderTask>> {
+  updateStatus(
+    taskNo: string,
+    status: ETaskStatus,
+    options?: { blockedReason?: ETaskBlockedReason; remark?: string },
+  ): Promise<IBaseResponse<IWorkOrderTask>> {
     return this.request(() =>
-      this.httpService.patch<IWorkOrderTask>(`${this.apiPath}/${taskNo}/status`, { status }),
+      this.httpService.patch<IWorkOrderTask>(`${this.apiPath}/${taskNo}/status`, { status, ...options }),
     );
   }
 
