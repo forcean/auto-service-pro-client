@@ -16,9 +16,17 @@ import {
 } from '../../../shared/interface/repair-flow.interface';
 import { UserList } from '../../../shared/interface/table-user-management.interface';
 import { IWorkOrder } from '../../../shared/interface/work-order.interface';
+import {
+  ICreateWorkOrderPaymentRequest,
+  EPaymentMethod,
+  EWorkOrderPaymentType,
+  IWorkOrderPayment,
+} from '../../../shared/interface/billing.interface';
+import { BillingService } from '../../../shared/services/billing.service';
 import { PartIssueService } from '../../../shared/services/part-issue.service';
 import { ProductService } from '../../../shared/services/product.service';
 import { TaskService } from '../../../shared/services/task.service';
+import { ToastService } from '../../../shared/services/toast.service';
 import { UserManagementService } from '../../../shared/services/user-management.service';
 import { WorkOrderService } from '../../../shared/services/work-order.service';
 
@@ -59,6 +67,8 @@ export class WorkOrderFlowComponent implements OnChanges {
     { label: 'ดำเนินการซ่อม', shortLabel: 'ซ่อม' },
     { label: 'ตรวจสอบคุณภาพ', shortLabel: 'QC' },
     { label: 'QC ผ่าน', shortLabel: 'ผ่าน' },
+    { label: 'พร้อมส่งมอบ', shortLabel: 'ส่งมอบ' },
+    { label: 'ปิดงาน', shortLabel: 'ปิดงาน' },
   ];
   readonly taskBoardColumns: ITaskBoardColumn[] = [
     {
@@ -112,7 +122,6 @@ export class WorkOrderFlowComponent implements OnChanges {
   isSearchingProducts = false;
   isLoadingQuotationParts = false;
   isSubmitting = false;
-  feedback = '';
   productSearch = '';
   partRequestMode: PartRequestMode = 'QUOTED';
   reworkTitle = '';
@@ -122,6 +131,9 @@ export class WorkOrderFlowComponent implements OnChanges {
   draggedTask: IWorkOrderTask | null = null;
   showBoardGuide = false;
   isCreateTaskModalOpen = false;
+  isPrepaymentModalOpen = false;
+  isLoadingPrepayments = false;
+  prepayments: IWorkOrderPayment[] = [];
 
   openCreateTaskModal(): void {
     this.isCreateTaskModalOpen = true;
@@ -165,6 +177,8 @@ export class WorkOrderFlowComponent implements OnChanges {
     private readonly partIssueService: PartIssueService,
     private readonly productService: ProductService,
     private readonly userManagementService: UserManagementService,
+    private readonly billingService: BillingService,
+    private readonly toastService: ToastService,
     private readonly router: Router,
   ) {}
 
@@ -192,6 +206,10 @@ export class WorkOrderFlowComponent implements OnChanges {
         return 4;
       case EWorkOrderStatus.QC_APPROVED:
         return 5;
+      case EWorkOrderStatus.READY_DELIVERY:
+        return 6;
+      case EWorkOrderStatus.COMPLETED:
+        return 7;
       default:
         return 0;
     }
@@ -223,6 +241,29 @@ export class WorkOrderFlowComponent implements OnChanges {
     const estimated = active.reduce((sum, task) => sum + Math.max(0, Number(task.estimateMinute) || 0), 0);
     if (!estimated) return 0;
     return Math.round((active.reduce((sum, task) => sum + this.taskProgress(task) * Math.max(0, Number(task.estimateMinute) || 0), 0) / estimated) * 100) / 100;
+  }
+
+  get canRecordPrepayment(): boolean {
+    return [
+      EWorkOrderStatus.WAITING_ASSIGNMENT,
+      EWorkOrderStatus.IN_PROGRESS,
+      EWorkOrderStatus.WAITING_ADDITIONAL_APPROVAL,
+      EWorkOrderStatus.WAITING_QC,
+      EWorkOrderStatus.REWORK,
+      EWorkOrderStatus.QC_APPROVED,
+      EWorkOrderStatus.READY_DELIVERY,
+    ].includes(this.workOrder.status);
+  }
+
+  get totalPrepayment(): number {
+    return this.prepayments.reduce((total, payment) => total + payment.amount, 0);
+  }
+
+  get availablePrepayment(): number {
+    return this.prepayments.reduce(
+      (total, payment) => total + Math.max(0, payment.amount - payment.allocatedAmount),
+      0,
+    );
   }
 
   get editingTask(): IWorkOrderTask | null {
@@ -293,7 +334,20 @@ export class WorkOrderFlowComponent implements OnChanges {
   }
 
   async refreshWorkspace(): Promise<void> {
-    await Promise.all([this.loadTasks(), this.loadMechanics()]);
+    await Promise.all([this.loadTasks(), this.loadMechanics(), this.loadPrepayments()]);
+  }
+
+  async loadPrepayments(): Promise<void> {
+    if (!this.workOrder?.workOrderNo) return;
+    this.isLoadingPrepayments = true;
+    try {
+      const response = await this.billingService.getWorkOrderPayments(this.workOrder.workOrderNo);
+      this.prepayments = response.resultCode === RESPONSE.SUCCESS ? response.resultData : [];
+    } catch {
+      this.prepayments = [];
+    } finally {
+      this.isLoadingPrepayments = false;
+    }
   }
 
   async loadTasks(): Promise<void> {
@@ -351,6 +405,58 @@ export class WorkOrderFlowComponent implements OnChanges {
       [create ? '/portal/repair/quotation/create' : '/portal/repair/quotation'],
       create ? { queryParams: { workOrderNo: this.workOrder.workOrderNo } } : undefined,
     );
+  }
+
+  openBilling(): void {
+    void this.router.navigate(['/portal/billing'], {
+      queryParams: { workOrderNo: this.workOrder.workOrderNo },
+    });
+  }
+
+  openPrepaymentModal(): void {
+    this.isPrepaymentModalOpen = true;
+  }
+
+  closePrepaymentModal(): void {
+    if (!this.isSubmitting) this.isPrepaymentModalOpen = false;
+  }
+
+  async recordPrepayment(request: ICreateWorkOrderPaymentRequest): Promise<void> {
+    const amount = Number(request.amount);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      this.setFeedback('กรุณาระบุจำนวนเงินที่มากกว่า 0');
+      return;
+    }
+    if (this.isSubmitting) return;
+    this.isSubmitting = true;
+    try {
+      const response = await this.billingService.recordWorkOrderPayment(this.workOrder.workOrderNo, {
+        amount,
+        method: request.method,
+        type: request.type,
+        reference: request.reference,
+        note: request.note,
+      });
+      if (response.resultCode !== RESPONSE.SUCCESS) {
+        this.setFeedback(this.errorMessage(response));
+        return;
+      }
+      this.isPrepaymentModalOpen = false;
+      await this.loadPrepayments();
+      this.setFeedback(`บันทึก${this.prepaymentTypeLabel(response.resultData.type)} ${response.resultData.paymentNo} แล้ว`, false);
+    } catch {
+      this.setFeedback('ไม่สามารถบันทึกการรับชำระได้');
+    } finally {
+      this.isSubmitting = false;
+    }
+  }
+
+  prepaymentTypeLabel(type: EWorkOrderPaymentType): string {
+    return type === EWorkOrderPaymentType.DEPOSIT ? 'เงินมัดจำ' : 'ชำระระหว่างซ่อม';
+  }
+
+  paymentMethodLabel(method: EPaymentMethod): string {
+    return { CASH: 'เงินสด', TRANSFER: 'โอนเงิน', CARD: 'บัตร', QR: 'QR Payment', OTHER: 'อื่น ๆ' }[method];
   }
 
   async createTask(): Promise<void> {
@@ -847,6 +953,10 @@ export class WorkOrderFlowComponent implements OnChanges {
   }
 
   private setFeedback(message: string, isError = true): void {
-    this.feedback = `${isError ? 'ไม่สำเร็จ: ' : 'สำเร็จ: '}${message}`;
+    if (isError) {
+      this.toastService.error(message);
+      return;
+    }
+    this.toastService.success(message);
   }
 }

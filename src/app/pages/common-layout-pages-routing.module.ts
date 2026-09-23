@@ -78,6 +78,16 @@ const routes: Routes = [
           }
         },
       },
+      {
+        path: 'billing',
+        loadChildren: async () => {
+          try {
+            return await import('./billing/billing.module').then((m) => m.BillingModule);
+          } catch (error) {
+            throw new Error('Failed to load BillingModule');
+          }
+        },
+      },
     ],
   },
 ];

@@ -199,6 +199,7 @@ export class WorkOrderService {
       advisorId: this.toId(raw.advisorId ?? raw.advisor),
       advisor,
       currentQuotationId: this.toId(raw.currentQuotationId),
+      invoiceId: this.toId(raw.invoiceId),
       customer,
       complaints: Array.isArray(raw.complaints) ? raw.complaints : [],
       inspectionRequired: Boolean(raw.inspectionRequired),

@@ -75,7 +75,17 @@ import {
   Sheet,
   Inbox,
   ArrowUpRight,
-  FileText
+  FileText,
+  Printer,
+  CreditCard,
+  Copy,
+  Plus,
+  X,
+  ExternalLink,
+  ShieldCheck,
+  QrCode,
+  Banknote,
+  Building2
 } from 'lucide-angular';
 import { TableStockManagementComponent } from './components/table-stock-management/table-stock-management.component';
 import { CustomSearchSelectComponent } from './components/custom-search-select/custom-search-select.component';
@@ -96,6 +106,8 @@ import { WorkOrderCardComponent } from './components/work-order-card/work-order-
 import { TableQuotationListComponent } from './components/table-quotation-list/table-quotation-list.component';
 import { TaskEditModalComponent } from './components/task-edit-modal/task-edit-modal.component';
 import { PartIssueModalComponent } from './components/part-issue-modal/part-issue-modal.component';
+import { WorkOrderPaymentModalComponent } from './components/work-order-payment-modal/work-order-payment-modal.component';
+import { ToastComponent } from './components/toast/toast.component';
 
 const components = [
   ModalCommonComponent,
@@ -137,7 +149,9 @@ const components = [
   WorkOrderCardComponent,
   TableQuotationListComponent,
   TaskEditModalComponent,
-  PartIssueModalComponent
+  PartIssueModalComponent,
+  WorkOrderPaymentModalComponent,
+  ToastComponent
 ];
 
 const directives = [
@@ -197,7 +211,17 @@ const directives = [
       Sheet,
       Inbox,
       ArrowUpRight,
-      FileText
+      FileText,
+      Printer,
+      CreditCard,
+      Copy,
+      Plus,
+      X,
+      ExternalLink,
+      ShieldCheck,
+      QrCode,
+      Banknote,
+      Building2
     }),
     ProvincePipe,
     TimeAgoPipe,

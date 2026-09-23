@@ -1,11 +1,15 @@
 <div
-  class="cursor-pointer transition-colors text-[0.92rem] font-medium custom-option"
+  class="custom-option cursor-pointer rounded-xl text-[0.92rem] font-medium transition-colors"
   (click)="select()"
   [class.pointer-events-none]="disabled"
   [class.cursor-default]="disabled"
-  [class.opacity-50]="disabled">
+  [class.opacity-50]="disabled"
+  [class.bg-emerald-50]="isSelected"
+  [class.text-emerald-800]="isSelected">
   <span
-    class="block px-2 py-1 my-1  hover:bg-[#F6F7F8] hover:rounded-2xl">
+    class="my-1 block rounded-lg px-2 py-1 transition-colors"
+    [class.hover:bg-slate-100]="!disabled && !isSelected"
+    [class.font-semibold]="isSelected">
     <ng-content></ng-content>
   </span>
 </div>

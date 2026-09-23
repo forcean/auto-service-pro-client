@@ -69,15 +69,6 @@
     </div>
   </div>
 
-  <!-- ─── Feedback banner ─────────────────────────────────────────────────── -->
-  <p
-    *ngIf="feedback"
-    class="mx-3 mt-4 rounded-xl border px-3 py-2 text-sm leading-6 sm:mx-5 sm:mt-5"
-    [ngClass]="feedback.startsWith('สำเร็จ') ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-rose-200 bg-rose-50 text-rose-800'"
-  >
-    {{ feedback }}
-  </p>
-
   <!-- ─── Main content + Sidebar ──────────────────────────────────────────── -->
   <div class="flex flex-col gap-5 p-3 sm:p-5 lg:flex-row lg:items-start">
 
@@ -207,13 +198,64 @@
 
               <div *ngSwitchCase="statuses.QC_APPROVED">
                 <h3 class="mt-1 text-lg font-bold text-slate-900">QC ผ่านแล้ว</h3>
-                <p class="mt-1 text-sm text-slate-500">จบขอบเขต Work Management ของ branch นี้ ขั้นตอนส่งมอบและ Payment อยู่ในโมดูลถัดไป</p>
+                <p class="mt-1 text-sm text-slate-500">ยืนยันว่ารถพร้อมส่งมอบก่อนเปิดคิว Billing ระบบจะตรวจเงื่อนไขใบเสนอราคา งานช่าง และอะไหล่ที่จ่ายจริงอีกครั้ง</p>
+                <button
+                  type="button"
+                  (click)="moveWorkOrder(statuses.READY_DELIVERY)"
+                  [disabled]="isSubmitting"
+                  class="mt-4 min-h-11 w-full rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-700 disabled:opacity-50 sm:w-auto"
+                >
+                  ยืนยันพร้อมส่งมอบและไปออกบิล
+                </button>
+              </div>
+
+              <div *ngSwitchCase="statuses.READY_DELIVERY">
+                <h3 class="mt-1 text-lg font-bold text-slate-900">พร้อมส่งมอบ · รอออกบิล</h3>
+                <p class="mt-1 text-sm text-slate-500">สร้างใบแจ้งหนี้จากยอดอะไหล่ที่จ่ายจริง ค่าแรงจริง และรายการในใบเสนอราคาที่อนุมัติแล้ว</p>
+                <button
+                  type="button"
+                  (click)="openBilling()"
+                  class="mt-4 min-h-11 w-full rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-slate-700 sm:w-auto"
+                >
+                  ไปที่ Billing และรับชำระ
+                </button>
+              </div>
+
+              <div *ngSwitchCase="statuses.COMPLETED">
+                <h3 class="mt-1 text-lg font-bold text-slate-900">ปิดงานและบันทึกประวัติแล้ว</h3>
+                <p class="mt-1 text-sm text-slate-500">งานจะปิดเมื่อ Invoice ชำระครบ ระบบได้สร้าง Service History ของรถคันนี้ไว้เรียบร้อยแล้ว</p>
+                <button
+                  type="button"
+                  (click)="openBilling()"
+                  class="mt-4 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50 sm:w-auto"
+                >
+                  ดูเอกสาร Billing
+                </button>
               </div>
 
             </ng-container>
           </div>
         </div>
       </section>
+
+      <section *ngIf="canRecordPrepayment" class="overflow-hidden rounded-2xl border border-sky-200 bg-white shadow-sm">
+        <div class="flex flex-col gap-4 border-b border-sky-100 bg-sky-50/60 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+          <div class="min-w-0"><p class="text-xs font-bold uppercase tracking-wider text-sky-700">Customer payment credit</p><h3 class="mt-1 text-lg font-bold text-slate-900">เงินมัดจำและชำระระหว่างซ่อม</h3><p class="mt-1 text-sm leading-6 text-slate-600">บันทึกเป็นเครดิตของใบงานนี้ แล้วระบบจะหักจาก Invoice ยอดจริงโดยอัตโนมัติเมื่อพร้อมส่งมอบ</p></div>
+          <button type="button" (click)="openPrepaymentModal()" [disabled]="isSubmitting" class="min-h-11 shrink-0 rounded-xl bg-sky-700 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-sky-800 disabled:opacity-50">รับชำระเงิน</button>
+        </div>
+        <div class="grid gap-3 p-4 sm:grid-cols-2 sm:p-5"><div class="rounded-xl bg-slate-50 p-3"><p class="text-xs font-semibold text-slate-500">รับชำระสะสม</p><p class="mt-1 text-xl font-bold text-slate-900">฿{{ totalPrepayment | number:'1.2-2' }}</p></div><div class="rounded-xl bg-emerald-50 p-3"><p class="text-xs font-semibold text-emerald-700">เครดิตที่ยังรอหัก Invoice</p><p class="mt-1 text-xl font-bold text-emerald-800">฿{{ availablePrepayment | number:'1.2-2' }}</p></div></div>
+        <div *ngIf="isLoadingPrepayments" class="px-4 pb-4 text-sm text-slate-500 sm:px-5">กำลังโหลดประวัติรับชำระ…</div>
+        <div *ngIf="!isLoadingPrepayments && prepayments.length" class="border-t border-slate-100"><div *ngFor="let payment of prepayments | slice:0:4" class="flex flex-col gap-2 border-b border-slate-100 px-4 py-3 text-sm last:border-0 sm:flex-row sm:items-center sm:justify-between sm:px-5"><div><p class="font-mono text-xs font-bold text-slate-700">{{ payment.paymentNo }}</p><p class="mt-0.5 text-xs text-slate-500">{{ prepaymentTypeLabel(payment.type) }} · {{ paymentMethodLabel(payment.method) }}<span *ngIf="payment.reference"> · {{ payment.reference }}</span></p></div><div class="text-left sm:text-right"><p class="font-bold text-slate-900">฿{{ payment.amount | number:'1.2-2' }}</p><p *ngIf="payment.allocatedAmount" class="text-xs text-slate-500">หัก Invoice แล้ว ฿{{ payment.allocatedAmount | number:'1.2-2' }}</p></div></div></div>
+        <p *ngIf="!isLoadingPrepayments && !prepayments.length" class="px-4 pb-4 text-sm text-slate-500 sm:px-5">ยังไม่มีการรับชำระล่วงหน้าสำหรับใบงานนี้</p>
+      </section>
+
+      <app-work-order-payment-modal
+        [isOpen]="isPrepaymentModalOpen"
+        [availableCredit]="availablePrepayment"
+        [isSubmitting]="isSubmitting"
+        (close)="closePrepaymentModal()"
+        (submitPayment)="recordPrepayment($event)"
+      ></app-work-order-payment-modal>
 
       <!-- ─── Create Task Modal Popup ─────────────────────────────────────────── -->
       <div
