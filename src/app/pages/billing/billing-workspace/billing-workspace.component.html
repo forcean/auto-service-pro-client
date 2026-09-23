@@ -1,0 +1,809 @@
+<section class="mx-auto w-full max-w-[1600px] space-y-6 p-4 sm:p-6 lg:p-8">
+  <!-- Top Header Bar -->
+  <header class="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm sm:p-7">
+    <div class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none"></div>
+    <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+      <div class="flex items-start gap-4">
+        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-md shadow-emerald-600/20">
+          <lucide-angular [img]="IconReceipt" class="h-6 w-6"></lucide-angular>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200/60">
+              <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              Billing & Delivery Workspace
+            </span>
+          </div>
+          <h1 class="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">ส่งมอบรถ รับชำระ และปิดงานซ่อม</h1>
+          <p class="mt-1.5 max-w-3xl text-sm leading-relaxed text-slate-500">
+            ระบบบริหารการออกใบแจ้งหนี้ รับชำระเงินมัดจำ/ยอดคงค้าง และออกประวัติการซ่อม (Service History) โดยอัตโนมัติ
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 self-start lg:self-center">
+        <button
+          type="button"
+          (click)="loadWorkspace()"
+          [disabled]="isLoading"
+          class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition shadow-xs hover:bg-slate-50 hover:text-slate-900 active:scale-95 disabled:opacity-50"
+        >
+          <lucide-angular [img]="IconRefresh" class="h-4 w-4" [ngClass]="{ 'animate-spin': isLoading }"></lucide-angular>
+          <span>{{ isLoading ? 'กำลังโหลด…' : 'รีเฟรชข้อมูล' }}</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Feedback Notification Banner -->
+  <div
+    *ngIf="feedback"
+    class="flex items-start justify-between gap-4 rounded-2xl border p-4 text-sm font-medium shadow-xs transition-all"
+    [ngClass]="feedbackIsError ? 'border-rose-200 bg-rose-50/90 text-rose-800' : 'border-emerald-200 bg-emerald-50/90 text-emerald-800'"
+  >
+    <div class="flex items-center gap-3">
+      <lucide-angular [img]="feedbackIsError ? IconAlertCircle : IconCheckCircle" class="h-5 w-5 shrink-0"></lucide-angular>
+      <span>{{ feedback }}</span>
+    </div>
+    <button type="button" (click)="feedback = ''" class="shrink-0 rounded-lg p-1 hover:bg-black/5" aria-label="ปิดแจ้งเตือน">
+      <lucide-angular [img]="IconClose" class="h-4 w-4"></lucide-angular>
+    </button>
+  </div>
+
+  <!-- Interactive Stat Cards -->
+  <div class="grid gap-4 sm:grid-cols-3">
+    <!-- Stat Card 1: Ready to Invoice -->
+    <div
+      (click)="setActiveTab('READY')"
+      class="group relative cursor-pointer overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50/80 via-white to-indigo-50/30 p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-md hover:border-indigo-300"
+      [ngClass]="{ 'ring-2 ring-indigo-500 border-indigo-400': activeTab === 'READY' }"
+    >
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold uppercase tracking-wider text-indigo-700">พร้อมออกใบแจ้งหนี้</span>
+        <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-100 text-indigo-700 group-hover:scale-110 transition-transform">
+          <lucide-angular [img]="IconFileText" class="h-5 w-5"></lucide-angular>
+        </div>
+      </div>
+      <div class="mt-3 flex items-baseline justify-between">
+        <p class="text-3xl font-extrabold text-indigo-950">{{ readyToInvoiceCount }}</p>
+        <span class="text-xs font-semibold text-indigo-600 group-hover:underline">คลิกเพื่อกรองคิว &rarr;</span>
+      </div>
+      <p class="mt-1 text-xs text-indigo-600/80">งานที่ผ่านการตรวจรับและเงื่อนไขครบแล้ว</p>
+    </div>
+
+    <!-- Stat Card 2: Pending Payment -->
+    <div
+      (click)="setActiveTab('UNPAID')"
+      class="group relative cursor-pointer overflow-hidden rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50/80 via-white to-amber-50/30 p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-md hover:border-amber-300"
+      [ngClass]="{ 'ring-2 ring-amber-500 border-amber-400': activeTab === 'UNPAID' }"
+    >
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold uppercase tracking-wider text-amber-700">ยอดรอรับชำระ</span>
+        <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-100 text-amber-700 group-hover:scale-110 transition-transform">
+          <lucide-angular [img]="IconClock" class="h-5 w-5"></lucide-angular>
+        </div>
+      </div>
+      <div class="mt-3 flex items-baseline justify-between">
+        <p class="text-3xl font-extrabold text-amber-950">{{ issuedCount }}</p>
+        <span class="text-xs font-semibold text-amber-600 group-hover:underline">คลิกเพื่อกรองคิว &rarr;</span>
+      </div>
+      <p class="mt-1 text-xs text-amber-600/80">ใบแจ้งหนี้ที่รอการรับชำระเงิน</p>
+    </div>
+
+    <!-- Stat Card 3: Completed & Closed -->
+    <div
+      (click)="setActiveTab('COMPLETED')"
+      class="group relative cursor-pointer overflow-hidden rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50/80 via-white to-emerald-50/30 p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-md hover:border-emerald-300"
+      [ngClass]="{ 'ring-2 ring-emerald-500 border-emerald-400': activeTab === 'COMPLETED' }"
+    >
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold uppercase tracking-wider text-emerald-700">ปิดงานซ่อมแล้ว</span>
+        <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 group-hover:scale-110 transition-transform">
+          <lucide-angular [img]="IconCheckCircle" class="h-5 w-5"></lucide-angular>
+        </div>
+      </div>
+      <div class="mt-3 flex items-baseline justify-between">
+        <p class="text-3xl font-extrabold text-emerald-950">{{ paidCount }}</p>
+        <span class="text-xs font-semibold text-emerald-600 group-hover:underline">คลิกเพื่อกรองคิว &rarr;</span>
+      </div>
+      <p class="mt-1 text-xs text-emerald-600/80">ชำระเงินเรียบร้อยและบันทึกประวัติซ่อมแล้ว</p>
+    </div>
+  </div>
+
+  <!-- Skeleton / Main Loader -->
+  <div *ngIf="isLoading" class="flex flex-col items-center justify-center rounded-3xl border border-slate-200 bg-white p-12 text-center shadow-xs">
+    <lucide-angular [img]="IconRefresh" class="h-8 w-8 animate-spin text-emerald-600"></lucide-angular>
+    <p class="mt-4 font-semibold text-slate-700">กำลังโหลดรายการส่งมอบและใบแจ้งหนี้…</p>
+  </div>
+
+  <!-- Main Workspace Grid (Left Queue + Right Inspector) -->
+  <div *ngIf="!isLoading" class="grid items-start gap-6 lg:grid-cols-[minmax(320px,0.85fr)_minmax(0,1.65fr)]">
+
+    <!-- Queue Navigator Sidebar -->
+    <section class="flex flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-xs">
+      <!-- Queue Header & Search -->
+      <div class="border-b border-slate-100 bg-slate-50/50 p-4 sm:p-5">
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <lucide-angular [img]="IconFilter" class="h-4 w-4 text-emerald-600"></lucide-angular>
+            <h2 class="font-bold text-slate-900">คิวส่งมอบ / ออกบิล</h2>
+          </div>
+          <span class="rounded-full bg-emerald-100 px-3 py-0.5 text-xs font-bold text-emerald-800">
+            {{ visibleWorkOrders.length }} รายการ
+          </span>
+        </div>
+
+        <!-- Filter Pill Tabs -->
+        <div class="mt-3 flex items-center gap-1 overflow-x-auto pb-1 text-xs">
+          <button
+            type="button"
+            (click)="setActiveTab('ALL')"
+            class="rounded-xl px-3 py-1.5 font-semibold transition"
+            [ngClass]="activeTab === 'ALL' ? 'bg-slate-900 text-white shadow-xs' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'"
+          >
+            ทั้งหมด
+          </button>
+          <button
+            type="button"
+            (click)="setActiveTab('READY')"
+            class="rounded-xl px-3 py-1.5 font-semibold transition"
+            [ngClass]="activeTab === 'READY' ? 'bg-indigo-600 text-white shadow-xs' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'"
+          >
+            พร้อมออกบิล
+          </button>
+          <button
+            type="button"
+            (click)="setActiveTab('UNPAID')"
+            class="rounded-xl px-3 py-1.5 font-semibold transition"
+            [ngClass]="activeTab === 'UNPAID' ? 'bg-amber-600 text-white shadow-xs' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'"
+          >
+            รอชำระ
+          </button>
+          <button
+            type="button"
+            (click)="setActiveTab('COMPLETED')"
+            class="rounded-xl px-3 py-1.5 font-semibold transition"
+            [ngClass]="activeTab === 'COMPLETED' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'"
+          >
+            ปิดงานแล้ว
+          </button>
+        </div>
+
+        <!-- Search Bar Input -->
+        <div class="relative mt-3">
+          <span class="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-slate-400">
+            <lucide-angular [img]="IconSearch" class="h-4 w-4"></lucide-angular>
+          </span>
+          <input
+            [(ngModel)]="keyword"
+            type="search"
+            placeholder="ค้นหาเลขใบงาน, ทะเบียน หรือชื่อลูกค้า…"
+            class="min-h-11 w-full rounded-2xl border border-slate-200 bg-white py-2 pl-10 pr-9 text-sm outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+          />
+          <button
+            *ngIf="keyword"
+            type="button"
+            (click)="keyword = ''"
+            class="absolute inset-y-0 right-3 flex items-center text-slate-400 hover:text-slate-600"
+          >
+            <lucide-angular [img]="IconClose" class="h-4 w-4"></lucide-angular>
+          </button>
+        </div>
+      </div>
+
+      <!-- Queue Items Scrollable List -->
+      <div class="max-h-[620px] divide-y divide-slate-100 overflow-y-auto">
+        <button
+          *ngFor="let workOrder of visibleWorkOrders"
+          type="button"
+          (click)="selectWorkOrder(workOrder)"
+          class="relative w-full p-4 text-left transition-all hover:bg-slate-50/80"
+          [ngClass]="selectedWorkOrder?.workOrderNo === workOrder.workOrderNo ? 'bg-emerald-50/60 shadow-xs' : 'bg-white'"
+        >
+          <!-- Active Indicator Bar -->
+          <div
+            *ngIf="selectedWorkOrder?.workOrderNo === workOrder.workOrderNo"
+            class="absolute left-0 top-0 bottom-0 w-1 bg-emerald-600 rounded-r-full"
+          ></div>
+
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-xs font-bold text-slate-500">#{{ workOrder.workOrderNo }}</span>
+              </div>
+
+              <!-- Vehicle Plate Badge -->
+              <p class="mt-1 truncate text-sm font-bold text-slate-900">
+                <span class="inline-flex items-center gap-1 rounded-md bg-slate-100 px-1.5 py-0.5 font-mono text-xs font-extrabold text-slate-800 border border-slate-200">
+                  <lucide-angular [img]="IconCar" class="h-3 w-3 text-slate-500"></lucide-angular>
+                  {{ workOrder.vehicle?.licensePlate || 'ไม่ระบุทะเบียน' }}
+                </span>
+                <span class="ml-1.5 font-medium text-slate-600">{{ workOrder.vehicle?.province || '' }}</span>
+              </p>
+
+              <!-- Customer Info & Mileage -->
+              <p class="mt-1.5 flex items-center gap-2 truncate text-xs text-slate-500">
+                <span class="inline-flex items-center gap-1">
+                  <lucide-angular [img]="IconUser" class="h-3 w-3 text-slate-400"></lucide-angular>
+                  {{ workOrder.vehicle?.firstname || 'ลูกค้าทั่วไป' }} {{ workOrder.vehicle?.lastname || '' }}
+                </span>
+                <span *ngIf="workOrder.mileage">· {{ workOrder.mileage | number }} กม.</span>
+              </p>
+            </div>
+
+            <!-- Status Pill Badge -->
+            <span
+              class="shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-bold"
+              [ngClass]="
+                workOrder.status === 'COMPLETED'
+                  ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                  : workOrder.canCreateInvoice
+                  ? 'border-indigo-200 bg-indigo-50 text-indigo-800'
+                  : 'border-amber-200 bg-amber-50 text-amber-800'
+              "
+            >
+              {{ workOrder.status === 'COMPLETED' ? 'ปิดงานแล้ว' : workOrder.canCreateInvoice ? 'พร้อมออกบิล' : 'ติดเงื่อนไข' }}
+            </span>
+          </div>
+
+          <!-- Blocker Flags -->
+          <div *ngIf="workOrder.blockers.length" class="mt-2.5 flex items-center gap-1.5 rounded-lg bg-amber-50 p-2 border border-amber-100 text-[11px] font-medium text-amber-800">
+            <lucide-angular [img]="IconAlertCircle" class="h-3.5 w-3.5 shrink-0 text-amber-600"></lucide-angular>
+            <span class="truncate">{{ workOrder.blockers.join(' · ') }}</span>
+          </div>
+        </button>
+
+        <!-- Empty Search Result -->
+        <div *ngIf="!visibleWorkOrders.length" class="flex flex-col items-center justify-center p-10 text-center text-slate-400">
+          <lucide-angular [img]="IconSearch" class="h-10 w-10 text-slate-300"></lucide-angular>
+          <p class="mt-3 text-sm font-semibold text-slate-600">ไม่พบรายการในคิวส่งมอบ</p>
+          <p class="mt-1 text-xs text-slate-400">ลองปรับเปลี่ยนคำค้นหา หรือสลับแท็บสถานะ</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Right Inspector Panel -->
+    <section class="min-w-0 overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-xs">
+      <ng-container *ngIf="selectedInvoice as invoice; else workOrderEmpty">
+
+        <!-- Inspector Header Bar -->
+        <div class="flex flex-col gap-4 border-b border-slate-100 bg-slate-50/40 p-5 sm:p-6 lg:flex-row lg:items-start lg:justify-between">
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-emerald-600">Invoice Document</span>
+              <span class="rounded-full border px-2.5 py-0.5 text-xs font-bold ring-1 ring-inset" [ngClass]="invoiceStatusClass(invoice.status)">
+                {{ invoiceStatusLabel(invoice.status) }}
+              </span>
+            </div>
+
+            <div class="mt-2 flex flex-wrap items-center gap-3">
+              <h2 class="font-mono text-2xl font-extrabold tracking-tight text-slate-950">
+                {{ invoice.invoiceNo }}
+              </h2>
+              <button
+                type="button"
+                (click)="copyToClipboard(invoice.invoiceNo)"
+                class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100"
+                title="คัดลอกเลขที่ใบแจ้งหนี้"
+              >
+                <lucide-angular [img]="copiedText === invoice.invoiceNo ? IconCheck : IconCopy" class="h-3.5 w-3.5 text-slate-500"></lucide-angular>
+                <span>{{ copiedText === invoice.invoiceNo ? 'คัดลอกแล้ว' : 'คัดลอก' }}</span>
+              </button>
+            </div>
+
+            <!-- Vehicle & Customer Snapshot Info -->
+            <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-600">
+              <span class="inline-flex items-center gap-1.5 font-semibold text-slate-800">
+                <lucide-angular [img]="IconCar" class="h-4 w-4 text-slate-500"></lucide-angular>
+                {{ invoice.vehicleSnapshot?.licensePlate || '-' }} {{ invoice.vehicleSnapshot?.province || '' }}
+              </span>
+              <span class="text-slate-300">•</span>
+              <span class="inline-flex items-center gap-1.5">
+                <lucide-angular [img]="IconUser" class="h-4 w-4 text-slate-400"></lucide-angular>
+                {{ invoice.billingParty?.name || 'ไม่ระบุชื่อลูกค้า' }}
+              </span>
+              <span class="text-slate-300">•</span>
+              <span class="font-mono text-xs text-slate-500">WO: #{{ invoice.workOrderNo }}</span>
+            </div>
+          </div>
+
+          <!-- Inspector Quick Actions -->
+          <div class="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              (click)="goToWorkOrder()"
+              class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-700 shadow-xs transition hover:bg-slate-100 active:scale-95"
+            >
+              <lucide-angular [img]="IconExternalLink" class="h-3.5 w-3.5 text-slate-500"></lucide-angular>
+              <span>ดูใบสั่งงาน</span>
+            </button>
+
+            <button
+              type="button"
+              (click)="printInvoice()"
+              class="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50/80 px-3.5 py-2.5 text-xs font-bold text-indigo-700 transition hover:bg-indigo-100 active:scale-95"
+            >
+              <lucide-angular [img]="IconPrinter" class="h-3.5 w-3.5"></lucide-angular>
+              <span>พิมพ์ Invoice</span>
+            </button>
+
+            <button
+              *ngIf="outstandingAmount > 0 && invoice.status !== invoiceStatuses.VOID"
+              type="button"
+              (click)="openPaymentModal()"
+              class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow-md shadow-emerald-600/20 transition hover:bg-emerald-700 active:scale-95"
+            >
+              <lucide-angular [img]="IconWallet" class="h-4 w-4"></lucide-angular>
+              <span>รับชำระเงิน</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Financial Overview Dashboard Grid -->
+        <div class="grid gap-4 border-b border-slate-100 bg-slate-50/70 p-5 sm:grid-cols-2 xl:grid-cols-4">
+          <!-- Total Amount -->
+          <div class="rounded-2xl border border-slate-200/70 bg-white p-4 shadow-xs">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-500">ยอดรวมสุทธิ</span>
+              <div class="rounded-lg bg-slate-100 p-1.5 text-slate-600">
+                <lucide-angular [img]="IconReceipt" class="h-4 w-4"></lucide-angular>
+              </div>
+            </div>
+            <p class="mt-2 text-xl font-black tracking-tight text-slate-950">฿{{ currency(invoice.grandTotal) }}</p>
+          </div>
+
+          <!-- Applied Prepayment -->
+          <div class="rounded-2xl border border-sky-100 bg-white p-4 shadow-xs">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-sky-700">เครดิตก่อนออกบิล</span>
+              <div class="rounded-lg bg-sky-100 p-1.5 text-sky-700">
+                <lucide-angular [img]="IconShieldCheck" class="h-4 w-4"></lucide-angular>
+              </div>
+            </div>
+            <p class="mt-2 text-xl font-black tracking-tight text-sky-700">฿{{ currency(invoice.prepaymentAppliedAmount) }}</p>
+          </div>
+
+          <!-- Paid Amount -->
+          <div class="rounded-2xl border border-emerald-100 bg-white p-4 shadow-xs">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-emerald-700">รับชำระแล้ว</span>
+              <div class="rounded-lg bg-emerald-100 p-1.5 text-emerald-700">
+                <lucide-angular [img]="IconCheckCircle" class="h-4 w-4"></lucide-angular>
+              </div>
+            </div>
+            <p class="mt-2 text-xl font-black tracking-tight text-emerald-700">฿{{ currency(invoice.paidAmount) }}</p>
+          </div>
+
+          <!-- Outstanding Amount -->
+          <div class="rounded-2xl border p-4 shadow-xs" [ngClass]="outstandingAmount > 0 ? 'border-amber-200 bg-amber-50/50' : 'border-emerald-200 bg-emerald-50/50'">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold" [ngClass]="outstandingAmount > 0 ? 'text-amber-800' : 'text-emerald-800'">ยอดคงค้าง</span>
+              <div class="rounded-lg p-1.5" [ngClass]="outstandingAmount > 0 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'">
+                <lucide-angular [img]="IconWallet" class="h-4 w-4"></lucide-angular>
+              </div>
+            </div>
+            <p class="mt-2 text-xl font-black tracking-tight" [ngClass]="outstandingAmount > 0 ? 'text-amber-900' : 'text-emerald-900'">
+              ฿{{ currency(outstandingAmount) }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Invoice Line Items Table & Summary -->
+        <div class="p-5 sm:p-6">
+          <div class="flex items-center justify-between pb-3">
+            <h3 class="font-bold text-slate-900">รายการในใบแจ้งหนี้ (Line Items)</h3>
+            <span class="text-xs text-slate-500">{{ invoice.items.length }} รายการ</span>
+          </div>
+
+          <div class="overflow-x-auto rounded-2xl border border-slate-200/80 bg-white">
+            <table class="w-full min-w-[600px] text-sm">
+              <thead class="bg-slate-50 border-b border-slate-200/80 text-left text-xs font-semibold text-slate-500">
+                <tr>
+                  <th class="py-3 px-4">รายการสินค้า/ค่าแรง</th>
+                  <th class="py-3 px-4 text-right">จำนวน</th>
+                  <th class="py-3 px-4 text-right">ราคา/หน่วย</th>
+                  <th class="py-3 px-4 text-right">รวมเงิน (บาท)</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr *ngFor="let item of invoice.items" class="hover:bg-slate-50/60 transition">
+                  <td class="py-3.5 px-4">
+                    <p class="font-semibold text-slate-900">{{ item.description }}</p>
+                    <span *ngIf="item.sku" class="mt-0.5 inline-block font-mono text-[11px] text-slate-400">
+                      SKU: {{ item.sku }}
+                    </span>
+                  </td>
+                  <td class="py-3.5 px-4 text-right font-medium text-slate-700">{{ item.quantity }}</td>
+                  <td class="py-3.5 px-4 text-right text-slate-600">฿{{ currency(item.unitPrice) }}</td>
+                  <td class="py-3.5 px-4 text-right font-bold text-slate-900">฿{{ currency(item.totalAmount) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Financial Breakdown Summary Box -->
+          <div class="ml-auto mt-6 max-w-md rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 space-y-2.5 text-sm">
+            <div class="flex justify-between text-slate-600">
+              <span>ค่าอะไหล่ (Parts Subtotal)</span>
+              <span class="font-medium text-slate-900">฿{{ currency(invoice.partTotal) }}</span>
+            </div>
+            <div class="flex justify-between text-slate-600">
+              <span>ค่าแรง (Labor Subtotal)</span>
+              <span class="font-medium text-slate-900">฿{{ currency(invoice.laborTotal) }}</span>
+            </div>
+            <div class="flex justify-between text-slate-600">
+              <span>ค่าบริการ (Service Subtotal)</span>
+              <span class="font-medium text-slate-900">฿{{ currency(invoice.serviceTotal) }}</span>
+            </div>
+
+            <div *ngIf="invoice.discountAmount" class="flex justify-between text-rose-600 font-medium">
+              <span>ส่วนลด (Discount)</span>
+              <span>-฿{{ currency(invoice.discountAmount) }}</span>
+            </div>
+
+            <div *ngIf="invoice.vatAmount" class="flex justify-between text-slate-600">
+              <span>ภาษีมูลค่าเพิ่ม (VAT 7%)</span>
+              <span class="font-medium text-slate-900">฿{{ currency(invoice.vatAmount) }}</span>
+            </div>
+
+            <div class="flex justify-between border-t border-slate-200 pt-3 text-base font-extrabold text-slate-950">
+              <span>ยอดรวมสุทธิ</span>
+              <span class="text-emerald-700">฿{{ currency(invoice.grandTotal) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Applied Prepayments Log -->
+        <div *ngIf="invoice.appliedPrepayments.length" class="border-t border-sky-100 bg-sky-50/40 p-5 sm:p-6">
+          <div class="flex items-center gap-2">
+            <lucide-angular [img]="IconShieldCheck" class="h-4 w-4 text-sky-700"></lucide-angular>
+            <h3 class="font-bold text-sky-950">เครดิต/เงินมัดจำที่นำมาหักใน Invoice นี้</h3>
+          </div>
+          <div class="mt-3 space-y-2">
+            <div *ngFor="let payment of invoice.appliedPrepayments" class="flex items-center justify-between gap-3 rounded-xl border border-sky-200/80 bg-white p-3.5 text-xs shadow-xs">
+              <div>
+                <p class="font-mono font-bold text-slate-800">Ref: {{ payment.paymentNo }}</p>
+                <p class="mt-0.5 text-slate-500">
+                  {{ payment.type === 'DEPOSIT' ? 'เงินมัดจำล่วงหน้า' : 'ชำระระหว่างซ่อม' }}
+                </p>
+              </div>
+              <p class="font-extrabold text-sky-700 text-sm">−฿{{ currency(payment.amount) }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Transactions Audit History -->
+        <div *ngIf="invoice.payments.length" class="border-t border-slate-100 p-5 sm:p-6">
+          <div class="flex items-center gap-2">
+            <lucide-angular [img]="IconActivity" class="h-4 w-4 text-slate-700"></lucide-angular>
+            <h3 class="font-bold text-slate-900">ประวัติการรับชำระเงิน (Payment History)</h3>
+          </div>
+          <div class="mt-3 space-y-2.5">
+            <div *ngFor="let payment of invoice.payments" class="flex flex-col gap-2 rounded-2xl border border-slate-200/80 bg-slate-50/50 p-3.5 text-xs sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-mono font-bold text-slate-800">#{{ payment.paymentNo }}</span>
+                  <span class="rounded-md bg-emerald-100 px-2 py-0.5 font-semibold text-emerald-800">
+                    {{ paymentMethodLabel(payment.method) }}
+                  </span>
+                </div>
+                <p *ngIf="payment.reference" class="mt-1 text-slate-500">อ้างอิง: {{ payment.reference }}</p>
+              </div>
+              <p class="font-extrabold text-emerald-700 text-sm">฿{{ currency(payment.amount) }}</p>
+            </div>
+          </div>
+        </div>
+
+      </ng-container>
+
+      <!-- Work Order Delivery Check View (When no invoice created yet) -->
+      <ng-template #workOrderEmpty>
+        <div *ngIf="selectedWorkOrder as workOrder; else noSelection" class="p-6 sm:p-8">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-indigo-600">Delivery Checklist</span>
+            <span class="rounded-full border px-2.5 py-0.5 text-xs font-bold" [ngClass]="workOrder.canCreateInvoice ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-amber-200 bg-amber-50 text-amber-800'">
+              {{ workOrder.canCreateInvoice ? 'พร้อมออกใบแจ้งหนี้' : 'ยังไม่พร้อมออกใบแจ้งหนี้' }}
+            </span>
+          </div>
+
+          <h2 class="mt-2 text-2xl font-bold text-slate-950">ใบสั่งงาน #{{ workOrder.workOrderNo }}</h2>
+          <p class="mt-2 text-sm text-slate-500 leading-relaxed">
+            ตรวจสอบเงื่อนไขความเรียบร้อยของใบสั่งงาน ระบบจะทำการรวบรวมรายการอะไหล่ที่เบิกจ่ายจริงและค่าแรงจาก Task เพื่อสร้างเอกสารใบแจ้งหนี้
+          </p>
+
+          <!-- Ready to Invoice Box -->
+          <div *ngIf="workOrder.canCreateInvoice" class="mt-6 rounded-3xl border border-emerald-200 bg-emerald-50/70 p-6 shadow-xs">
+            <div class="flex items-start gap-3">
+              <lucide-angular [img]="IconCheckCircle" class="h-6 w-6 text-emerald-600 shrink-0 mt-0.5"></lucide-angular>
+              <div>
+                <h3 class="font-bold text-emerald-950 text-base">เงื่อนไขพร้อมสร้างใบแจ้งหนี้</h3>
+                <p class="mt-1 text-sm text-emerald-800 leading-relaxed">
+                  งานซ่อมผ่าน QC ครบถ้วน ใบเสนอราคาได้รับการอนุมัติ และการเบิกจ่ายอะไหล่ตรงตามรายการ
+                </p>
+                <button
+                  type="button"
+                  (click)="createInvoice()"
+                  [disabled]="isCreatingInvoice"
+                  class="mt-5 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white shadow-md shadow-emerald-600/20 transition hover:bg-emerald-700 active:scale-95 disabled:opacity-50"
+                >
+                  <lucide-angular [img]="IconPlus" class="h-4 w-4" *ngIf="!isCreatingInvoice"></lucide-angular>
+                  <lucide-angular [img]="IconRefresh" class="h-4 w-4 animate-spin" *ngIf="isCreatingInvoice"></lucide-angular>
+                  <span>{{ isCreatingInvoice ? 'กำลังสร้างใบแจ้งหนี้…' : 'สร้างใบแจ้งหนี้ทันที' }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Blocker Warning Box -->
+          <div *ngIf="!workOrder.canCreateInvoice" class="mt-6 rounded-3xl border border-amber-200 bg-amber-50/70 p-6 shadow-xs">
+            <div class="flex items-start gap-3">
+              <lucide-angular [img]="IconAlertCircle" class="h-6 w-6 text-amber-600 shrink-0 mt-0.5"></lucide-angular>
+              <div>
+                <h3 class="font-bold text-amber-950 text-base">รายการที่ต้องแก้ไขก่อนออกใบแจ้งหนี้</h3>
+                <ul class="mt-3 space-y-2 text-sm text-amber-900">
+                  <li *ngFor="let blocker of workOrder.blockers" class="flex items-center gap-2">
+                    <span class="h-1.5 w-1.5 rounded-full bg-amber-600"></span>
+                    <span>{{ blocker }}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- No Selection Prompt View -->
+        <ng-template #noSelection>
+          <div class="flex min-h-[420px] flex-col items-center justify-center p-8 text-center">
+            <div class="flex h-16 w-16 items-center justify-center rounded-3xl bg-slate-100 text-slate-400">
+              <lucide-angular [img]="IconReceipt" class="h-8 w-8 text-slate-400"></lucide-angular>
+            </div>
+            <h2 class="mt-4 font-bold text-slate-900 text-lg">เลือกรายการจากคิวทางซ้ายมือ</h2>
+            <p class="mt-1 max-w-sm text-sm text-slate-500 leading-relaxed">
+              เลือกใบสั่งงานเพื่อตรวจสอบการออกใบแจ้งหนี้ หรือเลือกใบแจ้งหนี้ที่มีอยู่แล้วเพื่อทำการรับชำระเงิน
+            </p>
+          </div>
+        </ng-template>
+      </ng-template>
+    </section>
+  </div>
+
+  <!-- Bottom Data Table: Recent Invoices Log -->
+  <section *ngIf="!isLoading && invoices.length" class="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-xs">
+    <div class="flex items-center justify-between gap-3 border-b border-slate-100 bg-slate-50/50 p-5">
+      <div class="flex items-center gap-2.5">
+        <lucide-angular [img]="IconReceipt" class="h-5 w-5 text-emerald-600"></lucide-angular>
+        <div>
+          <h2 class="font-bold text-slate-900">ประวัติใบแจ้งหนี้ทั้งหมดในระบบ</h2>
+          <p class="mt-0.5 text-xs text-slate-500">คลิกที่แถวเพื่อเลือกดูรายละเอียดและจัดการชำระเงิน</p>
+        </div>
+      </div>
+      <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">
+        {{ invoices.length }} เอกสาร
+      </span>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[760px] text-sm">
+        <thead class="bg-slate-50 border-b border-slate-200/80 text-left text-xs font-semibold text-slate-500">
+          <tr>
+            <th class="px-5 py-3.5 font-semibold">เลขที่ใบแจ้งหนี้</th>
+            <th class="px-5 py-3.5 font-semibold">ใบสั่งงาน</th>
+            <th class="px-5 py-3.5 font-semibold">ลูกค้า / รถยนต์</th>
+            <th class="px-5 py-3.5 text-right font-semibold">ยอดสุทธิ</th>
+            <th class="px-5 py-3.5 text-right font-semibold">ยอดคงค้าง</th>
+            <th class="px-5 py-3.5 font-semibold">สถานะ</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <tr
+            *ngFor="let invoice of invoices"
+            (click)="selectInvoice(invoice)"
+            class="cursor-pointer transition-all hover:bg-slate-50/80"
+            [ngClass]="{ 'bg-emerald-50/40': selectedInvoice?.invoiceNo === invoice.invoiceNo }"
+          >
+            <td class="px-5 py-4 font-mono font-bold text-slate-900">{{ invoice.invoiceNo }}</td>
+            <td class="px-5 py-4 font-mono text-xs text-slate-600">#{{ invoice.workOrderNo }}</td>
+            <td class="px-5 py-4">
+              <p class="font-semibold text-slate-800">{{ invoice.billingParty?.name || '-' }}</p>
+              <p class="text-xs text-slate-500">
+                {{ invoice.vehicleSnapshot?.licensePlate || '-' }} {{ invoice.vehicleSnapshot?.province || '' }}
+              </p>
+            </td>
+            <td class="px-5 py-4 text-right font-semibold text-slate-900">฿{{ currency(invoice.grandTotal) }}</td>
+            <td
+              class="px-5 py-4 text-right font-extrabold"
+              [ngClass]="invoice.grandTotal - invoice.paidAmount > 0 ? 'text-amber-700' : 'text-emerald-700'"
+            >
+              ฿{{ currency(invoice.grandTotal - invoice.paidAmount) }}
+            </td>
+            <td class="px-5 py-4">
+              <span class="rounded-full border px-2.5 py-1 text-xs font-bold ring-1 ring-inset" [ngClass]="invoiceStatusClass(invoice.status)">
+                {{ invoiceStatusLabel(invoice.status) }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>
+
+<!-- Interactive Payment Modal Dialog -->
+<div
+  *ngIf="isPaymentModalOpen"
+  class="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/60 p-0 backdrop-blur-sm transition-all sm:items-center sm:p-4"
+  (click)="closePaymentModal()"
+>
+  <section
+    class="w-full max-w-lg rounded-t-3xl bg-white shadow-2xl transition-all sm:rounded-3xl"
+    role="dialog"
+    aria-modal="true"
+    aria-label="รับชำระเงิน"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Modal Header -->
+    <div class="flex items-start justify-between gap-4 border-b border-slate-100 p-6">
+      <div class="flex items-start gap-3">
+        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
+          <lucide-angular [img]="IconWallet" class="h-6 w-6"></lucide-angular>
+        </div>
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-emerald-600">Payment Collection</span>
+          <h2 class="mt-0.5 text-xl font-bold text-slate-950">บันทึกรับชำระเงิน</h2>
+          <p class="mt-1 text-xs text-slate-500">
+            ใบแจ้งหนี้ <span class="font-mono font-bold text-slate-800">{{ selectedInvoice?.invoiceNo }}</span>
+          </p>
+        </div>
+      </div>
+      <button
+        type="button"
+        (click)="closePaymentModal()"
+        class="inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+        aria-label="ปิด"
+      >
+        <lucide-angular [img]="IconClose" class="h-5 w-5"></lucide-angular>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="space-y-5 p-6 max-h-[75vh] overflow-y-auto">
+
+      <!-- Outstanding Amount Display & Quick Fill -->
+      <div class="rounded-2xl border border-amber-200/80 bg-amber-50/60 p-4">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-amber-800">ยอดเงินคงค้างชำระ</span>
+          <span class="font-mono text-lg font-black text-amber-950">฿{{ currency(outstandingAmount) }}</span>
+        </div>
+        <div class="mt-3 flex items-center gap-2">
+          <button
+            type="button"
+            (click)="setFullPaymentAmount()"
+            class="rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-amber-900 border border-amber-200 shadow-xs hover:bg-amber-100"
+          >
+            จ่ายเต็มจำนวน (฿{{ currency(outstandingAmount) }})
+          </button>
+          <button
+            type="button"
+            (click)="setHalfPaymentAmount()"
+            class="rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-amber-900 border border-amber-200 shadow-xs hover:bg-amber-100"
+          >
+            จ่าย 50%
+          </button>
+        </div>
+      </div>
+
+      <!-- Payment Amount Input -->
+      <label class="block">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-700">จำนวนเงินที่รับชำระ</span>
+        <div class="relative mt-1.5">
+          <span class="pointer-events-none absolute inset-y-0 left-3.5 flex items-center font-bold text-slate-400">฿</span>
+          <input
+            [(ngModel)]="paymentForm.amount"
+            type="number"
+            min="0.01"
+            [max]="outstandingAmount"
+            step="0.01"
+            class="min-h-12 w-full rounded-2xl border border-slate-200 py-2.5 pl-9 pr-4 font-mono text-lg font-bold outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+          />
+        </div>
+      </label>
+
+      <!-- Payment Method Visual Selector Grid -->
+      <div>
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-700">ช่องทางชำระเงิน</span>
+        <div class="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <button
+            type="button"
+            (click)="selectPaymentMethod(paymentMethodsEnum.QR)"
+            class="flex flex-col items-center justify-center rounded-2xl border p-3 text-center transition"
+            [ngClass]="paymentForm.method === paymentMethodsEnum.QR ? 'border-emerald-500 bg-emerald-50 text-emerald-800 font-bold shadow-xs' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'"
+          >
+            <lucide-angular [img]="IconQrCode" class="h-5 w-5 mb-1 text-emerald-600"></lucide-angular>
+            <span class="text-xs">PromptPay QR</span>
+          </button>
+
+          <button
+            type="button"
+            (click)="selectPaymentMethod(paymentMethodsEnum.CASH)"
+            class="flex flex-col items-center justify-center rounded-2xl border p-3 text-center transition"
+            [ngClass]="paymentForm.method === paymentMethodsEnum.CASH ? 'border-emerald-500 bg-emerald-50 text-emerald-800 font-bold shadow-xs' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'"
+          >
+            <lucide-angular [img]="IconBanknote" class="h-5 w-5 mb-1 text-emerald-600"></lucide-angular>
+            <span class="text-xs">เงินสด</span>
+          </button>
+
+          <button
+            type="button"
+            (click)="selectPaymentMethod(paymentMethodsEnum.CARD)"
+            class="flex flex-col items-center justify-center rounded-2xl border p-3 text-center transition"
+            [ngClass]="paymentForm.method === paymentMethodsEnum.CARD ? 'border-emerald-500 bg-emerald-50 text-emerald-800 font-bold shadow-xs' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'"
+          >
+            <lucide-angular [img]="IconCreditCard" class="h-5 w-5 mb-1 text-emerald-600"></lucide-angular>
+            <span class="text-xs">บัตรเครดิต</span>
+          </button>
+
+          <button
+            type="button"
+            (click)="selectPaymentMethod(paymentMethodsEnum.TRANSFER)"
+            class="flex flex-col items-center justify-center rounded-2xl border p-3 text-center transition"
+            [ngClass]="paymentForm.method === paymentMethodsEnum.TRANSFER ? 'border-emerald-500 bg-emerald-50 text-emerald-800 font-bold shadow-xs' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'"
+          >
+            <lucide-angular [img]="IconBuilding" class="h-5 w-5 mb-1 text-emerald-600"></lucide-angular>
+            <span class="text-xs">โอนเงินธนาคาร</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Reference & Note Fields -->
+      <div class="grid gap-3 sm:grid-cols-2">
+        <label class="block">
+          <span class="text-xs font-semibold text-slate-700">เลขอ้างอิง <span class="font-normal text-slate-400">(สลิป/สลิปโอน)</span></span>
+          <input
+            [(ngModel)]="paymentForm.reference"
+            placeholder="เช่น 202609191234"
+            class="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 px-3.5 text-xs outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+          />
+        </label>
+
+        <label class="block">
+          <span class="text-xs font-semibold text-slate-700">หมายเหตุ</span>
+          <input
+            [(ngModel)]="paymentForm.note"
+            placeholder="หมายเหตุเพิ่มเติม…"
+            class="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 px-3.5 text-xs outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+          />
+        </label>
+      </div>
+
+      <!-- Info Footer Text -->
+      <div class="flex items-start gap-2.5 rounded-2xl bg-emerald-50/80 p-3.5 text-xs leading-relaxed text-emerald-900 border border-emerald-200/60">
+        <lucide-angular [img]="IconInfo" class="h-4 w-4 shrink-0 text-emerald-600 mt-0.5"></lucide-angular>
+        <p>
+          เมื่อรับชำระครบตามยอดคงค้าง ระบบจะปรับสถานะ Invoice เป็น <strong>PAID</strong>, ปิดใบสั่งงาน และบันทึก <strong>Service History</strong> โดยอัตโนมัติ
+        </p>
+      </div>
+    </div>
+
+    <!-- Modal Footer Actions -->
+    <div class="flex flex-col-reverse gap-2 border-t border-slate-100 p-5 sm:flex-row sm:justify-end">
+      <button
+        type="button"
+        (click)="closePaymentModal()"
+        [disabled]="isReceivingPayment"
+        class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-bold text-slate-600 transition hover:bg-slate-100 disabled:opacity-50"
+      >
+        ยกเลิก
+      </button>
+
+      <button
+        type="button"
+        (click)="receivePayment()"
+        [disabled]="isReceivingPayment"
+        class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-emerald-600/20 transition hover:bg-emerald-700 active:scale-95 disabled:opacity-50"
+      >
+        <lucide-angular [img]="IconRefresh" class="h-4 w-4 animate-spin" *ngIf="isReceivingPayment"></lucide-angular>
+        <span>{{ isReceivingPayment ? 'กำลังบันทึก…' : 'ยืนยันรับชำระเงิน' }}</span>
+      </button>
+    </div>
+  </section>
+</div>

@@ -78,6 +78,7 @@ export interface IWorkOrder {
   advisorId?: string;
   advisor?: IWorkOrderAdvisor;
   currentQuotationId?: string;
+  invoiceId?: string;
   customer?: IWorkOrderCustomer;
   complaints: IComplaint[];
   inspectionRequired: boolean;

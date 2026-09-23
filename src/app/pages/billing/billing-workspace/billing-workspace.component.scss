@@ -1,0 +1,50 @@
+:host {
+  display: block;
+}
+
+/* Custom scrollbars for queue list and modal body */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 9999px;
+
+  &:hover {
+    background: rgba(100, 116, 139, 0.5);
+  }
+}
+
+/* Smooth transition for active tab selections */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Remove spin buttons from number input */
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+/* Print styling helper */
+@media print {
+  header,
+  section:first-of-type,
+  .queue-navigator,
+  button {
+    display: none !important;
+  }
+}
