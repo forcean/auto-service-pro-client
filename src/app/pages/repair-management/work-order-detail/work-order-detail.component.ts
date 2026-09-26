@@ -63,6 +63,8 @@ export class WorkOrderDetailComponent implements OnInit {
     'จัดทีมและซ่อม',
     'ตรวจ QC',
     'QC ผ่าน',
+    'พร้อมส่งมอบ',
+    'ปิดงาน',
   ];
 
   workOrderId: string = '';
@@ -219,7 +221,7 @@ export class WorkOrderDetailComponent implements OnInit {
     void this.loadWorkOrder(this.workOrderId);
   }
 
-  get currentProcessIndex(): number {
+  get currentProcessIndex(): number | null {
     switch (this.workOrder?.status) {
       case EWorkOrderStatus.OPEN:
       case EWorkOrderStatus.INSPECTING:
@@ -237,9 +239,39 @@ export class WorkOrderDetailComponent implements OnInit {
         return 4;
       case EWorkOrderStatus.QC_APPROVED:
         return 5;
+      case EWorkOrderStatus.READY_DELIVERY:
+        return 6;
       default:
-        return 0;
+        return null;
     }
+  }
+
+  get isProcessCompleted(): boolean {
+    return this.workOrder?.status === EWorkOrderStatus.COMPLETED;
+  }
+
+  isProcessStepCompleted(index: number): boolean {
+    if (this.isProcessCompleted) {
+      return true;
+    }
+
+    if (this.currentProcessIndex === null) {
+      return false;
+    }
+
+    return index < this.currentProcessIndex;
+  }
+
+  isProcessStepActive(index: number): boolean {
+    if (this.isProcessCompleted) {
+      return true;
+    }
+
+    if (this.currentProcessIndex === null) {
+      return false;
+    }
+
+    return index <= this.currentProcessIndex;
   }
 
   openTeamAssignment(): void {
