@@ -3,6 +3,10 @@ import { EWorkOrderStatus } from '../enum/work-order.enum';
 
 export interface IWorkOrderVehicle2 {
   _id?: string;
+  firstname?: string;
+  lastname?: string;
+  phoneNumber?: string;
+  billingName?: string;
   licensePlate?: string;
   province?: string;
   vehicle?: {
@@ -74,7 +78,6 @@ export interface IWorkOrder {
   fuelLevel?: EFuelLevel;
   vehicle?: IWorkOrderVehicle2;
   vehicleId: string;
-  customerId?: string;
   advisorId?: string;
   advisor?: IWorkOrderAdvisor;
   currentQuotationId?: string;
@@ -94,6 +97,8 @@ export interface IWorkOrderQuery {
   page?: number;
   limit?: number;
   sort?: string;
+  search?: string;
+  status?: EWorkOrderStatus;
 }
 
 export interface IWorkOrderResult {

@@ -1,0 +1,57 @@
+<div class="table-container">
+  <div class="table-wrapper">
+    <table *ngIf="!isLoading" class="table team-assignment-table">
+      <thead>
+        <tr>
+          <th>ใบงาน</th>
+          <th>รถ / ลูกค้า</th>
+          <th>สถานะ</th>
+          <th>ความคืบหน้า</th>
+          <th>งาน</th>
+          <th class="text-right">การทำงาน</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of data; trackBy: trackByWorkOrder" class="data-row">
+          <td>
+            <p class="work-order-no">{{ item.workOrderNo }}</p>
+            <p class="work-order-date">{{ item.checkInDate | date:'dd/MM/yyyy HH:mm' }}</p>
+          </td>
+          <td>
+            <div class="vehicle-cell">
+              <div class="vehicle-icon">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><path stroke-linecap="round" stroke-linejoin="round" d="M5 17h14M7 17V9l2-3h6l2 3v8M4 17h16M8 12h.01M16 12h.01" /></svg>
+              </div>
+              <div class="min-w-0">
+                <p class="vehicle-title">{{ item.vehicle?.licensePlate || '-' }} <span>{{ item.vehicle?.province || '' }}</span></p>
+                <p class="vehicle-subtitle">{{ vehicleName(item) }}<span *ngIf="item.vehicle?.phoneNumber"> · {{ item.vehicle?.phoneNumber }}</span></p>
+              </div>
+            </div>
+          </td>
+          <td><span class="status-badge" [ngClass]="statusClass(item.status)"><span class="status-dot"></span>{{ statusLabel(item.status) }}</span></td>
+          <td>
+            <div class="progress-cell">
+              <div class="progress-meta"><span>Progress</span><strong>{{ item.progress || 0 }}%</strong></div>
+              <div class="progress-track"><div class="progress-value" [style.width.%]="item.progress || 0"></div></div>
+            </div>
+          </td>
+          <td><p class="task-count">{{ item.taskSummary?.completedTasks || 0 }} / {{ item.taskSummary?.totalTasks || 0 }}</p><p class="task-label">เสร็จแล้ว</p></td>
+          <td class="text-right"><button type="button" class="open-button" (click)="open.emit(item.workOrderNo)">เปิด workspace <span>→</span></button></td>
+        </tr>
+        <tr *ngIf="!data.length"><td colspan="6" class="empty-row">ไม่พบใบงานที่ตรงกับเงื่อนไข</td></tr>
+      </tbody>
+    </table>
+
+    <app-lazy-load-table *ngIf="isLoading" [recordPerPage]="pageSize" tableClass="table table-custom"></app-lazy-load-table>
+  </div>
+</div>
+
+<app-pagination
+  *ngIf="!isLoading && totalRecord"
+  aligns="end"
+  [paginationOption]="paginationOption"
+  [currentPage]="pageIndex"
+  [recordPerPage]="pageSize"
+  [totalRecord]="totalRecord"
+  (changePage)="onPageChange($event)"
+></app-pagination>

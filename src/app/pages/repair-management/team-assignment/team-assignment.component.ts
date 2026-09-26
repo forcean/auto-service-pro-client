@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { RESPONSE } from '../../../shared/enum/response.enum';
-import { IWorkOrder } from '../../../shared/interface/work-order.interface';
+import { EWorkOrderStatus } from '../../../shared/enum/work-order.enum';
+import { IWorkOrder, IWorkOrderQuery } from '../../../shared/interface/work-order.interface';
+import { PaginationModel } from '../../../shared/interface/pagination.model';
 import { WorkOrderService } from '../../../shared/services/work-order.service';
 
 @Component({
@@ -12,10 +14,19 @@ import { WorkOrderService } from '../../../shared/services/work-order.service';
   styleUrl: './team-assignment.component.scss',
 })
 export class TeamAssignmentComponent implements OnInit {
+  readonly statuses = EWorkOrderStatus;
+  readonly paginationOption = [10, 15, 20, 30, 50];
+
   workOrder?: IWorkOrder;
   workOrders: IWorkOrder[] = [];
+  page = 1;
+  limit = 10;
+  totalRecords = 0;
+  searchQuery = '';
+  selectedStatus: EWorkOrderStatus = EWorkOrderStatus.ALL;
   isLoading = true;
   errorMessage = '';
+  private searchTimer?: ReturnType<typeof setTimeout>;
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -56,19 +67,59 @@ export class TeamAssignmentComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
+    const query: IWorkOrderQuery = {
+      page: this.page,
+      limit: this.limit,
+      search: this.searchQuery.trim() || undefined,
+    };
+
+    if (this.selectedStatus !== EWorkOrderStatus.ALL) {
+      query.status = this.selectedStatus;
+    }
+
     try {
-      const response = await this.workOrderService.getListWorkOrder({ page: 1, limit: 50 });
+      const response = await this.workOrderService.getListWorkOrder(query);
       if (response.resultCode !== RESPONSE.SUCCESS) {
         this.errorMessage = response.developerMessage || 'ไม่สามารถโหลดรายการใบงานได้';
         return;
       }
       this.workOrders = response.resultData.data;
+      this.totalRecords = response.resultData.total;
     } catch (error) {
       console.error('Failed to load work orders for team assignment:', error);
       this.errorMessage = 'ไม่สามารถโหลดรายการใบงานได้ โปรดลองใหม่อีกครั้ง';
     } finally {
       this.isLoading = false;
     }
+  }
+
+  onSearchInput(value: string): void {
+    this.searchQuery = value;
+    if (this.searchTimer) {
+      clearTimeout(this.searchTimer);
+    }
+    this.searchTimer = setTimeout(() => {
+      this.page = 1;
+      void this.loadWorkOrders();
+    }, 400);
+  }
+
+  onStatusChange(): void {
+    this.page = 1;
+    void this.loadWorkOrders();
+  }
+
+  onPageChange(event: PaginationModel): void {
+    this.page = event.page;
+    this.limit = event.pageSize;
+    void this.loadWorkOrders();
+  }
+
+  resetFilters(): void {
+    this.searchQuery = '';
+    this.selectedStatus = EWorkOrderStatus.ALL;
+    this.page = 1;
+    void this.loadWorkOrders();
   }
 
   openWorkspace(workOrderNo: string): void {
@@ -84,4 +135,25 @@ export class TeamAssignmentComponent implements OnInit {
       void this.loadWorkOrder(this.workOrder.workOrderNo);
     }
   }
+
+  statusLabel(status: string): string {
+    const labels: Record<string, string> = {
+      OPEN: 'เปิดใบงาน',
+      INSPECTING: 'กำลังตรวจเช็ค',
+      WAITING_QUOTATION: 'รอทำใบเสนอราคา',
+      WAITING_APPROVAL: 'รอลูกค้าอนุมัติ',
+      WAITING_ASSIGNMENT: 'รอมอบหมาย',
+      IN_PROGRESS: 'กำลังซ่อม',
+      WAITING_ADDITIONAL_APPROVAL: 'รออนุมัติงานเพิ่ม',
+      WAITING_QC: 'รอตรวจ QC',
+      REWORK: 'รอแก้ไขงาน',
+      QC_APPROVED: 'QC ผ่าน',
+      READY_DELIVERY: 'พร้อมส่งมอบ',
+      COMPLETED: 'เสร็จสิ้น',
+      CANCELLED: 'ยกเลิก',
+      HOLD: 'พักงาน',
+    };
+    return labels[status] || status.replaceAll('_', ' ');
+  }
+
 }
