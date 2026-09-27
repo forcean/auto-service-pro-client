@@ -1,105 +1,86 @@
-<section class="min-h-screen bg-slate-50 px-3 py-4 sm:px-6 sm:py-6 lg:px-8">
-  <div class="mx-auto w-full max-w-none">
-
-    <!-- Back button -->
-    <button
-      type="button"
-      (click)="backToWorkOrders()"
-      class="mb-4 inline-flex min-h-11 items-center gap-2 rounded-xl px-2 text-sm font-semibold text-slate-600 transition hover:bg-white hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
-    >
-      ← <span>กลับรายการใบงาน</span>
-    </button>
-
-    <!-- Loading state -->
-    <div
-      *ngIf="isLoading"
-      class="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-500 shadow-sm sm:p-12"
-    >
-      <div class="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-4 border-indigo-100 border-t-indigo-600"></div>
-      กำลังโหลดพื้นที่จัดทีม…
-    </div>
-
-    <!-- Error state -->
-    <div
-      *ngIf="!isLoading && errorMessage"
-      class="rounded-2xl border border-rose-200 bg-rose-50 p-5 text-rose-700 shadow-sm"
-    >
-      {{ errorMessage }}
-    </div>
-
-    <!-- Workspace: single work order -->
+<section class="min-h-screen bg-[#f7f8fa] px-5 py-7 text-slate-800 sm:px-8 lg:px-10 lg:py-10">
+  <div class="mx-auto max-w-[1480px]">
     <ng-container *ngIf="!isLoading && workOrder">
-      <header class="mb-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div class="flex flex-col gap-4 p-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
-          <div class="min-w-0">
-            <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-600">
-              Team assignment · Kanban workspace
-            </p>
-            <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
-              <h1 class="font-mono text-lg font-bold text-slate-900 sm:text-2xl">
-                {{ workOrder.workOrderNo }}
-              </h1>
-              <span class="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-700">
-                {{ workOrder.status }}
-              </span>
+      <button type="button" (click)="backToWorkOrders()" class="mb-5 inline-flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-semibold text-slate-500 transition hover:bg-white hover:text-slate-900">
+        <span class="text-xl leading-none">‹</span>
+        กลับรายการใบงาน
+      </button>
+
+      <header class="mb-7 rounded-2xl border border-slate-800 bg-slate-900 px-6 py-7 text-white shadow-lg sm:px-8 sm:py-8">
+        <div class="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-[#b7dca9]">Team assignment workspace</p>
+            <div class="mt-2 flex flex-wrap items-center gap-3">
+              <h1 class="font-mono text-2xl font-bold sm:text-3xl">{{ workOrder.workOrderNo }}</h1>
+              <span class="rounded-full border border-[#cfe6c6]/20 bg-[#88c273]/15 px-3 py-1 text-xs font-semibold text-[#c8e8bc]">{{ statusLabel(workOrder.status) }}</span>
             </div>
-            <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-              จัดทีม ติดตามงานช่าง เบิกอะไหล่ และส่งงานเข้าตรวจ QC จากพื้นที่เดียว
-            </p>
+            <p class="mt-2 text-sm text-slate-400">จัดทีม ติดตามงานช่าง เบิกอะไหล่ และส่งงานเข้าตรวจ QC</p>
+          </div>
+          <div class="flex gap-3">
+            <div class="min-w-28 rounded-xl border border-white/10 bg-white/5 px-4 py-3"><p class="text-[10px] uppercase tracking-wider text-slate-400">Progress</p><p class="mt-1 text-xl font-bold">{{ workOrder.progress || 0 }}%</p></div>
+            <div class="min-w-28 rounded-xl border border-white/10 bg-white/5 px-4 py-3"><p class="text-[10px] uppercase tracking-wider text-slate-400">Tasks</p><p class="mt-1 text-xl font-bold">{{ workOrder.taskSummary?.completedTasks || 0 }}<span class="text-sm font-normal text-slate-400"> / {{ workOrder.taskSummary?.totalTasks || 0 }}</span></p></div>
           </div>
         </div>
       </header>
+
       <app-work-order-flow [workOrder]="workOrder" (flowChanged)="onFlowChanged()"></app-work-order-flow>
     </ng-container>
 
-    <!-- Work order picker list -->
-    <ng-container *ngIf="!isLoading && !workOrder && !errorMessage">
-      <header class="mb-5">
-        <p class="text-xs font-bold uppercase tracking-widest text-indigo-600">Team assignment</p>
-        <h1 class="mt-1 text-2xl font-bold text-slate-900">เลือกใบงานเพื่อจัดทีม</h1>
-        <p class="mt-1 text-sm text-slate-500">เปิด board ของใบงานที่ต้องการเพื่อดูและอัปเดตงานของช่าง</p>
+    <ng-container *ngIf="!workOrder && !errorMessage">
+      <header class="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-[#6da85c]">Repair operations</p>
+          <h1 class="mt-2 text-3xl font-bold tracking-tight text-slate-950">จัดทีมช่าง</h1>
+          <p class="mt-1 text-sm text-slate-500">จัดการคิวงานและเปิด workspace ของใบงานที่ต้องการมอบหมายทีม</p>
+        </div>
+        <button type="button" (click)="loadWorkOrders()" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h5M20 20v-5h-5M5.5 15a7 7 0 0011.8 2M18.5 9A7 7 0 006.7 7" /></svg>
+          รีเฟรช
+        </button>
       </header>
 
-      <!-- Empty state -->
-      <div
-        *ngIf="!workOrders.length"
-        class="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-500"
-      >
-        ไม่พบใบงานในระบบ
-      </div>
-
-      <!-- Work order card grid -->
-      <div *ngIf="workOrders.length" class="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
-        <button
-          *ngFor="let item of workOrders"
-          type="button"
-          (click)="openWorkspace(item.workOrderNo)"
-          class="group relative min-h-[9rem] rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition
-                 hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md
-                 focus:outline-none focus:ring-2 focus:ring-indigo-500/30
-                 active:scale-[0.99]"
-        >
-          <!-- Work order number -->
-          <p class="font-mono text-xs text-slate-400">{{ item.workOrderNo }}</p>
-
-          <!-- Vehicle info -->
-          <p class="mt-2 font-semibold text-slate-900 leading-snug">
-            {{ item.vehicle?.licensePlate || '-' }}
-            <span *ngIf="item.vehicle?.province" class="text-slate-500 font-normal">· {{ item.vehicle?.province }}</span>
-          </p>
-
-          <!-- Footer: status + CTA -->
-          <div class="mt-4 flex items-center justify-between gap-2 text-sm">
-            <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-              {{ item.status }}
-            </span>
-            <span class="text-xs font-semibold text-indigo-600 transition group-hover:text-indigo-800">
-              เปิด board →
-            </span>
+      <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="border-b border-slate-200 px-5 py-5 sm:px-7 sm:py-6">
+          <div class="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+            <div>
+              <h2 class="text-base font-bold text-slate-900">รายการใบงาน</h2>
+              <p class="mt-0.5 text-xs text-slate-500">ทั้งหมด {{ totalRecords | number }} รายการ · แสดง {{ workOrders.length }} รายการในหน้านี้</p>
+            </div>
+            <div class="flex flex-col gap-2 sm:flex-row">
+              <label class="relative min-w-0 sm:w-80">
+                <span class="sr-only">ค้นหาใบงาน</span>
+                <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7" /><path stroke-linecap="round" d="m20 20-4-4" /></svg>
+              <input [value]="searchQuery" (input)="onSearchInput($any($event.target).value)" type="search" placeholder="เลขที่ใบงาน, ทะเบียน, ลูกค้า" class="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#88c273] focus:bg-white focus:ring-4 focus:ring-[#88c273]/20" />
+              </label>
+              <select [(ngModel)]="selectedStatus" (ngModelChange)="onStatusChange()" class="h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-600 outline-none focus:border-[#88c273] focus:bg-white">
+                <option [ngValue]="statuses.ALL">ทุกสถานะ</option>
+                <option [ngValue]="statuses.OPEN">เปิดใบงาน</option>
+                <option [ngValue]="statuses.WAITING_APPROVAL">รอลูกค้าอนุมัติ</option>
+                <option [ngValue]="statuses.WAITING_ASSIGNMENT">รอมอบหมาย</option>
+                <option [ngValue]="statuses.IN_PROGRESS">กำลังซ่อม</option>
+                <option [ngValue]="statuses.WAITING_ADDITIONAL_APPROVAL">รออนุมัติงานเพิ่ม</option>
+                <option [ngValue]="statuses.WAITING_QC">รอตรวจ QC</option>
+                <option [ngValue]="statuses.REWORK">รอแก้ไขงาน</option>
+                <option [ngValue]="statuses.READY_DELIVERY">พร้อมส่งมอบ</option>
+                <option [ngValue]="statuses.COMPLETED">เสร็จสิ้น</option>
+              </select>
+              <button *ngIf="searchQuery || selectedStatus !== statuses.ALL" type="button" (click)="resetFilters()" class="h-11 rounded-lg border border-slate-200 px-4 text-sm font-semibold text-slate-500 hover:bg-slate-50">ล้างตัวกรอง</button>
+            </div>
           </div>
-        </button>
-      </div>
+        </div>
+
+        <app-table-team-assignment
+          [data]="workOrders"
+          [pageIndex]="page"
+          [pageSize]="limit"
+          [totalRecord]="totalRecords"
+          [isLoading]="isLoading"
+          (open)="openWorkspace($event)"
+          (changePage)="onPageChange($event)"
+        ></app-table-team-assignment>
+      </section>
     </ng-container>
 
+    <div *ngIf="!isLoading && errorMessage" class="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm font-semibold text-rose-700">{{ errorMessage }}</div>
   </div>
 </section>

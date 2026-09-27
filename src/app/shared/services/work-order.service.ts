@@ -142,8 +142,12 @@ export class WorkOrderService {
   private mapWorkOrder(raw: any): IWorkOrder {
     const rawVehicle = raw.vehicle ?? raw.vehicleId;
     const vehicle = rawVehicle && typeof rawVehicle === 'object'
-      ? {
+        ? {
           _id: this.toId(rawVehicle._id),
+          firstname: rawVehicle.firstname,
+          lastname: rawVehicle.lastname,
+          phoneNumber: rawVehicle.phoneNumber,
+          billingName: rawVehicle.billingName,
           licensePlate: rawVehicle.licensePlate,
           province: rawVehicle.province,
           vin: rawVehicle.vin,
@@ -195,7 +199,6 @@ export class WorkOrderService {
       fuelLevel: raw.fuelLevel,
       vehicle,
       vehicleId: this.toId(raw.vehicleId) || vehicle?._id || '',
-      customerId: this.toId(raw.customerId),
       advisorId: this.toId(raw.advisorId ?? raw.advisor),
       advisor,
       currentQuotationId: this.toId(raw.currentQuotationId),

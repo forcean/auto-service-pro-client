@@ -60,11 +60,14 @@
           จัดทีมและติดตามงานช่าง
         </button>
       </div>
-      <ol class="grid gap-3 px-5 py-5 sm:grid-cols-3 xl:grid-cols-6">
-        <li *ngFor="let step of overviewSteps; let index = index" class="relative rounded-2xl border p-3" [ngClass]="index <= currentProcessIndex ? 'border-emerald-200 bg-emerald-50/70' : 'border-slate-200 bg-slate-50'">
-          <span class="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold" [ngClass]="index <= currentProcessIndex ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-500'">{{ index + 1 }}</span>
-          <p class="mt-3 text-xs font-semibold" [ngClass]="index === currentProcessIndex ? 'text-emerald-800' : 'text-slate-600'">{{ step }}</p>
-          <p *ngIf="index === currentProcessIndex" class="mt-1 text-[11px] font-medium text-emerald-700">อยู่ขั้นตอนนี้</p>
+      <ol class="grid gap-3 px-5 py-5 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
+        <li *ngFor="let step of overviewSteps; let index = index" class="relative rounded-2xl border p-3" [ngClass]="isProcessStepActive(index) ? 'border-emerald-200 bg-emerald-50/70' : 'border-slate-200 bg-slate-50'">
+          <span class="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold" [ngClass]="isProcessStepActive(index) ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-500'">
+            <ng-container *ngIf="isProcessStepCompleted(index); else overviewStepNumber">✓</ng-container>
+            <ng-template #overviewStepNumber>{{ index + 1 }}</ng-template>
+          </span>
+          <p class="mt-3 text-xs font-semibold" [ngClass]="isProcessCompleted || isProcessStepCompleted(index) ? 'text-emerald-800' : index === currentProcessIndex ? 'text-emerald-800' : 'text-slate-600'">{{ step }}</p>
+          <p *ngIf="!isProcessCompleted && index === currentProcessIndex" class="mt-1 text-[11px] font-medium text-emerald-700">อยู่ขั้นตอนนี้</p>
         </li>
       </ol>
     </section>

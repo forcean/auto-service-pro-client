@@ -104,6 +104,7 @@ import { CreateWorkOrderModalComponent } from './components/create-work-order-mo
 import { WorkOrderCardComponent } from './components/work-order-card/work-order-card.component';
 
 import { TableQuotationListComponent } from './components/table-quotation-list/table-quotation-list.component';
+import { TableTeamAssignmentComponent } from './components/table-team-assignment/table-team-assignment.component';
 import { TaskEditModalComponent } from './components/task-edit-modal/task-edit-modal.component';
 import { PartIssueModalComponent } from './components/part-issue-modal/part-issue-modal.component';
 import { WorkOrderPaymentModalComponent } from './components/work-order-payment-modal/work-order-payment-modal.component';
@@ -148,6 +149,7 @@ const components = [
   CreateWorkOrderModalComponent,
   WorkOrderCardComponent,
   TableQuotationListComponent,
+  TableTeamAssignmentComponent,
   TaskEditModalComponent,
   PartIssueModalComponent,
   WorkOrderPaymentModalComponent,
