@@ -29,6 +29,7 @@
           type="text"
           [(ngModel)]="searchQuery"
           (ngModelChange)="onSearchInput($event)"
+          (keyup.enter)="onSearch()"
           placeholder="ค้นหา Work Order, ทะเบียน, ลูกค้า..."
           class="w-full border border-gray-300 font-medium text-[#000d19] text-xs px-3 py-2 rounded-xl transition-all"
         />
@@ -300,7 +301,7 @@
       [currentPage]="page"
       [recordPerPage]="limit"
       (changePage)="onPageChange($event)"
-      [totalRecord]="10"
+      [totalRecord]="workOrders?.total || 0"
     >
     </app-pagination>
   </div>
