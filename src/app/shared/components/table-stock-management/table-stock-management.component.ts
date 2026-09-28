@@ -32,6 +32,7 @@ export class TableStockManagementComponent implements OnInit, OnChanges {
 
   @Output() sortEmit = new EventEmitter<string[]>();
   @Output() changePage = new EventEmitter<PaginationModel>();
+  @Output() viewDetail = new EventEmitter<IStockMovement>();
 
   sortField = '';
   sortDirection: 'asc' | 'desc' = 'asc';
@@ -72,6 +73,10 @@ export class TableStockManagementComponent implements OnInit, OnChanges {
 
   onPageChange(event: PaginationModel): void {
     this.changePage.emit(event);
+  }
+
+  onViewDetail(row: IStockMovement): void {
+    this.viewDetail.emit(row);
   }
 
   formatDate(date: string): string {
@@ -157,7 +162,7 @@ export class TableStockManagementComponent implements OnInit, OnChanges {
   }
 
   movementLabel(type: string): string {
-    switch (type) {
+    switch (type?.toLowerCase()) {
       case 'receive':
         return 'รับเข้า';
 

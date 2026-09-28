@@ -117,14 +117,37 @@ small {
   gap: .75rem;
 }
 
+.action-detail-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+  background: #eff6ff;
+  cursor: pointer;
+  transition: all .2s ease;
+
+  &:hover {
+    border-color: #93c5fd;
+    background: #dbeafe;
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgba(59, 130, 246, .25);
+    outline-offset: 2px;
+  }
+}
+
 .action-icon {
   width: 20px;
   height: 20px;
-  cursor: pointer;
   transition: all .2s ease;
 }
 
-.action-icon:hover {
+.action-detail-button:hover .action-icon {
   transform: scale(1.15);
 }
 

@@ -13,7 +13,11 @@
   <!-- Search -->
 
   <section class="section-card">
-    <app-stock-search (search)="onSearch($event)" (reset)="onReset()">
+    <app-stock-search
+      [initialCriteria]="search"
+      (search)="onSearch($event)"
+      (reset)="onReset()"
+    >
     </app-stock-search>
   </section>
 
@@ -31,9 +35,11 @@
       [config]="movementList"
       [pageIndex]="page"
       [pageSize]="limit"
+      [sort]="sort"
       [isLoading]="isLoading"
       (sortEmit)="onSort($event)"
       (changePage)="onChangePage($event)"
+      (viewDetail)="openMovementDetail($event)"
     >
     </app-table-stock-management>
   </section>
@@ -41,3 +47,88 @@
 
 <app-receive-stock-modal (confirm)="onReceiveStock($event)">
 </app-receive-stock-modal>
+
+<div
+  *ngIf="selectedMovement as movement"
+  class="fixed inset-0 z-[9999] flex items-end bg-slate-950/60 p-0 backdrop-blur-sm sm:items-center sm:justify-center sm:p-4"
+  role="presentation"
+  (click)="closeMovementDetail()"
+>
+  <section
+    class="flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-t-3xl bg-white text-slate-800 shadow-2xl sm:max-h-[calc(100vh-2rem)] sm:rounded-3xl"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="movement-detail-title"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="flex items-start justify-between gap-4 border-b border-slate-100 bg-gradient-to-r from-sky-50 to-white px-5 py-5 sm:px-6">
+      <div class="flex min-w-0 items-start gap-3">
+        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-sky-600 text-xl font-bold text-white shadow-sm">
+          ↕
+        </div>
+        <div class="min-w-0">
+          <p class="text-xs font-bold uppercase tracking-wider text-sky-700">Stock movement</p>
+          <h2 id="movement-detail-title" class="mt-1 text-xl font-bold text-slate-950">รายละเอียดการเคลื่อนไหว</h2>
+          <p class="mt-1 truncate font-mono text-xs text-slate-500">{{ movement.id }}</p>
+        </div>
+      </div>
+      <button
+        type="button"
+        (click)="closeMovementDetail()"
+        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-2xl leading-none text-slate-400 transition hover:bg-white hover:text-slate-700"
+        aria-label="ปิด"
+      >
+        ×
+      </button>
+    </header>
+
+    <div class="flex-1 space-y-5 overflow-y-auto px-5 py-5 sm:px-6">
+      <section class="rounded-2xl border border-slate-200 bg-slate-50/60 p-4">
+        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">สินค้า</p>
+        <div class="mt-2 flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h3 class="text-base font-bold text-slate-900">{{ movement.productName || '-' }}</h3>
+            <p class="mt-0.5 font-mono text-xs text-slate-500">SKU: {{ movement.sku || '-' }}</p>
+          </div>
+          <span class="rounded-lg bg-white px-2.5 py-1 font-mono text-xs font-semibold text-slate-600 ring-1 ring-slate-200">{{ movement.productId || '-' }}</span>
+        </div>
+      </section>
+
+      <section class="grid gap-3 sm:grid-cols-2">
+        <div class="rounded-2xl border border-slate-200 p-4">
+          <p class="text-xs font-bold uppercase tracking-wider text-slate-400">ประเภท</p>
+          <span class="mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-bold ring-1 ring-inset" [ngClass]="movementTone(movement.movementType)">{{ movementLabel(movement.movementType) }}</span>
+        </div>
+        <div class="rounded-2xl border border-slate-200 p-4">
+          <p class="text-xs font-bold uppercase tracking-wider text-slate-400">ทิศทาง</p>
+          <span class="mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-bold ring-1 ring-inset" [ngClass]="directionTone(movement.direction)">{{ movement.direction === 'IN' ? 'รับเข้า' : movement.direction === 'OUT' ? 'จ่ายออก' : 'ปรับ/จอง' }}</span>
+        </div>
+      </section>
+
+      <section class="rounded-2xl border border-slate-200 p-4">
+        <div class="flex items-center justify-between gap-4">
+          <p class="text-xs font-bold uppercase tracking-wider text-slate-400">ยอดคงเหลือ</p>
+          <p class="text-sm font-semibold text-slate-500">เปลี่ยนแปลง <span [class.text-emerald-600]="quantityChange(movement) > 0" [class.text-rose-600]="quantityChange(movement) < 0" class="font-bold">{{ quantityChange(movement) > 0 ? '+' : '' }}{{ quantityChange(movement) | number }}</span></p>
+        </div>
+        <div class="mt-3 grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-center">
+          <div class="rounded-xl bg-slate-50 px-3 py-3"><p class="text-xs text-slate-500">ก่อนทำรายการ</p><strong class="mt-1 block text-xl text-slate-900">{{ movement.beforeQty | number }}</strong></div>
+          <span class="text-xl font-bold text-slate-300">→</span>
+          <div class="rounded-xl bg-sky-50 px-3 py-3"><p class="text-xs text-sky-600">หลังทำรายการ</p><strong class="mt-1 block text-xl text-sky-900">{{ movement.afterQty | number }}</strong></div>
+        </div>
+        <p class="mt-3 text-center text-xs text-slate-500">จำนวนที่บันทึกในรายการ: <strong class="font-semibold text-slate-700">{{ movement.quantity | number }}</strong></p>
+      </section>
+
+      <section class="grid gap-3 sm:grid-cols-2">
+        <div class="rounded-2xl border border-slate-200 p-4"><p class="text-xs font-bold uppercase tracking-wider text-slate-400">เอกสารอ้างอิง</p><p class="mt-2 break-all font-mono text-sm font-bold text-slate-800">{{ movement.referenceId || '-' }}</p><p class="mt-1 text-xs text-slate-500">{{ movement.referenceType || 'ไม่มีเอกสารอ้างอิง' }}</p></div>
+        <div class="rounded-2xl border border-slate-200 p-4"><p class="text-xs font-bold uppercase tracking-wider text-slate-400">ข้อมูลบันทึก</p><p class="mt-2 text-sm font-bold text-slate-800">{{ movement.createdBy || '-' }}</p><p class="mt-1 text-xs text-slate-500">{{ movement.createdAt | date: 'dd/MM/yyyy HH:mm:ss' }}</p></div>
+      </section>
+
+      <section *ngIf="movement.remark" class="rounded-2xl border border-amber-100 bg-amber-50/70 p-4"><p class="text-xs font-bold uppercase tracking-wider text-amber-700">หมายเหตุ</p><p class="mt-2 whitespace-pre-wrap text-sm leading-6 text-amber-950">{{ movement.remark }}</p></section>
+      <p class="rounded-xl bg-slate-50 px-3.5 py-3 text-xs leading-5 text-slate-500">รายการเคลื่อนไหวเป็นประวัติการตรวจสอบ จึงไม่สามารถแก้ไขหรือลบจากหน้านี้ได้</p>
+    </div>
+
+    <footer class="flex justify-end border-t border-slate-100 bg-slate-50/70 px-5 py-4 sm:px-6">
+      <button type="button" (click)="closeMovementDetail()" class="min-h-11 rounded-xl bg-slate-800 px-5 py-2 text-sm font-bold text-white transition hover:bg-slate-700">ปิด</button>
+    </footer>
+  </section>
+</div>

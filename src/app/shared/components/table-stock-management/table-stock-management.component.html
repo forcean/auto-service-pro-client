@@ -90,16 +90,19 @@
 
           <td>
             <div class="action-group">
-              <img
-                src="assets/img/icons/icon.viewdetail.svg"
-                class="action-icon"
-              />
-
-              <!-- <img src="assets/img/icons/icon.resetPwd.svg"
-                class="action-icon"
-                [ngClass]="{ 'disabled': !isResetPassword }"
-                [style.pointerEvents]="!isResetPassword ? 'none' : 'auto'"
-                (click)="onReset.emit(row.id)" /> -->
+              <button
+                type="button"
+                class="action-detail-button"
+                (click)="onViewDetail(row)"
+                [attr.aria-label]="'ดูรายละเอียดรายการ ' + row.sku"
+                title="ดูรายละเอียด"
+              >
+                <img
+                  src="assets/img/icons/icon.viewdetail.svg"
+                  class="action-icon"
+                  alt=""
+                />
+              </button>
             </div>
           </td>
         </tr>
