@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { IQueryStockMovement } from '../../interface/stock-management.interface';
 import { IProducts } from '../../interface/product-list.interface';
@@ -12,7 +12,8 @@ import { UserManagementService } from '../../services/user-management.service';
   templateUrl: './stock-search.component.html',
   styleUrl: './stock-search.component.scss',
 })
-export class StockSearchComponent implements OnInit {
+export class StockSearchComponent implements OnInit, OnChanges {
+  @Input() initialCriteria?: Partial<IQueryStockMovement>;
   @Output() search = new EventEmitter<IQueryStockMovement>();
   @Output() reset = new EventEmitter<void>();
 
@@ -29,7 +30,7 @@ export class StockSearchComponent implements OnInit {
   constructor(
     private readonly fb: FormBuilder,
     private readonly productService: ProductService,
-    private readonly userManagementService:UserManagementService
+    private readonly userManagementService: UserManagementService,
   ) {}
 
   ngOnInit(): void {
@@ -42,7 +43,12 @@ export class StockSearchComponent implements OnInit {
       startDate: [''],
       endDate: [''],
     });
-    this.searchUser()
+    this.applyInitialCriteria();
+    void this.searchUser();
+  }
+
+  ngOnChanges(): void {
+    this.applyInitialCriteria();
   }
 
   onSubmit(): void {
@@ -95,7 +101,7 @@ export class StockSearchComponent implements OnInit {
     try {
       const payload = {
         page: 1,
-        limit: 20,
+        limit: 100,
         role: ''
       };
       const res = await this.userManagementService.getListUser(payload);
@@ -110,6 +116,24 @@ export class StockSearchComponent implements OnInit {
       // ];
     } catch (err) {
       console.error('Error loading manager list', err);
+    }
+  }
+
+  private applyInitialCriteria(): void {
+    if (!this.searchForm || !this.initialCriteria) return;
+
+    this.searchForm.patchValue({
+      sku: this.initialCriteria.sku ?? '',
+      movementType: this.initialCriteria.movementType ?? '',
+      referenceType: this.initialCriteria.referenceType ?? '',
+      referenceId: this.initialCriteria.referenceId ?? '',
+      createdBy: this.initialCriteria.createdBy ?? '',
+      startDate: this.initialCriteria.startDate ?? '',
+      endDate: this.initialCriteria.endDate ?? '',
+    }, { emitEvent: false });
+
+    if (this.initialCriteria.sku) {
+      void this.searchProduct(this.initialCriteria.sku);
     }
   }
 }

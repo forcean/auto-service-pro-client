@@ -13,6 +13,7 @@ import { StockManagementService } from '../../../shared/services/stock-managemen
 import {
   ICreateStockReceiveRequest,
   IQueryStockMovement,
+  IStockMovement,
   IStockMovementList,
   IStockMovementSummary,
 } from '../../../shared/interface/stock-management.interface';
@@ -49,9 +50,10 @@ export class PartTransactionComponent implements OnInit {
   };
   isLoading = false;
   isLoadingSummary = false;
+  selectedMovement: IStockMovement | null = null;
   headers: ITableHeaderStock[] = [
     {
-      headerName: 'transactionDate',
+      headerName: 'createdAt',
       valueType: 'date',
       isSort: true,
       i18nKey: 'วันที่',
@@ -121,8 +123,12 @@ export class PartTransactionComponent implements OnInit {
   }
 
   onSearch(criteria: IQueryStockMovement): void {
-    this.search = criteria;
     this.page = 1;
+    this.search = {
+      ...criteria,
+      page: this.page,
+      limit: this.limit,
+    };
     this.updateUrlParams();
   }
 
@@ -134,6 +140,7 @@ export class PartTransactionComponent implements OnInit {
 
   onSort(sort: string[]): void {
     this.sort = sort.join(',');
+    this.page = 1;
     this.updateUrlParams();
   }
 
@@ -141,6 +148,52 @@ export class PartTransactionComponent implements OnInit {
     this.page = event.page;
     this.limit = event.pageSize;
     this.updateUrlParams();
+  }
+
+  openMovementDetail(movement: IStockMovement): void {
+    this.selectedMovement = movement;
+  }
+
+  closeMovementDetail(): void {
+    this.selectedMovement = null;
+  }
+
+  movementLabel(type: string): string {
+    return {
+      RECEIVE: 'รับเข้า',
+      ISSUE: 'เบิกออก',
+      RETURN: 'คืนสินค้า',
+      ADJUST: 'ปรับสต๊อก',
+      RESERVE: 'สำรองสินค้า',
+      RELEASE: 'ปลดสำรอง',
+      TRANSFER_IN: 'รับโอน',
+      TRANSFER_OUT: 'โอนออก',
+    }[type] ?? type;
+  }
+
+  movementTone(type: string): string {
+    return {
+      RECEIVE: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
+      RETURN: 'bg-sky-50 text-sky-700 ring-sky-200',
+      ISSUE: 'bg-rose-50 text-rose-700 ring-rose-200',
+      ADJUST: 'bg-amber-50 text-amber-700 ring-amber-200',
+      RESERVE: 'bg-violet-50 text-violet-700 ring-violet-200',
+      RELEASE: 'bg-slate-100 text-slate-700 ring-slate-200',
+      TRANSFER_IN: 'bg-cyan-50 text-cyan-700 ring-cyan-200',
+      TRANSFER_OUT: 'bg-orange-50 text-orange-700 ring-orange-200',
+    }[type] ?? 'bg-slate-100 text-slate-700 ring-slate-200';
+  }
+
+  directionTone(direction: string): string {
+    return direction === 'IN'
+      ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+      : direction === 'OUT'
+        ? 'bg-rose-50 text-rose-700 ring-rose-200'
+        : 'bg-amber-50 text-amber-700 ring-amber-200';
+  }
+
+  quantityChange(movement: IStockMovement): number {
+    return movement.afterQty - movement.beforeQty;
   }
 
   onReset(): void {
@@ -151,22 +204,7 @@ export class PartTransactionComponent implements OnInit {
       page: this.page,
       limit: this.limit,
     };
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: {
-        keyword: null,
-        sku: null,
-        movementType: null,
-        warehouseId: null,
-        referenceType: null,
-        referenceId: null,
-        startDate: null,
-        endDate: null,
-        createdBy: null,
-        page: 1,
-      },
-      queryParamsHandling: 'merge',
-    });
+    this.updateUrlParams();
   }
 
   navigateToPartIssueQueue(): void {
@@ -175,8 +213,8 @@ export class PartTransactionComponent implements OnInit {
 
   private updateQueryParams(params: any): void {
     this.keyword = params['keyword'] ?? '';
-    this.page = Number(params['page'] ?? 1);
-    this.limit = Number(params['limit'] ?? 20);
+    this.page = this.readPositiveNumber(params['page'], 1);
+    this.limit = this.readPositiveNumber(params['limit'], 20);
     this.sort = params['sort'] ?? '';
     this.search = {
       movementType: params['movementType'],
@@ -198,20 +236,19 @@ export class PartTransactionComponent implements OnInit {
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: {
-        keyword: this.keyword || undefined,
-        sku: this.search.sku || undefined,
-        movementType: this.search.movementType || undefined,
-        warehouseId: this.search.warehouseId || undefined,
-        referenceType: this.search.referenceType || undefined,
-        referenceId: this.search.referenceId || undefined,
-        startDate: this.search.startDate || undefined,
-        endDate: this.search.endDate || undefined,
-        createdBy: this.search.createdBy || undefined,
+        keyword: this.keyword || null,
+        sku: this.search.sku || null,
+        movementType: this.search.movementType || null,
+        warehouseId: this.search.warehouseId || null,
+        referenceType: this.search.referenceType || null,
+        referenceId: this.search.referenceId || null,
+        startDate: this.search.startDate || null,
+        endDate: this.search.endDate || null,
+        createdBy: this.search.createdBy || null,
         page: this.page,
         limit: this.limit,
-        sort: this.sort || undefined,
+        sort: this.sort || null,
       },
-      queryParamsHandling: 'merge',
     });
   }
 
@@ -220,7 +257,7 @@ export class PartTransactionComponent implements OnInit {
     const loader = this.loadingBarService.useRef();
     loader.start();
     try {
-      const params: any = {
+      const params: IQueryStockMovement = {
         keyword: this.keyword || undefined,
         movementType: this.search.movementType,
         warehouseId: this.search.warehouseId,
@@ -230,8 +267,8 @@ export class PartTransactionComponent implements OnInit {
         endDate: this.search.endDate,
         createdBy: this.search.createdBy,
         sku: this.search.sku,
-        // page: this.page,
-        // limit: this.limit,
+        page: this.page,
+        limit: this.limit,
         sort: this.sort || undefined,
       };
       const res = await this.stockManagementService.getStockList(params);
@@ -300,5 +337,10 @@ export class PartTransactionComponent implements OnInit {
       this.handleFailResponse();
     } finally {
     }
+  }
+
+  private readPositiveNumber(value: unknown, fallback: number): number {
+    const parsed = Number(value);
+    return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
   }
 }
