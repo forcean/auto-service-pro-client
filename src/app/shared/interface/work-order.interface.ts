@@ -99,6 +99,7 @@ export interface IWorkOrderQuery {
   sort?: string;
   search?: string;
   status?: EWorkOrderStatus;
+  date?: string;
 }
 
 export interface IWorkOrderResult {

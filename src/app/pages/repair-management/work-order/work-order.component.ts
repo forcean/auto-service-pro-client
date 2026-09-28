@@ -32,6 +32,7 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   IWorkOrder,
+  IWorkOrderQuery,
   IWorkOrderResult,
 } from '../../../shared/interface/work-order.interface';
 import { ICustomerVehicle } from '../../../shared/interface/table-vehicle.interface';
@@ -95,6 +96,7 @@ export class WorkOrderComponent implements OnInit, OnDestroy {
 
   private readonly searchSubject = new Subject<string>();
   private readonly destroy$ = new Subject<void>();
+  private latestFetchId = 0;
 
   isLoading: boolean = false;
   isCreateModalOpen: boolean = false;
@@ -169,8 +171,8 @@ export class WorkOrderComponent implements OnInit, OnDestroy {
   private updateStateFromQueryParams(params: {
     [key: string]: string | null;
   }): void {
-    this.page = Number(params['page'] || 1);
-    this.limit = Number(params['limit'] || 10);
+    this.page = this.readPositiveNumber(params['page'], 1);
+    this.limit = this.readPositiveNumber(params['limit'], 10);
 
     this.sortList = params['sort'] || '';
     this.searchQuery = params['search'] || '';
@@ -233,25 +235,33 @@ export class WorkOrderComponent implements OnInit, OnDestroy {
   }
 
   onPageChange(e: any): void {
-    console.log(e);
-    
     this.page = e.page;
     this.limit = e.pageSize;
     this.updateQueryParams();
   }
 
   async fetchWorkOrders(): Promise<void> {
+    const fetchId = ++this.latestFetchId;
     this.isLoading = true;
     const loader = this.loadingBarService.useRef();
     loader.start();
     try {
-      const params = {
+      const params: IWorkOrderQuery = {
         page: this.page,
         limit: this.limit,
         sort: this.sortList || undefined,
+        search: this.searchQuery.trim() || undefined,
+        status:
+          this.selectedStatus === EWorkOrderStatus.ALL
+            ? undefined
+            : this.selectedStatus,
+        date: this.selectedDate || undefined,
       };
 
       const response = await this.workOrderService.getListWorkOrder(params);
+
+      // A previous request can finish after a newer filter has been selected.
+      if (fetchId !== this.latestFetchId) return;
 
       if (
         response.resultCode === RESPONSE.SUCCESS ||
@@ -264,10 +274,14 @@ export class WorkOrderComponent implements OnInit, OnDestroy {
         this.handleFailResponse();
       }
     } catch (error) {
-      console.error('Error fetching work orders:', error);
+      if (fetchId === this.latestFetchId) {
+        console.error('Error fetching work orders:', error);
+      }
     } finally {
-      this.isLoading = false;
-      loader.complete();
+      if (fetchId === this.latestFetchId) {
+        this.isLoading = false;
+        loader.complete();
+      }
     }
   }
 
@@ -461,5 +475,10 @@ export class WorkOrderComponent implements OnInit, OnDestroy {
     requestAnimationFrame(() => {
       window.print();
     });
+  }
+
+  private readPositiveNumber(value: string | null, fallback: number): number {
+    const parsed = Number(value);
+    return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
   }
 }
