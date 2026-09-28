@@ -15,6 +15,9 @@ export enum EPaymentMethod {
   OTHER = 'OTHER',
 }
 
+export type TReceiptPrintSize = 'a4' | '80mm' | '58mm';
+export type TCashFlowInterval = 'day' | 'week' | 'month';
+
 export interface IInvoiceItem {
   itemType: 'PART' | 'LABOR' | 'SERVICE';
   productId?: string;
@@ -112,4 +115,59 @@ export interface ICreatePaymentRequest {
 
 export interface ICreateWorkOrderPaymentRequest extends ICreatePaymentRequest {
   type: EWorkOrderPaymentType;
+}
+
+export interface IPaymentTransaction {
+  invoiceId: string;
+  invoiceNo: string;
+  workOrderNo: string;
+  billingParty?: IInvoice['billingParty'];
+  vehicleSnapshot?: IInvoice['vehicleSnapshot'];
+  paymentNo: string;
+  amount: number;
+  method: EPaymentMethod;
+  reference?: string;
+  note?: string;
+  paidAt?: string;
+  receivedBy?: string;
+}
+
+export interface IPaymentListResult {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  data: IPaymentTransaction[];
+}
+
+export interface IPaymentCashFlowPeriod {
+  period: string;
+  amount: number;
+  transactions: number;
+}
+
+export interface IPaymentMethodSummary {
+  method: EPaymentMethod;
+  amount: number;
+  transactions: number;
+}
+
+export interface IPaymentCashFlowSummary {
+  interval: TCashFlowInterval;
+  totalAmount: number;
+  totalTransactions: number;
+  averagePeriodAmount: number;
+  latestPaymentAt?: string;
+  series: IPaymentCashFlowPeriod[];
+  byMethod: IPaymentMethodSummary[];
+}
+
+export interface IPaymentQuery {
+  page?: number;
+  limit?: number;
+  keyword?: string;
+  method?: EPaymentMethod;
+  paidFrom?: string;
+  paidTo?: string;
+  chartInterval?: TCashFlowInterval;
 }
