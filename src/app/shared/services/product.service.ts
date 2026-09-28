@@ -28,11 +28,21 @@ export class ProductService {
     try {
       const uri = this.PREFIX_USER + `/products/listProducts`;
       const response = await this.httpService.get<IProductList>(uri, params);
+      const resultData = response.resultData ?? ({} as IProductList);
+      const total = Number(resultData.total ?? response.total ?? 0);
+      const limit = Number(resultData.limit ?? params.limit);
+
       return {
         ...response,
         resultData: {
-          ...response.resultData,
-          products: (response.resultData.products ?? []).map((product) =>
+          ...resultData,
+          page: Number(resultData.page ?? params.page),
+          limit,
+          total,
+          totalPage:
+            Number(resultData.totalPage ?? 0) ||
+            (limit > 0 ? Math.ceil(total / limit) : 0),
+          products: (resultData.products ?? []).map((product) =>
             this.mapProduct(product),
           ),
         },
@@ -47,6 +57,7 @@ export class ProductService {
   }
 
   private mapProduct(raw: any): IProducts {
+    raw = raw ?? {};
     const sku = raw.sku ?? raw.code ?? '';
     const price = raw.price ?? raw.prices;
     const media = raw.media ?? raw.images ?? [];
@@ -56,7 +67,7 @@ export class ProductService {
       id: String(raw.id ?? raw._id ?? ''),
       sku,
       code: sku,
-      images: media,
+      images: Array.isArray(media) ? media : [],
       prices: price,
     } as IProducts;
   }
@@ -65,7 +76,20 @@ export class ProductService {
     try {
       const uri = this.PREFIX_USER + `/products/${productId}/detail`;
       const response = await this.httpService.get<IResponseProductDetail>(uri);
-      return response;
+
+      if (!response.resultData?.product) {
+        return response;
+      }
+
+      return {
+        ...response,
+        resultData: {
+          ...response.resultData,
+          // The product schema stores these fields as `media` and `price`.
+          // Keep the detail response consistent with the product-list contract.
+          product: this.mapProduct(response.resultData.product) as IResponseProductDetail['product'],
+        },
+      };
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.error) {
         return error.error as IBaseResponse<IResponseProductDetail>;
@@ -103,10 +127,9 @@ export class ProductService {
     }
   }
 
-  async deleteUser(userId: string) {
+  async deleteProduct(sku: string) {
     try {
-      const uri = this.PREFIX_USER + `/products/${userId}/delete`;
-      // const uri = this.PREFIX_USER + `/corps/users/${userId}/delete`;
+      const uri = this.PREFIX_USER + `/products/${sku}/delete`;
       const response = await this.httpService.post<unknown>(uri, {});
       return response;
     } catch (error) {

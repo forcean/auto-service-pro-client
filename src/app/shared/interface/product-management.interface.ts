@@ -58,7 +58,7 @@ export interface IPrices {
 export interface IResponseProductDetail {
   product: IProductDetail;
   stockInfo?: IProductStock;
-  recentMovements?: any[];
+  recentMovements?: IProductMovement[];
 }
 
 export interface IProductDetail {
@@ -98,8 +98,22 @@ export interface IProductStock {
 }
 
 export interface IProductMovement {
-  type: 'in' | 'out';
+  id: string;
+  productId: string;
+  sku: string;
+  type:
+    | 'RECEIVE'
+    | 'ISSUE'
+    | 'RETURN'
+    | 'ADJUST'
+    | 'RESERVE'
+    | 'RELEASE'
+    | 'TRANSFER_IN'
+    | 'TRANSFER_OUT';
   quantity: number;
-  date: string;
-  reference: string;
+  beforeQty: number;
+  afterQty: number;
+  createdDt: string | Date;
+  reference?: string;
+  createdBy?: string;
 }

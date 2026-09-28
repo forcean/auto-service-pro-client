@@ -46,7 +46,6 @@ export class ProductUpdateComponent implements OnInit {
     try {
       const res = await this.catalogService.getCategories({
         isActive: true,
-        isSelectable: true
       });
 
       if (res.resultCode === RESPONSE.SUCCESS) {
@@ -121,7 +120,9 @@ export class ProductUpdateComponent implements OnInit {
   }
 
   onCancel() {
-    this.router.navigate(['/portal/product/detail', this.productId]);
+    this.router.navigate(['/portal/product/detail', this.productId], {
+      queryParams: this.route.snapshot.queryParams,
+    });
   }
 
   private async uploadImages(images: IUploadImagePayload[]) {

@@ -1,6 +1,8 @@
-<div
+<button
+  type="button"
   class="product-card"
   [ngClass]="product.status"
+  [attr.aria-label]="'ดูรายละเอียด ' + product.name"
   (click)="onClick()">
 
   <div class="product-image">
@@ -8,7 +10,7 @@
     <img
       *ngIf="primaryImageUrl; else noImage"
       [src]="primaryImageUrl"
-      alt="product image"
+      [alt]="product.name"
       class="image" />
 
     <ng-template #noImage>
@@ -52,11 +54,11 @@
       *ngIf="hasPrice"
       class="price-section">
 
-      <div *ngIf="product.prices?.retail" class="price retail">
+      <div *ngIf="hasRetailPrice" class="price retail">
         ฿ {{ product.prices?.retail | number:'1.0-2' }}
       </div>
 
-      <div *ngIf="product.prices?.wholesale" class="price wholesale">
+      <div *ngIf="hasWholesalePrice" class="price wholesale">
         ราคาส่ง ฿ {{ product.prices?.wholesale | number:'1.0-2' }}
       </div>
 
@@ -64,4 +66,4 @@
 
   </div>
 
-</div>
+</button>

@@ -5,6 +5,10 @@
       <aside class="filter-panel">
         <app-product-filter
           class="sticky-filter"
+          [loading]="isLoading"
+          [initialFilters]="filters"
+          [initialCategorySlug]="categorySlug"
+          [initialBrandCode]="brandCode"
           (onSearchChange)="onFilterChange($event)">
         </app-product-filter>
       </aside>
@@ -18,7 +22,8 @@
               รายการอะไหล่
             </h2>
             <p class="page-subtitle">
-              {{ productList?.products?.length || 0 }} รายการทั้งหมด
+              <span *ngIf="!isLoading">{{ totalRecord | number }} รายการทั้งหมด</span>
+              <span *ngIf="isLoading">กำลังโหลดรายการสินค้า...</span>
             </p>
           </div>
 
@@ -55,23 +60,35 @@
 
         </div>
 
+        <div *ngIf="isLoading" class="loading-state">
+          <div class="loading-spinner"></div>
+          <span>กำลังโหลดสินค้า</span>
+        </div>
+
+        <div *ngIf="!isLoading && errorMessage" class="error-state">
+          <p>{{ errorMessage }}</p>
+          <button type="button" class="retry-btn" (click)="retry()">ลองใหม่</button>
+        </div>
+
         <div
-          *ngIf="productList?.products?.length; else emptyState"
+          *ngIf="!isLoading && !errorMessage && productList.products.length > 0"
           class="product-grid">
 
           <app-product-card
-            *ngFor="let product of productList.products"
+            *ngFor="let product of productList.products; trackBy: trackByProduct"
             [product]="product"
             (clicked)="onClick($event)">
           </app-product-card>
 
         </div>
 
-        <ng-template #emptyState>
-          <div class="empty-state">
-            ไม่พบสินค้า
-          </div>
-        </ng-template>
+        <div
+          *ngIf="!isLoading && !errorMessage && productList.products.length === 0"
+          class="empty-state">
+          <div class="empty-icon">⌕</div>
+          <p>ไม่พบสินค้าที่ตรงกับเงื่อนไข</p>
+          <small>ลองเปลี่ยนคำค้นหาหรือปรับตัวกรอง แล้วค้นหาอีกครั้ง</small>
+        </div>
 
         <div class="pagination-wrapper">
           <app-pagination
@@ -80,7 +97,7 @@
             [currentPage]="pageIndex"
             [recordPerPage]="pageSize"
             (changePage)="onPageChange($event)"
-            [totalRecord]="10">
+            [totalRecord]="totalRecord">
           </app-pagination>
         </div>
 

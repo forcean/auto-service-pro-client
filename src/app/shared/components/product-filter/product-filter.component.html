@@ -16,6 +16,7 @@
     <button
       type="button"
       class="filter-reset"
+      [disabled]="loading"
       (click)="reset()">
       ล้าง
     </button>
@@ -31,6 +32,7 @@
         type="text"
         class="form-input-custom"
         placeholder="SKU / ชื่อสินค้า"
+        [disabled]="loading"
         formControlName="search" />
     </div>
   </div>
@@ -43,6 +45,7 @@
     <app-custom-select-category
       formControlName="categoryId"
       [categories]="categories"
+      [isDisabled]="loading"
       placeholder="เลือกหมวดหมู่">
     </app-custom-select-category>
   </div>
@@ -54,6 +57,7 @@
     </label>
     <custom-select
       formControlName="brandId"
+      [isDisabled]="loading"
       placeholder="เลือกแบรนด์">
       <app-custom-brand-option
         *ngFor="let brand of brands"
@@ -62,41 +66,15 @@
     </custom-select>
   </div>
 
-  <hr class="divider" />
-
-  <!-- VEHICLE SECTION -->
-  <div class="vehicle-section">
-    <h4 class="vehicle-title">
-      รถที่รองรับ
-    </h4>
-
-    <div class="vehicle-grid">
-      <select class="form-input-custom" formControlName="vehicleBrandId">
-        <option [ngValue]="null">ยี่ห้อรถ</option>
-      </select>
-
-      <select class="form-input-custom" formControlName="vehicleModelId">
-        <option [ngValue]="null">รุ่นรถ</option>
-      </select>
-
-      <select class="form-input-custom" formControlName="year">
-        <option [ngValue]="null">ปี</option>
-      </select>
-
-      <select class="form-input-custom" formControlName="engine">
-        <option [ngValue]="null">เครื่องยนต์</option>
-      </select>
-    </div>
-  </div>
-
   <!-- STOCK -->
   <div class="stock-wrapper">
     <label class="stock-check">
       <input
         type="checkbox"
         formControlName="inStock"
+        [disabled]="loading"
         class="stock-checkbox" />
-      <span>แสดงเฉพาะสินค้าที่มีในสต็อก</span>
+      <span>แสดงเฉพาะสินค้าที่เปิดใช้งานสต็อก</span>
     </label>
   </div>
 

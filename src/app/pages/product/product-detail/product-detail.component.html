@@ -201,7 +201,7 @@
 
           <div class="engine-tags">
             <span *ngFor="let e of v.engines">
-              {{ e }}
+              {{ e.code }}<ng-container *ngIf="e.fuel"> · {{ e.fuel }}</ng-container>
             </span>
           </div>
         </div>
@@ -224,29 +224,51 @@
 
   </section>
 
-  <section *ngIf="recentMovements?.length"
-    class="card">
-
-    <h3>ความเคลื่อนไหวล่าสุด</h3>
-
-    <div class="movement-list">
-
-      <div *ngFor="let m of recentMovements"
-        class="movement-item">
-
-        <div>
-          <strong>{{ m.type }}</strong>
-          <div class="movement-date">
-            {{ m.createdDt | date:'dd/MM/yyyy HH:mm' }}
-          </div>
-        </div>
-
-        <div class="movement-qty">
-          {{ m.quantity }}
-        </div>
-
+  <section *ngIf="recentMovements.length" class="movement-card">
+    <div class="movement-header">
+      <div>
+        <p class="movement-eyebrow">INVENTORY ACTIVITY</p>
+        <h3>ความเคลื่อนไหวล่าสุด</h3>
+        <p class="movement-description">รายการเปลี่ยนแปลงสต๊อกล่าสุดของสินค้านี้</p>
       </div>
 
+      <div class="movement-count">
+        <strong>{{ recentMovements.length }}</strong>
+        <span>รายการล่าสุด</span>
+      </div>
+    </div>
+
+    <div class="movement-list">
+      <article
+        *ngFor="let m of recentMovements; trackBy: trackByMovement"
+        class="movement-item"
+        [ngClass]="'movement-' + movementTone(m.type)">
+
+        <div class="movement-marker" aria-hidden="true">
+          <span class="movement-icon">{{ movementIcon(m.type) }}</span>
+        </div>
+
+        <div class="movement-content">
+          <div class="movement-topline">
+            <div class="movement-title-group">
+              <span class="movement-badge">{{ movementLabel(m.type) }}</span>
+              <time class="movement-date">{{ m.createdDt | date:'dd/MM/yyyy HH:mm' }}</time>
+            </div>
+
+            <div class="movement-quantity">
+              <span *ngIf="movementChange(m) > 0">+</span>{{ (movementChange(m) || m.quantity) | number }}
+              <small>ชิ้น</small>
+            </div>
+          </div>
+
+          <div class="movement-meta">
+            <span *ngIf="m.reference" class="movement-reference">อ้างอิง <strong>{{ m.reference }}</strong></span>
+            <span class="movement-balance">
+              คงเหลือ {{ m.beforeQty | number }} <b>→</b> {{ m.afterQty | number }}
+            </span>
+          </div>
+        </div>
+      </article>
     </div>
   </section>
 
