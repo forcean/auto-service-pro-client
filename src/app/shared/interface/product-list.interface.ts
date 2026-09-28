@@ -63,5 +63,12 @@ export interface ISearchProducts {
   vehicleModelId?: string
   year?: string
   engine?: string
-  inStock?: string
+  isStocked?: boolean
+}
+
+/** UI state for the product filter. Readable values are used only in the URL. */
+export interface IProductFilterState {
+  filters: ISearchProducts;
+  categorySlug?: string;
+  brandCode?: string;
 }

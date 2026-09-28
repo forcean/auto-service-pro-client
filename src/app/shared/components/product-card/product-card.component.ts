@@ -60,6 +60,14 @@ export class ProductCardComponent {
   }
 
   get hasPrice(): boolean {
-    return !!this.product.prices;
+    return this.hasRetailPrice || this.hasWholesalePrice;
+  }
+
+  get hasRetailPrice(): boolean {
+    return this.product.prices?.retail != null;
+  }
+
+  get hasWholesalePrice(): boolean {
+    return this.product.prices?.wholesale != null;
   }
 }

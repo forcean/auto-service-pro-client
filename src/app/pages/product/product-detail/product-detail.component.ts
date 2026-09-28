@@ -6,6 +6,7 @@ import { Subscription } from 'rxjs';
 import { ModalCommonService } from '../../../shared/components/modal-common/modal-common.service';
 import {
   IProductDetail,
+  IProductMovement,
   IProductStock,
   IResponseProductDetail,
 } from '../../../shared/interface/product-management.interface';
@@ -35,7 +36,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     minStock: 5,
   };
 
-  recentMovements: any[] = [];
+  recentMovements: IProductMovement[] = [];
 
   isSkuCopied = false;
   isLoading = false;
@@ -125,16 +126,65 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     return isNaN(margin) ? 0 : Math.round(margin);
   }
 
+  movementLabel(type: IProductMovement['type']): string {
+    const labels: Record<IProductMovement['type'], string> = {
+      RECEIVE: 'รับเข้า',
+      ISSUE: 'เบิกออก',
+      RETURN: 'คืนเข้า',
+      ADJUST: 'ปรับสต็อก',
+      RESERVE: 'จองสินค้า',
+      RELEASE: 'ยกเลิกการจอง',
+      TRANSFER_IN: 'รับโอนเข้า',
+      TRANSFER_OUT: 'โอนออก',
+    };
+
+    return labels[type];
+  }
+
+  movementTone(type: IProductMovement['type']): 'in' | 'out' | 'reserve' | 'adjust' {
+    if (['RECEIVE', 'RETURN', 'TRANSFER_IN'].includes(type)) return 'in';
+    if (['ISSUE', 'TRANSFER_OUT'].includes(type)) return 'out';
+    if (['RESERVE', 'RELEASE'].includes(type)) return 'reserve';
+    return 'adjust';
+  }
+
+  movementIcon(type: IProductMovement['type']): string {
+    const icons: Record<IProductMovement['type'], string> = {
+      RECEIVE: '↓',
+      ISSUE: '↑',
+      RETURN: '↩',
+      ADJUST: '±',
+      RESERVE: '•',
+      RELEASE: '↺',
+      TRANSFER_IN: '↙',
+      TRANSFER_OUT: '↗',
+    };
+
+    return icons[type];
+  }
+
+  movementChange(movement: IProductMovement): number {
+    return movement.afterQty - movement.beforeQty;
+  }
+
+  trackByMovement(_: number, movement: IProductMovement): string {
+    return movement.id;
+  }
+
   preview(url: string) {
     this.mainImageUrl = url;
   }
 
   goEdit() {
-    this.router.navigate(['/portal/product/update', this.product.id]);
+    this.router.navigate(['/portal/product/update', this.product.sku], {
+      queryParams: this.route.snapshot.queryParams,
+    });
   }
 
   goBack() {
-    this.router.navigate(['/portal/product/list']);
+    this.router.navigate(['/portal/product/list'], {
+      queryParams: this.route.snapshot.queryParams,
+    });
   }
 
   copySku() {

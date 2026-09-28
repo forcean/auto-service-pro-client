@@ -7,7 +7,9 @@ import {
   HostListener,
   AfterContentInit,
   ElementRef,
-  ViewChild
+  ViewChild,
+  OnChanges,
+  SimpleChanges,
 } from '@angular/core';
 import {
   ControlValueAccessor,
@@ -30,7 +32,7 @@ import { ICategory } from '../../interface/catalog.interface';
     }
   ]
 })
-export class CustomSelectCategoryComponent implements ControlValueAccessor {
+export class CustomSelectCategoryComponent implements ControlValueAccessor, OnChanges {
   @Input() placeholder = '';
   @Input() isDisabled = false;
   @Input() isError = false;
@@ -49,6 +51,14 @@ export class CustomSelectCategoryComponent implements ControlValueAccessor {
   selectedValue: string | null = null;
   noDataOptionText = 'ไม่มีข้อมูล';
   isDropdownOpen = false;
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // In edit mode the form value and the category tree are loaded
+    // independently. Re-apply the saved value once the options arrive.
+    if (changes['categories']) {
+      this.writeValue(this.selectedValue);
+    }
+  }
 
   ngAfterContentInit(): void {
     this.bindOptions();
