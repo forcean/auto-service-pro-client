@@ -22,6 +22,13 @@
       </div>
 
       <div class="flex items-center gap-3 self-start lg:self-center">
+        <a
+          routerLink="/portal/billing/payment"
+          class="inline-flex items-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-4 py-2.5 text-sm font-semibold text-sky-700 transition shadow-xs hover:bg-sky-100 hover:text-sky-900 active:scale-95"
+        >
+          <lucide-angular [img]="IconWallet" class="h-4 w-4"></lucide-angular>
+          <span>ประวัติการชำระเงิน</span>
+        </a>
         <button
           type="button"
           (click)="loadWorkspace()"

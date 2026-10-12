@@ -7,6 +7,7 @@ import { ProfileComponent } from './components/profile/profile.component';
 import { MaskValueComponent } from './components/mask-value/mask-value.component';
 import { StrongPasswordInputComponent } from './components/strong-password-input/strong-password-input.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { NgApexchartsModule } from 'ng-apexcharts';
 import { CustomOptionComponent } from './components/custom-option/custom-option.component';
 import { CustomSelectComponent } from './components/custom-select/custom-select.component';
 import { ResetPasswordModuleComponent } from './components/reset-password-modal/reset-password-modal.component';
@@ -85,7 +86,8 @@ import {
   ShieldCheck,
   QrCode,
   Banknote,
-  Building2
+  Building2,
+  TrendingUp,
 } from 'lucide-angular';
 import { TableStockManagementComponent } from './components/table-stock-management/table-stock-management.component';
 import { CustomSearchSelectComponent } from './components/custom-search-select/custom-search-select.component';
@@ -109,6 +111,7 @@ import { TaskEditModalComponent } from './components/task-edit-modal/task-edit-m
 import { PartIssueModalComponent } from './components/part-issue-modal/part-issue-modal.component';
 import { WorkOrderPaymentModalComponent } from './components/work-order-payment-modal/work-order-payment-modal.component';
 import { ToastComponent } from './components/toast/toast.component';
+import { PaymentCashFlowComponent } from './components/payment-cash-flow/payment-cash-flow.component';
 
 const components = [
   ModalCommonComponent,
@@ -153,7 +156,8 @@ const components = [
   TaskEditModalComponent,
   PartIssueModalComponent,
   WorkOrderPaymentModalComponent,
-  ToastComponent
+  ToastComponent,
+  PaymentCashFlowComponent,
 ];
 
 const directives = [
@@ -173,6 +177,7 @@ const directives = [
     SharedRoutingModule,
     FormsModule,
     ReactiveFormsModule,
+    NgApexchartsModule,
     LucideAngularModule.pick({
       ArrowUpFromDot,
       RotateCcw,
@@ -223,7 +228,8 @@ const directives = [
       ShieldCheck,
       QrCode,
       Banknote,
-      Building2
+      Building2,
+      TrendingUp,
     }),
     ProvincePipe,
     TimeAgoPipe,
