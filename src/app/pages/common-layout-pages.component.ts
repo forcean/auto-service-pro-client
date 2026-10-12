@@ -1,5 +1,4 @@
-import { ChangeDetectorRef, Component, ElementRef, HostListener, Input, ViewChild } from '@angular/core';
-import { HeaderComponent } from './template/header/header.component';
+import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 
 @Component({
@@ -13,49 +12,45 @@ export class CommonLayoutPagesComponent {
   isUseOffcanvas = false;
   isSidebarOverlayOpen = false;
 
-  @ViewChild(HeaderComponent) headerComponent!: HeaderComponent;
   @ViewChild('mainContent', { static: false }) mainContent!: ElementRef;
 
   constructor(
-    private cdr: ChangeDetectorRef,
     private router: Router
   ) {
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         this.scrollToTop();
+        this.closeSidebar();
       }
     });
   }
 
-  ngOnInit() { }
+  ngOnInit(): void {
+    this.checkWindowSize();
+  }
 
-  onSidebarToggled(isMinibar: boolean) {
+  onSidebarToggled(isMinibar: boolean): void {
     this.isMinibar = isMinibar;
-    if (!isMinibar) {
-      this.isSidebarOverlayOpen = true;
-    } else {
-      this.isSidebarOverlayOpen = false;
-    }
+    this.isSidebarOverlayOpen = !isMinibar;
   }
 
   @HostListener('window:resize', ['$event'])
-  onResize(event: Event) {
+  onResize(): void {
     this.checkWindowSize();
   }
 
-  private checkWindowSize() {
-    if (window.innerWidth <= 800) {
-      this.isUseOffcanvas = true;
-      this.isMinibar = true;
-    } else {
-      this.isUseOffcanvas = false;
-    }
-    this.cdr.detectChanges();
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.closeSidebar();
   }
 
-  ngAfterViewInit() {
-    this.checkWindowSize();
-    window.dispatchEvent(new Event('resize'));
+  closeSidebar(): void {
+    this.isMinibar = true;
+    this.isSidebarOverlayOpen = false;
+  }
+
+  private checkWindowSize(): void {
+    this.isUseOffcanvas = window.innerWidth < 1024;
   }
 
   scrollToTop() {
@@ -74,13 +69,4 @@ export class CommonLayoutPagesComponent {
     }
   }
 
-  @HostListener('document:click', ['$event'])
-  onClickOutside(event: MouseEvent) {
-    const target = event.target as HTMLElement;
-
-    if (this.isSidebarOverlayOpen && target.classList.contains('sidebar-backdrop')) {
-      this.isMinibar = true;
-      this.isSidebarOverlayOpen = false;
-    }
-  }
 }

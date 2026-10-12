@@ -1,7 +1,9 @@
 <header class="flex items-center justify-between px-4 h-12 bg-white shadow">
   <div class="flex items-center gap-3">
     <button
-      class="p-2 rounded-md hover:bg-gray-100 transition"
+      class="rounded-xl p-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+      [attr.aria-label]="isMinimal ? 'เปิดเมนู' : 'ย่อเมนู'"
+      [attr.title]="isMinimal ? 'เปิดเมนู' : 'ย่อเมนู'"
       (click)="onMiniBarToggled()">
       <lucide-icon name="menu"
         class="w-5 h-5 text-gray-700"></lucide-icon>

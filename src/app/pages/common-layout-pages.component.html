@@ -1,45 +1,48 @@
 <div
-  class="flex h-screen overflow-hidden bg-gradient-to-b from-[#f8fafc] to-slate-100">
+  class="app-shell flex h-screen overflow-hidden bg-gradient-to-b from-[#f8fafc] to-slate-100">
   <div
     *ngIf="isSidebarOverlayOpen"
-    class="sidebar-backdrop fixed inset-0 bg-black/40 z-30"></div>
+    class="sidebar-backdrop fixed inset-0 z-40 bg-slate-950/45 backdrop-blur-[1px]"
+    (click)="closeSidebar()"
+  ></div>
   <aside
-    class="
-    fixed top-0 left-0 h-full
-    w-52 bg-white border-r border-gray-200 shadow-lg
-    transition-all duration-300 z-40
-    flex flex-col
-  "
-    [class.w-14]="isMinibar"
-    [class.-translate-x-full]="isMinibar"
-    [class.translate-x-0]="!isMinibar">
+    class="app-sidebar fixed left-0 top-0 z-50 flex h-full flex-col border-r border-slate-200/80 bg-white"
+    [class.is-mobile]="isUseOffcanvas"
+    [class.is-open]="!isMinibar">
 
-    <div class="p-3 border-b border-gray-200">
+    <div class="flex min-h-[4.5rem] items-center border-b border-slate-100 px-4">
       <img src="assets/img/logo/logo.new.svg"
-        class="w-40 h-7"
-        [class.hidden]="isMinibar" />
-      <img src="assets/img/logo/logo40x37-mini.svg"
-        class="w-9"
-        [class.hidden]="!isMinibar" />
+        class="h-8 w-40 object-contain object-left" />
+      <button
+        type="button"
+        class="ml-auto inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+        (click)="closeSidebar()"
+        aria-label="ปิดเมนู"
+      >
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="m6 6 12 12M18 6 6 18" stroke-linecap="round" />
+        </svg>
+      </button>
     </div>
 
-    <div class="flex-1 overflow-y-auto scrollable-items">
+    <div class="flex-1 overflow-y-auto px-1.5 py-3 scrollable-items">
       <app-sidebar
         [isMinibar]="isMinibar"
+        [closeOnNavigate]="true"
         (miniBarToggled)="onSidebarToggled($event)">
       </app-sidebar>
     </div>
 
   </aside>
 
-  <div class="flex flex-col flex-1 overflow-hidden">
+  <div class="application-content flex min-w-0 flex-1 flex-col overflow-hidden">
     <app-header
-      class="sticky top-0 z-10 bg-white shadow-md"
+      class="sticky top-0 z-20 bg-white shadow-sm"
       [isMinimal]="isMinibar"
       (miniBarToggled)="onSidebarToggled($event)">
     </app-header>
 
-    <main class="flex-1 overflow-y-auto scrollable-items">
+    <main #mainContent class="main-content flex-1 overflow-y-auto scrollable-items">
       <router-outlet></router-outlet>
     </main>
 

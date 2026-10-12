@@ -1,61 +1,40 @@
-<ul
-  #menuList
-  class="sidebar-menu w-full"
-  [ngClass]="{ 'mini-bar': isMinibar }">
-  <li *ngFor="let menu of menus.menus" class="mb-1">
+<nav class="sidebar-menu h-full w-full" [class.is-mini]="isMinibar" aria-label="เมนูหลัก">
+  <ul class="space-y-1 p-3" role="list">
+    <li *ngFor="let menu of menus.menus; trackBy: trackByMenuKey">
+      <button
+        type="button"
+        class="menu-trigger group"
+        [class.is-active]="isActiveParentMenu(menu)"
+        [class.is-expanded]="isMenuExpanded(menu)"
+        [attr.aria-expanded]="menu.children.length ? isMenuExpanded(menu) : null"
+        [attr.aria-current]="isActiveParentMenu(menu) ? 'page' : null"
+        [attr.title]="isMinibar ? menu.displayName : null"
+        (click)="toggleMenu(menu)"
+      >
+        <span class="menu-icon" aria-hidden="true">
+          <img [src]="'assets/img/menu' + menu.icon" alt="" />
+        </span>
 
-    <!-- MAIN MENU -->
-    <div
-      class="menu-list flex items-center px-3 py-2 rounded-lg cursor-pointer transition-all duration-150
-             hover:bg-gray-50 rounded-t-xl "
-      (click)="menu.children.length ? isShowExpand(menu.key) : navigate(menu.endpoint); handleMiniBarToggle()"
-      [attr.data-bs-toggle]="!isMinibar && menu.children.length ? 'collapse' : null"
-      [attr.href]="menu.children.length ? '#' + menu.key + 'Menu' : null">
-      <span
-        class="icon-menu relative flex items-center justify-center w-6 h-6"
-        [ngClass]="{
-          'after:content-[\'\'] after:absolute after:w-2.5 after:h-2.5 after:bg-yellow-400 after:rounded-full after:-right-1 after:top-1':
-            isActiveParentMenu(menu)
-        }">
-        <img class="w-5 h-5" [src]="'assets/img/menu' + menu.icon" alt />
-      </span>
+        <span *ngIf="!isMinibar" class="menu-label">{{ menu.displayName }}</span>
 
-      <span class="text-menu ml-3 font-normal"
-        *ngIf="!isMinibar">
-        {{ menu.displayName }}
-      </span>
+        <svg *ngIf="menu.children.length && !isMinibar" class="menu-chevron" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="m7 5 5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
 
-      <span
-        class="ml-auto icon-expand transition-transform"
-        *ngIf="menu.children.length && !isMinibar">
-        <img
-          class="w-4 h-4 transition-transform"
-          [ngClass]="{ 'rotate-90': expands[menu.key] }"
-          src="assets/img/icon.expand.close.svg"
-          alt />
-      </span>
-    </div>
-
-    <div
-      *ngIf="menu.children.length"
-      class="pl-10 mt-1 transition-all"
-      [id]="menu.key + 'Menu'"
-      [ngClass]="{
-  'block': !isMinibar && (isActiveMenu(menu.endpoint) || expands[menu.key]),
-  'hidden': isMinibar || !(isActiveMenu(menu.endpoint) || expands[menu.key])
-  }">
-      <div *ngFor="let child of menu.children">
-        <div
-          class="submenu flex items-center py-2 px-3 rounded-md cursor-pointer text-sm
-                 hover:bg-gray-50 rounded-t-xl transition-all"
-          [ngClass]="{
-            'bg-lime-400 font-semibold text-black': isActiveMenu(child.endpoint)
-          }"
-          (click)="navigate(child.endpoint)">
-          {{ child.displayName }}
-        </div>
+      <div *ngIf="menu.children.length && isMenuExpanded(menu)" class="submenu-panel">
+        <button
+          *ngFor="let child of menu.children; trackBy: trackByMenuKey"
+          type="button"
+          class="submenu-trigger"
+          [class.is-active]="isActiveMenu(child.endpoint)"
+          [attr.aria-current]="isActiveMenu(child.endpoint) ? 'page' : null"
+          (click)="navigate(child.endpoint)"
+        >
+          <span class="submenu-indicator" aria-hidden="true"></span>
+          <span>{{ child.displayName }}</span>
+        </button>
       </div>
-    </div>
-
-  </li>
-</ul>
+    </li>
+  </ul>
+</nav>

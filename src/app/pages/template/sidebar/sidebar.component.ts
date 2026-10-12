@@ -1,11 +1,13 @@
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { IAvailableMenu, IMenu, IResponseMenu } from '../../../shared/interface/sidebar.interface';
+import { IMenu, IResponseMenu } from '../../../shared/interface/sidebar.interface';
 import { LoadingBarService } from '@ngx-loading-bar/core';
 import { RESPONSE } from '../../../shared/enum/response.enum';
 import { ModalCommonService } from '../../../shared/components/modal-common/modal-common.service';
 import { UserService } from '../../../shared/services/user.service';
 import { MaskValueService } from '../../../shared/components/mask-value/mask-value.service';
+import { filter, Subscription } from 'rxjs';
+import { NavigationEnd } from '@angular/router';
 
 @Component({
   selector: 'app-sidebar',
@@ -13,12 +15,11 @@ import { MaskValueService } from '../../../shared/components/mask-value/mask-val
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss'
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnInit, OnDestroy {
   @Input() isMinibar = false;
+  @Input() closeOnNavigate = false;
   @Output() miniBarToggled = new EventEmitter<boolean>();
-  @ViewChild('menuList') menuList!: ElementRef
 
-  availableMenus!: IAvailableMenu
   expands: Record<string, boolean> = {};
   menus: IResponseMenu = {
     role: '',
@@ -26,6 +27,7 @@ export class SidebarComponent {
   }
 
   private callBackUrl: string = '';
+  private readonly subscriptions = new Subscription();
 
   constructor(
     private router: Router,
@@ -37,12 +39,20 @@ export class SidebarComponent {
 
   ) { }
 
-  async ngOnInit() {
-    this.route.queryParams.subscribe((params) => {
+  async ngOnInit(): Promise<void> {
+    this.subscriptions.add(this.route.queryParams.subscribe((params) => {
       this.callBackUrl = params['callBackUrl'] || '';
-    })
-    await this.getMenus()
-    this.handleDefaultExpand()
+    }));
+    this.subscriptions.add(this.router.events.pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd)).subscribe(() => {
+      this.handleDefaultExpand();
+    }));
+
+    await this.getMenus();
+    this.handleDefaultExpand();
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 
   private async getMenus() {
@@ -74,13 +84,13 @@ export class SidebarComponent {
     }
   }
 
-  private handleDefaultExpand() {
+  private handleDefaultExpand(): void {
     for (const menu of this.menus.menus) {
-      if (menu.endpoint && this.router.url.includes(menu.endpoint)) {
+      if (this.isActiveMenu(menu.endpoint)) {
         this.expands[menu.key] = true
       }
       for (const child of menu.children) {
-        if (this.router.url.includes(child.endpoint)) {
+        if (this.isActiveMenu(child.endpoint)) {
           this.expands[menu.key] = true
           break
         }
@@ -88,17 +98,36 @@ export class SidebarComponent {
     }
   }
 
-  navigate(url: string) {
-    // this.sessionIdService.newTransactionId()
-    this.router.navigate(['portal' + url]);
-    if (window.innerWidth <= 800) {
+  navigate(endpoint: string): void {
+    if (!endpoint) return;
+
+    const target = endpoint.startsWith('/portal')
+      ? endpoint
+      : `/portal${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+
+    void this.router.navigateByUrl(target);
+    if (this.closeOnNavigate) {
       this.isMinibar = true;
+      this.miniBarToggled.emit(this.isMinibar);
     }
-    this.isMinibar = true;
-    this.miniBarToggled.emit(this.isMinibar);
   }
 
-  isActiveParentMenu(menu: any): boolean {
+  toggleMenu(menu: IMenu): void {
+    if (!menu.children.length) {
+      this.navigate(menu.endpoint);
+      return;
+    }
+
+    if (this.isMinibar) {
+      this.isMinibar = false;
+      this.miniBarToggled.emit(this.isMinibar);
+      return;
+    }
+
+    this.expands[menu.key] = !this.expands[menu.key];
+  }
+
+  isActiveParentMenu(menu: IMenu): boolean {
     if (menu.endpoint && this.isActiveMenu(menu.endpoint)) {
       return true
     }
@@ -110,22 +139,23 @@ export class SidebarComponent {
     return false
   }
 
-  isActiveMenu(endpoint: string) {
-    return this.router.url.includes(endpoint)
+  isActiveMenu(endpoint: string): boolean {
+    if (!endpoint) return false;
+
+    const currentUrl = this.router.url.split('?')[0].split('#')[0];
+    const target = endpoint.startsWith('/portal')
+      ? endpoint
+      : `/portal${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+
+    return currentUrl === target || currentUrl.startsWith(`${target}/`);
   }
 
-  isShowExpand(key: string) {
-    if (this.isMinibar) {
-      return
-    }
-    this.expands[key] = !this.expands[key]
+  isMenuExpanded(menu: IMenu): boolean {
+    return !this.isMinibar && (this.expands[menu.key] || this.isActiveParentMenu(menu));
   }
 
-  handleMiniBarToggle() {
-    if (this.isMinibar) {
-      this.isMinibar = false
-      this.miniBarToggled.emit(this.isMinibar)
-    }
+  trackByMenuKey(_: number, menu: IMenu): string {
+    return menu.key;
   }
 
   private getAllEndpoint(menuItems: IMenu[]) {
