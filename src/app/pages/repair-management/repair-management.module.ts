@@ -12,9 +12,10 @@ import { QuotationCreateComponent } from './quotation-create/quotation-create.co
 import { WorkOrderFlowComponent } from './work-order-flow/work-order-flow.component';
 import { QuotationApprovalComponent } from './quotation-approval/quotation-approval.component';
 import { TeamAssignmentComponent } from './team-assignment/team-assignment.component';
+import { MyAssignmentComponent } from './my-assignment/my-assignment.component';
 
 @NgModule({
-  declarations: [WorkOrderComponent, QuotationComponent, WorkOrderDetailComponent, QuotationCreateComponent, WorkOrderFlowComponent, QuotationApprovalComponent, TeamAssignmentComponent],
+  declarations: [WorkOrderComponent, QuotationComponent, WorkOrderDetailComponent, QuotationCreateComponent, WorkOrderFlowComponent, QuotationApprovalComponent, TeamAssignmentComponent, MyAssignmentComponent],
   imports: [
     CommonModule,
     RepairManagementRoutingModule,

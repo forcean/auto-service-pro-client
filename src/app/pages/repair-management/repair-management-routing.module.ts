@@ -6,6 +6,7 @@ import { QuotationCreateComponent } from './quotation-create/quotation-create.co
 import { QuotationComponent } from './quotation/quotation.component';
 import { QuotationApprovalComponent } from './quotation-approval/quotation-approval.component';
 import { TeamAssignmentComponent } from './team-assignment/team-assignment.component';
+import { MyAssignmentComponent } from './my-assignment/my-assignment.component';
 
 const routes: Routes = [
   { 
@@ -23,6 +24,10 @@ const routes: Routes = [
   {
     path: 'team-assignment/:id',
     component: TeamAssignmentComponent,
+  },
+  {
+    path: 'my-assignment',
+    component: MyAssignmentComponent,
   },
   { 
     path: 'quotation/create', 

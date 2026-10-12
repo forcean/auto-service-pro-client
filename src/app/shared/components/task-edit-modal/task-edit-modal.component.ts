@@ -15,6 +15,7 @@ export class TaskEditModalComponent implements OnChanges {
   @Input() mechanics: UserList[] = [];
   @Input() taskGroups: IWorkOrderTask[] = [];
   @Input() isSubmitting = false;
+  @Input() isMechanicMode = false;
 
   @Output() close = new EventEmitter<void>();
   @Output() save = new EventEmitter<IUpdateTaskRequest>();
@@ -49,6 +50,17 @@ export class TaskEditModalComponent implements OnChanges {
     const title = this.form.title?.trim();
     if (!title) return;
 
+    const assignedMechanics = this.isMechanicMode
+      ? (this.task?.mechanics ?? [])
+      : this.mechanics.length > 0
+        ? this.mechanics
+            .filter((mechanic) => this.mechanicIds.includes(mechanic.id))
+            .map((mechanic) => ({
+              mechanicId: mechanic.id,
+              mechanicName: [mechanic.firstname, mechanic.lastname].filter(Boolean).join(' ') || mechanic.publicId,
+            }))
+        : (this.task?.mechanics ?? []);
+
     this.save.emit({
       ...this.form,
       title,
@@ -63,17 +75,40 @@ export class TaskEditModalComponent implements OnChanges {
       isRequired: this.form.isRequired !== false,
       dependsOn: this.form.dependsOn?.filter(Boolean) ?? [],
       sortOrder: Math.max(0, Number(this.form.sortOrder) || 0),
-      mechanics: this.mechanics
-        .filter((mechanic) => this.mechanicIds.includes(mechanic.id))
-        .map((mechanic) => ({
-          mechanicId: mechanic.id,
-          mechanicName: [mechanic.firstname, mechanic.lastname].filter(Boolean).join(' ') || mechanic.publicId,
-        })),
+      mechanics: assignedMechanics,
     });
   }
 
   onBackdropClick(): void {
     if (!this.isSubmitting) this.close.emit();
+  }
+
+  isMechanicSelected(id: string): boolean {
+    return this.mechanicIds.includes(id);
+  }
+
+  toggleMechanic(id: string): void {
+    if (this.isMechanicMode) return;
+    if (this.isMechanicSelected(id)) {
+      this.mechanicIds = this.mechanicIds.filter((mId) => mId !== id);
+    } else {
+      this.mechanicIds = [...this.mechanicIds, id];
+    }
+  }
+
+  removeMechanic(id: string, event?: Event): void {
+    event?.stopPropagation();
+    if (this.isMechanicMode) return;
+    this.mechanicIds = this.mechanicIds.filter((mId) => mId !== id);
+  }
+
+  getMechanicInitials(name?: string): string {
+    if (!name?.trim()) return 'M';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.slice(0, 2).toUpperCase();
   }
 
   private toDateTimeLocal(value?: string): string {

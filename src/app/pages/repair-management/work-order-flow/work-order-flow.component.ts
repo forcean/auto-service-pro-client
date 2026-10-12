@@ -52,6 +52,7 @@ type PartRequestMode = 'QUOTED' | 'COMPLIMENTARY' | 'CHARGED';
 })
 export class WorkOrderFlowComponent implements OnChanges {
   @Input({ required: true }) workOrder!: IWorkOrder;
+  @Input() canManageTeamAssignment = false;
   @Output() flowChanged = new EventEmitter<void>();
   @ViewChild('taskBoardScroller') private taskBoardScroller?: ElementRef<HTMLElement>;
 
@@ -136,6 +137,7 @@ export class WorkOrderFlowComponent implements OnChanges {
   prepayments: IWorkOrderPayment[] = [];
 
   openCreateTaskModal(): void {
+    if (!this.canManageTeamAssignment) return;
     this.isCreateTaskModalOpen = true;
   }
 
@@ -244,7 +246,7 @@ export class WorkOrderFlowComponent implements OnChanges {
   }
 
   get canRecordPrepayment(): boolean {
-    return [
+    return this.canManageTeamAssignment && [
       EWorkOrderStatus.WAITING_ASSIGNMENT,
       EWorkOrderStatus.IN_PROGRESS,
       EWorkOrderStatus.WAITING_ADDITIONAL_APPROVAL,
@@ -334,11 +336,18 @@ export class WorkOrderFlowComponent implements OnChanges {
   }
 
   async refreshWorkspace(): Promise<void> {
-    await Promise.all([this.loadTasks(), this.loadMechanics(), this.loadPrepayments()]);
+    const requests = [this.loadTasks()];
+    if (this.canManageTeamAssignment) {
+      requests.push(this.loadMechanics(), this.loadPrepayments());
+    }
+    await Promise.all(requests);
   }
 
   async loadPrepayments(): Promise<void> {
-    if (!this.workOrder?.workOrderNo) return;
+    if (!this.canManageTeamAssignment || !this.workOrder?.workOrderNo) {
+      this.prepayments = [];
+      return;
+    }
     this.isLoadingPrepayments = true;
     try {
       const response = await this.billingService.getWorkOrderPayments(this.workOrder.workOrderNo);
@@ -408,12 +417,15 @@ export class WorkOrderFlowComponent implements OnChanges {
   }
 
   openBilling(): void {
+    if (!this.canManageTeamAssignment) return;
+
     void this.router.navigate(['/portal/billing'], {
       queryParams: { workOrderNo: this.workOrder.workOrderNo },
     });
   }
 
   openPrepaymentModal(): void {
+    if (!this.canManageTeamAssignment) return;
     this.isPrepaymentModalOpen = true;
   }
 
@@ -422,6 +434,8 @@ export class WorkOrderFlowComponent implements OnChanges {
   }
 
   async recordPrepayment(request: ICreateWorkOrderPaymentRequest): Promise<void> {
+    if (!this.canManageTeamAssignment) return;
+
     const amount = Number(request.amount);
     if (!Number.isFinite(amount) || amount <= 0) {
       this.setFeedback('กรุณาระบุจำนวนเงินที่มากกว่า 0');
@@ -460,6 +474,8 @@ export class WorkOrderFlowComponent implements OnChanges {
   }
 
   async createTask(): Promise<void> {
+    if (!this.canManageTeamAssignment) return;
+
     const mechanics = this.selectedMechanics;
     if (!this.taskForm.title.trim() || (!this.isGroupForm() && !mechanics.length)) {
       this.setFeedback(this.isGroupForm() ? 'กรุณาระบุชื่อกลุ่มงาน' : 'กรุณาระบุชื่องานและเลือกช่างผู้รับผิดชอบอย่างน้อย 1 คน');

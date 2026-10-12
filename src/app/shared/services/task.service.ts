@@ -8,6 +8,8 @@ import {
   ICreateTaskRequest,
   IApproveAdditionalProblemRequest,
   ITaskListResult,
+  IMyAssignmentListResult,
+  IMyAssignmentQuery,
   IWorkOrderTask,
   ETaskStatus,
   ETaskBlockedReason,
@@ -28,6 +30,10 @@ export class TaskService {
         workOrderNo,
       }),
     );
+  }
+
+  getMyAssignments(params: IMyAssignmentQuery): Promise<IBaseResponse<IMyAssignmentListResult>> {
+    return this.request(() => this.httpService.get<IMyAssignmentListResult>(`${this.apiPath}/my-assignments`, params));
   }
 
   createTask(body: ICreateTaskRequest): Promise<IBaseResponse<IWorkOrderTask>> {
