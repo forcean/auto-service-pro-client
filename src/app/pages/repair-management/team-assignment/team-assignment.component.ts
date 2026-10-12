@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { RESPONSE } from '../../../shared/enum/response.enum';
+import { ROLE } from '../../../shared/enum/role.enum';
 import { EWorkOrderStatus } from '../../../shared/enum/work-order.enum';
+import { HandleTokenService } from '../../../core/services/handle-token-service/handle-token.service';
 import { IWorkOrder, IWorkOrderQuery } from '../../../shared/interface/work-order.interface';
 import { PaginationModel } from '../../../shared/interface/pagination.model';
 import { WorkOrderService } from '../../../shared/services/work-order.service';
@@ -16,6 +18,7 @@ import { WorkOrderService } from '../../../shared/services/work-order.service';
 export class TeamAssignmentComponent implements OnInit {
   readonly statuses = EWorkOrderStatus;
   readonly paginationOption = [10, 15, 20, 30, 50];
+  readonly teamAssignmentRoles = new Set<string>([ROLE.ADM, ROLE.MNG, ROLE.SO]);
 
   workOrder?: IWorkOrder;
   workOrders: IWorkOrder[] = [];
@@ -26,13 +29,21 @@ export class TeamAssignmentComponent implements OnInit {
   selectedStatus: EWorkOrderStatus = EWorkOrderStatus.ALL;
   isLoading = true;
   errorMessage = '';
+  currentRole = '';
   private searchTimer?: ReturnType<typeof setTimeout>;
 
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly workOrderService: WorkOrderService,
-  ) {}
+    private readonly handleTokenService: HandleTokenService,
+  ) {
+    this.currentRole = this.handleTokenService.getRole();
+  }
+
+  get canManageTeamAssignment(): boolean {
+    return this.teamAssignmentRoles.has(this.currentRole);
+  }
 
   ngOnInit(): void {
     const workOrderNo = this.route.snapshot.paramMap.get('id');

@@ -86,6 +86,46 @@ export interface ITaskListResult {
   data: IWorkOrderTask[];
 }
 
+export type TMyAssignmentSchedule = 'ALL' | 'OVERDUE' | 'TODAY' | 'UPCOMING' | 'UNSCHEDULED';
+
+export interface IMyAssignmentWorkOrder {
+  workOrderNo: string;
+  status: string;
+  expectedFinishDate?: string;
+  checkInDate?: string;
+  vehicle?: {
+    licensePlate?: string;
+    province?: string;
+    firstname?: string;
+    lastname?: string;
+    billingName?: string;
+    phoneNumber?: string;
+    brand?: string;
+    model?: string;
+  };
+}
+
+export interface IMyAssignment extends IWorkOrderTask {
+  workOrder?: IMyAssignmentWorkOrder;
+}
+
+export interface IMyAssignmentListResult {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  data: IMyAssignment[];
+}
+
+export interface IMyAssignmentQuery {
+  page?: number;
+  limit?: number;
+  status?: ETaskStatus;
+  priority?: ETaskPriority;
+  keyword?: string;
+  schedule?: TMyAssignmentSchedule;
+}
+
 export interface ICreateTaskRequest {
   workOrderNo: string;
   title: string;

@@ -140,6 +140,7 @@
                 <h3 class="mt-1 text-lg font-bold text-slate-900">มอบหมายงานให้ทีมช่าง</h3>
                 <p class="mt-1 text-sm text-slate-500">สร้างงานและเลือกช่างจากรายชื่อผู้ใช้งานในระบบ</p>
                 <button
+                  *ngIf="canManageTeamAssignment"
                   type="button"
                   (click)="openCreateTaskModal()"
                   class="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-xs transition hover:bg-indigo-700 sm:w-auto w-full"
@@ -156,6 +157,7 @@
                     <p class="mt-1 text-sm text-slate-500">ช่างอัปเดตงานที่ได้รับมอบหมาย เบิกอะไหล่จากงาน และแจ้งปัญหาเพิ่มได้</p>
                   </div>
                   <button
+                    *ngIf="canManageTeamAssignment"
                     type="button"
                     (click)="openCreateTaskModal()"
                     class="mt-2 sm:mt-0 inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2 text-xs font-bold text-indigo-700 transition hover:bg-indigo-100 shrink-0"
@@ -182,6 +184,7 @@
                 <h3 class="mt-1 text-lg font-bold text-slate-900">มอบหมายงานแก้ไขจาก QC</h3>
                 <p class="mt-1 text-sm text-slate-500">สร้างงานแก้ไขใหม่และเลือกช่างผู้รับผิดชอบ</p>
                 <button
+                  *ngIf="canManageTeamAssignment"
                   type="button"
                   (click)="openCreateTaskModal()"
                   class="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-xs transition hover:bg-indigo-700 sm:w-auto w-full"
@@ -198,8 +201,14 @@
 
               <div *ngSwitchCase="statuses.QC_APPROVED">
                 <h3 class="mt-1 text-lg font-bold text-slate-900">QC ผ่านแล้ว</h3>
-                <p class="mt-1 text-sm text-slate-500">ยืนยันว่ารถพร้อมส่งมอบก่อนเปิดคิว Billing ระบบจะตรวจเงื่อนไขใบเสนอราคา งานช่าง และอะไหล่ที่จ่ายจริงอีกครั้ง</p>
+                <p class="mt-1 text-sm text-slate-500">
+                  <ng-container *ngIf="canManageTeamAssignment; else restrictedQcApproved">
+                    ยืนยันว่ารถพร้อมส่งมอบก่อนเปิดคิว Billing ระบบจะตรวจเงื่อนไขใบเสนอราคา งานช่าง และอะไหล่ที่จ่ายจริงอีกครั้ง
+                  </ng-container>
+                  <ng-template #restrictedQcApproved>งานผ่านการตรวจคุณภาพแล้ว</ng-template>
+                </p>
                 <button
+                  *ngIf="canManageTeamAssignment"
                   type="button"
                   (click)="moveWorkOrder(statuses.READY_DELIVERY)"
                   [disabled]="isSubmitting"
@@ -210,27 +219,39 @@
               </div>
 
               <div *ngSwitchCase="statuses.READY_DELIVERY">
-                <h3 class="mt-1 text-lg font-bold text-slate-900">พร้อมส่งมอบ · รอออกบิล</h3>
-                <p class="mt-1 text-sm text-slate-500">สร้างใบแจ้งหนี้จากยอดอะไหล่ที่จ่ายจริง ค่าแรงจริง และรายการในใบเสนอราคาที่อนุมัติแล้ว</p>
-                <button
-                  type="button"
-                  (click)="openBilling()"
-                  class="mt-4 min-h-11 w-full rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-slate-700 sm:w-auto"
-                >
-                  ไปที่ Billing และรับชำระ
-                </button>
+                <ng-container *ngIf="canManageTeamAssignment; else restrictedReadyDelivery">
+                  <h3 class="mt-1 text-lg font-bold text-slate-900">พร้อมส่งมอบ · รอออกบิล</h3>
+                  <p class="mt-1 text-sm text-slate-500">สร้างใบแจ้งหนี้จากยอดอะไหล่ที่จ่ายจริง ค่าแรงจริง และรายการในใบเสนอราคาที่อนุมัติแล้ว</p>
+                  <button
+                    type="button"
+                    (click)="openBilling()"
+                    class="mt-4 min-h-11 w-full rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-slate-700 sm:w-auto"
+                  >
+                    ไปที่ Billing และรับชำระ
+                  </button>
+                </ng-container>
+                <ng-template #restrictedReadyDelivery>
+                  <h3 class="mt-1 text-lg font-bold text-slate-900">พร้อมส่งมอบ</h3>
+                  <p class="mt-1 text-sm text-slate-500">ใบงานอยู่ระหว่างรอดำเนินการในขั้นตอนถัดไป</p>
+                </ng-template>
               </div>
 
               <div *ngSwitchCase="statuses.COMPLETED">
-                <h3 class="mt-1 text-lg font-bold text-slate-900">ปิดงานและบันทึกประวัติแล้ว</h3>
-                <p class="mt-1 text-sm text-slate-500">งานจะปิดเมื่อ Invoice ชำระครบ ระบบได้สร้าง Service History ของรถคันนี้ไว้เรียบร้อยแล้ว</p>
-                <button
-                  type="button"
-                  (click)="openBilling()"
-                  class="mt-4 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50 sm:w-auto"
-                >
-                  ดูเอกสาร Billing
-                </button>
+                <ng-container *ngIf="canManageTeamAssignment; else restrictedCompleted">
+                  <h3 class="mt-1 text-lg font-bold text-slate-900">ปิดงานและบันทึกประวัติแล้ว</h3>
+                  <p class="mt-1 text-sm text-slate-500">งานจะปิดเมื่อ Invoice ชำระครบ ระบบได้สร้าง Service History ของรถคันนี้ไว้เรียบร้อยแล้ว</p>
+                  <button
+                    type="button"
+                    (click)="openBilling()"
+                    class="mt-4 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50 sm:w-auto"
+                  >
+                    ดูเอกสาร Billing
+                  </button>
+                </ng-container>
+                <ng-template #restrictedCompleted>
+                  <h3 class="mt-1 text-lg font-bold text-slate-900">ปิดงานแล้ว</h3>
+                  <p class="mt-1 text-sm text-slate-500">ระบบได้บันทึกประวัติของใบงานนี้เรียบร้อยแล้ว</p>
+                </ng-template>
               </div>
 
             </ng-container>
@@ -250,6 +271,7 @@
       </section>
 
       <app-work-order-payment-modal
+        *ngIf="canManageTeamAssignment"
         [isOpen]="isPrepaymentModalOpen"
         [availableCredit]="availablePrepayment"
         [isSubmitting]="isSubmitting"
@@ -259,7 +281,7 @@
 
       <!-- ─── Create Task Modal Popup ─────────────────────────────────────────── -->
       <div
-        *ngIf="isCreateTaskModalOpen"
+        *ngIf="canManageTeamAssignment && isCreateTaskModalOpen"
         class="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden bg-slate-900/50 p-4 backdrop-blur-sm"
         role="presentation"
         (click)="closeCreateTaskModal()"

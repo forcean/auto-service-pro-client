@@ -23,7 +23,11 @@
         </div>
       </header>
 
-      <app-work-order-flow [workOrder]="workOrder" (flowChanged)="onFlowChanged()"></app-work-order-flow>
+      <app-work-order-flow
+        [workOrder]="workOrder"
+        [canManageTeamAssignment]="canManageTeamAssignment"
+        (flowChanged)="onFlowChanged()"
+      ></app-work-order-flow>
     </ng-container>
 
     <ng-container *ngIf="!workOrder && !errorMessage">

@@ -1,0 +1,342 @@
+<section class="min-h-screen bg-slate-100/70 px-4 py-6 text-slate-800 sm:px-6 lg:px-8 lg:py-8 font-sans">
+  <div class="mx-auto max-w-[1480px] space-y-6">
+
+    <!-- Flagship Header (AutoService Pro Dark Premium Style) -->
+    <header class="relative overflow-hidden rounded-3xl border border-slate-800/80 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 p-6 text-white shadow-2xl shadow-slate-950/20 sm:p-8">
+      <!-- Glow background circles -->
+      <div class="pointer-events-none absolute -right-16 -top-20 h-72 w-72 rounded-full bg-sky-500/15 blur-3xl"></div>
+      <div class="pointer-events-none absolute -left-16 -bottom-20 h-72 w-72 rounded-full bg-indigo-500/15 blur-3xl"></div>
+
+      <div class="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <!-- Title & Info -->
+        <div class="flex items-start gap-4 sm:gap-5">
+          <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white shadow-lg shadow-sky-500/25 ring-1 ring-white/20">
+            <lucide-angular [img]="IconTask" class="h-7 w-7"></lucide-angular>
+          </span>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center rounded-full bg-sky-500/10 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-sky-400 ring-1 ring-inset ring-sky-500/20">
+                AutoService Pro
+              </span>
+              <span class="text-xs font-semibold text-slate-400">· Mechanic Workspace</span>
+            </div>
+            <h1 class="mt-1 text-2xl font-black tracking-tight text-white sm:text-3xl">
+              งานที่ได้รับมอบหมาย (My Assignments)
+            </h1>
+            <p class="mt-1 max-w-2xl text-xs sm:text-sm text-slate-300/90 leading-relaxed">
+              รายการงานซ่อมบำรุงที่ได้รับมอบหมายให้คุณโดยตรง สามารถอัปเดตสถานะ เวลาดำเนินการ และบันทึกรายละเอียดงานได้ทันที
+            </p>
+          </div>
+        </div>
+
+        <!-- KPI Metrics & Actions -->
+        <div class="flex flex-wrap items-center gap-3">
+          <!-- Found Total -->
+          <div class="flex-1 min-w-[120px] rounded-2xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-md">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">งานทั้งหมด</p>
+            <p class="mt-0.5 font-mono text-2xl font-black text-sky-400">{{ assignments.total | number }}</p>
+          </div>
+
+          <!-- In Progress -->
+          <div class="flex-1 min-w-[120px] rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 backdrop-blur-md">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-amber-300">กำลังทำอยู่</p>
+            <p class="mt-0.5 font-mono text-2xl font-black text-amber-400">{{ inProgressCount | number }}</p>
+          </div>
+
+          <!-- Urgent / Overdue -->
+          <div *ngIf="urgentCount > 0" class="flex-1 min-w-[120px] rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 backdrop-blur-md">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-rose-300">เร่งด่วน / เกินกำหนด</p>
+            <p class="mt-0.5 font-mono text-2xl font-black text-rose-400">{{ urgentCount | number }}</p>
+          </div>
+
+          <!-- Refresh Button -->
+          <button
+            type="button"
+            (click)="refresh()"
+            [disabled]="isLoading"
+            class="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 text-xs font-bold text-white shadow-sm backdrop-blur-md transition hover:bg-white/20 active:scale-95 disabled:opacity-50"
+          >
+            <lucide-angular [img]="IconRefresh" class="h-4 w-4" [ngClass]="{ 'animate-spin': isLoading }"></lucide-angular>
+            <span>{{ isLoading ? 'กำลังโหลด…' : 'รีเฟรช' }}</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Feedback Banner (If any error/message) -->
+    <div
+      *ngIf="feedback"
+      class="flex items-center justify-between gap-4 rounded-2xl border p-4 text-xs font-semibold shadow-xs"
+      [ngClass]="feedbackIsError ? 'border-rose-200 bg-rose-50 text-rose-800' : 'border-emerald-200 bg-emerald-50 text-emerald-800'"
+    >
+      <div class="flex items-center gap-2">
+        <lucide-angular [img]="IconAlert" class="h-4 w-4 shrink-0"></lucide-angular>
+        <span>{{ feedback }}</span>
+      </div>
+      <button type="button" (click)="feedback = ''" class="rounded-lg px-2 py-1 text-base leading-none hover:bg-black/5" aria-label="ปิด">×</button>
+    </div>
+
+    <!-- Filter & Toolbar Section -->
+    <section class="rounded-3xl border border-slate-200/80 bg-white p-4 shadow-sm sm:p-6">
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+
+        <!-- Status Filter Tabs -->
+        <div class="flex flex-wrap items-center gap-1.5 rounded-2xl bg-slate-100/80 p-1.5 border border-slate-200/60">
+          <button
+            *ngFor="let tab of statusTabs"
+            type="button"
+            (click)="selectStatus(tab.value)"
+            class="rounded-xl px-3.5 py-2 text-xs font-extrabold transition-all"
+            [ngClass]="status === tab.value ? 'bg-slate-900 text-white shadow-md shadow-slate-900/15' : 'text-slate-600 hover:bg-slate-200/70 hover:text-slate-900'"
+          >
+            {{ tab.label }}
+          </button>
+        </div>
+
+        <!-- Search & Custom Dropdowns Bar -->
+        <div class="flex flex-wrap items-center gap-3">
+          <!-- Keyword Search Input -->
+          <div class="relative min-w-[220px] flex-1 sm:flex-none">
+            <lucide-angular [img]="IconSearch" class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"></lucide-angular>
+            <input
+              [(ngModel)]="keyword"
+              (keyup.enter)="onSearch()"
+              placeholder="ค้นหาชื่องาน, Task ID, ใบงาน..."
+              class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs font-medium text-slate-900 outline-none transition focus:border-sky-500 focus:bg-white focus:ring-4 focus:ring-sky-100"
+            />
+          </div>
+
+          <!-- Shared Central Custom Select: Priority -->
+          <div class="w-40">
+            <custom-select
+              [(ngModel)]="priority"
+              (ngModelChange)="onFilterChange()"
+              placeholder="ทุกความสำคัญ"
+            >
+              <custom-option value="">ทุกความสำคัญ</custom-option>
+              <custom-option [value]="taskPriorities.URGENT">เร่งด่วน</custom-option>
+              <custom-option [value]="taskPriorities.HIGH">สูง</custom-option>
+              <custom-option [value]="taskPriorities.NORMAL">ปกติ</custom-option>
+              <custom-option [value]="taskPriorities.LOW">ต่ำ</custom-option>
+            </custom-select>
+          </div>
+
+          <!-- Shared Central Custom Select: Schedule -->
+          <div class="w-44">
+            <custom-select
+              [(ngModel)]="schedule"
+              (ngModelChange)="onFilterChange()"
+              placeholder="ทุกกำหนดการ"
+            >
+              <custom-option *ngFor="let item of scheduleOptions" [value]="item.value">
+                {{ item.label }}
+              </custom-option>
+            </custom-select>
+          </div>
+
+          <!-- Reset Filter Button -->
+          <button
+            *ngIf="keyword || status || priority || schedule !== 'ALL'"
+            type="button"
+            (click)="resetFilters()"
+            class="h-10 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+          >
+            ล้างตัวกรอง
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Urgent Warning Callout -->
+    <section *ngIf="!isLoading && urgentCount > 0" class="flex items-center gap-3.5 rounded-2xl border border-amber-300/80 bg-gradient-to-r from-amber-50 to-orange-50 px-5 py-3.5 text-xs font-semibold text-amber-900 shadow-xs">
+      <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white shadow-xs">
+        <lucide-angular [img]="IconAlert" class="h-5 w-5"></lucide-angular>
+      </div>
+      <div>
+        <p class="font-bold text-amber-950 text-sm">พบงานเร่งด่วน หรือ เลยกำหนดชำระ {{ urgentCount }} รายการ</p>
+        <p class="text-amber-800 text-xs mt-0.5">โปรดเร่งดำเนินการหรืออัปเดตสถานะงานให้เป็นปัจจุบัน</p>
+      </div>
+    </section>
+
+    <!-- Skeleton Loading -->
+    <section *ngIf="isLoading" class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+      <div *ngFor="let item of [1,2,3,4,5,6]" class="h-80 animate-pulse rounded-3xl border border-slate-200/80 bg-white shadow-xs"></div>
+    </section>
+
+    <!-- Assignments Grid -->
+    <section *ngIf="!isLoading && assignments.data.length" class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+      <article
+        *ngFor="let task of assignments.data; trackBy: trackByTaskNo"
+        class="group flex flex-col justify-between rounded-3xl border bg-white p-5 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-sky-300 hover:shadow-xl"
+        [ngClass]="isOverdue(task) ? 'border-rose-300/90 ring-1 ring-rose-200 bg-rose-50/20' : 'border-slate-200/80'"
+      >
+        <div>
+          <!-- Card Header & Identifiers -->
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <span class="inline-flex items-center gap-1.5 font-mono text-xs font-bold text-sky-700 bg-sky-50 border border-sky-100 px-2.5 py-0.5 rounded-lg">
+                {{ task.workOrderNo }}
+                <span class="text-slate-400">/</span>
+                {{ task.taskNo }}
+              </span>
+              <h2 class="mt-2.5 line-clamp-2 text-base font-extrabold text-slate-900 group-hover:text-sky-700 transition-colors">
+                {{ task.title }}
+              </h2>
+            </div>
+
+            <!-- Priority Badge -->
+            <span class="shrink-0 rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-wide" [ngClass]="priorityClass(task.priority)">
+              {{ priorityLabel(task.priority) }}
+            </span>
+          </div>
+
+          <!-- Description -->
+          <p class="mt-2 line-clamp-2 min-h-10 text-xs text-slate-500 leading-relaxed">
+            {{ task.description || task.remark || 'ไม่มีรายละเอียดเพิ่มเติม' }}
+          </p>
+
+          <!-- Status Badge & Rework Tag -->
+          <div class="mt-3.5 flex flex-wrap items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-bold" [ngClass]="taskStatusClass(task.status)">
+              <span class="h-1.5 w-1.5 rounded-full" [ngClass]="task.status === taskStatuses.FINISHED ? 'bg-emerald-500' : task.status === taskStatuses.IN_PROGRESS ? 'bg-amber-500 animate-pulse' : 'bg-current'"></span>
+              {{ taskStatusLabel(task.status) }}
+            </span>
+
+            <span *ngIf="task.isRework" class="rounded-full border border-rose-200 bg-rose-50 px-2.5 py-0.5 text-[11px] font-extrabold text-rose-700">
+              งานแก้ไข (Rework)
+            </span>
+          </div>
+
+          <!-- Vehicle / Customer Inset Box -->
+          <div class="mt-4 rounded-2xl border border-slate-100 bg-slate-50/90 p-3.5">
+            <div class="flex items-center gap-3">
+              <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white border border-slate-200/70 text-sky-600 shadow-2xs">
+                <lucide-angular [img]="IconCar" class="h-4 w-4"></lucide-angular>
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="font-bold text-slate-900 text-xs sm:text-sm truncate">{{ vehicleLabel(task) }}</p>
+                <p class="truncate text-[11px] font-medium text-slate-500 mt-0.5">
+                  {{ customerLabel(task) }}
+                  <span *ngIf="task.workOrder?.vehicle?.brand || task.workOrder?.vehicle?.model">
+                    · {{ task.workOrder?.vehicle?.brand }} {{ task.workOrder?.vehicle?.model }}
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="mt-4">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-slate-500">ความคืบหน้า</span>
+              <span class="font-mono font-black text-slate-800">{{ task.progress || 0 }}%</span>
+            </div>
+            <div class="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-100">
+              <div
+                class="h-full rounded-full transition-all duration-300"
+                [ngClass]="task.status === taskStatuses.FINISHED ? 'bg-emerald-500' : task.status === taskStatuses.PAUSED ? 'bg-rose-500' : 'bg-sky-500'"
+                [style.width.%]="task.progress || 0"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card Footer Actions -->
+        <div class="mt-5 flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
+          <!-- Due Date Info -->
+          <div class="min-w-0">
+            <div
+              class="flex items-center gap-1 text-xs"
+              [ngClass]="isOverdue(task) ? 'font-bold text-rose-700' : isDueToday(task) ? 'font-bold text-amber-700' : 'text-slate-500'"
+            >
+              <lucide-angular [img]="IconCalendar" class="h-3.5 w-3.5 shrink-0"></lucide-angular>
+              <span class="truncate">{{ dueLabel(task) }}</span>
+            </div>
+            <p *ngIf="task.plannedFinishDate" class="mt-0.5 text-[11px] font-semibold text-slate-700">
+              {{ task.plannedFinishDate | date:'dd MMM yyyy HH:mm' }}
+            </p>
+          </div>
+
+          <!-- Action Buttons Toolbar -->
+          <div class="flex shrink-0 items-center gap-2">
+            <!-- Edit Modal Trigger -->
+            <button
+              type="button"
+              (click)="openEditModal(task)"
+              class="inline-flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-extrabold text-slate-700 shadow-2xs transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700"
+              title="แก้ไข Task / อัปเดตงาน"
+            >
+              <lucide-angular [img]="IconPencil" class="h-3.5 w-3.5 text-sky-600"></lucide-angular>
+              <span>แก้ไข Task</span>
+            </button>
+
+            <!-- Quick Status Advance -->
+            <button
+              *ngIf="actionLabel(task.status) as action"
+              type="button"
+              (click)="advanceTask(task)"
+              [disabled]="updatingTaskNo === task.taskNo"
+              class="inline-flex h-9 items-center gap-1.5 rounded-xl bg-sky-600 px-3.5 text-xs font-extrabold text-white shadow-2xs transition hover:bg-sky-700 active:scale-95 disabled:opacity-50"
+            >
+              <lucide-angular [img]="IconCheck" class="h-3.5 w-3.5" [ngClass]="{ 'animate-spin': updatingTaskNo === task.taskNo }"></lucide-angular>
+              <span>{{ updatingTaskNo === task.taskNo ? 'กำลังอัปเดต' : action }}</span>
+            </button>
+
+            <!-- Team Assignment Workspace Link -->
+            <button
+              type="button"
+              (click)="openWorkspace(task)"
+              class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 shadow-2xs transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700"
+              title="ไปที่ Team Assignment Workspace"
+            >
+              <lucide-angular [img]="IconArrow" class="h-4 w-4"></lucide-angular>
+            </button>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- Empty State -->
+    <section *ngIf="!isLoading && !assignments.data.length" class="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-20 text-center">
+      <span class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+        <lucide-angular [img]="IconWrench" class="h-7 w-7"></lucide-angular>
+      </span>
+      <h2 class="mt-4 text-lg font-extrabold text-slate-800">ยังไม่มีงานที่ได้รับมอบหมาย</h2>
+      <p class="mt-1 max-w-md text-xs sm:text-sm text-slate-500 leading-relaxed">
+        เมื่อหัวหน้าทีมมอบหมายงานจาก Team Assignment งานจะปรากฏในหน้านี้สำหรับบัญชีที่ได้รับมอบหมายเท่านั้น
+      </p>
+      <button
+        *ngIf="keyword || status || priority || schedule !== 'ALL'"
+        type="button"
+        (click)="resetFilters()"
+        class="mt-5 rounded-xl bg-slate-900 px-5 py-2.5 text-xs font-extrabold text-white transition hover:bg-slate-800"
+      >
+        ล้างตัวกรอง
+      </button>
+    </section>
+
+    <!-- Pagination -->
+    <div *ngIf="assignments.total > 0" class="rounded-2xl border border-slate-200/80 bg-white px-4 py-3 shadow-xs">
+      <app-pagination
+        aligns="end"
+        [paginationOption]="paginationOption"
+        [currentPage]="page"
+        [recordPerPage]="limit"
+        [totalRecord]="assignments.total"
+        (changePage)="onPageChange($event)"
+      ></app-pagination>
+    </div>
+  </div>
+</section>
+
+<!-- Task Edit Modal -->
+<app-task-edit-modal
+  [isOpen]="isTaskModalOpen"
+  [task]="editingTask"
+  [mechanics]="[]"
+  [taskGroups]="[]"
+  [isSubmitting]="isSubmittingTaskModal"
+  [isMechanicMode]="true"
+  (close)="closeTaskModal()"
+  (save)="onSaveTaskModal($event)"
+></app-task-edit-modal>

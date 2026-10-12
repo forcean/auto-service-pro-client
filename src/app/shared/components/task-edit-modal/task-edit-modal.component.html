@@ -21,40 +21,143 @@
     </div>
 
     <div class="modal-scroll flex-1 space-y-6 overflow-y-auto p-6">
+      <!-- Notice for Mechanic Mode -->
+      <div *ngIf="isMechanicMode" class="flex items-center gap-3 rounded-2xl border border-indigo-100 bg-indigo-50/80 p-4 text-xs font-semibold text-indigo-900">
+        <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white text-sm">🔒</span>
+        <div>
+          <p class="font-bold text-indigo-950">โหมดช่างผู้ปฏิบัติงาน (Mechanic View)</p>
+          <p class="mt-0.5 text-indigo-800/80">ข้อมูลพื้นฐาน รายละเอียด มอบหมายช่าง และเวลาประเมินถูกล็อคไว้ ช่างสามารถแก้ไขเฉพาะเวลาที่ใช้จริง ความคืบหน้า และหมายเหตุได้</p>
+        </div>
+      </div>
+
       <section class="space-y-4 rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
         <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">ข้อมูลพื้นฐาน</h4>
         <div>
           <label class="mb-1 block text-sm font-semibold text-slate-700">ชื่องาน *</label>
-          <input [(ngModel)]="form.title" class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20" />
+          <input [(ngModel)]="form.title" [disabled]="isMechanicMode" class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 disabled:bg-slate-100/90 disabled:text-slate-600 disabled:cursor-not-allowed" />
         </div>
         <div>
           <label class="mb-1 block text-sm font-semibold text-slate-700">รายละเอียดงาน</label>
-          <textarea [(ngModel)]="form.description" rows="3" class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"></textarea>
+          <textarea [(ngModel)]="form.description" [disabled]="isMechanicMode" rows="3" class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 disabled:bg-slate-100/90 disabled:text-slate-600 disabled:cursor-not-allowed"></textarea>
         </div>
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
           <label class="text-sm font-semibold text-slate-700">
             Priority
-            <custom-select [(ngModel)]="form.priority" class="mt-1.5 block w-full">
+            <custom-select [(ngModel)]="form.priority" [isDisabled]="isMechanicMode" class="mt-1.5 block w-full">
               <custom-option *ngFor="let priority of priorities" [value]="priority">{{ priority }}</custom-option>
             </custom-select>
           </label>
-          <label class="text-sm font-semibold text-slate-700">
-            ช่างผู้รับผิดชอบ <span class="font-normal text-slate-400">(เลือกได้หลายคน)</span>
-            <select multiple [(ngModel)]="mechanicIds" size="4" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20">
-              <option *ngFor="let mechanic of mechanics" [value]="mechanic.id">{{ mechanic.firstname || mechanic.publicId }} {{ mechanic.lastname || '' }} · {{ mechanic.publicId }}</option>
-            </select>
-          </label>
+          <div>
+            <label class="mb-1.5 block text-sm font-semibold text-slate-700">
+              ช่างผู้รับผิดชอบ <span class="font-normal text-slate-400 font-sans text-xs">(มอบหมายโดยหัวหน้างาน)</span>
+            </label>
+
+            <!-- Mechanic Mode Read-Only View -->
+            <div *ngIf="isMechanicMode" class="rounded-2xl border border-slate-200/90 bg-slate-50/80 p-3 shadow-2xs">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                  <span class="text-sky-600">👨‍🔧</span> ช่างผู้รับผิดชอบ Task นี้
+                </span>
+                <span class="rounded-full bg-sky-100/80 px-2.5 py-0.5 font-mono text-[11px] font-extrabold text-sky-800">
+                  {{ task?.mechanics?.length || 0 }} คน
+                </span>
+              </div>
+
+              <div *ngIf="task.mechanics?.length" class="flex flex-wrap gap-2">
+                <div
+                  *ngFor="let mechanic of task.mechanics"
+                  class="inline-flex items-center gap-2.5 rounded-xl border border-slate-200/80 bg-white px-3 py-1.5 shadow-2xs transition-all hover:border-sky-300"
+                >
+                  <div class="flex h-6 w-6 items-center justify-center rounded-lg bg-gradient-to-tr from-sky-500 to-indigo-600 font-mono text-[10px] font-bold text-white shadow-2xs">
+                    {{ getMechanicInitials(mechanic.mechanicName) }}
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-xs font-bold text-slate-900 leading-tight">
+                      {{ mechanic.mechanicName || mechanic.mechanicId }}
+                    </p>
+                    <p class="font-mono text-[9px] font-semibold text-slate-400">
+                      ID: {{ mechanic.mechanicId }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div *ngIf="!task.mechanics?.length" class="flex items-center gap-2 py-1 text-xs text-slate-400 italic">
+                <span>⚠️</span> ยังไม่ได้ระบุช่างผู้รับผิดชอบสำหรับ Task นี้
+              </div>
+            </div>
+
+            <!-- Supervisor Mode Interactive Selection View -->
+            <div *ngIf="!isMechanicMode" class="space-y-2">
+              <!-- Selected Chips Container -->
+              <div class="flex min-h-[44px] flex-wrap items-center gap-1.5 rounded-2xl border border-slate-200 bg-white p-2 text-sm shadow-2xs transition-all focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20">
+                <div
+                  *ngFor="let mechanic of mechanics"
+                  [hidden]="!isMechanicSelected(mechanic.id)"
+                  class="inline-flex items-center gap-1.5 rounded-xl border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-950 shadow-2xs"
+                >
+                  <div class="flex h-5 w-5 items-center justify-center rounded-md bg-indigo-600 font-mono text-[10px] font-bold text-white">
+                    {{ getMechanicInitials(mechanic.firstname || mechanic.publicId) }}
+                  </div>
+                  <span>{{ mechanic.firstname || mechanic.publicId }} {{ mechanic.lastname || '' }}</span>
+                  <button
+                    type="button"
+                    (click)="removeMechanic(mechanic.id, $event)"
+                    class="ml-0.5 rounded-md p-0.5 text-indigo-400 hover:bg-indigo-200/60 hover:text-indigo-800 transition-colors"
+                    title="ยกเลิกการเลือก"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <span *ngIf="!mechanicIds.length" class="px-2 text-xs text-slate-400">
+                  คลิกเลือกช่างด้านล่าง (เลือกได้หลายคน)
+                </span>
+              </div>
+
+              <!-- Available Mechanics List Box -->
+              <div class="max-h-36 overflow-y-auto rounded-2xl border border-slate-200/80 bg-slate-50/70 p-1.5 shadow-inner space-y-1">
+                <div
+                  *ngFor="let mechanic of mechanics"
+                  (click)="toggleMechanic(mechanic.id)"
+                  class="flex cursor-pointer items-center justify-between rounded-xl px-3 py-1.5 text-xs font-semibold transition-all"
+                  [ngClass]="isMechanicSelected(mechanic.id) ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-100'"
+                >
+                  <div class="flex items-center gap-2.5">
+                    <div
+                      class="flex h-5 w-5 items-center justify-center rounded-md font-mono text-[10px] font-bold"
+                      [ngClass]="isMechanicSelected(mechanic.id) ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'"
+                    >
+                      {{ getMechanicInitials(mechanic.firstname || mechanic.publicId) }}
+                    </div>
+                    <div>
+                      <p class="font-bold leading-tight">{{ mechanic.firstname || mechanic.publicId }} {{ mechanic.lastname || '' }}</p>
+                      <p class="font-mono text-[9px] opacity-75">ID: {{ mechanic.publicId }}</p>
+                    </div>
+                  </div>
+
+                  <span class="text-sm font-bold">
+                    {{ isMechanicSelected(mechanic.id) ? '✓ Selected' : '+ Add' }}
+                  </span>
+                </div>
+
+                <div *ngIf="!mechanics.length" class="p-3 text-center text-xs text-slate-400 italic">
+                  ไม่มีรายชื่อช่างในระบบ
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
           <label class="text-sm font-semibold text-slate-700">
             กลุ่มงาน
-            <custom-select [(ngModel)]="form.parentTaskNo" placeholder="ไม่จัดกลุ่มงาน" class="mt-1.5 block w-full">
+            <custom-select [(ngModel)]="form.parentTaskNo" [isDisabled]="isMechanicMode" placeholder="ไม่จัดกลุ่มงาน" class="mt-1.5 block w-full">
               <custom-option value="">ไม่จัดกลุ่มงาน</custom-option>
               <custom-option *ngFor="let group of taskGroups" [value]="group.taskNo" [disabled]="group.taskNo === task.taskNo">{{ group.title }} · {{ group.taskNo }}</custom-option>
             </custom-select>
           </label>
-          <label class="flex items-center gap-2 self-end rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm font-semibold text-slate-700">
-            <input [(ngModel)]="form.isRequired" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-indigo-600" /> ต้องเสร็จก่อนส่ง QC
+          <label class="flex items-center gap-2 self-end rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm font-semibold text-slate-700" [ngClass]="{ 'bg-slate-100/90 text-slate-500 cursor-not-allowed': isMechanicMode }">
+            <input [(ngModel)]="form.isRequired" [disabled]="isMechanicMode" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-indigo-600 disabled:opacity-60 disabled:cursor-not-allowed" /> ต้องเสร็จก่อนส่ง QC
           </label>
         </div>
       </section>
@@ -62,10 +165,22 @@
       <section class="space-y-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
         <h4 class="border-b border-slate-100 pb-3 text-xs font-bold uppercase tracking-wider text-slate-500">เวลาและความคืบหน้า</h4>
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <label class="text-sm font-semibold text-slate-700">เวลาประเมิน (นาที)<input [(ngModel)]="form.estimateMinute" type="number" min="0" class="mt-1.5 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20" /></label>
-          <label class="text-sm font-semibold text-slate-700">เวลาที่ใช้จริง (นาที)<input [(ngModel)]="form.actualMinute" type="number" min="0" class="mt-1.5 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20" /></label>
-          <label class="text-sm font-semibold text-slate-700">กำหนดเริ่มงาน<input [(ngModel)]="form.plannedStartDate" type="datetime-local" class="mt-1.5 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20" /></label>
-          <label class="text-sm font-semibold text-slate-700">กำหนดเสร็จงาน<input [(ngModel)]="form.plannedFinishDate" type="datetime-local" class="mt-1.5 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20" /></label>
+          <label class="text-sm font-semibold text-slate-700">
+            เวลาประเมิน (นาที)
+            <input [(ngModel)]="form.estimateMinute" [disabled]="isMechanicMode" type="number" min="0" class="mt-1.5 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 disabled:bg-slate-100/90 disabled:text-slate-600 disabled:cursor-not-allowed" />
+          </label>
+          <label class="text-sm font-semibold text-slate-700">
+            เวลาที่ใช้จริง (นาที)
+            <input [(ngModel)]="form.actualMinute" type="number" min="0" class="mt-1.5 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20" />
+          </label>
+          <label class="text-sm font-semibold text-slate-700">
+            กำหนดเริ่มงาน
+            <input [(ngModel)]="form.plannedStartDate" [disabled]="isMechanicMode" type="datetime-local" class="mt-1.5 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 disabled:bg-slate-100/90 disabled:text-slate-600 disabled:cursor-not-allowed" />
+          </label>
+          <label class="text-sm font-semibold text-slate-700">
+            กำหนดเสร็จงาน
+            <input [(ngModel)]="form.plannedFinishDate" [disabled]="isMechanicMode" type="datetime-local" class="mt-1.5 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 disabled:bg-slate-100/90 disabled:text-slate-600 disabled:cursor-not-allowed" />
+          </label>
         </div>
         <div>
           <div class="flex items-center justify-between"><label class="text-sm font-semibold text-slate-700">ความคืบหน้า</label><span class="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700">{{ form.progress || 0 }}%</span></div>
@@ -76,7 +191,7 @@
 
       <section>
         <label class="mb-1 block text-sm font-semibold text-slate-700">หมายเหตุภายใน</label>
-        <textarea [(ngModel)]="form.remark" rows="3" class="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"></textarea>
+        <textarea [(ngModel)]="form.remark" rows="3" class="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20" placeholder="ระบุหมายเหตุหรือข้อสังเกตของงาน"></textarea>
       </section>
     </div>
 
